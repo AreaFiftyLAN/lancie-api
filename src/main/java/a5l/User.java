@@ -9,12 +9,36 @@ import java.io.Serializable;
 @Entity
 public class User implements Serializable{
 
+    @JsonIgnore
+    @Column(name = "password_hash", nullable = false)
+    public String passwordHash;
+
+    @Column(nullable = false, unique = true)
+    public String username;
+
+    @Column(nullable = false, unique = true)
+    public String email;
+
     @OneToOne(targetEntity = Profile.class, cascade= CascadeType.ALL)
     private Profile profile;
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
+    public User(String username, String passwordHash, String email) {
+        this.username = username;
+        this.passwordHash = passwordHash;
+        this.email = email;
+        this.profile = new Profile();
+    }
+
+    User() { // jpa only
+    }
 
     public Profile getProfile() {
         return profile;
@@ -24,18 +48,21 @@ public class User implements Serializable{
         return id;
     }
 
-    public String getPassword() {
-        return password;
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
     }
 
     public String getUsername() {
         return username;
     }
 
-    @JsonIgnore
-    public String password;
-    public String username;
-    public String email;
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
     public String getEmail() {
         return email;
@@ -43,23 +70,5 @@ public class User implements Serializable{
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public User(String username, String password, String email) {
-        this.username = username;
-        this.password = password;
-        this.email = email;
-        this.profile = new Profile();
-    }
-
-    User() { // jpa only
     }
 }

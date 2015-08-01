@@ -21,7 +21,7 @@ public class Application {
                 .forEach(
                         a -> {
                             User account = accountRepository.save(new User(a,
-                                    "password", "mail@mail.com"));
+                                    "passwordHash", "mail@mail.com"));
                         });
     }
 
