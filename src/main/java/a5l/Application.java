@@ -1,5 +1,7 @@
 package a5l;
 
+import a5l.Model.User;
+import a5l.Service.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -21,7 +23,7 @@ public class Application {
                 .forEach(
                         a -> {
                             User account = accountRepository.save(new User(a,
-                                    "passwordHash", "mail@mail.com"));
+                                    "password", a + "@mail.com"));
                         });
     }
 

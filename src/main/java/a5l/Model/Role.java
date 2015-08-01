@@ -1,4 +1,4 @@
-package a5l;
+package a5l.Model;
 
 public enum Role {
     USER, COMMITTEE, ADMIN

@@ -1,4 +1,4 @@
-package a5l;
+package a5l.Model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -10,7 +10,7 @@ import java.io.Serializable;
 public class User implements Serializable{
 
     @JsonIgnore
-    @Column(name = "password_hash", nullable = false)
+    @Column(nullable = false)
     public String passwordHash;
 
     @Column(nullable = false, unique = true)
@@ -26,6 +26,14 @@ public class User implements Serializable{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -35,6 +43,7 @@ public class User implements Serializable{
         this.passwordHash = passwordHash;
         this.email = email;
         this.profile = new Profile();
+        this.role = Role.USER;
     }
 
     User() { // jpa only
