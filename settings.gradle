@@ -1,0 +1,3 @@
+rootProject.name = 'lancie'
+include 'lancie-api'
+

@@ -31,4 +31,7 @@ overridedb.*
 .idea
 *.jar
 .DS_Store
-src/main/resources/config/application.properties
+node_modules
+dist
+bower_components
+.tmp
