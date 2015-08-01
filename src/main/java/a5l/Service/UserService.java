@@ -15,4 +15,6 @@ public interface UserService {
 
     User create(UserDTO userDTO);
 
+    User save(User user);
+
 }

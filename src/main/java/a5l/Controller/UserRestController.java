@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -35,7 +36,7 @@ public class UserRestController {
      * @return The generated object, in JSON format.
      */
     @RequestMapping(method = RequestMethod.POST)
-    ResponseEntity<?> add(@RequestBody UserDTO input) {
+    ResponseEntity<?> add(@Validated @RequestBody UserDTO input) {
         User save = userService.create(input);
 
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -43,12 +44,12 @@ public class UserRestController {
                 .fromCurrentRequest().path("/{id}")
                 .buildAndExpand(save.getId()).toUri());
 
-        return new ResponseEntity<>(null, httpHeaders, HttpStatus.CREATED);
+        return new ResponseEntity<>(save, httpHeaders, HttpStatus.CREATED);
     }
 
     @RequestMapping(value = "/{userId}", method = RequestMethod.GET)
-    Optional<User> getUserById(@PathVariable Long userId) {
-        return this.userService.getUserById(userId);
+    User getUserById(@PathVariable Long userId) {
+        return this.userService.getUserById(userId).get();
     }
 
     @RequestMapping(method = RequestMethod.GET)

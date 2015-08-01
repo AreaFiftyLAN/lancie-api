@@ -41,7 +41,12 @@ public class UserServiceImpl implements UserService {
         User user = new User(userDTO.getUsername(), passwordHash,  userDTO.getEmail());
         user.setRole(userDTO.getRole());
 
-        return userRepository.save(user);
+        return userRepository.saveAndFlush(user);
+    }
+
+    @Override
+    public User save(User user) {
+        return userRepository.saveAndFlush(user);
     }
 
 }
