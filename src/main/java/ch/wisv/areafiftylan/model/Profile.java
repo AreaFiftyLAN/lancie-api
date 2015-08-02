@@ -1,4 +1,4 @@
-package a5l.Model;
+package ch.wisv.areafiftylan.model;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;

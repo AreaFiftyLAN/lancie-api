@@ -1,10 +1,9 @@
-package a5l.Controller;
+package ch.wisv.areafiftylan.controller;
 
-import a5l.DTO.ProfileDTO;
-import a5l.Exception.UserNotFoundException;
-import a5l.Model.Profile;
-import a5l.Model.User;
-import a5l.Service.UserService;
+import ch.wisv.areafiftylan.dto.ProfileDTO;
+import ch.wisv.areafiftylan.model.Profile;
+import ch.wisv.areafiftylan.model.User;
+import ch.wisv.areafiftylan.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

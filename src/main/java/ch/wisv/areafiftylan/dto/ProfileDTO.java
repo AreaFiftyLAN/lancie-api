@@ -1,4 +1,4 @@
-package a5l.DTO;
+package ch.wisv.areafiftylan.dto;
 
 import org.hibernate.validator.constraints.NotEmpty;
 

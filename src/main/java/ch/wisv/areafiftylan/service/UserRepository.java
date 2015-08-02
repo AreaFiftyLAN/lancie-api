@@ -1,6 +1,6 @@
-package a5l.Service;
+package ch.wisv.areafiftylan.service;
 
-import a5l.Model.User;
+import ch.wisv.areafiftylan.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

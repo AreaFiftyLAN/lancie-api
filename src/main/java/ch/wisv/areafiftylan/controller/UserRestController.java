@@ -1,8 +1,8 @@
-package a5l.Controller;
+package ch.wisv.areafiftylan.controller;
 
-import a5l.DTO.UserDTO;
-import a5l.Model.User;
-import a5l.Service.UserService;
+import ch.wisv.areafiftylan.DTO.UserDTO;
+import ch.wisv.areafiftylan.Model.User;
+import ch.wisv.areafiftylan.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.Collection;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/users")

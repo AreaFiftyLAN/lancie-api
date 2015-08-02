@@ -1,4 +1,4 @@
-package a5l.Model;
+package ch.wisv.areafiftylan.model;
 
 public enum Role {
     USER, COMMITTEE, ADMIN
