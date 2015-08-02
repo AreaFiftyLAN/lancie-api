@@ -1,4 +1,4 @@
-package a5l;
+package ch.wisv.areafiftylan;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

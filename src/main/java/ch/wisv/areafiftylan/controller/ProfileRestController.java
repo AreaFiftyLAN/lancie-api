@@ -33,6 +33,13 @@ public class ProfileRestController {
         profile.setFirstName(input.getFirstName());
         profile.setLastName(input.getLastName());
 
+        profile.setAddress(input.getAddress());
+        profile.setGender(input.getGender());
+        profile.setCity(input.getCity());
+        profile.setPhoneNumber(input.getPhoneNumber());
+        profile.setZipcode(input.getZipcode());
+        profile.setNotes(input.getNotes());
+
         userService.save(user);
 
         HttpHeaders httpHeaders = new HttpHeaders();

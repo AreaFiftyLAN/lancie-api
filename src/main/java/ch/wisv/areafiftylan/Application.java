@@ -1,7 +1,8 @@
 package ch.wisv.areafiftylan;
 
-import ch.wisv.areafiftylan.Model.User;
-import ch.wisv.areafiftylan.Service.UserRepository;
+
+import ch.wisv.areafiftylan.model.User;
+import ch.wisv.areafiftylan.service.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -31,4 +32,3 @@ public class Application {
         SpringApplication.run(Application.class, args);
     }
 }
-

@@ -1,8 +1,8 @@
 package ch.wisv.areafiftylan.controller;
 
-import ch.wisv.areafiftylan.DTO.UserDTO;
-import ch.wisv.areafiftylan.Model.User;
-import ch.wisv.areafiftylan.Service.UserService;
+import ch.wisv.areafiftylan.dto.UserDTO;
+import ch.wisv.areafiftylan.model.User;
+import ch.wisv.areafiftylan.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

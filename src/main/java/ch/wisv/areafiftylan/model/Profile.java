@@ -12,10 +12,16 @@ public class Profile implements Serializable {
     public String lastName;
     public String displayName;
 
+    public Gender gender;
+    public String address;
+    public String zipcode;
+    public String city;
+    public String phoneNumber;
+    public String notes;
+
     @Id
     @GeneratedValue
     private Long id;
-
 
     Profile() {
     }
@@ -24,6 +30,54 @@ public class Profile implements Serializable {
         this.firstName = firstName;
         this.lastName = lastName;
         this.displayName = displayName;
+    }
+
+    public Gender getGender() {
+        return gender;
+    }
+
+    public void setGender(Gender gender) {
+        this.gender = gender;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getZipcode() {
+        return zipcode;
+    }
+
+    public void setZipcode(String zipcode) {
+        this.zipcode = zipcode;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
     }
 
     public String getFirstName() {
