@@ -1,6 +1,6 @@
 package ch.wisv.areafiftylan.dto;
 
-import ch.wisv.areafiftylan.model.Gender;
+import ch.wisv.areafiftylan.model.util.Gender;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;

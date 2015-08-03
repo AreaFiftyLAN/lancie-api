@@ -1,8 +1,12 @@
 package ch.wisv.areafiftylan.controller;
 
 import ch.wisv.areafiftylan.dto.UserDTO;
+import ch.wisv.areafiftylan.model.Seat;
 import ch.wisv.areafiftylan.model.User;
+import ch.wisv.areafiftylan.service.SeatService;
 import ch.wisv.areafiftylan.service.UserService;
+import org.bouncycastle.cert.ocsp.Req;
+import org.hibernate.annotations.SelectBeforeUpdate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -11,6 +15,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.nio.file.Path;
 import java.util.Collection;
 
 @RestController
@@ -20,9 +25,12 @@ public class UserRestController {
 
     private UserService userService;
 
+    private SeatService seatService;
+
     @Autowired
-    UserRestController(UserService userService) {
+    UserRestController(UserService userService, SeatService seatService) {
         this.userService = userService;
+        this.seatService = seatService;
     }
 
     //////////// USER MAPPINGS //////////////////
@@ -54,5 +62,12 @@ public class UserRestController {
     @RequestMapping(method = RequestMethod.GET)
     Collection<User> readUsers() {
         return userService.getAllUsers();
+    }
+
+    @RequestMapping(value = "/{userId}/seat", method = RequestMethod.GET)
+    Seat getSeatByUser(@PathVariable Long userId){
+        User user = userService.getUserById(userId).get();
+
+        return seatService.getSeatByUser(user);
     }
 }

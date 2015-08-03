@@ -1,5 +1,6 @@
 package ch.wisv.areafiftylan.model;
 
+import ch.wisv.areafiftylan.model.util.Role;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;

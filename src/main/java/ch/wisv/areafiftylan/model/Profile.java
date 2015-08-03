@@ -1,5 +1,7 @@
 package ch.wisv.areafiftylan.model;
 
+import ch.wisv.areafiftylan.model.util.Gender;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;

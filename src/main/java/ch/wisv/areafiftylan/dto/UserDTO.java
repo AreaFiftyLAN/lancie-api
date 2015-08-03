@@ -1,6 +1,6 @@
 package ch.wisv.areafiftylan.dto;
 
-import ch.wisv.areafiftylan.model.Role;
+import ch.wisv.areafiftylan.model.util.Role;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 
