@@ -5,7 +5,6 @@ import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.service.repository.TeamRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -13,18 +12,18 @@ import java.util.Collection;
 @Service
 public class TeamServiceImpl implements TeamService {
     private final TeamRepository teamRepository;
+    private final UserService userService;
 
     @Autowired
-    public TeamServiceImpl(TeamRepository teamRepository) {
+    public TeamServiceImpl(TeamRepository teamRepository, UserService userService) {
         this.teamRepository = teamRepository;
+        this.userService = userService;
     }
 
     @Override
     public Team create(TeamDTO teamDTO) {
-        Team team = new Team(teamDTO.)
-        String passwordHash = new BCryptPasswordEncoder().encode(teamDTO.getPassword());
-        User user = new User(teamDTO.getUsername(), passwordHash,  teamDTO.getEmail());
-        user.setRole(teamDTO.getRole());
+        User captain = userService.getUserById(teamDTO.getCaptianID()).get();
+        Team team = new Team(teamDTO.getTeamName(), captain);
 
         return teamRepository.saveAndFlush(team);
     }

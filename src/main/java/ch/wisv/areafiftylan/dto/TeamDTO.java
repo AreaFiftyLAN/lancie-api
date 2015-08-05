@@ -9,6 +9,16 @@ public class TeamDTO {
 
     @NotEmpty
     private String teamName;
-    
+
+    @NotEmpty
     private Long captianID;
+
+    public String getTeamName() {
+        return teamName;
+    }
+
+    public Long getCaptianID() {
+        return captianID;
+    }
+
 }
