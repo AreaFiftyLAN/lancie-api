@@ -105,4 +105,17 @@ public class Profile implements Serializable {
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
+
+    public void setAllFields(String firstName, String lastName, String displayName, Gender gender, String address,
+                             String zipcode, String city, String phoneNumber, String notes) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.displayName = displayName;
+        this.gender = gender;
+        this.address = address;
+        this.zipcode = zipcode;
+        this.city = city;
+        this.phoneNumber = phoneNumber;
+        this.notes = notes;
+    }
 }
