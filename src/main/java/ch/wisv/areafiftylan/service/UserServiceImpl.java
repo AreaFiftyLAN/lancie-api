@@ -3,6 +3,7 @@ package ch.wisv.areafiftylan.service;
 import ch.wisv.areafiftylan.dto.UserDTO;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.service.repository.UserRepository;
+import org.hibernate.PersistentObjectException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -16,9 +17,15 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
+    private final TeamService teamService;
+
+    private final SeatService seatService;
+
     @Autowired
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, TeamService teamService, SeatService seatService) {
         this.userRepository = userRepository;
+        this.teamService = teamService;
+        this.seatService = seatService;
     }
 
     @Override
@@ -38,7 +45,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User create(UserDTO userDTO) {
-        String passwordHash = new BCryptPasswordEncoder().encode(userDTO.getPassword());
+        String passwordHash = getPasswordHash(userDTO.getPassword());
         User user = new User(userDTO.getUsername(), passwordHash,  userDTO.getEmail());
         user.setRole(userDTO.getRole());
 
@@ -46,8 +53,33 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User replace(Long userId, UserDTO userDTO) {
+        User user = userRepository.getOne(userId);
+        user.setUsername(userDTO.getUsername());
+        user.setEmail(userDTO.getEmail());
+        user.setPasswordHash(getPasswordHash(userDTO.getPassword()));
+        user.resetProfile();
+        return userRepository.saveAndFlush(user);
+    }
+
+    @Override
+    public boolean delete(Long userId) {
+        try {
+            userRepository.delete(userId);
+        } catch (Exception e) {
+            //TODO: Logging & Exception handling
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public User save(User user) {
         return userRepository.saveAndFlush(user);
+    }
+
+    private String getPasswordHash(String plainTextPassword) {
+        return new BCryptPasswordEncoder().encode(plainTextPassword);
     }
 
 }

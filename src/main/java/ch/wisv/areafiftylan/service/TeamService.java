@@ -9,6 +9,8 @@ public interface TeamService {
 
     Team getTeamByTeamname(String teamname);
 
+    Team getTeamByCaptainId(Long userId);
+
     Collection<Team> getAllTeams();
 
     Collection<Team> getTeamsByUsername(String username);
