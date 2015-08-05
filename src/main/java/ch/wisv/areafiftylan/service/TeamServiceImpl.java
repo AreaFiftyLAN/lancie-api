@@ -30,7 +30,7 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public Team save(Team team) {
-        return null;
+        return teamRepository.save(team);
     }
 
     @Override
