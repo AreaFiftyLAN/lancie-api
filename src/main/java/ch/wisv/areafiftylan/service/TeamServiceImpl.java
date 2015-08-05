@@ -1,6 +1,8 @@
 package ch.wisv.areafiftylan.service;
 
+import ch.wisv.areafiftylan.dto.TeamDTO;
 import ch.wisv.areafiftylan.model.Team;
+import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.service.repository.TeamRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,10 +12,25 @@ import java.util.Collection;
 @Service
 public class TeamServiceImpl implements TeamService {
     private final TeamRepository teamRepository;
+    private final UserService userService;
 
     @Autowired
-    public TeamServiceImpl(TeamRepository teamRepository) {
+    public TeamServiceImpl(TeamRepository teamRepository, UserService userService) {
         this.teamRepository = teamRepository;
+        this.userService = userService;
+    }
+
+    @Override
+    public Team create(TeamDTO teamDTO) {
+        User captain = userService.getUserById(teamDTO.getCaptainID()).get();
+        Team team = new Team(teamDTO.getTeamName(), captain);
+
+        return teamRepository.saveAndFlush(team);
+    }
+
+    @Override
+    public Team save(Team team) {
+        return null;
     }
 
     @Override
