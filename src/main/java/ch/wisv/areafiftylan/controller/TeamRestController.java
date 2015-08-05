@@ -2,7 +2,6 @@ package ch.wisv.areafiftylan.controller;
 
 import ch.wisv.areafiftylan.dto.TeamDTO;
 import ch.wisv.areafiftylan.model.Team;
-import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.service.TeamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
