@@ -2,12 +2,10 @@ package ch.wisv.areafiftylan.controller;
 
 import ch.wisv.areafiftylan.dto.TeamDTO;
 import ch.wisv.areafiftylan.model.Team;
-import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.service.TeamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,8 +27,8 @@ public class TeamRestController {
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    RequestEntity<?> add(@Validated @RequestBody TeamDTO input) {
-        Team save = teamService.save(input);
+    ResponseEntity<?> add(@Validated @RequestBody TeamDTO input) {
+        Team save = teamService.create(input);
 
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setLocation(ServletUriComponentsBuilder
