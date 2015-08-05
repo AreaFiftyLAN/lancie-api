@@ -2,6 +2,7 @@ package ch.wisv.areafiftylan.service;
 
 import ch.wisv.areafiftylan.dto.UserDTO;
 import ch.wisv.areafiftylan.model.User;
+import ch.wisv.areafiftylan.service.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;

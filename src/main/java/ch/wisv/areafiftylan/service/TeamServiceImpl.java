@@ -1,6 +1,7 @@
 package ch.wisv.areafiftylan.service;
 
 import ch.wisv.areafiftylan.model.Team;
+import ch.wisv.areafiftylan.service.repository.TeamRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

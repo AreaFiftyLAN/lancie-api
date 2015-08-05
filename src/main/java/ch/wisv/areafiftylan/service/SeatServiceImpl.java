@@ -3,6 +3,7 @@ package ch.wisv.areafiftylan.service;
 import ch.wisv.areafiftylan.model.Seat;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.util.Coordinate;
+import ch.wisv.areafiftylan.service.repository.SeatRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

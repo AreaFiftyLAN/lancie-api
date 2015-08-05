@@ -21,6 +21,7 @@ public class User implements Serializable{
     public String email;
 
     @OneToOne(targetEntity = Profile.class, cascade= CascadeType.ALL)
+    @JsonIgnore
     private Profile profile;
 
     @Id

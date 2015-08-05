@@ -1,4 +1,4 @@
-package ch.wisv.areafiftylan.service;
+package ch.wisv.areafiftylan.service.repository;
 
 import ch.wisv.areafiftylan.model.Seat;
 import ch.wisv.areafiftylan.model.User;

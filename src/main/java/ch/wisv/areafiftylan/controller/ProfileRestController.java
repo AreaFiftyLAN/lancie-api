@@ -49,4 +49,9 @@ public class ProfileRestController {
 
         return new ResponseEntity<>(user, httpHeaders, HttpStatus.CREATED);
     }
+
+    @RequestMapping(method = RequestMethod.GET)
+    Profile readProfile(@PathVariable Long userId) {
+        return userService.getUserById(userId).get().getProfile();
+    }
 }

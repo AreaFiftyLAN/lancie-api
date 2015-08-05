@@ -1,4 +1,4 @@
-package ch.wisv.areafiftylan.service;
+package ch.wisv.areafiftylan.service.repository;
 
 import ch.wisv.areafiftylan.model.Team;
 import org.springframework.data.jpa.repository.JpaRepository;
