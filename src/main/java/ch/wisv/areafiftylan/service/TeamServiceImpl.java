@@ -22,7 +22,7 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public Team create(TeamDTO teamDTO) {
-        User captain = userService.getUserById(teamDTO.getCaptianID()).get();
+        User captain = userService.getUserById(teamDTO.getCaptainID()).get();
         Team team = new Team(teamDTO.getTeamName(), captain);
 
         return teamRepository.saveAndFlush(team);
