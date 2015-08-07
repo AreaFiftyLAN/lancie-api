@@ -21,6 +21,8 @@ public interface UserService {
 
     boolean delete(Long userId);
 
+    User edit(Long userId, UserDTO userDTO);
+
     User save(User user);
 
 }

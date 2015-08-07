@@ -3,7 +3,7 @@ package ch.wisv.areafiftylan.service;
 import ch.wisv.areafiftylan.dto.UserDTO;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.service.repository.UserRepository;
-import org.hibernate.PersistentObjectException;
+import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -17,15 +17,9 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
-    private final TeamService teamService;
-
-    private final SeatService seatService;
-
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, TeamService teamService, SeatService seatService) {
+    public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.teamService = teamService;
-        this.seatService = seatService;
     }
 
     @Override
@@ -71,6 +65,22 @@ public class UserServiceImpl implements UserService {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public User edit(Long userId, UserDTO userDTO) {
+        User user = userRepository.findOne(userId);
+        if (!Strings.isNullOrEmpty(userDTO.getUsername())) {
+            user.setUsername(userDTO.getUsername());
+        }
+        if (!Strings.isNullOrEmpty(userDTO.getEmail())) {
+            user.setEmail(userDTO.getEmail());
+        }
+        if (!Strings.isNullOrEmpty(userDTO.getPassword())) {
+            user.setPasswordHash(getPasswordHash(userDTO.getPassword()));
+        }
+        return userRepository.saveAndFlush(user);
+
     }
 
     @Override

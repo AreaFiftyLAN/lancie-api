@@ -60,7 +60,18 @@ public class UserRestController {
      * @return The User object.
      */
     @RequestMapping(value = "/{userId}", method = RequestMethod.PUT)
-    User getUserById(@PathVariable Long userId, @RequestBody UserDTO input) {
+    User replaceUser(@PathVariable Long userId, @Validated @RequestBody UserDTO input) {
+        return this.userService.replace(userId, input);
+    }
+
+    /**
+     * Edit the current user. Only change the fields which have been set. All fields should be in the requestbody.
+     * @param userId The id of the user to be updated
+     * @param input A userDTO object with updated fields. empty fields will be ignored
+     * @return The updated User object
+     */
+    @RequestMapping(value = "/{userId}", method = RequestMethod.PATCH)
+    User updateUser(@PathVariable Long userId, @RequestBody UserDTO input) {
         return this.userService.replace(userId, input);
     }
 
