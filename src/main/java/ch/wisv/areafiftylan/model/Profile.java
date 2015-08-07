@@ -25,7 +25,41 @@ public class Profile implements Serializable {
     @GeneratedValue
     private Long id;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Profile)) return false;
+
+        Profile profile = (Profile) o;
+
+        if (firstName != null ? !firstName.equals(profile.firstName) : profile.firstName != null) return false;
+        if (lastName != null ? !lastName.equals(profile.lastName) : profile.lastName != null) return false;
+        if (displayName != null ? !displayName.equals(profile.displayName) : profile.displayName != null) return false;
+        if (gender != profile.gender) return false;
+        if (address != null ? !address.equals(profile.address) : profile.address != null) return false;
+        if (zipcode != null ? !zipcode.equals(profile.zipcode) : profile.zipcode != null) return false;
+        if (city != null ? !city.equals(profile.city) : profile.city != null) return false;
+        if (phoneNumber != null ? !phoneNumber.equals(profile.phoneNumber) : profile.phoneNumber != null) return false;
+        return !(notes != null ? !notes.equals(profile.notes) : profile.notes != null);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = firstName != null ? firstName.hashCode() : 0;
+        result = 31 * result + (lastName != null ? lastName.hashCode() : 0);
+        result = 31 * result + (displayName != null ? displayName.hashCode() : 0);
+        result = 31 * result + (gender != null ? gender.hashCode() : 0);
+        result = 31 * result + (address != null ? address.hashCode() : 0);
+        result = 31 * result + (zipcode != null ? zipcode.hashCode() : 0);
+        result = 31 * result + (city != null ? city.hashCode() : 0);
+        result = 31 * result + (phoneNumber != null ? phoneNumber.hashCode() : 0);
+        result = 31 * result + (notes != null ? notes.hashCode() : 0);
+        return result;
+    }
+
     Profile() {
+
     }
 
     public Profile(String firstName, String lastName, String displayName) {
