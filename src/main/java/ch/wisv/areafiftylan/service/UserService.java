@@ -19,7 +19,7 @@ public interface UserService {
 
     User replace(Long userId, UserDTO userDTO);
 
-    boolean delete(Long userId);
+    void delete(Long userId);
 
     User edit(Long userId, UserDTO userDTO);
 

@@ -40,7 +40,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User create(UserDTO userDTO) {
         String passwordHash = getPasswordHash(userDTO.getPassword());
-        User user = new User(userDTO.getUsername(), passwordHash,  userDTO.getEmail());
+        User user = new User(userDTO.getUsername(), passwordHash, userDTO.getEmail());
         user.setRole(userDTO.getRole());
 
         return userRepository.saveAndFlush(user);
@@ -57,14 +57,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean delete(Long userId) {
-        try {
-            userRepository.delete(userId);
-        } catch (Exception e) {
-            //TODO: Logging & Exception handling
-            return false;
-        }
-        return true;
+    public void delete(Long userId) {
+        userRepository.delete(userId);
     }
 
     @Override

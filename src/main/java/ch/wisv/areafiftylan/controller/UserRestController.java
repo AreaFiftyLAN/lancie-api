@@ -5,7 +5,9 @@ import ch.wisv.areafiftylan.model.Seat;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.service.SeatService;
 import ch.wisv.areafiftylan.service.UserService;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +15,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Collection;
 
 @RestController
@@ -48,7 +52,7 @@ public class UserRestController {
                 .fromCurrentRequest().path("/{id}")
                 .buildAndExpand(save.getId()).toUri());
 
-        return new ResponseEntity<>(save, httpHeaders, HttpStatus.CREATED);
+        return new ResponseEntity<>(null, httpHeaders, HttpStatus.CREATED);
     }
 
     /**
@@ -98,15 +102,10 @@ public class UserRestController {
 
     @RequestMapping(value = "/{userId}", method = RequestMethod.DELETE)
     ResponseEntity<?> deleteUser(@PathVariable Long userId) {
-        boolean success = userService.delete(userId);
-
-        if (success) {
-            return new ResponseEntity<>(null, new HttpHeaders(), HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(null, new HttpHeaders(), HttpStatus.PRECONDITION_FAILED);
-        }
+        User deletedUser = userService.getUserById(userId).get();
+        userService.delete(userId);
+        return new ResponseEntity<>(deletedUser, new HttpHeaders(), HttpStatus.OK);
     }
-
 
     //////////// OTHER MAPPINGS //////////////////
 
