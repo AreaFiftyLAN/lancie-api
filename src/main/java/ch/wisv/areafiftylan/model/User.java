@@ -8,16 +8,20 @@ import java.io.Serializable;
 
 
 @Entity
+@Table(uniqueConstraints = {
+        @UniqueConstraint(name = "username", columnNames = {"username"}),
+        @UniqueConstraint(name = "email", columnNames = {"email"})}
+)
 public class User implements Serializable{
 
     @JsonIgnore
     @Column(nullable = false)
     public String passwordHash;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     public String username;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     public String email;
 
     @OneToOne(targetEntity = Profile.class, cascade= CascadeType.ALL)
