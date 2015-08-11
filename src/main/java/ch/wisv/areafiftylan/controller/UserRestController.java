@@ -5,9 +5,9 @@ import ch.wisv.areafiftylan.model.Seat;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.service.SeatService;
 import ch.wisv.areafiftylan.service.UserService;
-import org.bouncycastle.cert.ocsp.Req;
-import org.hibernate.annotations.SelectBeforeUpdate;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +15,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.nio.file.Path;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Collection;
 
 @RestController
@@ -36,7 +37,7 @@ public class UserRestController {
     //////////// USER MAPPINGS //////////////////
 
     /**
-     * This method accepts POST requests on /users. It will create a new user and an empty profile attached to it.
+     * This method accepts POST requests on /users. It will send the input to the {@link UserService} to create a new user
      *
      * @param input The user that has to be created. It consists of 3 fields. The username, the email and the
      *                  plain-text password. The password is saved hashed using the BCryptPasswordEncoder
@@ -51,18 +52,62 @@ public class UserRestController {
                 .fromCurrentRequest().path("/{id}")
                 .buildAndExpand(save.getId()).toUri());
 
-        return new ResponseEntity<>(save, httpHeaders, HttpStatus.CREATED);
+        return new ResponseEntity<>(null, httpHeaders, HttpStatus.CREATED);
     }
 
+    /**
+     * This method accepts PUT requests on /users/{userId}. It replaces all fields with the new user provided in the
+     * RequestBody and resets the profile fields. All references to the old user are maintained (Team membership ect).
+     *
+     * @param userId The userId of the User to be repalced
+     * @param input  A UserDTO object containing data of the new user
+     * @return The User object.
+     */
+    @RequestMapping(value = "/{userId}", method = RequestMethod.PUT)
+    User replaceUser(@PathVariable Long userId, @Validated @RequestBody UserDTO input) {
+        return this.userService.replace(userId, input);
+    }
+
+    /**
+     * Edit the current user. Only change the fields which have been set. All fields should be in the requestbody.
+     * @param userId The id of the user to be updated
+     * @param input A userDTO object with updated fields. empty fields will be ignored
+     * @return The updated User object
+     */
+    @RequestMapping(value = "/{userId}", method = RequestMethod.PATCH)
+    User updateUser(@PathVariable Long userId, @RequestBody UserDTO input) {
+        return this.userService.replace(userId, input);
+    }
+
+    /**
+     * Get the user with a specific userId
+     *
+     * @param userId The user to be retrieved
+     * @return The user with the given userId
+     */
     @RequestMapping(value = "/{userId}", method = RequestMethod.GET)
     User getUserById(@PathVariable Long userId) {
         return this.userService.getUserById(userId).get();
     }
 
+    /**
+     * Get all users in the database
+     *
+     * @return all users
+     */
     @RequestMapping(method = RequestMethod.GET)
     Collection<User> readUsers() {
         return userService.getAllUsers();
     }
+
+    @RequestMapping(value = "/{userId}", method = RequestMethod.DELETE)
+    ResponseEntity<?> deleteUser(@PathVariable Long userId) {
+        User deletedUser = userService.getUserById(userId).get();
+        userService.delete(userId);
+        return new ResponseEntity<>(deletedUser, new HttpHeaders(), HttpStatus.OK);
+    }
+
+    //////////// OTHER MAPPINGS //////////////////
 
     @RequestMapping(value = "/{userId}/seat", method = RequestMethod.GET)
     Seat getSeatByUser(@PathVariable Long userId){

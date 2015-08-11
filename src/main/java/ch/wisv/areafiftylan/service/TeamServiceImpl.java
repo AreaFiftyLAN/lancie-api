@@ -27,6 +27,11 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
+    public Team getTeamByCaptainId(Long userId) {
+        return teamRepository.findByCaptainId(userId).get();
+    }
+
+    @Override
     public Collection<Team> getAllTeams() {
         return teamRepository.findAll();
     }

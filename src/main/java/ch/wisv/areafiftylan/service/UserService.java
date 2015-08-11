@@ -17,6 +17,12 @@ public interface UserService {
 
     User create(UserDTO userDTO);
 
+    User replace(Long userId, UserDTO userDTO);
+
+    void delete(Long userId);
+
+    User edit(Long userId, UserDTO userDTO);
+
     User save(User user);
 
 }
