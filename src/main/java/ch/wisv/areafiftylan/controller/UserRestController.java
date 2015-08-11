@@ -18,6 +18,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
@@ -115,4 +117,31 @@ public class UserRestController {
 
         return seatService.getSeatByUser(user);
     }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<?> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
+        Map<String, String> responseBody = new HashMap<>();
+        HttpStatus status;
+        String message = "Database contraint violated!";
+
+        try {
+            throw ex.getCause();
+        }catch (ConstraintViolationException constraintException){
+            String constraintName = constraintException.getConstraintName();
+            if("USERNAME".equals(constraintName)){
+                message = "Username is not unique!";
+            } else if("EMAIL".equals(constraintName)){
+                message = "Email is not unique!";
+            }
+        } catch (Throwable throwable) {
+            message = throwable.toString();
+        }
+
+        responseBody.put("message", message);
+
+        // prepare responseEntity
+        return new ResponseEntity<>(responseBody, new HttpHeaders(), HttpStatus.CONFLICT);
+    }
+
+
 }
