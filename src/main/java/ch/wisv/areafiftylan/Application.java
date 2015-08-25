@@ -45,7 +45,7 @@ public class Application {
 //                        a -> {
 //                            User account = accountRepository.save(new User(a,
 //                                    "password", a + "@mail.com"));
-//                            User gcaptain = accountRepository.findByUsername(a).get();
+//                            User captain = accountRepository.findByUsername(a).get();
 //                            Team team = new Team(a + "team", captain);
 //                            teamRepository.save(team);
 //
