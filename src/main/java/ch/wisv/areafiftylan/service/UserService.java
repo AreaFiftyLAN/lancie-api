@@ -15,6 +15,8 @@ public interface UserService {
 
     Collection<User> getAllUsers();
 
+    String getCurrent();
+
     User create(UserDTO userDTO);
 
     User replace(Long userId, UserDTO userDTO);

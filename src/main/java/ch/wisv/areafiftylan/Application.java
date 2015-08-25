@@ -1,6 +1,7 @@
 package ch.wisv.areafiftylan;
 
 
+import ch.wisv.areafiftylan.config.WebSecurityConfig;
 import ch.wisv.areafiftylan.model.Seat;
 import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.model.User;
@@ -14,6 +15,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
 import java.util.Arrays;
 
@@ -51,6 +53,11 @@ public class Application {
 //                        });
 //
 //    }
+
+    @Bean
+    public WebSecurityConfigurerAdapter webSecurityConfigurerAdapter() {
+        return new WebSecurityConfig();
+    }
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
