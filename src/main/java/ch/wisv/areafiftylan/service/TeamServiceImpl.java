@@ -64,4 +64,9 @@ public class TeamServiceImpl implements TeamService {
     public Team update(Long teamId, TeamDTO input) {
         return null;
     }
+
+    @Override
+    public void delete(Long teamId) {
+        teamRepository.delete(teamId);
+    }
 }

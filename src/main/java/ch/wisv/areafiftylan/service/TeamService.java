@@ -23,4 +23,6 @@ public interface TeamService {
     Collection<Team> getTeamsByUsername(String username);
 
     Team update(Long teamId, TeamDTO input);
+
+    void delete(Long teamId);
 }
