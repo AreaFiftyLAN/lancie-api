@@ -7,7 +7,6 @@ public class Event {
     String headerTitle;
     String description;
     String backgroundImagePath;
-    boolean notify = false;
 
     public Event(String title, String subtitle, String headerTitle, String description, String backgroundImagePath) {
         this.title = title;
@@ -55,13 +54,5 @@ public class Event {
 
     public void setBackgroundImagePath(String backgroundImagePath) {
         this.backgroundImagePath = backgroundImagePath;
-    }
-
-    public boolean isNotify() {
-        return notify;
-    }
-
-    public void setNotify(boolean notify) {
-        this.notify = notify;
     }
 }
