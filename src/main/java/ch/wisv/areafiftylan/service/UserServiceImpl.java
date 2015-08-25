@@ -1,6 +1,8 @@
 package ch.wisv.areafiftylan.service;
 
+import ch.wisv.areafiftylan.dto.ProfileDTO;
 import ch.wisv.areafiftylan.dto.UserDTO;
+import ch.wisv.areafiftylan.model.Profile;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.service.repository.UserRepository;
 import com.google.common.base.Strings;
@@ -80,6 +82,28 @@ public class UserServiceImpl implements UserService {
     @Override
     public User save(User user) {
         return userRepository.saveAndFlush(user);
+    }
+
+    @Override
+    public User addProfile(Long userId, ProfileDTO profileDTO) {
+        User user = userRepository.findOne(userId);
+        user.getProfile().setAllFields(profileDTO.getFirstName(), profileDTO.getLastName(), profileDTO.getDisplayName(),
+                profileDTO.getGender(), profileDTO.getAddress(), profileDTO.getZipcode(), profileDTO.getCity(),
+                profileDTO.getPhoneNumber(), profileDTO.getNotes());
+        return userRepository.saveAndFlush(user);
+
+    }
+
+    @Override
+    public User changeProfile(Long userId, ProfileDTO profileDTO) {
+        return addProfile(userId, profileDTO);
+    }
+
+    @Override
+    public Profile resetProfile(Long userId) {
+        Profile profile = userRepository.findOne(userId).getProfile();
+        userRepository.findOne(userId).resetProfile();
+        return profile;
     }
 
     private String getPasswordHash(String plainTextPassword) {
