@@ -1,6 +1,7 @@
 package ch.wisv.areafiftylan.web.service;
 
 import ch.wisv.areafiftylan.web.model.Format;
+import ch.wisv.areafiftylan.web.model.Platform;
 import ch.wisv.areafiftylan.web.model.Sponsor;
 import ch.wisv.areafiftylan.web.model.Tournament;
 import org.springframework.stereotype.Service;
@@ -30,7 +31,7 @@ public class TournamentServiceImpl {
                         "side are dead or a team's objective is completed", "/images/background/tournaments/lol.jpg",
                 new Sponsor("Logitech", "path/to/image", "logitech.com"),
                 new LinkedList<>(Arrays.asList("Mooie koptelegoof", "Mooie koptelegoof", "Mooie koptelegoof")),
-                Format.FIVE_VS_FIVE, LocalDateTime.now(), "link/to/rules"));
+                Format.FIVE_VS_FIVE, LocalDateTime.now(), "link/to/rules", Platform.MAC, Platform.PC));
 
         tournaments.add(new Tournament("CS:GO", "5v5", "Counter Strike: Global Offensive",
                 "Counter-Strike: Global Offensive (CS:GO) is a tactical first-person shooter developed by " +
@@ -42,7 +43,7 @@ public class TournamentServiceImpl {
                         "side are dead or a team's objective is completed", "/images/background/tournaments/lol.jpg",
                 new Sponsor("Logitech", "path/to/image", "logitech.com"),
                 new LinkedList<>(Arrays.asList("Mooie koptelegoof", "Mooie koptelegoof", "Mooie koptelegoof")),
-                Format.FIVE_VS_FIVE, LocalDateTime.now(), "link/to/rules"));
+                Format.FIVE_VS_FIVE, LocalDateTime.now(), "link/to/rules", Platform.OFFLINE));
         return tournaments;
     }
 }

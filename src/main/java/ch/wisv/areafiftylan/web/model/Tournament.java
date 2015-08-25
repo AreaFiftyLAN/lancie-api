@@ -1,6 +1,8 @@
 package ch.wisv.areafiftylan.web.model;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedList;
 
 public class Tournament extends Event {
@@ -10,16 +12,26 @@ public class Tournament extends Event {
     Format format;
     LocalDateTime startingDateTime;
     String rulePath;
+    Collection<Platform> platform;
 
     public Tournament(String title, String subtitle, String headerTitle, String description, String backgroundImagePath,
-                      Sponsor sponsor, LinkedList<String> prizes, Format format,
-                      LocalDateTime startingDateTime, String rulePath) {
+                      Sponsor sponsor, LinkedList<String> prizes, Format format, LocalDateTime startingDateTime,
+                      String rulePath, Platform... platforms) {
         super(title, subtitle, headerTitle, description, backgroundImagePath);
         this.sponsor = sponsor;
         this.prizes = prizes;
         this.format = format;
         this.startingDateTime = startingDateTime;
         this.rulePath = rulePath;
+        this.platform = Arrays.asList(platforms);
+    }
+
+    public Collection<Platform> getPlatform() {
+        return platform;
+    }
+
+    public void setPlatform(Collection<Platform> platform) {
+        this.platform = platform;
     }
 
     public Sponsor getSponsor() {
