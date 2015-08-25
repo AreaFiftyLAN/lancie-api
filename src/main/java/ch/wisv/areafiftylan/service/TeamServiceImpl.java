@@ -62,7 +62,13 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public Team update(Long teamId, TeamDTO input) {
-        return null;
+        Team current = this.getTeamById(teamId).get();
+        current.setTeamName(input.getTeamName());
+
+        User captian = userService.getUserById(input.getCaptainID()).get();
+        current.setCaptain(captian);
+
+        return teamRepository.saveAndFlush(current);
     }
 
     @Override
