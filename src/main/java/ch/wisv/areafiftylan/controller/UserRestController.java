@@ -1,5 +1,6 @@
 package ch.wisv.areafiftylan.controller;
 
+import ch.wisv.areafiftylan.ResponseEntityBuilder;
 import ch.wisv.areafiftylan.dto.UserDTO;
 import ch.wisv.areafiftylan.model.Seat;
 import ch.wisv.areafiftylan.model.User;
@@ -15,11 +16,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
@@ -39,10 +36,12 @@ public class UserRestController {
     //////////// USER MAPPINGS //////////////////
 
     /**
-     * This method accepts POST requests on /users. It will send the input to the {@link UserService} to create a new user
+     * This method accepts POST requests on /users. It will send the input to the {@link UserService} to create a new
+     * user
      *
-     * @param input The user that has to be created. It consists of 3 fields. The username, the email and the
-     *                  plain-text password. The password is saved hashed using the BCryptPasswordEncoder
+     * @param input The user that has to be created. It consists of 3 fields. The username, the email and the plain-text
+     *              password. The password is saved hashed using the BCryptPasswordEncoder
+     *
      * @return The generated object, in JSON format.
      */
     @RequestMapping(method = RequestMethod.POST)
@@ -50,11 +49,11 @@ public class UserRestController {
         User save = userService.create(input);
 
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setLocation(ServletUriComponentsBuilder
-                .fromCurrentRequest().path("/{id}")
-                .buildAndExpand(save.getId()).toUri());
+        httpHeaders.setLocation(
+                ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(save.getId()).toUri());
 
-        return new ResponseEntity<>(null, httpHeaders, HttpStatus.CREATED);
+        return ResponseEntityBuilder.createResponseEntity(HttpStatus.CREATED, httpHeaders,
+                "User successfully created at " + httpHeaders.getLocation(), save);
     }
 
     /**
@@ -63,28 +62,34 @@ public class UserRestController {
      *
      * @param userId The userId of the User to be repalced
      * @param input  A UserDTO object containing data of the new user
+     *
      * @return The User object.
      */
     @RequestMapping(value = "/{userId}", method = RequestMethod.PUT)
-    User replaceUser(@PathVariable Long userId, @Validated @RequestBody UserDTO input) {
-        return this.userService.replace(userId, input);
+    ResponseEntity<?> replaceUser(@PathVariable Long userId, @Validated @RequestBody UserDTO input) {
+        User user = this.userService.replace(userId, input);
+        return ResponseEntityBuilder.createResponseEntity(HttpStatus.OK, null, "User successfully replaced", user);
     }
 
     /**
      * Edit the current user. Only change the fields which have been set. All fields should be in the requestbody.
+     *
      * @param userId The id of the user to be updated
-     * @param input A userDTO object with updated fields. empty fields will be ignored
+     * @param input  A userDTO object with updated fields. empty fields will be ignored
+     *
      * @return The updated User object
      */
     @RequestMapping(value = "/{userId}", method = RequestMethod.PATCH)
-    User updateUser(@PathVariable Long userId, @RequestBody UserDTO input) {
-        return this.userService.replace(userId, input);
+    ResponseEntity<?> updateUser(@PathVariable Long userId, @RequestBody UserDTO input) {
+        User user = this.userService.replace(userId, input);
+        return ResponseEntityBuilder.createResponseEntity(HttpStatus.OK, null, "User successfully updated", user);
     }
 
     /**
      * Get the user with a specific userId
      *
      * @param userId The user to be retrieved
+     *
      * @return The user with the given userId
      */
     @RequestMapping(value = "/{userId}", method = RequestMethod.GET)
@@ -106,13 +111,14 @@ public class UserRestController {
     ResponseEntity<?> deleteUser(@PathVariable Long userId) {
         User deletedUser = userService.getUserById(userId).get();
         userService.delete(userId);
-        return new ResponseEntity<>(deletedUser, new HttpHeaders(), HttpStatus.OK);
+        return ResponseEntityBuilder
+                .createResponseEntity(HttpStatus.OK, null, "User successfully deleted", deletedUser);
     }
 
     //////////// OTHER MAPPINGS //////////////////
 
     @RequestMapping(value = "/{userId}/seat", method = RequestMethod.GET)
-    Seat getSeatByUser(@PathVariable Long userId){
+    Seat getSeatByUser(@PathVariable Long userId) {
         User user = userService.getUserById(userId).get();
 
         return seatService.getSeatByUser(user);
@@ -120,28 +126,22 @@ public class UserRestController {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<?> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
-        Map<String, String> responseBody = new HashMap<>();
         HttpStatus status;
         String message = "Database contraint violated!";
 
         try {
             throw ex.getCause();
-        }catch (ConstraintViolationException constraintException){
+        } catch (ConstraintViolationException constraintException) {
             String constraintName = constraintException.getConstraintName();
-            if("USERNAME".equals(constraintName)){
+            if ("USERNAME".equals(constraintName)) {
                 message = "Username is not unique!";
-            } else if("EMAIL".equals(constraintName)){
+            } else if ("EMAIL".equals(constraintName)) {
                 message = "Email is not unique!";
             }
         } catch (Throwable throwable) {
             message = throwable.toString();
         }
 
-        responseBody.put("message", message);
-
-        // prepare responseEntity
-        return new ResponseEntity<>(responseBody, new HttpHeaders(), HttpStatus.CONFLICT);
+        return ResponseEntityBuilder.createResponseEntity(HttpStatus.CONFLICT, null, message, null);
     }
-
-
 }
