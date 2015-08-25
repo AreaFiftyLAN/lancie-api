@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.Optional;
 
 @Service
 public class TeamServiceImpl implements TeamService {
@@ -34,13 +35,13 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public Team getTeamById(Long id) {
-        return teamRepository.findOne(id);
+    public Optional<Team> getTeamById(Long id) {
+        return Optional.ofNullable(teamRepository.findOne(id));
     }
 
     @Override
-    public Team getTeamByTeamname(String teamname) {
-        return teamRepository.findByTeamName(teamname);
+    public Optional<Team> getTeamByTeamname(String teamname) {
+        return Optional.ofNullable(teamRepository.findByTeamName(teamname));
     }
 
     @Override
@@ -56,6 +57,11 @@ public class TeamServiceImpl implements TeamService {
     @Override
     public Collection<Team> getTeamsByUsername(String username) {
 //        return teamRepository.findByMembersUsername(username);
+        return null;
+    }
+
+    @Override
+    public Team update(Long teamId, TeamDTO input) {
         return null;
     }
 }

@@ -2,6 +2,7 @@ package ch.wisv.areafiftylan.controller;
 
 import ch.wisv.areafiftylan.dto.TeamDTO;
 import ch.wisv.areafiftylan.model.Team;
+import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.service.TeamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.Collection;
@@ -32,6 +34,11 @@ public class TeamRestController {
         this.teamService = teamService;
     }
 
+    @RequestMapping(method = RequestMethod.GET)
+    Collection<Team> readUsers() {
+        return teamService.getAllTeams();
+    }
+
     @RequestMapping(method = RequestMethod.POST)
     ResponseEntity<?> add(@Validated @RequestBody TeamDTO input) {
         Team save = teamService.create(input);
@@ -44,8 +51,13 @@ public class TeamRestController {
         return new ResponseEntity<>(save, httpHeaders, HttpStatus.CREATED);
     }
 
-    @RequestMapping(method = RequestMethod.GET)
-    Collection<Team> readUsers() {
-        return teamService.getAllTeams();
+    @RequestMapping(value = "/{teamId}", method = RequestMethod.GET)
+    Team getTeamById(@PathVariable Long teamId) {
+        return this.teamService.getTeamById(teamId).get();
+    }
+
+    @RequestMapping(method = RequestMethod.PUT, value = "{teamId}")
+    public Team update(@PathVariable Long teamId, @RequestBody TeamDTO input) {
+        return this.teamService.update(teamId, input);
     }
 }
