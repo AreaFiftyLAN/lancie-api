@@ -1,6 +1,5 @@
 package ch.wisv.areafiftylan.controller;
 
-import ch.wisv.areafiftylan.util.ResponseEntityBuilder;
 import ch.wisv.areafiftylan.dto.ProfileDTO;
 import ch.wisv.areafiftylan.dto.UserDTO;
 import ch.wisv.areafiftylan.model.Profile;
@@ -8,6 +7,7 @@ import ch.wisv.areafiftylan.model.Seat;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.service.SeatService;
 import ch.wisv.areafiftylan.service.UserService;
+import ch.wisv.areafiftylan.util.ResponseEntityBuilder;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -170,7 +170,9 @@ public class UserRestController {
 
     /**
      * Resets the profile fields to null. The profile can't actually be deleted as it is a required field.
+     *
      * @param userId The userId of the user which needs the profile reset
+     *
      * @return Empty body with StatusCode OK.
      */
     @RequestMapping(value = "/{userId}/profile", method = RequestMethod.DELETE)
