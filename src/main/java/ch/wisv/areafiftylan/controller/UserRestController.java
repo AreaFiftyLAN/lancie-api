@@ -1,7 +1,9 @@
 package ch.wisv.areafiftylan.controller;
 
 import ch.wisv.areafiftylan.util.ResponseEntityBuilder;
+import ch.wisv.areafiftylan.dto.ProfileDTO;
 import ch.wisv.areafiftylan.dto.UserDTO;
+import ch.wisv.areafiftylan.model.Profile;
 import ch.wisv.areafiftylan.model.Seat;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.service.SeatService;
@@ -115,6 +117,68 @@ public class UserRestController {
                 .createResponseEntity(HttpStatus.OK, null, "User successfully deleted", deletedUser);
     }
 
+    //////////// PROFILE MAPPINGS //////////////////
+
+
+    /**
+     * Add a profile to a user. An empty profile is created when a user is created, so this method fills the existing
+     * fields
+     *
+     * @param userId The userId of the user to which the profile needs to be added
+     * @param input  A representation of the profile
+     *
+     * @return The user with the new profile
+     */
+    @RequestMapping(value = "/{userId}/profile", method = RequestMethod.POST)
+    ResponseEntity<?> addProfile(@PathVariable Long userId, @Validated @RequestBody ProfileDTO input) {
+        User user = userService.addProfile(userId, input);
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setLocation(
+                ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}/profile").buildAndExpand(user.getId())
+                        .toUri());
+
+        return new ResponseEntity<>(user, httpHeaders, HttpStatus.CREATED);
+    }
+
+    /**
+     * Change the profile fields of the User. Basically the same as the POST request.
+     *
+     * @param userId The userId of the user to which the profile needs to be added
+     * @param input  A representation of the profile
+     *
+     * @return The user with the changed profile
+     */
+    @RequestMapping(value = "/{userId}/profile", method = RequestMethod.PUT)
+    ResponseEntity<?> changeProfile(@PathVariable Long userId, @Validated @RequestBody ProfileDTO input) {
+        User user = userService.changeProfile(userId, input);
+
+        return new ResponseEntity<>(user, new HttpHeaders(), HttpStatus.OK);
+    }
+
+    /**
+     * Get the profile view without the related User
+     *
+     * @param userId UserId of the user
+     *
+     * @return The profile of the specific user
+     */
+    @RequestMapping(value = "/{userId}/profile", method = RequestMethod.GET)
+    Profile readProfile(@PathVariable Long userId) {
+        return userService.getUserById(userId).get().getProfile();
+    }
+
+    /**
+     * Resets the profile fields to null. The profile can't actually be deleted as it is a required field.
+     * @param userId The userId of the user which needs the profile reset
+     * @return Empty body with StatusCode OK.
+     */
+    @RequestMapping(value = "/{userId}/profile", method = RequestMethod.DELETE)
+    ResponseEntity<?> resetProfile(@PathVariable Long userId) {
+        Profile profile = userService.resetProfile(userId);
+        return new ResponseEntity<>(profile, new HttpHeaders(), HttpStatus.OK);
+    }
+
     //////////// OTHER MAPPINGS //////////////////
 
     @RequestMapping(value = "/{userId}/seat", method = RequestMethod.GET)
@@ -123,6 +187,8 @@ public class UserRestController {
 
         return seatService.getSeatByUser(user);
     }
+
+    //////////// EXCEPTION HANDLING //////////////////
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<?> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {

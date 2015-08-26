@@ -1,8 +1,9 @@
 package ch.wisv.areafiftylan.service;
 
 
-
+import ch.wisv.areafiftylan.dto.ProfileDTO;
 import ch.wisv.areafiftylan.dto.UserDTO;
+import ch.wisv.areafiftylan.model.Profile;
 import ch.wisv.areafiftylan.model.User;
 
 import java.util.Collection;
@@ -24,5 +25,11 @@ public interface UserService {
     User edit(Long userId, UserDTO userDTO);
 
     User save(User user);
+
+    User addProfile(Long userId, ProfileDTO profileDTO);
+
+    User changeProfile(Long userId, ProfileDTO profileDTO);
+
+    Profile resetProfile(Long userId);
 
 }

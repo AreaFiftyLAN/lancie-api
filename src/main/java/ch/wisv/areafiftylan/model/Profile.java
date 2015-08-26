@@ -25,21 +25,58 @@ public class Profile implements Serializable {
     @GeneratedValue
     private Long id;
 
+    Profile() {
+
+    }
+
+    public Profile(String firstName, String lastName, String displayName, Gender gender, String address, String zipcode,
+                   String city, String phoneNumber, String notes) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.displayName = displayName;
+        this.gender = gender;
+        this.address = address;
+        this.zipcode = zipcode;
+        this.city = city;
+        this.phoneNumber = phoneNumber;
+        this.notes = notes;
+    }
+
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Profile)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Profile)) {
+            return false;
+        }
 
         Profile profile = (Profile) o;
 
-        if (firstName != null ? !firstName.equals(profile.firstName) : profile.firstName != null) return false;
-        if (lastName != null ? !lastName.equals(profile.lastName) : profile.lastName != null) return false;
-        if (displayName != null ? !displayName.equals(profile.displayName) : profile.displayName != null) return false;
-        if (gender != profile.gender) return false;
-        if (address != null ? !address.equals(profile.address) : profile.address != null) return false;
-        if (zipcode != null ? !zipcode.equals(profile.zipcode) : profile.zipcode != null) return false;
-        if (city != null ? !city.equals(profile.city) : profile.city != null) return false;
-        if (phoneNumber != null ? !phoneNumber.equals(profile.phoneNumber) : profile.phoneNumber != null) return false;
+        if (firstName != null ? !firstName.equals(profile.firstName) : profile.firstName != null) {
+            return false;
+        }
+        if (lastName != null ? !lastName.equals(profile.lastName) : profile.lastName != null) {
+            return false;
+        }
+        if (displayName != null ? !displayName.equals(profile.displayName) : profile.displayName != null) {
+            return false;
+        }
+        if (gender != profile.gender) {
+            return false;
+        }
+        if (address != null ? !address.equals(profile.address) : profile.address != null) {
+            return false;
+        }
+        if (zipcode != null ? !zipcode.equals(profile.zipcode) : profile.zipcode != null) {
+            return false;
+        }
+        if (city != null ? !city.equals(profile.city) : profile.city != null) {
+            return false;
+        }
+        if (phoneNumber != null ? !phoneNumber.equals(profile.phoneNumber) : profile.phoneNumber != null) {
+            return false;
+        }
         return !(notes != null ? !notes.equals(profile.notes) : profile.notes != null);
 
     }
@@ -56,16 +93,6 @@ public class Profile implements Serializable {
         result = 31 * result + (phoneNumber != null ? phoneNumber.hashCode() : 0);
         result = 31 * result + (notes != null ? notes.hashCode() : 0);
         return result;
-    }
-
-    Profile() {
-
-    }
-
-    public Profile(String firstName, String lastName, String displayName) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.displayName = displayName;
     }
 
     public Gender getGender() {
