@@ -1,6 +1,6 @@
 package ch.wisv.areafiftylan.controller;
 
-import ch.wisv.areafiftylan.ResponseEntityBuilder;
+import ch.wisv.areafiftylan.util.ResponseEntityBuilder;
 import ch.wisv.areafiftylan.dto.UserDTO;
 import ch.wisv.areafiftylan.model.Seat;
 import ch.wisv.areafiftylan.model.User;

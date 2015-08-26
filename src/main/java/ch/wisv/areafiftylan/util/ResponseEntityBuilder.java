@@ -1,11 +1,11 @@
-package ch.wisv.areafiftylan;
+package ch.wisv.areafiftylan.util;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ResponseEntityBuilder {
@@ -22,7 +22,7 @@ public class ResponseEntityBuilder {
      */
     public static ResponseEntity<?> createResponseEntity(HttpStatus httpStatus, HttpHeaders httpHeaders, String message,
                                                          Object object) {
-        Map<String, Object> responseBody = new HashMap<>();
+        Map<String, Object> responseBody = new LinkedHashMap<>();
         responseBody.put("status", httpStatus.toString());
         responseBody.put("timestamp", LocalDateTime.now().toString());
         responseBody.put("message", message);
@@ -32,6 +32,19 @@ public class ResponseEntityBuilder {
             httpHeaders = new HttpHeaders();
         }
         return new ResponseEntity<>(responseBody, httpHeaders, httpStatus);
+    }
 
+    public static ResponseEntity<?> createResponseEntity(HttpStatus httpStatus, String message, Object object) {
+        return createResponseEntity(httpStatus, null, message, object);
+    }
+
+    public static ResponseEntity<?> createResponseEntity(HttpStatus httpStatus, String message) {
+        return createResponseEntity(httpStatus, null, message, null);
+    }
+
+    public static ResponseEntity<?> createResponseEntity(HttpStatus httpStatus, HttpHeaders httpHeaders,
+                                                         String message) {
+        return createResponseEntity(httpStatus, httpHeaders, message, null);
     }
 }
+
