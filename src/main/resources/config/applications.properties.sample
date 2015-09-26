@@ -1,0 +1,19 @@
+# Basic auth
+security.user.password =
+
+#Default Property file, which is commited in Git
+spring.mail.host=
+spring.mail.port=
+spring.mail.username=
+spring.mail.password=
+
+# THYMELEAF (ThymeleafAutoConfiguration)
+spring.thymeleaf.check-template-location=true
+spring.thymeleaf.prefix=classpath:/templates/
+spring.thymeleaf.view-names= MailTemplate
+spring.thymeleaf.suffix=.html
+spring.thymeleaf.mode=HTML5
+spring.thymeleaf.encoding=UTF-8
+spring.thymeleaf.content-type=text/html
+
+server.port =
