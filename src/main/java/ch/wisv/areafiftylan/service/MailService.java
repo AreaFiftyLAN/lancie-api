@@ -11,7 +11,7 @@ public interface MailService {
     void sendMail(String recipientEmail, String recipientName, String senderEmail, String subject, String message)
             throws MessagingException;
 
-    void sendTemplateMailToTeam(Team team, MailDTO mailDTO);
+    void sendTemplateMailToTeam(Team team, MailDTO mailDTO) throws MessagingException;
 
     void sendTemplateMailToAll(MailDTO mailDTO);
 

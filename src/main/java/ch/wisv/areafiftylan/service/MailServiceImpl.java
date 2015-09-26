@@ -59,9 +59,10 @@ public class MailServiceImpl implements MailService {
     }
 
     @Override
-    public void sendTemplateMailToTeam(Team team, MailDTO mailDTO) {
-        throw new NotYetImplementedException();
-
+    public void sendTemplateMailToTeam(Team team, MailDTO mailDTO) throws MessagingException {
+        for(User user : team.getMembers()){
+            sendTemplateMailToUser(user, mailDTO);
+        }
     }
 
     @Override

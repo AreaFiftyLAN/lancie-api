@@ -48,7 +48,11 @@ public class MailRestController {
     @RequestMapping(value = "/team/{teamId}", method = RequestMethod.POST)
     ResponseEntity<?> sendMailToTeam(@PathVariable Long teamId, @Validated @RequestBody MailDTO mailDTO) {
         Team team = teamService.getTeamById(teamId);
-        mailService.sendTemplateMailToTeam(team, mailDTO);
+        try {
+            mailService.sendTemplateMailToTeam(team, mailDTO);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
 
         return new ResponseEntity<>(null, new HttpHeaders(), HttpStatus.OK);
     }
