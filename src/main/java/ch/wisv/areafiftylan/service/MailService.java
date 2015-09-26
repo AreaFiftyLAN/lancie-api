@@ -4,13 +4,16 @@ import ch.wisv.areafiftylan.dto.MailDTO;
 import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.model.User;
 
+import javax.mail.MessagingException;
+
 public interface MailService {
 
-    void sendMail(String recipient, String sender, String subject, String message);
+    void sendMail(String recipientEmail, String recipientName, String senderEmail, String subject, String message)
+            throws MessagingException;
 
     void sendTemplateMailToTeam(Team team, MailDTO mailDTO);
 
     void sendTemplateMailToAll(MailDTO mailDTO);
 
-    void sendTemplateMailToUser(User user, MailDTO mailDTO);
+    void sendTemplateMailToUser(User user, MailDTO mailDTO) throws MessagingException;
 }

@@ -1,10 +1,24 @@
 package ch.wisv.areafiftylan.dto;
 
-import java.util.Collection;
-
 public class MailDTO {
 
     String subject;
 
-    Collection<String> paragraphs;
+    String message;
+
+    public String getSubject() {
+        return subject;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
 }

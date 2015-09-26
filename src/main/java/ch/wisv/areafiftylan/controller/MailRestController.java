@@ -1,7 +1,9 @@
 package ch.wisv.areafiftylan.controller;
 
 import ch.wisv.areafiftylan.dto.MailDTO;
+import ch.wisv.areafiftylan.exception.UserNotFoundException;
 import ch.wisv.areafiftylan.model.Team;
+import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.service.MailService;
 import ch.wisv.areafiftylan.service.TeamService;
 import ch.wisv.areafiftylan.service.UserService;
@@ -11,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import javax.mail.MessagingException;
 
 @RestController
 @RequestMapping("/mail")
@@ -26,6 +30,20 @@ public class MailRestController {
     MailService mailService;
     UserService userService;
     TeamService teamService;
+
+    @RequestMapping(value = "/user/{userId}", method = RequestMethod.POST)
+    ResponseEntity<?> sendMailToUser(@PathVariable Long userId, @Validated @RequestBody MailDTO mailDTO){
+        User user = userService.getUserById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+
+        try {
+            mailService.sendTemplateMailToUser(user, mailDTO);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
+
+        return new ResponseEntity<>(null, new HttpHeaders(), HttpStatus.OK);
+
+    }
 
     @RequestMapping(value = "/team/{teamId}", method = RequestMethod.POST)
     ResponseEntity<?> sendMailToTeam(@PathVariable Long teamId, @Validated @RequestBody MailDTO mailDTO) {
