@@ -13,6 +13,7 @@ import org.thymeleaf.spring4.SpringTemplateEngine;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import java.util.Collection;
 import java.util.Locale;
 
 @Service
@@ -27,7 +28,6 @@ public class MailServiceImpl implements MailService {
         this.mailSender = mailSender;
         this.templateEngine = templateEngine;
     }
-
 
     @Override
     public void sendMail(String recipientEmail, String recipientName, String senderEmail, String subject,
@@ -66,8 +66,10 @@ public class MailServiceImpl implements MailService {
     }
 
     @Override
-    public void sendTemplateMailToAll(MailDTO mailDTO) {
-        throw new NotYetImplementedException();
+    public void sendTemplateMailToAll(Collection<User> users, MailDTO mailDTO) throws MessagingException {
+        for(User user : users){
+            sendTemplateMailToUser(user, mailDTO);
+        }
     }
 
     @Override

@@ -5,6 +5,7 @@ import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.model.User;
 
 import javax.mail.MessagingException;
+import java.util.Collection;
 
 public interface MailService {
 
@@ -13,7 +14,7 @@ public interface MailService {
 
     void sendTemplateMailToTeam(Team team, MailDTO mailDTO) throws MessagingException;
 
-    void sendTemplateMailToAll(MailDTO mailDTO);
+    void sendTemplateMailToAll(Collection<User> users, MailDTO mailDTO) throws MessagingException;
 
     void sendTemplateMailToUser(User user, MailDTO mailDTO) throws MessagingException;
 }

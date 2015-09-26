@@ -32,7 +32,7 @@ public class MailRestController {
     TeamService teamService;
 
     @RequestMapping(value = "/user/{userId}", method = RequestMethod.POST)
-    ResponseEntity<?> sendMailToUser(@PathVariable Long userId, @Validated @RequestBody MailDTO mailDTO){
+    ResponseEntity<?> sendMailToUser(@PathVariable Long userId, @Validated @RequestBody MailDTO mailDTO) {
         User user = userService.getUserById(userId).orElseThrow(() -> new UserNotFoundException(userId));
 
         try {
@@ -54,6 +54,16 @@ public class MailRestController {
             e.printStackTrace();
         }
 
+        return new ResponseEntity<>(null, new HttpHeaders(), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/users/all/YESREALLY", method = RequestMethod.POST)
+    ResponseEntity<?> sendMailToAll(@Validated @RequestBody MailDTO mailDTO) {
+        try {
+            mailService.sendTemplateMailToAll(userService.getAllUsers(), mailDTO);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
         return new ResponseEntity<>(null, new HttpHeaders(), HttpStatus.OK);
     }
 }
