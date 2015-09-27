@@ -32,11 +32,11 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .logoutSuccessUrl("/")
                 .permitAll()
             .and().authorizeRequests()
+                .antMatchers("/login*").permitAll()
                 .antMatchers("/mail").hasAuthority("ADMIN")
 //                .anyRequest().permitAll();
                 .anyRequest().authenticated();
         http.csrf().disable(); //FIXME
-
     }
 
     @Override

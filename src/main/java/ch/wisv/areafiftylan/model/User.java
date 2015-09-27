@@ -16,19 +16,18 @@ import java.util.HashSet;
         @UniqueConstraint(name = "email", columnNames = { "email" }) })
 public class User implements Serializable, UserDetails {
 
+    @Column(nullable = false)
     @JsonIgnore
-    @Column(nullable = false)
-    public String passwordHash;
+    private String passwordHash;
 
     @Column(nullable = false)
-    public String username;
+    protected String username;
 
     @Column(nullable = false)
-    public String email;
+    protected String email;
 
     @OneToOne(targetEntity = Profile.class, cascade = CascadeType.ALL)
-    @JsonIgnore
-    private Profile profile;
+    protected Profile profile;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,10 +38,15 @@ public class User implements Serializable, UserDetails {
     @CollectionTable(name = "user_role")
     private Collection<Role> roles;
 
-    boolean accountNonExpired = false;
-    boolean accountNonLocked = false;
-    boolean credentialsNonExpired = false;
-    boolean enabled;
+
+    @JsonIgnore
+    boolean accountNonExpired = true;
+    @JsonIgnore
+    boolean accountNonLocked = true;
+    @JsonIgnore
+    boolean credentialsNonExpired = true;
+    @JsonIgnore
+    boolean enabled = true;
 
     public User(String username, String passwordHash, String email) {
         this.username = username;
@@ -116,10 +120,6 @@ public class User implements Serializable, UserDetails {
 
     public void resetProfile() {
         this.profile = new Profile();
-    }
-
-    public Collection<Role> getRoles() {
-        return roles;
     }
 
     public void addRole(Role role) {
