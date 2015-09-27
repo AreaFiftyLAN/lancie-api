@@ -5,14 +5,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.Collections;
 
 
 @Entity
-@Table(uniqueConstraints = {
-        @UniqueConstraint(name = "username", columnNames = {"username"}),
-        @UniqueConstraint(name = "email", columnNames = {"email"})}
-)
-public class User implements Serializable{
+@Table(uniqueConstraints = { @UniqueConstraint(name = "username", columnNames = { "username" }),
+        @UniqueConstraint(name = "email", columnNames = { "email" }) })
+public class User implements Serializable {
 
     @JsonIgnore
     @Column(nullable = false)
@@ -24,7 +24,7 @@ public class User implements Serializable{
     @Column(nullable = false)
     public String email;
 
-    @OneToOne(targetEntity = Profile.class, cascade= CascadeType.ALL)
+    @OneToOne(targetEntity = Profile.class, cascade = CascadeType.ALL)
     @JsonIgnore
     private Profile profile;
 
@@ -32,24 +32,16 @@ public class User implements Serializable{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
-    }
-
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private Role role;
+    private Collection<Role> roles;
 
     public User(String username, String passwordHash, String email) {
         this.username = username;
         this.passwordHash = passwordHash;
         this.email = email;
         this.profile = new Profile();
-        this.role = Role.USER;
+        this.roles = Collections.singletonList(Role.USER);
     }
 
     User() { // jpa only
@@ -87,7 +79,21 @@ public class User implements Serializable{
         this.email = email;
     }
 
-    public void resetProfile(){
+    public void resetProfile() {
         this.profile = new Profile();
+    }
+
+    public Collection<Role> getRoles() {
+        return roles;
+    }
+
+    public void addRole(Role role){
+        this.roles.add(role);
+    }
+
+    public void removeRole(Role role){
+        if(this.roles.contains(role)){
+            this.roles.remove(role);
+        }
     }
 }

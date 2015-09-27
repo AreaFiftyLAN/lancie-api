@@ -35,6 +35,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Optional<User> getUserByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
+    @Override
     public Collection<User> getAllUsers() {
         return userRepository.findAll(new Sort("email"));
     }
@@ -43,7 +48,7 @@ public class UserServiceImpl implements UserService {
     public User create(UserDTO userDTO) {
         String passwordHash = getPasswordHash(userDTO.getPassword());
         User user = new User(userDTO.getUsername(), passwordHash, userDTO.getEmail());
-        user.setRole(userDTO.getRole());
+        user.addRole(userDTO.getRole());
 
         return userRepository.saveAndFlush(user);
     }
