@@ -2,6 +2,8 @@ package ch.wisv.areafiftylan.model;
 
 import ch.wisv.areafiftylan.model.util.Role;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -12,7 +14,7 @@ import java.util.HashSet;
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(name = "username", columnNames = { "username" }),
         @UniqueConstraint(name = "email", columnNames = { "email" }) })
-public class User implements Serializable {
+public class User implements Serializable, UserDetails {
 
     @JsonIgnore
     @Column(nullable = false)
@@ -37,6 +39,11 @@ public class User implements Serializable {
     @CollectionTable(name = "user_role")
     private Collection<Role> roles;
 
+    boolean accountNonExpired = false;
+    boolean accountNonLocked = false;
+    boolean credentialsNonExpired = false;
+    boolean enabled;
+
     public User(String username, String passwordHash, String email) {
         this.username = username;
         this.passwordHash = passwordHash;
@@ -57,12 +64,18 @@ public class User implements Serializable {
         return id;
     }
 
-    public String getPasswordHash() {
-        return passwordHash;
-    }
-
     public void setPasswordHash(String passwordHash) {
         this.passwordHash = passwordHash;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return roles;
+    }
+
+    @Override
+    public String getPassword() {
+        return passwordHash;
     }
 
     public String getUsername() {
@@ -71,6 +84,26 @@ public class User implements Serializable {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return accountNonExpired;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return accountNonLocked;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return credentialsNonExpired;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
     }
 
     public String getEmail() {
@@ -91,11 +124,5 @@ public class User implements Serializable {
 
     public void addRole(Role role) {
         this.roles.add(role);
-    }
-
-    public void removeRole(Role role) {
-        if (this.roles.contains(role)) {
-            this.roles.remove(role);
-        }
     }
 }
