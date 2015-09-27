@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.HashSet;
 
 
 @Entity
@@ -32,8 +32,9 @@ public class User implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @ElementCollection(targetClass = Role.class)
     @Enumerated(EnumType.STRING)
+    @CollectionTable(name = "user_role")
     private Collection<Role> roles;
 
     public User(String username, String passwordHash, String email) {
@@ -41,7 +42,8 @@ public class User implements Serializable {
         this.passwordHash = passwordHash;
         this.email = email;
         this.profile = new Profile();
-        this.roles = Collections.singletonList(Role.USER);
+        this.roles = new HashSet<>();
+        roles.add(Role.USER);
     }
 
     User() { // jpa only
@@ -87,12 +89,12 @@ public class User implements Serializable {
         return roles;
     }
 
-    public void addRole(Role role){
+    public void addRole(Role role) {
         this.roles.add(role);
     }
 
-    public void removeRole(Role role){
-        if(this.roles.contains(role)){
+    public void removeRole(Role role) {
+        if (this.roles.contains(role)) {
             this.roles.remove(role);
         }
     }

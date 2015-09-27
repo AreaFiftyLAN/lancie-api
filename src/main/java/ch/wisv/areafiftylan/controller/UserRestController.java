@@ -5,6 +5,7 @@ import ch.wisv.areafiftylan.dto.UserDTO;
 import ch.wisv.areafiftylan.model.Profile;
 import ch.wisv.areafiftylan.model.Seat;
 import ch.wisv.areafiftylan.model.User;
+import ch.wisv.areafiftylan.security.CurrentUser;
 import ch.wisv.areafiftylan.service.SeatService;
 import ch.wisv.areafiftylan.service.UserService;
 import ch.wisv.areafiftylan.util.ResponseEntityBuilder;
@@ -15,6 +16,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -95,9 +97,16 @@ public class UserRestController {
      *
      * @return The user with the given userId
      */
+    @PreAuthorize("@currentUserServiceImpl.canAccessUser(principal, #id)")
     @RequestMapping(value = "/{userId}", method = RequestMethod.GET)
     User getUserById(@PathVariable Long userId) {
         return this.userService.getUserById(userId).get();
+    }
+
+    @RequestMapping(value = "/current", method = RequestMethod.GET)
+    User getCurrentUser(Authentication auth) {
+        CurrentUser currentUser = (CurrentUser) auth.getPrincipal();
+        return currentUser.getUser();
     }
 
     /**
