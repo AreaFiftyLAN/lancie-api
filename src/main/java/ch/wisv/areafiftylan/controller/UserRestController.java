@@ -5,7 +5,6 @@ import ch.wisv.areafiftylan.dto.UserDTO;
 import ch.wisv.areafiftylan.model.Profile;
 import ch.wisv.areafiftylan.model.Seat;
 import ch.wisv.areafiftylan.model.User;
-import ch.wisv.areafiftylan.security.CurrentUser;
 import ch.wisv.areafiftylan.service.SeatService;
 import ch.wisv.areafiftylan.service.UserService;
 import ch.wisv.areafiftylan.util.ResponseEntityBuilder;
@@ -17,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -104,9 +104,16 @@ public class UserRestController {
     }
 
     @RequestMapping(value = "/current", method = RequestMethod.GET)
-    User getCurrentUser(Authentication auth) {
-        CurrentUser currentUser = (CurrentUser) auth.getPrincipal();
-        return currentUser.getUser();
+    ResponseEntity<?> getCurrentUser(Authentication auth) {
+        if (auth != null) {
+            UserDetails currentUser = (UserDetails) auth.getPrincipal();
+            User user = userService.getUserByUsername(currentUser.getUsername()).get();
+            return new ResponseEntity<>(user, HttpStatus.OK);
+        } else {
+            return ResponseEntityBuilder
+                    .createResponseEntity(HttpStatus.NOT_FOUND, null, "No user currently logged in!", null);
+        }
+
     }
 
     /**

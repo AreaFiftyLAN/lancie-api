@@ -3,6 +3,7 @@ package ch.wisv.areafiftylan.security;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -17,9 +18,10 @@ public class CurrentUserDetailsService implements UserDetailsService {
     }
 
     @Override
-    public CurrentUser loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userService.getUserByUsername(username).orElseThrow(
-                () -> new UsernameNotFoundException(username));
-        return new CurrentUser(user);
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userService.getUserByUsername(username).orElseThrow(() -> new UsernameNotFoundException(username));
+        return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPasswordHash(),
+                user.getRoles());
+
     }
 }

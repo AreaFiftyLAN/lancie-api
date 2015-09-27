@@ -1,7 +1,7 @@
 package ch.wisv.areafiftylan.service;
 
-import ch.wisv.areafiftylan.security.CurrentUser;
+import org.springframework.security.core.userdetails.UserDetails;
 
 public interface CurrentUserService {
-    boolean canAccessUser(CurrentUser currentUser, Long userId);
+    boolean canAccessUser(UserDetails currentUser, Long userId);
 }
