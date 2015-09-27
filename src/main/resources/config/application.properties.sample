@@ -1,7 +1,7 @@
 # Basic auth
 security.user.password =
 
-#Default Property file, which is commited in Git
+#Default Property file, which is committed in Git
 spring.mail.host=
 spring.mail.port=
 spring.mail.username=
