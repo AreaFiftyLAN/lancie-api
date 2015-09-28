@@ -36,7 +36,9 @@ public class User implements Serializable, UserDetails {
     @Enumerated(EnumType.STRING)
     @CollectionTable(name = "user_role")
     private Collection<Role> roles;
-
+    
+    @OneToOne
+    public Ticket ticket;
 
     @JsonIgnore
     boolean accountNonExpired = true;
