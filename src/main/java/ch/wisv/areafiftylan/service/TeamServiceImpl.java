@@ -31,22 +31,22 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public Team save(Team team) {
-        return teamRepository.save(team);
+        return teamRepository.saveAndFlush(team);
     }
 
     @Override
-    public Optional<Team> getTeamById(Long id) {
-        return Optional.ofNullable(teamRepository.findOne(id));
+    public Optional<Team> getTeamById(Long teamId) {
+        return teamRepository.findById(teamId);
     }
 
     @Override
     public Optional<Team> getTeamByTeamname(String teamname) {
-        return Optional.ofNullable(teamRepository.findByTeamName(teamname));
+        return teamRepository.findByTeamName(teamname);
     }
 
     @Override
-    public Team getTeamByCaptainId(Long userId) {
-        return teamRepository.findByCaptainId(userId).get();
+    public Collection<Team> getTeamByCaptainId(Long userId) {
+        return teamRepository.findByCaptainId(userId);
     }
 
     @Override
@@ -65,8 +65,8 @@ public class TeamServiceImpl implements TeamService {
         Team current = this.getTeamById(teamId).get();
         current.setTeamName(input.getTeamName());
 
-        User captian = userService.getUserById(input.getCaptainID()).get();
-        current.setCaptain(captian);
+        User captain = userService.getUserById(input.getCaptainID()).get();
+        current.setCaptain(captain);
 
         return teamRepository.saveAndFlush(current);
     }

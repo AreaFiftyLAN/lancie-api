@@ -48,8 +48,9 @@ public class TeamRestControllerTest {
 
     @Before
     public void init() {
-        teamRepository.deleteAll();
-        userRepository.deleteAll();
+        // Must be handled with caution, because you can delete the whole DB with this.
+        /* teamRepository.deleteAll();
+        userRepository.deleteAll(); */
         serverPath = "http://localhost:" + port;
     }
 

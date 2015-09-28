@@ -16,7 +16,7 @@ public interface TeamService {
 
     Optional<Team> getTeamByTeamname(String teamname);
 
-    Team getTeamByCaptainId(Long userId);
+    Collection<Team> getTeamByCaptainId(Long userId);
 
     Collection<Team> getAllTeams();
 

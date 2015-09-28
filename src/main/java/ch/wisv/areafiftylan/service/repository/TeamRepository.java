@@ -9,9 +9,11 @@ import java.util.Collection;
 public interface TeamRepository extends JpaRepository<Team, Long> {
     Collection<Team> findAllByMembersUsername(String username);
 
-    Optional<Team> findByCaptainId(Long userId);
+    Collection<Team> findByCaptainId(Long userId);
+
+    Optional<Team> findById(Long teamId);
 
     Collection<Team> findAllByCaptainUsername(String username);
 
-    Team findByTeamName(String teamName);
+    Optional<Team> findByTeamName(String teamName);
 }
