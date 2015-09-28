@@ -17,7 +17,6 @@ import java.util.HashSet;
 public class User implements Serializable, UserDetails {
 
     @Column(nullable = false)
-    @JsonIgnore
     private String passwordHash;
 
     @Column(nullable = false)
@@ -78,6 +77,7 @@ public class User implements Serializable, UserDetails {
     }
 
     @Override
+    @JsonIgnore
     public String getPassword() {
         return passwordHash;
     }

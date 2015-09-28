@@ -24,7 +24,7 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
      * POST requests should be made to /login with a username and password field. Errors are redirected to /login?error.
      * The logout section is similar.
      *
-     * The last section is about permissions. Anything related to Login should is accessible for everyone. Use this
+     * The last section is about permissions. Anything related to Login is accessible for everyone. Use this
      * for URL-based permissions if that's the best way. Use Method specific permissions if this is not feasible.
      *
      * By default, all requests to the API should come from authenticated sources. (USER or ADMIN)
