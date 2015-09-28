@@ -5,6 +5,8 @@ import ch.wisv.areafiftylan.dto.UserDTO;
 import ch.wisv.areafiftylan.model.Profile;
 import ch.wisv.areafiftylan.model.Seat;
 import ch.wisv.areafiftylan.model.User;
+import ch.wisv.areafiftylan.service.CurrentUserService;
+import ch.wisv.areafiftylan.service.CurrentUserServiceImpl;
 import ch.wisv.areafiftylan.service.SeatService;
 import ch.wisv.areafiftylan.service.UserService;
 import ch.wisv.areafiftylan.util.ResponseEntityBuilder;
@@ -14,6 +16,9 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -28,6 +33,8 @@ public class UserRestController {
     private UserService userService;
 
     private SeatService seatService;
+
+    private CurrentUserService currentUserService = new CurrentUserServiceImpl();
 
     @Autowired
     UserRestController(UserService userService, SeatService seatService) {
@@ -47,7 +54,7 @@ public class UserRestController {
      * @return The generated object, in JSON format.
      */
     @RequestMapping(method = RequestMethod.POST)
-    ResponseEntity<?> add(@Validated @RequestBody UserDTO input) {
+    public ResponseEntity<?> add(@Validated @RequestBody UserDTO input) {
         User save = userService.create(input);
 
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -68,7 +75,7 @@ public class UserRestController {
      * @return The User object.
      */
     @RequestMapping(value = "/{userId}", method = RequestMethod.PUT)
-    ResponseEntity<?> replaceUser(@PathVariable Long userId, @Validated @RequestBody UserDTO input) {
+    public ResponseEntity<?> replaceUser(@PathVariable Long userId, @Validated @RequestBody UserDTO input) {
         User user = this.userService.replace(userId, input);
         return ResponseEntityBuilder.createResponseEntity(HttpStatus.OK, null, "User successfully replaced", user);
     }
@@ -82,7 +89,7 @@ public class UserRestController {
      * @return The updated User object
      */
     @RequestMapping(value = "/{userId}", method = RequestMethod.PATCH)
-    ResponseEntity<?> updateUser(@PathVariable Long userId, @RequestBody UserDTO input) {
+    public ResponseEntity<?> updateUser(@PathVariable Long userId, @RequestBody UserDTO input) {
         User user = this.userService.replace(userId, input);
         return ResponseEntityBuilder.createResponseEntity(HttpStatus.OK, null, "User successfully updated", user);
     }
@@ -94,9 +101,23 @@ public class UserRestController {
      *
      * @return The user with the given userId
      */
+    @PreAuthorize("@currentUserServiceImpl.canAccessUser(principal, #userId)")
     @RequestMapping(value = "/{userId}", method = RequestMethod.GET)
-    User getUserById(@PathVariable Long userId) {
+    public User getUserById(@PathVariable Long userId) {
         return this.userService.getUserById(userId).get();
+    }
+
+    @RequestMapping(value = "/current", method = RequestMethod.GET)
+    public ResponseEntity<?> getCurrentUser(Authentication auth) {
+        if (auth != null) {
+            UserDetails currentUser = (UserDetails) auth.getPrincipal();
+            User user = userService.getUserByUsername(currentUser.getUsername()).get();
+            return new ResponseEntity<>(user, HttpStatus.OK);
+        } else {
+            return ResponseEntityBuilder
+                    .createResponseEntity(HttpStatus.NOT_FOUND, null, "No user currently logged in!", null);
+        }
+
     }
 
     /**
@@ -105,12 +126,13 @@ public class UserRestController {
      * @return all users
      */
     @RequestMapping(method = RequestMethod.GET)
-    Collection<User> readUsers() {
+    @PreAuthorize("hasRole('ADMIN')")
+    public Collection<User> readUsers() {
         return userService.getAllUsers();
     }
 
     @RequestMapping(value = "/{userId}", method = RequestMethod.DELETE)
-    ResponseEntity<?> deleteUser(@PathVariable Long userId) {
+    public ResponseEntity<?> deleteUser(@PathVariable Long userId) {
         User deletedUser = userService.getUserById(userId).get();
         userService.delete(userId);
         return ResponseEntityBuilder
@@ -130,7 +152,7 @@ public class UserRestController {
      * @return The user with the new profile
      */
     @RequestMapping(value = "/{userId}/profile", method = RequestMethod.POST)
-    ResponseEntity<?> addProfile(@PathVariable Long userId, @Validated @RequestBody ProfileDTO input) {
+    public ResponseEntity<?> addProfile(@PathVariable Long userId, @Validated @RequestBody ProfileDTO input) {
         User user = userService.addProfile(userId, input);
 
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -150,7 +172,7 @@ public class UserRestController {
      * @return The user with the changed profile
      */
     @RequestMapping(value = "/{userId}/profile", method = RequestMethod.PUT)
-    ResponseEntity<?> changeProfile(@PathVariable Long userId, @Validated @RequestBody ProfileDTO input) {
+    public ResponseEntity<?> changeProfile(@PathVariable Long userId, @Validated @RequestBody ProfileDTO input) {
         User user = userService.changeProfile(userId, input);
 
         return new ResponseEntity<>(user, new HttpHeaders(), HttpStatus.OK);
@@ -164,7 +186,7 @@ public class UserRestController {
      * @return The profile of the specific user
      */
     @RequestMapping(value = "/{userId}/profile", method = RequestMethod.GET)
-    Profile readProfile(@PathVariable Long userId) {
+    public Profile readProfile(@PathVariable Long userId) {
         return userService.getUserById(userId).get().getProfile();
     }
 
@@ -176,7 +198,7 @@ public class UserRestController {
      * @return Empty body with StatusCode OK.
      */
     @RequestMapping(value = "/{userId}/profile", method = RequestMethod.DELETE)
-    ResponseEntity<?> resetProfile(@PathVariable Long userId) {
+    public ResponseEntity<?> resetProfile(@PathVariable Long userId) {
         Profile profile = userService.resetProfile(userId);
         return new ResponseEntity<>(profile, new HttpHeaders(), HttpStatus.OK);
     }
@@ -184,7 +206,7 @@ public class UserRestController {
     //////////// OTHER MAPPINGS //////////////////
 
     @RequestMapping(value = "/{userId}/seat", method = RequestMethod.GET)
-    Seat getSeatByUser(@PathVariable Long userId) {
+    public Seat getSeatByUser(@PathVariable Long userId) {
         User user = userService.getUserById(userId).get();
 
         return seatService.getSeatByUser(user);

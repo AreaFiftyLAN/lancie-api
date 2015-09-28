@@ -8,6 +8,9 @@ import ch.wisv.areafiftylan.service.repository.UserRepository;
 import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +18,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 @Service
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService, UserDetailsService {
 
     private final UserRepository userRepository;
 
@@ -35,6 +38,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Optional<User> getUserByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
+    @Override
     public Collection<User> getAllUsers() {
         return userRepository.findAll(new Sort("email"));
     }
@@ -43,7 +51,7 @@ public class UserServiceImpl implements UserService {
     public User create(UserDTO userDTO) {
         String passwordHash = getPasswordHash(userDTO.getPassword());
         User user = new User(userDTO.getUsername(), passwordHash, userDTO.getEmail());
-        user.setRole(userDTO.getRole());
+        user.addRole(userDTO.getRole());
 
         return userRepository.saveAndFlush(user);
     }
@@ -110,4 +118,8 @@ public class UserServiceImpl implements UserService {
         return new BCryptPasswordEncoder().encode(plainTextPassword);
     }
 
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(username));
+    }
 }

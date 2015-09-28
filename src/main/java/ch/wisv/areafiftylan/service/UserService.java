@@ -14,6 +14,8 @@ public interface UserService {
 
     Optional<User> getUserByEmail(String email);
 
+    Optional<User> getUserByUsername(String username);
+
     Collection<User> getAllUsers();
 
     User create(UserDTO userDTO);
