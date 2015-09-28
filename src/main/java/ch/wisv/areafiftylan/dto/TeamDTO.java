@@ -1,10 +1,23 @@
 package ch.wisv.areafiftylan.dto;
 
-import ch.wisv.areafiftylan.model.User;
+import org.hibernate.validator.constraints.NotEmpty;
 
-import java.util.Collection;
+import javax.validation.constraints.NotNull;
 
 public class TeamDTO {
-    String teamName;
-    Collection<String> members;
+
+    @NotEmpty
+    private String teamName;
+
+    @NotNull
+    private Long captainID;
+
+    public String getTeamName() {
+        return teamName;
+    }
+
+    public Long getCaptainID() {
+        return captainID;
+    }
+
 }

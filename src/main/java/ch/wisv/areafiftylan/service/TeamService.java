@@ -1,18 +1,28 @@
 package ch.wisv.areafiftylan.service;
 
+import ch.wisv.areafiftylan.dto.TeamDTO;
 import ch.wisv.areafiftylan.model.Team;
 
+import javax.swing.text.html.Option;
 import java.util.Collection;
+import java.util.Optional;
 
 public interface TeamService {
-    Team getTeamById(Long id);
+    Team create(TeamDTO team);
 
-    Team getTeamByTeamname(String teamname);
+    Team save(Team team);
 
-    Team getTeamByCaptainId(Long userId);
+    Optional<Team> getTeamById(Long id);
+
+    Optional<Team> getTeamByTeamname(String teamname);
+
+    Collection<Team> getTeamByCaptainId(Long userId);
 
     Collection<Team> getAllTeams();
 
     Collection<Team> getTeamsByUsername(String username);
 
+    Team update(Long teamId, TeamDTO input);
+
+    void delete(Long teamId);
 }
