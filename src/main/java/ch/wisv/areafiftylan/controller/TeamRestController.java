@@ -9,17 +9,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.RequestEntity;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -48,11 +37,11 @@ public class TeamRestController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public Collection<Team> readUsers() {
+    public Collection<Team> readTeams() {
         return teamService.getAllTeams();
     }
 
-    @RequestMapping(value = "/{teamId}", method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET, value = "{teamId}")
     public Team getTeamById(@PathVariable Long teamId) {
         return this.teamService.getTeamById(teamId).get();
     }
