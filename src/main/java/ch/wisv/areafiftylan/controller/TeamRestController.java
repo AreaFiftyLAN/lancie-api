@@ -3,6 +3,7 @@ package ch.wisv.areafiftylan.controller;
 import ch.wisv.areafiftylan.dto.TeamDTO;
 import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.service.TeamService;
+import ch.wisv.areafiftylan.util.ResponseEntityBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpHeaders;
@@ -55,9 +56,9 @@ public class TeamRestController {
     public ResponseEntity<?> delete(@PathVariable Long teamId) {
         try {
             this.teamService.delete(teamId);
-            return new ResponseEntity<> ("OK", HttpStatus.OK);
+            return ResponseEntityBuilder.createResponseEntity(HttpStatus.OK, "Deleted team with " + teamId);
         } catch (EmptyResultDataAccessException e) {
-            return new ResponseEntity<>("Not OK", HttpStatus.OK);
+            return ResponseEntityBuilder.createResponseEntity(HttpStatus.BAD_REQUEST, "Team can not be deleted.");
         }
     }
 }
