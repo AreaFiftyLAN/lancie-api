@@ -3,11 +3,9 @@ package ch.wisv.areafiftylan.controller;
 import ch.wisv.areafiftylan.dto.ProfileDTO;
 import ch.wisv.areafiftylan.dto.UserDTO;
 import ch.wisv.areafiftylan.model.Profile;
-import ch.wisv.areafiftylan.model.Seat;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.service.CurrentUserService;
 import ch.wisv.areafiftylan.service.CurrentUserServiceImpl;
-import ch.wisv.areafiftylan.service.SeatService;
 import ch.wisv.areafiftylan.service.UserService;
 import ch.wisv.areafiftylan.util.ResponseEntityBuilder;
 import org.hibernate.exception.ConstraintViolationException;
@@ -32,14 +30,11 @@ public class UserRestController {
 
     private UserService userService;
 
-    private SeatService seatService;
-
     private CurrentUserService currentUserService = new CurrentUserServiceImpl();
 
     @Autowired
-    UserRestController(UserService userService, SeatService seatService) {
+    UserRestController(UserService userService) {
         this.userService = userService;
-        this.seatService = seatService;
     }
 
     //////////// USER MAPPINGS //////////////////
@@ -201,15 +196,6 @@ public class UserRestController {
     public ResponseEntity<?> resetProfile(@PathVariable Long userId) {
         Profile profile = userService.resetProfile(userId);
         return new ResponseEntity<>(profile, new HttpHeaders(), HttpStatus.OK);
-    }
-
-    //////////// OTHER MAPPINGS //////////////////
-
-    @RequestMapping(value = "/{userId}/seat", method = RequestMethod.GET)
-    public Seat getSeatByUser(@PathVariable Long userId) {
-        User user = userService.getUserById(userId).get();
-
-        return seatService.getSeatByUser(user);
     }
 
     //////////// EXCEPTION HANDLING //////////////////
