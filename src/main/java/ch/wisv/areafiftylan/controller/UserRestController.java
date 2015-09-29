@@ -4,10 +4,7 @@ import ch.wisv.areafiftylan.dto.ProfileDTO;
 import ch.wisv.areafiftylan.dto.UserDTO;
 import ch.wisv.areafiftylan.model.Profile;
 import ch.wisv.areafiftylan.model.User;
-import ch.wisv.areafiftylan.service.CurrentUserService;
-import ch.wisv.areafiftylan.service.CurrentUserServiceImpl;
 import ch.wisv.areafiftylan.service.UserService;
-import ch.wisv.areafiftylan.util.ResponseEntityBuilder;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -23,14 +20,13 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.Collection;
 
+import static ch.wisv.areafiftylan.util.ResponseEntityBuilder.createResponseEntity;
+
 @RestController
 @RequestMapping("/users")
 public class UserRestController {
 
-
     private UserService userService;
-
-    private CurrentUserService currentUserService = new CurrentUserServiceImpl();
 
     @Autowired
     UserRestController(UserService userService) {
@@ -56,7 +52,7 @@ public class UserRestController {
         httpHeaders.setLocation(
                 ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(save.getId()).toUri());
 
-        return ResponseEntityBuilder.createResponseEntity(HttpStatus.CREATED, httpHeaders,
+        return createResponseEntity(HttpStatus.CREATED, httpHeaders,
                 "User successfully created at " + httpHeaders.getLocation(), save);
     }
 
@@ -64,15 +60,24 @@ public class UserRestController {
      * This method accepts PUT requests on /users/{userId}. It replaces all fields with the new user provided in the
      * RequestBody and resets the profile fields. All references to the old user are maintained (Team membership ect).
      *
-     * @param userId The userId of the User to be repalced
+     * @param userId The userId of the User to be replaced
      * @param input  A UserDTO object containing data of the new user
      *
      * @return The User object.
      */
+    @PreAuthorize("@currentUserServiceImpl.canAccessUser(principal, #userId)")
     @RequestMapping(value = "/{userId}", method = RequestMethod.PUT)
     public ResponseEntity<?> replaceUser(@PathVariable Long userId, @Validated @RequestBody UserDTO input) {
-        User user = this.userService.replace(userId, input);
-        return ResponseEntityBuilder.createResponseEntity(HttpStatus.OK, null, "User successfully replaced", user);
+        User user = userService.replace(userId, input);
+        return createResponseEntity(HttpStatus.OK, "User successfully replaced", user);
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @RequestMapping(value = "/current", method = RequestMethod.PUT)
+    public ResponseEntity<?> replaceCurrentUser(@Validated @RequestBody UserDTO input, Authentication auth) {
+        User user = (User) auth.getPrincipal();
+        user = userService.replace(user.getId(), input);
+        return createResponseEntity(HttpStatus.OK, "User successfully replaced", user);
     }
 
     /**
@@ -83,10 +88,21 @@ public class UserRestController {
      *
      * @return The updated User object
      */
+    @PreAuthorize("@currentUserServiceImpl.canAccessUser(principal, #userId)")
     @RequestMapping(value = "/{userId}", method = RequestMethod.PATCH)
     public ResponseEntity<?> updateUser(@PathVariable Long userId, @RequestBody UserDTO input) {
+        //TODO: Differentiate between PATCH and PUT
         User user = this.userService.replace(userId, input);
-        return ResponseEntityBuilder.createResponseEntity(HttpStatus.OK, null, "User successfully updated", user);
+        return createResponseEntity(HttpStatus.OK, "User successfully updated", user);
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @RequestMapping(value = "/current", method = RequestMethod.PATCH)
+    public ResponseEntity<?> updateCurrentUser(@Validated @RequestBody UserDTO input, Authentication auth) {
+        //TODO: Differentiate between PATCH and PUT
+        User user = (User) auth.getPrincipal();
+        user = userService.replace(user.getId(), input);
+        return createResponseEntity(HttpStatus.OK, "User successfully replaced", user);
     }
 
     /**
@@ -102,6 +118,13 @@ public class UserRestController {
         return this.userService.getUserById(userId).get();
     }
 
+    /**
+     * Get the User currently logged in. Returns a not-found entity if there's no user logged in. Returns the user
+     *
+     * @param auth Current Authentication object, automatically taken from the SecurityContext
+     *
+     * @return The currently logged in User.
+     */
     @RequestMapping(value = "/current", method = RequestMethod.GET)
     public ResponseEntity<?> getCurrentUser(Authentication auth) {
         if (auth != null) {
@@ -109,8 +132,7 @@ public class UserRestController {
             User user = userService.getUserByUsername(currentUser.getUsername()).get();
             return new ResponseEntity<>(user, HttpStatus.OK);
         } else {
-            return ResponseEntityBuilder
-                    .createResponseEntity(HttpStatus.NOT_FOUND, null, "No user currently logged in!", null);
+            return createResponseEntity(HttpStatus.NOT_FOUND, null, "No user currently logged in!", null);
         }
 
     }
@@ -120,22 +142,27 @@ public class UserRestController {
      *
      * @return all users
      */
-    @RequestMapping(method = RequestMethod.GET)
     @PreAuthorize("hasRole('ADMIN')")
+    @RequestMapping(method = RequestMethod.GET)
     public Collection<User> readUsers() {
         return userService.getAllUsers();
     }
 
+    /**
+     * Users can't actually be deleted due to various (security) constraints. It will be marked as disabled instead.
+     *
+     * @param userId User to be disabled
+     *
+     * @return A status message.
+     */
+    @PreAuthorize("hasRole('ADMIN')")
     @RequestMapping(value = "/{userId}", method = RequestMethod.DELETE)
     public ResponseEntity<?> deleteUser(@PathVariable Long userId) {
-        User deletedUser = userService.getUserById(userId).get();
-        userService.delete(userId);
-        return ResponseEntityBuilder
-                .createResponseEntity(HttpStatus.OK, null, "User successfully deleted", deletedUser);
+        userService.lock(userId, true);
+        return createResponseEntity(HttpStatus.OK, "User disabled");
     }
 
     //////////// PROFILE MAPPINGS //////////////////
-
 
     /**
      * Add a profile to a user. An empty profile is created when a user is created, so this method fills the existing
@@ -146,6 +173,7 @@ public class UserRestController {
      *
      * @return The user with the new profile
      */
+    @PreAuthorize("@currentUserServiceImpl.canAccessUser(principal, #userId)")
     @RequestMapping(value = "/{userId}/profile", method = RequestMethod.POST)
     public ResponseEntity<?> addProfile(@PathVariable Long userId, @Validated @RequestBody ProfileDTO input) {
         User user = userService.addProfile(userId, input);
@@ -155,7 +183,14 @@ public class UserRestController {
                 ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}/profile").buildAndExpand(user.getId())
                         .toUri());
 
-        return new ResponseEntity<>(user, httpHeaders, HttpStatus.CREATED);
+        return createResponseEntity(HttpStatus.CREATED, httpHeaders,
+                "Profile succesfully created at" + httpHeaders.getLocation(), user.getProfile());
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @RequestMapping(value = "/current/profile", method = RequestMethod.POST)
+    public ResponseEntity<?> addProfile(@Validated @RequestBody ProfileDTO input, Authentication auth) {
+        return this.addProfile(((User) auth.getPrincipal()).getId(), input);
     }
 
     /**
@@ -166,11 +201,12 @@ public class UserRestController {
      *
      * @return The user with the changed profile
      */
+    @PreAuthorize("@currentUserServiceImpl.canAccessUser(principal, #userId)")
     @RequestMapping(value = "/{userId}/profile", method = RequestMethod.PUT)
     public ResponseEntity<?> changeProfile(@PathVariable Long userId, @Validated @RequestBody ProfileDTO input) {
         User user = userService.changeProfile(userId, input);
 
-        return new ResponseEntity<>(user, new HttpHeaders(), HttpStatus.OK);
+        return createResponseEntity(HttpStatus.OK, "Profile successfully updated", user.getProfile());
     }
 
     /**
@@ -180,6 +216,7 @@ public class UserRestController {
      *
      * @return The profile of the specific user
      */
+    @PreAuthorize("@currentUserServiceImpl.canAccessUser(principal, #userId)")
     @RequestMapping(value = "/{userId}/profile", method = RequestMethod.GET)
     public Profile readProfile(@PathVariable Long userId) {
         return userService.getUserById(userId).get().getProfile();
@@ -192,10 +229,11 @@ public class UserRestController {
      *
      * @return Empty body with StatusCode OK.
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @RequestMapping(value = "/{userId}/profile", method = RequestMethod.DELETE)
     public ResponseEntity<?> resetProfile(@PathVariable Long userId) {
         Profile profile = userService.resetProfile(userId);
-        return new ResponseEntity<>(profile, new HttpHeaders(), HttpStatus.OK);
+        return createResponseEntity(HttpStatus.OK, "Profile successfully reset", profile);
     }
 
     //////////// EXCEPTION HANDLING //////////////////
@@ -218,6 +256,6 @@ public class UserRestController {
             message = throwable.toString();
         }
 
-        return ResponseEntityBuilder.createResponseEntity(HttpStatus.CONFLICT, null, message, null);
+        return createResponseEntity(HttpStatus.CONFLICT, null, message, null);
     }
 }

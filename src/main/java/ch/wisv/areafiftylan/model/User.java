@@ -124,4 +124,12 @@ public class User implements Serializable, UserDetails {
     public void addRole(Role role) {
         this.roles.add(role);
     }
+
+    public void setAccountNonLocked(boolean accountNonLocked) {
+        this.accountNonLocked = accountNonLocked;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
 }

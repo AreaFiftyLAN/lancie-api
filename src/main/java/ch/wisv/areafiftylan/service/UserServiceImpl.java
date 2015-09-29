@@ -114,6 +114,13 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return profile;
     }
 
+    @Override
+    public void lock(Long userId, boolean lock) {
+        User user = userRepository.findOne(userId);
+        user.setAccountNonLocked(!lock);
+        userRepository.saveAndFlush(user);
+    }
+
     private String getPasswordHash(String plainTextPassword) {
         return new BCryptPasswordEncoder().encode(plainTextPassword);
     }
