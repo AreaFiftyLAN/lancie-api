@@ -36,8 +36,8 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-web")
     compile("org.springframework.boot:spring-boot-starter-mail")
     compile("org.springframework.boot:spring-boot-starter-thymeleaf")
-    compile("org.hsqldb:hsqldb")
     compile("com.google.guava:guava:18.0")
+    runtime("org.postgresql:postgresql:9.4-1203-jdbc42")
     testCompile("org.springframework.boot:spring-boot-starter-test")
 }
 
