@@ -21,8 +21,13 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.RestAssured.when;
+import static com.jayway.restassured.config.RedirectConfig.redirectConfig;
+import static com.jayway.restassured.config.RestAssuredConfig.config;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.core.IsCollectionContaining.hasItem;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
+
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = Application.class)
@@ -36,9 +41,9 @@ public class UserRestIntegrationTest {
     @Autowired
     private UserRepository userRepository;
 
-    private User testUser1;
+    private User user;
 
-    private User testUser2;
+    private User admin;
 
     private static FormAuthConfig formAuthConfig = new FormAuthConfig("/login", "username", "password");
 
@@ -46,21 +51,22 @@ public class UserRestIntegrationTest {
     public void init() {
         userRepository.deleteAll();
 
-        testUser1 = new User("user", new BCryptPasswordEncoder().encode("password"), "user@mail.com");
-        testUser1.getProfile()
+        user = new User("user", new BCryptPasswordEncoder().encode("password"), "user@mail.com");
+        user.getProfile()
                 .setAllFields("Jan", "de Groot", "MonsterKiller9001", Gender.MALE, "Mekelweg 4", "2826CD", "Delft",
                         "0906-0666", null);
 
-        testUser2 = new User("admin", new BCryptPasswordEncoder().encode("password"), "bert@mail.com");
-        testUser2.addRole(Role.ADMIN);
-        testUser2.getProfile()
+        admin = new User("admin", new BCryptPasswordEncoder().encode("password"), "bert@mail.com");
+        admin.addRole(Role.ADMIN);
+        admin.getProfile()
                 .setAllFields("Bert", "Kleijn", "ILoveZombies", Gender.OTHER, "Mekelweg 20", "2826CD", "Amsterdam",
                         "0611", null);
 
-        userRepository.saveAndFlush(testUser1);
-        userRepository.saveAndFlush(testUser2);
+        userRepository.saveAndFlush(user);
+        userRepository.saveAndFlush(admin);
 
         RestAssured.port = port;
+        RestAssured.config = config().redirect(redirectConfig().followRedirects(false));
     }
 
     @After
@@ -74,7 +80,7 @@ public class UserRestIntegrationTest {
     @Test
     public void testGetAllUsersAnonymous() {
         when().get("/users").
-                then().statusCode(HttpStatus.SC_UNAUTHORIZED).body("message", equalTo("Please log in"));
+                then().statusCode(HttpStatus.SC_MOVED_TEMPORARILY).header("location", containsString("/login"));
     }
 
 
@@ -93,17 +99,45 @@ public class UserRestIntegrationTest {
                 when().get("/users").
                 then().
                 statusCode(HttpStatus.SC_OK).
-                body("username", hasItems(testUser1.getUsername(), testUser2.getUsername())).
+                body("username", hasItems(user.getUsername(), admin.getUsername())).
                 body("profile.displayName",
-                        hasItems(testUser1.getProfile().getDisplayName(), testUser2.getProfile().getDisplayName()));
+                        hasItems(user.getProfile().getDisplayName(), admin.getProfile().getDisplayName()));
     }
 
     // GET CURRENT USER AS ANONYMOUS
+    @Test
+    public void testGetCurrentUserAnonymous() {
+        when().get("/users/current").
+                then().statusCode(HttpStatus.SC_MOVED_TEMPORARILY).header("location", containsString("/login"));
+    }
+
     // PROFILE
+    @Test
+    public void testGetCurrentProfileAnonymous() {
+        when().get("/users/current/profile").
+                then().statusCode(HttpStatus.SC_MOVED_TEMPORARILY).header("location", containsString("/login"));
+    }
 
     // GET CURRENT USER AS USER
+    @Test
+    public void testGetCurrentUserUser() {
+        given().auth().form("user", "password", formAuthConfig).
+                when().get("/users/current").
+                then().statusCode(HttpStatus.SC_OK).
+                body("username", equalTo(user.getUsername())).
+                body("email", equalTo(user.getEmail())).
+                body("authorities", hasItem("USER"));
+    }
 
     // PROFILE
+    @Test
+    public void testGetCurrentProfileUser() {
+        given().auth().form("user", "password", formAuthConfig).
+                when().get("/users/current/profile").
+                then().statusCode(HttpStatus.SC_OK).
+                body("firstName", equalTo(user.getProfile().getFirstName())).
+                body("gender", equalTo(user.getProfile().getGender().toString()));
+    }
 
     // GET CURRENT USER AS ADMIN
     // PROFILE
