@@ -2,6 +2,7 @@ package ch.wisv.areafiftylan.controller;
 
 import ch.wisv.areafiftylan.dto.ProfileDTO;
 import ch.wisv.areafiftylan.dto.UserDTO;
+import ch.wisv.areafiftylan.exception.UserNotFoundException;
 import ch.wisv.areafiftylan.model.Profile;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.service.UserService;
@@ -221,6 +222,26 @@ public class UserRestController {
     @RequestMapping(value = "/{userId}/profile", method = RequestMethod.GET)
     public Profile readProfile(@PathVariable Long userId) {
         return userService.getUserById(userId).get().getProfile();
+    }
+
+    /**
+     * Get the profile from the currently logged on user
+     *
+     * @param auth Authentication of the current user
+     *
+     * @return The profile of the currently logged on user
+     */
+    @PreAuthorize("isAuthenticated()")
+    @RequestMapping(value = "/current/profile", method = RequestMethod.GET)
+    public ResponseEntity<?> readCurrentProfile(Authentication auth) {
+        if (auth != null) {
+            User user = (User) auth.getPrincipal();
+            Profile profile = userService.getUserById(user.getId()).
+                    orElseThrow(() -> new UserNotFoundException(user.getId())).getProfile();
+            return new ResponseEntity<>(profile, HttpStatus.OK);
+        } else {
+            return createResponseEntity(HttpStatus.NOT_FOUND, null, "No user currently logged in!", null);
+        }
     }
 
     /**
