@@ -12,7 +12,7 @@ public class AuthenticationController {
 
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     public ResponseEntity<?> getLoginPage() {
-        return ResponseEntityBuilder.createResponseEntity(HttpStatus.OK, "Please log in");
+        return ResponseEntityBuilder.createResponseEntity(HttpStatus.FORBIDDEN, "Please log in");
     }
 
 }

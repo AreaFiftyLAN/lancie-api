@@ -1,9 +1,14 @@
 package ch.wisv.areafiftylan.controller;
 
 import ch.wisv.areafiftylan.Application;
+import ch.wisv.areafiftylan.model.User;
+import ch.wisv.areafiftylan.model.util.Gender;
+import ch.wisv.areafiftylan.model.util.Role;
 import ch.wisv.areafiftylan.service.repository.UserRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.restassured.RestAssured;
+import com.jayway.restassured.authentication.FormAuthConfig;
+import org.apache.http.HttpStatus;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,21 +17,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.TestRestTemplate;
 import org.springframework.boot.test.WebIntegrationTest;
-import org.springframework.http.*;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.client.RestTemplate;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.hamcrest.CoreMatchers.startsWith;
-import static org.junit.Assert.*;
+import static com.jayway.restassured.RestAssured.given;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = Application.class)
 @WebIntegrationTest("server.port=0")
+@ActiveProfiles("test")
 public class UserRestIntegrationTest {
 
     @Value("${local.server.port}")
@@ -41,74 +42,90 @@ public class UserRestIntegrationTest {
     private UserRepository userRepository;
 
     //Test RestTemplate to invoke the APIs.
-    private RestTemplate restTemplate = new TestRestTemplate();
+    private RestTemplate anonRestTemplate = new TestRestTemplate(TestRestTemplate.HttpClientOption.ENABLE_COOKIES);
+    private RestTemplate userRestTemplate =
+            new TestRestTemplate("user", "password", TestRestTemplate.HttpClientOption.ENABLE_COOKIES);
+    private RestTemplate adminRestTemplate =
+            new TestRestTemplate("admin", "password", TestRestTemplate.HttpClientOption.ENABLE_COOKIES);
 
     private String serverPath;
+
+    private User testUser1;
+
+    private User testUser2;
 
     @Before
     public void init() {
         userRepository.deleteAll();
         serverPath = "http://localhost:" + port;
+
+        testUser1 = new User("user", new BCryptPasswordEncoder().encode("password"), "user@mail.com");
+        testUser1.getProfile()
+                .setAllFields("Jan", "de Groot", "MonsterKiller9001", Gender.MALE, "Mekelweg 4", "2826CD", "Delft",
+                        "0906-0666", null);
+
+        testUser2 = new User("admin", new BCryptPasswordEncoder().encode("password"), "bert@mail.com");
+        testUser2.addRole(Role.ADMIN);
+        testUser2.getProfile()
+                .setAllFields("Bert", "Kleijn", "ILoveZombies", Gender.OTHER, "Mekelweg 20", "2826CD", "Amsterdam",
+                        "0611", null);
+
+        userRepository.saveAndFlush(testUser1);
+        userRepository.saveAndFlush(testUser2);
+
+        RestAssured.port = port;
     }
+
+    // USER GET
+    // GET ALL USERS AS ANONYMOUS
 
     @Test
-    public void testCreateUserApi() throws JsonProcessingException, URISyntaxException {
-
-        //Building the Request body data
-        Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("username", "testUser1");
-        requestBody.put("email", "testuser@mail.com");
-        requestBody.put("password", "testPassword");
-        HttpEntity<String> httpEntity = getStringHttpEntity(requestBody);
-
-        //Invoking the API
-        URI uri = new URI(serverPath + "/users");
-
-        ResponseEntity<Map> response = restTemplate.postForEntity(uri, httpEntity, Map.class);
-
-        assertNotNull(response);
-
-        assertEquals(response.getStatusCode(), HttpStatus.CREATED);
-
-        HttpHeaders headers = response.getHeaders();
-        URI location = headers.getLocation();
-        assertThat(location.toString(), startsWith(serverPath + "/users/"));
-
-        assertNull(response.getBody());
+    public void testGetAllUsersAdmin() {
+        given().auth().form("admin", "password", new FormAuthConfig("/login", "username", "password")).
+                when().get("/users").
+                then().statusCode(HttpStatus.SC_OK).;
     }
 
-    @Test
-    public void testCreateUserUniqueUsername() throws JsonProcessingException, URISyntaxException {
-        Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("username", "testUser1");
-        requestBody.put("email", "testuser@mail.com");
-        requestBody.put("password", "testPassword");
-        HttpEntity<String> httpEntity = getStringHttpEntity(requestBody);
 
-        URI uri = new URI(serverPath + "/users");
+    // GET ALL USERS AS USER
 
-        ResponseEntity<Map> response = restTemplate.postForEntity(uri, httpEntity, Map.class);
+    // GET ALL USERS AS ADMIN
 
-        Map<String, Object> requestBody2 = new HashMap<>();
-        requestBody.put("username", "testUser1");
-        requestBody.put("email", "testuser2@mail.com");
-        requestBody.put("password", "testPassword2");
-        HttpEntity<String> httpEntity2 = getStringHttpEntity(requestBody2);
+    // GET CURRENT USER AS ANONYMOUS
+    // PROFILE
 
-        ResponseEntity<Map> response2 = restTemplate.postForEntity(uri, httpEntity2, Map.class);
+    // GET CURRENT USER AS USER
 
-        assertEquals(HttpStatus.CONFLICT, response2.getStatusCode());
-    }
+    // PROFILE
 
-    private HttpEntity<String> getStringHttpEntity(Map<String, Object> requestBody) throws JsonProcessingException {
-        //Creating http entity object with request body and headers
-        return new HttpEntity<>(OBJECT_MAPPER.writeValueAsString(requestBody), getHttpHeaders());
-    }
+    // GET CURRENT USER AS ADMIN
+    // PROFILE
 
-    private HttpHeaders getHttpHeaders() {
-        HttpHeaders requestHeaders = new HttpHeaders();
-        requestHeaders.setContentType(MediaType.APPLICATION_JSON);
-        requestHeaders.add("Authorization", "Basic dXNlcjpwYXNzd29yZA==");
-        return requestHeaders;
-    }
+    // GET OTHER USER AS ANONYMOUS
+    // PROFILE
+
+    // GET OTHER USER AS USER
+
+    // GET OTHER USER AS ADMIN
+
+    // GET OWN USER VIA ID
+
+
+    // USER POST
+    // CREATE USER AND VERIFY IN DB
+
+
+    // USER PATCH
+
+
+    // USER PUT
+
+
+    // USER DELETE
+
+
 }
+
+
+
+

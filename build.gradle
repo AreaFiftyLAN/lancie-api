@@ -36,9 +36,12 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-web")
     compile("org.springframework.boot:spring-boot-starter-mail")
     compile("org.springframework.boot:spring-boot-starter-thymeleaf")
-    compile("org.hsqldb:hsqldb")
+    compile("org.springframework.security:spring-security-test:4.0.2.RELEASE")
+    runtime("org.hsqldb:hsqldb")
+    runtime("org.postgresql:postgresql:9.4-1203-jdbc42")
     compile("com.google.guava:guava:18.0")
     testCompile("org.springframework.boot:spring-boot-starter-test")
+    compile("com.jayway.restassured:rest-assured:2.5.0")
 }
 
 dependencyManagement {
