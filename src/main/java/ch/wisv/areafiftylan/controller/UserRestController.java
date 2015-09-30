@@ -262,6 +262,6 @@ public class UserRestController {
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<?> handleAccessDeniedException(AccessDeniedException ex) {
-        return createResponseEntity(HttpStatus.UNAUTHORIZED, "Access denied, please log in");
+        return createResponseEntity(HttpStatus.FORBIDDEN, "Access denied");
     }
 }

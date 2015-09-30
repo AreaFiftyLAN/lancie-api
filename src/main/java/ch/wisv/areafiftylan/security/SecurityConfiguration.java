@@ -34,8 +34,8 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.formLogin()
-                .loginPage("/login")
-                .failureUrl("/login?error")
+//                .loginPage("/login")
+//                .failureUrl("/login?error")
                 .usernameParameter("username")
                 .permitAll()
             .and()
