@@ -140,17 +140,69 @@ public class UserRestIntegrationTest {
     }
 
     // GET CURRENT USER AS ADMIN
+    @Test
+    public void testGetCurrentUserAdmin() {
+        given().auth().form("admin", "password", formAuthConfig).
+                when().get("/users/current").
+                then().statusCode(HttpStatus.SC_OK).
+                body("username", equalTo(admin.getUsername())).
+                body("email", equalTo(admin.getEmail())).
+                body("authorities", hasItem("ADMIN"));
+    }
+
     // PROFILE
+    @Test
+    public void testGetCurrentProfileAdmin() {
+        given().auth().form("admin", "password", formAuthConfig).
+                when().get("/users/current/profile").
+                then().statusCode(HttpStatus.SC_OK).
+                body("firstName", equalTo(admin.getProfile().getFirstName())).
+                body("gender", equalTo(admin.getProfile().getGender().toString()));
+    }
 
     // GET OTHER USER AS ANONYMOUS
-    // PROFILE
+    @Test
+    public void testGetOtherUserAnonymous() {
+        when().get("/users/1").
+                then().statusCode(HttpStatus.SC_MOVED_TEMPORARILY).header("location", containsString("/login"));
+    }
+
+    @Test
+    public void testGetOtherProfileAnonymous() {
+        when().get("/users/1/profile").
+                then().statusCode(HttpStatus.SC_MOVED_TEMPORARILY).header("location", containsString("/login"));
+    }
 
     // GET OTHER USER AS USER
+    @Test
+    public void testGetOtherUserUser() {
+        long id = user.getId();
+        id++;
+        given().auth().form("user", "password", formAuthConfig).
+                when().get("/users/" + id).
+                then().statusCode(HttpStatus.SC_FORBIDDEN).body("message", equalTo("Access denied"));
+    }
 
     // GET OTHER USER AS ADMIN
+    @Test
+    public void testGetOtherUserAdmin() {
+        long userId = user.getId();
+        given().auth().form("admin", "password", formAuthConfig).
+                when().get("/users/" + userId).
+                then().statusCode(HttpStatus.SC_OK).
+                body("username", equalTo(user.getUsername())).
+                body("email", equalTo(user.getEmail()));
+    }
 
     // GET OWN USER VIA ID
-
+    @Test
+    public void testGetOwnUserId(){
+        given().auth().form("admin", "password", formAuthConfig).
+                when().get("/users/" + user.getId()).
+                then().statusCode(HttpStatus.SC_OK).
+                body("username", equalTo(user.getUsername())).
+                body("email", equalTo(user.getEmail()));
+    }
 
     // USER POST
     // CREATE USER AND VERIFY IN DB
