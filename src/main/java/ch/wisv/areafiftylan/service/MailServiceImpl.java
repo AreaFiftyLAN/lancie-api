@@ -3,7 +3,6 @@ package ch.wisv.areafiftylan.service;
 import ch.wisv.areafiftylan.dto.MailDTO;
 import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.model.User;
-import org.hibernate.cfg.NotYetImplementedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -60,14 +59,14 @@ public class MailServiceImpl implements MailService {
 
     @Override
     public void sendTemplateMailToTeam(Team team, MailDTO mailDTO) throws MessagingException {
-        for(User user : team.getMembers()){
+        for (User user : team.getMembers()) {
             sendTemplateMailToUser(user, mailDTO);
         }
     }
 
     @Override
     public void sendTemplateMailToAll(Collection<User> users, MailDTO mailDTO) throws MessagingException {
-        for(User user : users){
+        for (User user : users) {
             sendTemplateMailToUser(user, mailDTO);
         }
     }
@@ -76,5 +75,11 @@ public class MailServiceImpl implements MailService {
     public void sendTemplateMailToUser(User user, MailDTO mailDTO) throws MessagingException {
         sendMail(user.getEmail(), user.getProfile().getFirstName(), "lancie@ch.tudelft.nl", mailDTO.getSubject(),
                 mailDTO.getMessage());
+    }
+
+    @Override
+    public void sendVerificationmail(User user, String url) throws MessagingException {
+        String message = "Please click on the following link to complete your registration: " + url;
+        sendMail(user.getEmail(), user.getUsername(), null, "Confirm your registration", message);
     }
 }

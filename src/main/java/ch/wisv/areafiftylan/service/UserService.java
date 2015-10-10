@@ -18,7 +18,7 @@ public interface UserService {
 
     Collection<User> getAllUsers();
 
-    User create(UserDTO userDTO);
+    User create(UserDTO userDTO, String contextPath);
 
     User replace(Long userId, UserDTO userDTO);
 
@@ -35,5 +35,7 @@ public interface UserService {
     Profile resetProfile(Long userId);
 
     void lock(Long userId, boolean enabled);
+
+    void verify(Long userId);
 
 }

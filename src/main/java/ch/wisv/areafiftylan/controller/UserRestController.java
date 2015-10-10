@@ -18,6 +18,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.Collection;
@@ -47,8 +48,9 @@ public class UserRestController {
      * @return The generated object, in JSON format.
      */
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity<?> add(@Validated @RequestBody UserDTO input) {
-        User save = userService.create(input);
+    public ResponseEntity<?> add(WebRequest request, @Validated @RequestBody UserDTO input) {
+        String contextPath = request.getContextPath();
+        User save = userService.create(input, contextPath);
 
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setLocation(

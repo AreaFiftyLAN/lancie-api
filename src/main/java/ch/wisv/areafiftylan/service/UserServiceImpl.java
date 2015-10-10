@@ -4,7 +4,9 @@ import ch.wisv.areafiftylan.dto.ProfileDTO;
 import ch.wisv.areafiftylan.dto.UserDTO;
 import ch.wisv.areafiftylan.model.Profile;
 import ch.wisv.areafiftylan.model.User;
+import ch.wisv.areafiftylan.security.VerificationToken;
 import ch.wisv.areafiftylan.service.repository.UserRepository;
+import ch.wisv.areafiftylan.service.repository.VerificationTokenRepository;
 import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -14,17 +16,24 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.mail.MessagingException;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class UserServiceImpl implements UserService, UserDetailsService {
 
     private final UserRepository userRepository;
+    private final VerificationTokenRepository verificationTokenRepository;
+    private final MailService mailService;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, VerificationTokenRepository verificationTokenRepository,
+                           MailService mailService) {
         this.userRepository = userRepository;
+        this.verificationTokenRepository = verificationTokenRepository;
+        this.mailService = mailService;
     }
 
     @Override
@@ -48,12 +57,28 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public User create(UserDTO userDTO) {
+    public User create(UserDTO userDTO, String contextPath) {
         String passwordHash = getPasswordHash(userDTO.getPassword());
         User user = new User(userDTO.getUsername(), passwordHash, userDTO.getEmail());
         user.addRole(userDTO.getRole());
+        // All users that register through the service have to be verified
+        user.setEnabled(false);
 
-        return userRepository.saveAndFlush(user);
+        // Save the user so the verificationToken can be stored.
+        user = userRepository.saveAndFlush(user);
+
+        String token = UUID.randomUUID().toString();
+        VerificationToken verificationTokenn = new VerificationToken(token, user);
+        verificationTokenRepository.saveAndFlush(verificationTokenn);
+
+        try {
+            String confirmUrl = contextPath + "/confirmRegistration?token=" + token;
+            mailService.sendVerificationmail(user, confirmUrl);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
+
+        return user;
     }
 
     @Override
@@ -119,6 +144,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         User user = userRepository.findOne(userId);
         user.setAccountNonLocked(!lock);
         userRepository.saveAndFlush(user);
+    }
+
+    @Override
+    public void verify(Long userId) {
+        User user = userRepository.findOne(userId);
+        user.setEnabled(true);
     }
 
     private String getPasswordHash(String plainTextPassword) {

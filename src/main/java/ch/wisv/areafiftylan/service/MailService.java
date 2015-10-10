@@ -17,4 +17,6 @@ public interface MailService {
     void sendTemplateMailToAll(Collection<User> users, MailDTO mailDTO) throws MessagingException;
 
     void sendTemplateMailToUser(User user, MailDTO mailDTO) throws MessagingException;
+
+    void sendVerificationmail(User user, String url) throws MessagingException;
 }
