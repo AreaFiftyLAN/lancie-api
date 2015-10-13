@@ -155,6 +155,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public void verify(Long userId) {
         User user = userRepository.findOne(userId);
         user.setEnabled(true);
+        userRepository.saveAndFlush(user);
     }
 
     @Override

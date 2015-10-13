@@ -51,6 +51,7 @@ public class UserRestController {
     public ResponseEntity<?> add(HttpServletRequest request, @Validated @RequestBody UserDTO input) {
         User save = userService.create(input, request);
 
+        // Create headers to set the location of the created User object.
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setLocation(
                 ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(save.getId()).toUri());
@@ -75,6 +76,14 @@ public class UserRestController {
         return createResponseEntity(HttpStatus.OK, "User successfully replaced", user);
     }
 
+    /**
+     * This method accepts PUT requests on /users/current. It replaces all fields with the new user provided in the
+     * RequestBody and resets the profile fields. All references to the old user are maintained (Team membership ect).
+     *
+     * @param input A UserDTO object containing data of the new user
+     *
+     * @return The User object.
+     */
     @PreAuthorize("isAuthenticated()")
     @RequestMapping(value = "/current", method = RequestMethod.PUT)
     public ResponseEntity<?> replaceCurrentUser(@Validated @RequestBody UserDTO input, Authentication auth) {
@@ -85,6 +94,8 @@ public class UserRestController {
 
     /**
      * Edit the current user. Only change the fields which have been set. All fields should be in the requestbody.
+     * <p>
+     * TODO: The UserDTO needs to be valid right now, this should allow for null fields.
      *
      * @param userId The id of the user to be updated
      * @param input  A userDTO object with updated fields. empty fields will be ignored
@@ -122,7 +133,9 @@ public class UserRestController {
     }
 
     /**
-     * Get the User currently logged in. Returns a not-found entity if there's no user logged in. Returns the user
+     * Get the User currently logged in. Because our User model implements the Spring Security UserDetails, this can be
+     * directly derived from the Authentication object which is automatically added. Returns a not-found entity if
+     * there's no user logged in. Returns the user
      *
      * @param auth Current Authentication object, automatically taken from the SecurityContext
      *
@@ -131,6 +144,7 @@ public class UserRestController {
     @RequestMapping(value = "/current", method = RequestMethod.GET)
     public ResponseEntity<?> getCurrentUser(Authentication auth) {
         if (auth != null) {
+            // Get the currently logged in user from the autowired Authentication object.
             UserDetails currentUser = (UserDetails) auth.getPrincipal();
             User user = userService.getUserByUsername(currentUser.getUsername()).get();
             return new ResponseEntity<>(user, HttpStatus.OK);
@@ -141,7 +155,7 @@ public class UserRestController {
     }
 
     /**
-     * Get all users in the database
+     * Get all users in the database. Requires ADMIN privileges.
      *
      * @return all users
      */
@@ -160,16 +174,32 @@ public class UserRestController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @RequestMapping(value = "/{userId}", method = RequestMethod.DELETE)
-    public ResponseEntity<?> deleteUser(@PathVariable Long userId) {
+    public ResponseEntity<?> disableUser(@PathVariable Long userId) {
         userService.lock(userId, true);
         return createResponseEntity(HttpStatus.OK, "User disabled");
     }
 
+    /**
+     * Checks for the availability of an email address. Returns false when another user is already registered with this
+     * email.
+     *
+     * @param email The emailaddress to be checked.
+     *
+     * @return Whether this emailaddress has already been registered.
+     */
     @RequestMapping(value = "/checkEmail", method = RequestMethod.GET)
     public Boolean checkEmailExists(@RequestParam String email) {
         return userService.checkEmailAvailable(email);
     }
 
+    /**
+     * Checks for the availability of a username. Returns false when another user is already registered with this
+     * username.
+     *
+     * @param username The username to be checked.
+     *
+     * @return Whether this username has already been registered.
+     */
     @RequestMapping(value = "/checkUsername", method = RequestMethod.GET)
     public Boolean checkUsernameExists(@RequestParam String username) {
         return userService.checkUsernameAvailable(username);
@@ -191,6 +221,7 @@ public class UserRestController {
     public ResponseEntity<?> addProfile(@PathVariable Long userId, @Validated @RequestBody ProfileDTO input) {
         User user = userService.addProfile(userId, input);
 
+        // Create HttpHeaders to include the location of the newly created profile
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setLocation(
                 ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}/profile").buildAndExpand(user.getId())
@@ -200,6 +231,14 @@ public class UserRestController {
                 "Profile succesfully created at" + httpHeaders.getLocation(), user.getProfile());
     }
 
+    /**
+     * Add a profile to the current user. An empty profile is created when a user is created, so this method fills the
+     * existing fields
+     *
+     * @param input A representation of the profile
+     *
+     * @return The user with the new profile
+     */
     @PreAuthorize("isAuthenticated()")
     @RequestMapping(value = "/current/profile", method = RequestMethod.POST)
     public ResponseEntity<?> addProfile(@Validated @RequestBody ProfileDTO input, Authentication auth) {

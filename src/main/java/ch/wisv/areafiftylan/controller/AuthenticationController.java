@@ -23,7 +23,8 @@ import static ch.wisv.areafiftylan.util.ResponseEntityBuilder.createResponseEnti
 
 /**
  * This class handles all authentication related requests. These requests deal with the login message, the user email
- * verification and the password resets.
+ * verification and the password resets. Due to the minimal logic involved with tokens, it interacts directly with their
+ * respective repositories.
  */
 @Controller
 public class AuthenticationController {
@@ -40,11 +41,27 @@ public class AuthenticationController {
     @Autowired
     PasswordResetTokenRepository passwordResetTokenRepository;
 
+
+    /**
+     * This basic GET method for the /login endpoint returns a simple json object telling you to log in. Can be replaced
+     * by a login form by Spring if desired.
+     *
+     * @return Login message
+     */
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     public ResponseEntity<?> getLoginPage() {
         return createResponseEntity(HttpStatus.UNAUTHORIZED, "Please log in");
     }
 
+    /**
+     * This method requests a passwordResetToken and sends it to the user. With this token, the user can reset his
+     * password.
+     *
+     * @param request The HttpServletRequest of the call
+     * @param body    The body, should only contain an email parameter TODO: This can be done more elegantly
+     *
+     * @return A status message telling whether the action was successful
+     */
     @RequestMapping(value = "/requestResetPassword", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<?> requestResetPassword(HttpServletRequest request, @RequestBody Map<String, String> body) {
@@ -56,6 +73,14 @@ public class AuthenticationController {
         return createResponseEntity(HttpStatus.OK, "Password reset link sent to " + email);
     }
 
+    /**
+     * After requesting a token, the user can reset his password with a POST call to this method. It should contain the
+     * token and a password. The user is derived from the token.
+     *
+     * @param body The body, containing a token and password parameter. TODO: This should be validated
+     *
+     * @return A status message telling whethere the action was successful
+     */
     @RequestMapping(value = "/resetPassword", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> body) {
@@ -64,8 +89,9 @@ public class AuthenticationController {
 
         PasswordResetToken passwordResetToken =
                 passwordResetTokenRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
-        User user = passwordResetToken.getUser();
 
+        // Get the user associated to the token
+        User user = passwordResetToken.getUser();
         userService.resetPassword(user.getId(), password);
 
         // Disable the token for future use.
@@ -84,7 +110,7 @@ public class AuthenticationController {
      *
      * @param token The token as generated for the user opon registration
      *
-     * @return A JSON message containing information about the operation
+     * @return A status message containing information about the operation
      *
      * @throws TokenNotFoundException if the token can't be found
      */
@@ -94,17 +120,17 @@ public class AuthenticationController {
         VerificationToken verificationToken =
                 verificationTokenRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
 
+        // Get the user associated with this token
         User user = verificationToken.getUser();
         if (!verificationToken.isValid()) {
             return createResponseEntity(HttpStatus.UNAUTHORIZED, "Token is expired or has been already used.");
         }
 
-        user.setEnabled(true);
+        userService.verify(user.getId());
         verificationToken.setUsed(true);
 
         //Disable the token for future use.
         verificationTokenRepository.saveAndFlush(verificationToken);
-        userService.save(user);
 
         return createResponseEntity(HttpStatus.OK, "Succesfully verified");
     }
