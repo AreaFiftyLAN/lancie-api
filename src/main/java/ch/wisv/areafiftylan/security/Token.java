@@ -24,6 +24,8 @@ public abstract class Token {
 
     private Date expiryDate;
 
+    private boolean used = false;
+
     public Token() {
     }
 
@@ -63,4 +65,19 @@ public abstract class Token {
     public void setExpiryDate(Date expiryDate) {
         this.expiryDate = expiryDate;
     }
+
+    public void setUsed(boolean used) {
+        this.used = used;
+    }
+
+    public boolean isValid() {
+        // returns true only if the token is not used and not expired
+        return !(!this.used || isExpired());
+    }
+
+    private boolean isExpired() {
+        Calendar cal = Calendar.getInstance();
+        return (this.getExpiryDate().getTime() - cal.getTime().getTime()) <= 0;
+    }
+
 }

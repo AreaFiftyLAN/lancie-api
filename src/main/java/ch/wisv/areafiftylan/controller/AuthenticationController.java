@@ -16,11 +16,15 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Calendar;
 import java.util.Map;
 
 import static ch.wisv.areafiftylan.util.ResponseEntityBuilder.createResponseEntity;
 
+
+/**
+ * This class handles all authentication related requests. These requests deal with the login message, the user email
+ * verification and the password resets.
+ */
 @Controller
 public class AuthenticationController {
 
@@ -63,23 +67,45 @@ public class AuthenticationController {
         User user = passwordResetToken.getUser();
 
         userService.resetPassword(user.getId(), password);
+
+        // Disable the token for future use.
+        passwordResetToken.setUsed(true);
+        passwordResetTokenRepository.saveAndFlush(passwordResetToken);
+
         return createResponseEntity(HttpStatus.OK, "Password set!");
     }
 
+    /**
+     * This function confirms the registration of a user based on the provided token. If retrieves the token from the
+     * repository. From this token, we get the user. For this user, the enabled flag is set to true. After this, the
+     * token is marked as used so it can not be used again.
+     * <p>
+     * TODO: Token logic could be moved to a dedicated service
+     *
+     * @param token The token as generated for the user opon registration
+     *
+     * @return A JSON message containing information about the operation
+     *
+     * @throws TokenNotFoundException if the token can't be found
+     */
     @RequestMapping(value = "/confirmRegistration", method = RequestMethod.GET)
-    public ResponseEntity<?> confirmRegistration(@RequestParam("token") String token) throws Exception {
+    public ResponseEntity<?> confirmRegistration(@RequestParam("token") String token) throws TokenNotFoundException {
 
         VerificationToken verificationToken =
                 verificationTokenRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
 
         User user = verificationToken.getUser();
-        Calendar cal = Calendar.getInstance();
-        if ((verificationToken.getExpiryDate().getTime() - cal.getTime().getTime()) <= 0) {
-            return createResponseEntity(HttpStatus.UNAUTHORIZED, "Token expired");
+        if (!verificationToken.isValid()) {
+            return createResponseEntity(HttpStatus.UNAUTHORIZED, "Token is expired or has been already used.");
         }
 
         user.setEnabled(true);
+        verificationToken.setUsed(true);
+
+        //Disable the token for future use.
+        verificationTokenRepository.saveAndFlush(verificationToken);
         userService.save(user);
+
         return createResponseEntity(HttpStatus.OK, "Succesfully verified");
     }
 
