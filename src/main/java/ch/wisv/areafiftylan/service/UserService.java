@@ -6,6 +6,7 @@ import ch.wisv.areafiftylan.dto.UserDTO;
 import ch.wisv.areafiftylan.model.Profile;
 import ch.wisv.areafiftylan.model.User;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -38,4 +39,17 @@ public interface UserService {
 
     void verify(Long userId);
 
+    void requestResetPassword(User user, HttpServletRequest request);
+
+    void resetPassword(Long userId, String password);
+
+    /**
+     * Turns the request into a url to which the request is made. For example https://localhost:8080 TODO: This makes a
+     * call directly to the API, this should be handled by the front-end instead
+     *
+     * @param request The HttpServletRequest of the call that is made
+     *
+     * @return Formatted string of the base URL
+     */
+    String getAppUrl(HttpServletRequest request);
 }

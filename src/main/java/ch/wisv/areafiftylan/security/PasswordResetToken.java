@@ -5,12 +5,14 @@ import ch.wisv.areafiftylan.model.User;
 import javax.persistence.Entity;
 
 @Entity
-public class VerificationToken extends Token {
+public class PasswordResetToken extends Token {
 
-    public VerificationToken() {
+
+    public PasswordResetToken() {
     }
 
-    public VerificationToken(String token, User user) {
+    public PasswordResetToken(String token, User user) {
         super(token, user);
     }
+
 }

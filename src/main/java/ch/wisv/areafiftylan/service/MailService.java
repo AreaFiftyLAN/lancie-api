@@ -19,4 +19,6 @@ public interface MailService {
     void sendTemplateMailToUser(User user, MailDTO mailDTO) throws MessagingException;
 
     void sendVerificationmail(User user, String url) throws MessagingException;
+
+    void sendPasswordResetMail(User user, String url) throws MessagingException;
 }

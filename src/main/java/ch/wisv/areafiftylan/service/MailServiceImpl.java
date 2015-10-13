@@ -82,4 +82,10 @@ public class MailServiceImpl implements MailService {
         String message = "Please click on the following link to complete your registration: " + url;
         sendMail(user.getEmail(), user.getUsername(), null, "Confirm your registration", message);
     }
+
+    @Override
+    public void sendPasswordResetMail(User user, String url) throws MessagingException {
+        String message = "Please click on the following link to reset your password: " + url;
+        sendMail(user.getEmail(), user.getUsername(), null, "Password reset requested", message);
+    }
 }

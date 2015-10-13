@@ -4,7 +4,9 @@ import ch.wisv.areafiftylan.dto.ProfileDTO;
 import ch.wisv.areafiftylan.dto.UserDTO;
 import ch.wisv.areafiftylan.model.Profile;
 import ch.wisv.areafiftylan.model.User;
+import ch.wisv.areafiftylan.security.PasswordResetToken;
 import ch.wisv.areafiftylan.security.VerificationToken;
+import ch.wisv.areafiftylan.service.repository.PasswordResetTokenRepository;
 import ch.wisv.areafiftylan.service.repository.UserRepository;
 import ch.wisv.areafiftylan.service.repository.VerificationTokenRepository;
 import com.google.common.base.Strings;
@@ -17,6 +19,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
+import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
@@ -26,14 +29,16 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     private final UserRepository userRepository;
     private final VerificationTokenRepository verificationTokenRepository;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final MailService mailService;
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository, VerificationTokenRepository verificationTokenRepository,
-                           MailService mailService) {
+                           PasswordResetTokenRepository passwordResetTokenRepository, MailService mailService) {
         this.userRepository = userRepository;
         this.verificationTokenRepository = verificationTokenRepository;
         this.mailService = mailService;
+        this.passwordResetTokenRepository = passwordResetTokenRepository;
     }
 
     @Override
@@ -68,8 +73,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         user = userRepository.saveAndFlush(user);
 
         String token = UUID.randomUUID().toString();
-        VerificationToken verificationTokenn = new VerificationToken(token, user);
-        verificationTokenRepository.saveAndFlush(verificationTokenn);
+        VerificationToken verificationToken = new VerificationToken(token, user);
+        verificationTokenRepository.saveAndFlush(verificationToken);
 
         try {
             String confirmUrl = appUrl + "/confirmRegistration?token=" + token;
@@ -152,6 +157,27 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         user.setEnabled(true);
     }
 
+    @Override
+    public void requestResetPassword(User user, HttpServletRequest request) {
+        String token = UUID.randomUUID().toString();
+        PasswordResetToken passwordResetToken = new PasswordResetToken(token, user);
+        passwordResetTokenRepository.saveAndFlush(passwordResetToken);
+
+        try {
+            String passwordUrl = getAppUrl(request) + "/resetPassword?token=" + token;
+            mailService.sendPasswordResetMail(user, passwordUrl);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void resetPassword(Long userId, String password) {
+        User user = userRepository.findOne(userId);
+        user.setPasswordHash(new BCryptPasswordEncoder().encode(password));
+        userRepository.saveAndFlush(user);
+    }
+
     private String getPasswordHash(String plainTextPassword) {
         return new BCryptPasswordEncoder().encode(plainTextPassword);
     }
@@ -159,5 +185,18 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(username));
+    }
+
+    /**
+     * Turns the request into a url to which the request is made. For example https://localhost:8080 TODO: This makes a
+     * call directly to the API, this should be handled by the front-end instead
+     *
+     * @param request The HttpServletRequest of the call that is made
+     *
+     * @return Formatted string of the base URL
+     */
+    @Override
+    public String getAppUrl(HttpServletRequest request) {
+        return request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
     }
 }

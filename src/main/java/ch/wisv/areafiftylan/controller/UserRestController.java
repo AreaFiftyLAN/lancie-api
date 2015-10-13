@@ -49,7 +49,7 @@ public class UserRestController {
      */
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<?> add(HttpServletRequest request, @Validated @RequestBody UserDTO input) {
-        User save = userService.create(input, getAppUrl(request));
+        User save = userService.create(input, userService.getAppUrl(request));
 
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setLocation(
@@ -57,18 +57,6 @@ public class UserRestController {
 
         return createResponseEntity(HttpStatus.CREATED, httpHeaders,
                 "User successfully created at " + httpHeaders.getLocation(), save);
-    }
-
-    /**
-     * Turns the request into a url to which the request is made. For example https://localhost:8080
-     * TODO: This makes a call directly to the API, this should be handled by the front-end instead
-     *
-     * @param request The HttpServletRequest of the call that is made
-     *
-     * @return Formatted string of the base URL
-     */
-    private String getAppUrl(HttpServletRequest request) {
-        return request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
     }
 
     /**
