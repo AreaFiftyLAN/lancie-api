@@ -10,6 +10,7 @@ import ch.wisv.areafiftylan.service.repository.PasswordResetTokenRepository;
 import ch.wisv.areafiftylan.service.repository.UserRepository;
 import ch.wisv.areafiftylan.service.repository.VerificationTokenRepository;
 import com.google.common.base.Strings;
+import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -63,6 +64,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public User create(UserDTO userDTO, HttpServletRequest request) {
+        // Hash the plain password coming from the DTO
         String passwordHash = getPasswordHash(userDTO.getPassword());
         User user = new User(userDTO.getUsername(), passwordHash, userDTO.getEmail());
         user.addRole(userDTO.getRole());
@@ -72,33 +74,43 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         // Save the user so the verificationToken can be stored.
         user = userRepository.saveAndFlush(user);
 
+        generateAndSendToken(request, user);
+
+        return user;
+    }
+
+    private void generateAndSendToken(HttpServletRequest request, User user) {
         String token = UUID.randomUUID().toString();
+
+        // Create a new Verificationcode with this UUID, and link it to the user
         VerificationToken verificationToken = new VerificationToken(token, user);
         verificationTokenRepository.saveAndFlush(verificationToken);
 
         try {
+            // Build the URL and send this to the mailservice for sending.
             String confirmUrl = getAppUrl(request) + "/confirmRegistration?token=" + token;
             mailService.sendVerificationmail(user, confirmUrl);
         } catch (MessagingException e) {
             e.printStackTrace();
         }
-
-        return user;
     }
 
     @Override
     public User replace(Long userId, UserDTO userDTO) {
         User user = userRepository.getOne(userId);
+
         user.setUsername(userDTO.getUsername());
         user.setEmail(userDTO.getEmail());
         user.setPasswordHash(getPasswordHash(userDTO.getPassword()));
         user.resetProfile();
+
         return userRepository.saveAndFlush(user);
     }
 
     @Override
     public void delete(Long userId) {
-        userRepository.delete(userId);
+        // We don't delete users, we lock them
+        throw new NotImplementedException("Can't delete users, lock them instead");
     }
 
     @Override
@@ -119,12 +131,15 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public User save(User user) {
+        // Save the user and write it to the DB immediately
         return userRepository.saveAndFlush(user);
     }
 
     @Override
     public User addProfile(Long userId, ProfileDTO profileDTO) {
         User user = userRepository.findOne(userId);
+
+        // Set all the profile fields at once
         user.getProfile().setAllFields(profileDTO.getFirstName(), profileDTO.getLastName(), profileDTO.getDisplayName(),
                 profileDTO.getGender(), profileDTO.getAddress(), profileDTO.getZipcode(), profileDTO.getCity(),
                 profileDTO.getPhoneNumber(), profileDTO.getNotes());
@@ -147,6 +162,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public void lock(Long userId, boolean lock) {
         User user = userRepository.findOne(userId);
+        // Inverse boolean-ception. Double check this when changing.
         user.setAccountNonLocked(!lock);
         userRepository.saveAndFlush(user);
     }
@@ -161,11 +177,14 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public void requestResetPassword(User user, HttpServletRequest request) {
         String token = UUID.randomUUID().toString();
+        // Use the generated ID to create a passwordToken and link it to the user
         PasswordResetToken passwordResetToken = new PasswordResetToken(token, user);
         passwordResetTokenRepository.saveAndFlush(passwordResetToken);
 
         try {
+            // TODO: This is a bit weird. This needs to link to a form.
             String passwordUrl = getAppUrl(request) + "/resetPassword?token=" + token;
+            // Send the token to the user
             mailService.sendPasswordResetMail(user, passwordUrl);
         } catch (MessagingException e) {
             e.printStackTrace();
@@ -175,6 +194,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public void resetPassword(Long userId, String password) {
         User user = userRepository.findOne(userId);
+        // The token is being checked in the controller, so just set the password here
         user.setPasswordHash(new BCryptPasswordEncoder().encode(password));
         userRepository.saveAndFlush(user);
     }
@@ -190,6 +210,13 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     }
 
+    /**
+     * Encrypt the password using the BCryptPasswordEncoder with default settings
+     *
+     * @param plainTextPassword The password to be encoded
+     *
+     * @return The hashed password
+     */
     private String getPasswordHash(String plainTextPassword) {
         return new BCryptPasswordEncoder().encode(plainTextPassword);
     }
