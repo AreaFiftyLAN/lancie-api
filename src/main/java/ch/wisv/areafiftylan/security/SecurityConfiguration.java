@@ -34,8 +34,8 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.formLogin()
-//                .loginPage("/login")
-//                .failureUrl("/login?error")
+                .loginPage("/login")
+                .failureUrl("/login?error")
                 .usernameParameter("username")
                 .permitAll()
             .and()
@@ -46,8 +46,8 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             .and().authorizeRequests()
                 .antMatchers("/login*").permitAll()
                 .antMatchers("/mail").hasAuthority("ADMIN")
-                .anyRequest().permitAll();
-//                .anyRequest().authenticated();
+//                .anyRequest().permitAll();
+                .anyRequest().authenticated();
         http.csrf().disable(); //FIXME
     }
 
