@@ -75,6 +75,29 @@ public class UserRestIntegrationTest {
         userRepository.deleteAll();
     }
 
+
+    // CHECK AVAILABILITY
+    @Test
+    public void testUsernameTaken() {
+
+        when().get("/users/checkUsername?username=user").then().body(equalTo("false"));
+    }
+
+    @Test
+    public void testUsernameFree() {
+        when().get("/users/checkUsername?username=freeUsername").then().body(equalTo("true"));
+    }
+
+    @Test
+    public void testEmailTaken() {
+        when().get("/users/checkEmail?email=user@mail.com").then().body(equalTo("false"));
+    }
+
+    @Test
+    public void testEmailFree() {
+        when().get("/users/checkEmail?email=freemail@mail.com").then().body(equalTo("true"));
+    }
+
     // USER GET
     // GET ALL USERS AS ANONYMOUS
     @Test
@@ -196,7 +219,7 @@ public class UserRestIntegrationTest {
 
     // GET OWN USER VIA ID
     @Test
-    public void testGetOwnUserId(){
+    public void testGetOwnUserId() {
         given().auth().form("admin", "password", formAuthConfig).
                 when().get("/users/" + user.getId()).
                 then().statusCode(HttpStatus.SC_OK).

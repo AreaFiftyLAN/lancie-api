@@ -53,7 +53,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public Optional<User> getUserByUsername(String username) {
-        return userRepository.findByUsername(username);
+        return userRepository.findOneByUsername(username);
     }
 
     @Override
@@ -62,7 +62,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public User create(UserDTO userDTO, String appUrl) {
+    public User create(UserDTO userDTO, HttpServletRequest request) {
         String passwordHash = getPasswordHash(userDTO.getPassword());
         User user = new User(userDTO.getUsername(), passwordHash, userDTO.getEmail());
         user.addRole(userDTO.getRole());
@@ -77,7 +77,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         verificationTokenRepository.saveAndFlush(verificationToken);
 
         try {
-            String confirmUrl = appUrl + "/confirmRegistration?token=" + token;
+            String confirmUrl = getAppUrl(request) + "/confirmRegistration?token=" + token;
             mailService.sendVerificationmail(user, confirmUrl);
         } catch (MessagingException e) {
             e.printStackTrace();
@@ -178,13 +178,24 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         userRepository.saveAndFlush(user);
     }
 
+    @Override
+    public Boolean checkEmailAvailable(String email) {
+        return !userRepository.findOneByEmail(email).isPresent();
+    }
+
+    @Override
+    public Boolean checkUsernameAvailable(String username) {
+        return !userRepository.findOneByUsername(username).isPresent();
+
+    }
+
     private String getPasswordHash(String plainTextPassword) {
         return new BCryptPasswordEncoder().encode(plainTextPassword);
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(username));
+        return userRepository.findOneByUsername(username).orElseThrow(() -> new UsernameNotFoundException(username));
     }
 
     /**
@@ -195,7 +206,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
      *
      * @return Formatted string of the base URL
      */
-    @Override
     public String getAppUrl(HttpServletRequest request) {
         return request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
     }

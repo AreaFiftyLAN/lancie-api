@@ -19,7 +19,7 @@ public interface UserService {
 
     Collection<User> getAllUsers();
 
-    User create(UserDTO userDTO, String contextPath);
+    User create(UserDTO userDTO, HttpServletRequest request);
 
     User replace(Long userId, UserDTO userDTO);
 
@@ -43,13 +43,7 @@ public interface UserService {
 
     void resetPassword(Long userId, String password);
 
-    /**
-     * Turns the request into a url to which the request is made. For example https://localhost:8080 TODO: This makes a
-     * call directly to the API, this should be handled by the front-end instead
-     *
-     * @param request The HttpServletRequest of the call that is made
-     *
-     * @return Formatted string of the base URL
-     */
-    String getAppUrl(HttpServletRequest request);
+    Boolean checkEmailAvailable(String email);
+
+    Boolean checkUsernameAvailable(String username);
 }

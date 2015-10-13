@@ -49,7 +49,7 @@ public class UserRestController {
      */
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<?> add(HttpServletRequest request, @Validated @RequestBody UserDTO input) {
-        User save = userService.create(input, userService.getAppUrl(request));
+        User save = userService.create(input, request);
 
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setLocation(
@@ -163,6 +163,16 @@ public class UserRestController {
     public ResponseEntity<?> deleteUser(@PathVariable Long userId) {
         userService.lock(userId, true);
         return createResponseEntity(HttpStatus.OK, "User disabled");
+    }
+
+    @RequestMapping(value = "/checkEmail", method = RequestMethod.GET)
+    public Boolean checkEmailExists(@RequestParam String email) {
+        return userService.checkEmailAvailable(email);
+    }
+
+    @RequestMapping(value = "/checkUsername", method = RequestMethod.GET)
+    public Boolean checkUsernameExists(@RequestParam String username) {
+        return userService.checkUsernameAvailable(username);
     }
 
     //////////// PROFILE MAPPINGS //////////////////
