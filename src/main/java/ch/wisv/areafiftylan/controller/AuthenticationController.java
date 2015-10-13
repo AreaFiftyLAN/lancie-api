@@ -1,5 +1,6 @@
 package ch.wisv.areafiftylan.controller;
 
+import ch.wisv.areafiftylan.exception.TokenNotFoundException;
 import ch.wisv.areafiftylan.exception.UserNotFoundException;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.security.VerificationToken;
@@ -10,10 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Calendar;
@@ -58,7 +56,7 @@ public class AuthenticationController {
     public ResponseEntity<?> confirmRegistration(@RequestParam("token") String token) throws Exception {
 
         VerificationToken verificationToken =
-                verificationTokenRepository.findByToken(token).orElseThrow(() -> new Exception("Token not found"));
+                verificationTokenRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
 
         User user = verificationToken.getUser();
         Calendar cal = Calendar.getInstance();
@@ -69,6 +67,11 @@ public class AuthenticationController {
         user.setEnabled(true);
         userService.save(user);
         return createResponseEntity(HttpStatus.OK, "Succesfully verified");
+    }
+
+    @ExceptionHandler(TokenNotFoundException.class)
+    public ResponseEntity<?> handleAccessDeniedException(TokenNotFoundException ex) {
+        return createResponseEntity(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
 }

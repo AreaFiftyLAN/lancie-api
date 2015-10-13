@@ -57,7 +57,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public User create(UserDTO userDTO, String contextPath) {
+    public User create(UserDTO userDTO, String appUrl) {
         String passwordHash = getPasswordHash(userDTO.getPassword());
         User user = new User(userDTO.getUsername(), passwordHash, userDTO.getEmail());
         user.addRole(userDTO.getRole());
@@ -72,7 +72,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         verificationTokenRepository.saveAndFlush(verificationTokenn);
 
         try {
-            String confirmUrl = contextPath + "/confirmRegistration?token=" + token;
+            String confirmUrl = appUrl + "/confirmRegistration?token=" + token;
             mailService.sendVerificationmail(user, confirmUrl);
         } catch (MessagingException e) {
             e.printStackTrace();
