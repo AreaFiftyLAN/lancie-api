@@ -35,7 +35,9 @@ public interface UserService {
 
     Profile resetProfile(Long userId);
 
-    void lock(Long userId, boolean enabled);
+    void lock(Long userId);
+
+    void unlock(Long userId);
 
     void verify(Long userId);
 

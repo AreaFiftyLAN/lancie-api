@@ -10,7 +10,6 @@ import ch.wisv.areafiftylan.service.repository.PasswordResetTokenRepository;
 import ch.wisv.areafiftylan.service.repository.UserRepository;
 import ch.wisv.areafiftylan.service.repository.VerificationTokenRepository;
 import com.google.common.base.Strings;
-import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -110,7 +109,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public void delete(Long userId) {
         // We don't delete users, we lock them
-        throw new NotImplementedException("Can't delete users, lock them instead");
+        throw new UnsupportedOperationException("Can't delete users, lock them instead");
     }
 
     @Override
@@ -160,10 +159,16 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public void lock(Long userId, boolean lock) {
+    public void unlock(Long userId) {
         User user = userRepository.findOne(userId);
-        // Inverse boolean-ception. Double check this when changing.
-        user.setAccountNonLocked(!lock);
+        user.setAccountNonLocked(true);
+        userRepository.saveAndFlush(user);
+    }
+
+    @Override
+    public void lock(Long userId) {
+        User user = userRepository.findOne(userId);
+        user.setAccountNonLocked(false);
         userRepository.saveAndFlush(user);
     }
 

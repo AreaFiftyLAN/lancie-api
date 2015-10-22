@@ -90,6 +90,11 @@ public class AuthenticationController {
         PasswordResetToken passwordResetToken =
                 passwordResetTokenRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
 
+        //Check validity of the token
+        if (!passwordResetToken.isValid()) {
+            return createResponseEntity(HttpStatus.UNAUTHORIZED, "Token is expired or has been already used.");
+        }
+
         // Get the user associated to the token
         User user = passwordResetToken.getUser();
         userService.resetPassword(user.getId(), password);
