@@ -6,6 +6,7 @@ import ch.wisv.areafiftylan.dto.UserDTO;
 import ch.wisv.areafiftylan.model.Profile;
 import ch.wisv.areafiftylan.model.User;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -18,7 +19,7 @@ public interface UserService {
 
     Collection<User> getAllUsers();
 
-    User create(UserDTO userDTO);
+    User create(UserDTO userDTO, HttpServletRequest request);
 
     User replace(Long userId, UserDTO userDTO);
 
@@ -34,4 +35,17 @@ public interface UserService {
 
     Profile resetProfile(Long userId);
 
+    void lock(Long userId);
+
+    void unlock(Long userId);
+
+    void verify(Long userId);
+
+    void requestResetPassword(User user, HttpServletRequest request);
+
+    void resetPassword(Long userId, String password);
+
+    Boolean checkEmailAvailable(String email);
+
+    Boolean checkUsernameAvailable(String username);
 }

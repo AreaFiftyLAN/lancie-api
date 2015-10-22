@@ -28,15 +28,14 @@ public class User implements Serializable, UserDetails {
     @OneToOne(targetEntity = Profile.class, cascade = CascadeType.ALL)
     protected Profile profile;
 
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
     @CollectionTable(name = "user_role")
     private Collection<Role> roles;
-
 
     @JsonIgnore
     boolean accountNonExpired = true;
@@ -124,5 +123,13 @@ public class User implements Serializable, UserDetails {
 
     public void addRole(Role role) {
         this.roles.add(role);
+    }
+
+    public void setAccountNonLocked(boolean accountNonLocked) {
+        this.accountNonLocked = accountNonLocked;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 }
