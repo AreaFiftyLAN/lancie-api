@@ -175,7 +175,7 @@ public class UserRestController {
     @PreAuthorize("hasRole('ADMIN')")
     @RequestMapping(value = "/{userId}", method = RequestMethod.DELETE)
     public ResponseEntity<?> disableUser(@PathVariable Long userId) {
-        userService.lock(userId, true);
+        userService.lock(userId);
         return createResponseEntity(HttpStatus.OK, "User disabled");
     }
 
