@@ -12,7 +12,7 @@ spring.thymeleaf.check-template-location=true
 spring.thymeleaf.prefix=classpath:/templates/
 spring.thymeleaf.view-names= MailTemplate, dashboard/*
 spring.thymeleaf.suffix=.html
-spring.thymeleaf.mode=HTML5
+spring.thymeleaf.mode=LEGACYHTML5
 spring.thymeleaf.encoding=UTF-8
 spring.thymeleaf.content-type=text/html
 
