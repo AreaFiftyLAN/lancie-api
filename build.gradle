@@ -36,6 +36,7 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-web")
     compile("org.springframework.boot:spring-boot-starter-mail")
     compile("org.springframework.boot:spring-boot-starter-thymeleaf")
+    compile 'net.sourceforge.nekohtml:nekohtml:1.9.22'
     compile("org.springframework.security:spring-security-test:4.0.2.RELEASE")
     runtime("org.hsqldb:hsqldb")
     runtime("org.postgresql:postgresql:9.4-1203-jdbc42")

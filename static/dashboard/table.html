@@ -1,0 +1,47 @@
+<div class="container-fluid">
+    <div class="col-md-12">
+        <div class="card card-plain">
+            <div class="header">
+                <h4 class="title">User table</h4>
+                <p class="category">Here is a fancy subtitle for the user table</p>
+            </div>
+            <div class="content table-responsive table-full-width">
+                <table id="myTable" class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>id</th>
+                            <th>username</th>
+                            <th>email</th>
+                            <th>authorities</th>
+                            <th>first name</th>
+                            <th>last name</th>
+                            <th>gender</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#myTable').DataTable( {
+            "processing": true,
+            "ajax": {
+                url: "http://localhost:8080/users/",
+                dataSrc: "",
+                Authorization: "Basic dXNlcjpwYXNzd29yZA==",
+                "Content-Type": "application/json"
+            },
+            "columns": [
+                { "data": "id" },
+                { "data": "username" },
+                { "data": "email" },
+                { "data": "authorities"},
+                { "data": "profile.firstName" },
+                { "data": "profile.lastName" },
+                { "data": "profile.gender" }
+            ]
+        } );
+    } );
+</script>

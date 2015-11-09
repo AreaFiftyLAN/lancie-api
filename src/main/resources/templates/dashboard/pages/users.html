@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorator="dashboard/material-layout">
+<head>
+    <title>Area FiftyLAN - User Overview</title>
+    <!--Datatables-->
+    <script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script type="text/javascript" src="//cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#userTable').DataTable();
+        });
+    </script>
+</head>
+<body>
+<section layout:fragment="content">
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--8-col">
+
+            <p>This is a paragraph from the user page</p>
+
+            <table id="userTable" class="mdl-data-table mdl-js-data-table mdl-data-table--selectable mdl-shadow--2dp">
+                <thead>
+                <tr>
+                    <th>id</th>
+                    <th>username</th>
+                    <th>email</th>
+                    <th>authorities</th>
+                    <th>first name</th>
+                    <th>last name</th>
+                    <th>gender</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="user : ${users}">
+                    <td th:text="${user.id}">User ID</td>
+                    <td th:text="${user.username}">Username</td>
+                    <td th:text="${user.email}">email</td>
+                    <td th:text="${user.authorities}">authorities</td>
+                    <td th:text="${user.profile.firstName}">First Name</td>
+                    <td th:text="${user.profile.lastName}">Last Name</td>
+                    <td th:text="${user.profile.gender}">Gender</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="mdl-cell mdl-cell--4-col">
+            <form action="/admin/users" th:action="@{/users}" th:object="${UserDTO}" method="post">
+                <div class="mdl-textfield mdl-js-textfield">
+                    <input class="mdl-textfield__input" type="text" id="username" th:field="*{username}"/>
+                    <label class="mdl-textfield__label" for="username">Username...</label>
+                </div>
+                <div class="mdl-textfield mdl-js-textfield">
+                    <input class="mdl-textfield__input" type="email" id="email" th:field="*{email}"/>
+                    <label class="mdl-textfield__label" for="email">Email...</label>
+                </div>
+                <div class="mdl-textfield mdl-js-textfield">
+                    <input class="mdl-textfield__input" type="password" id="password" th:field="*{password}"/>
+                    <label class="mdl-textfield__label" for="password">Password...</label>
+                </div>
+                <button class="mdl-button mdl-js-button mdl-js-ripple-effect" type="submit">
+                    Submit
+                </button>
+
+            </form>
+        </div>
+    </div>
+</section>
+</body>
+</html>
