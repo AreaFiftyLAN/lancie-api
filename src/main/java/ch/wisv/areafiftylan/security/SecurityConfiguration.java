@@ -46,8 +46,9 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             .and().authorizeRequests()
                 .antMatchers("/login*").permitAll()
                 .antMatchers("/mail").hasAuthority("ADMIN")
-//                .anyRequest().permitAll();
-                .anyRequest().authenticated();
+                .antMatchers("/teams").authenticated()
+                .anyRequest().permitAll();
+//                .anyRequest().authenticated();
         http.csrf().disable(); //FIXME
     }
 
