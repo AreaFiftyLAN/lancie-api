@@ -3,12 +3,11 @@ package ch.wisv.areafiftylan.service;
 import ch.wisv.areafiftylan.dto.TeamDTO;
 import ch.wisv.areafiftylan.model.Team;
 
-import javax.swing.text.html.Option;
 import java.util.Collection;
 import java.util.Optional;
 
 public interface TeamService {
-    Team create(TeamDTO team);
+    Team create(String username, String teamname);
 
     Team save(Team team);
 
@@ -24,5 +23,9 @@ public interface TeamService {
 
     Team update(Long teamId, TeamDTO input);
 
-    void delete(Long teamId);
+    Team delete(Long teamId);
+
+    void addMember(Long teamId, String username);
+
+    boolean removeMember(Long teamId, String username);
 }

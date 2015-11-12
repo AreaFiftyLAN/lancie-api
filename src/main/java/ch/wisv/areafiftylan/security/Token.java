@@ -72,7 +72,7 @@ public abstract class Token {
 
     public boolean isValid() {
         // returns true only if the token is not used and not expired
-        return !(!this.used || isExpired());
+        return !(this.used || isExpired());
     }
 
     private boolean isExpired() {

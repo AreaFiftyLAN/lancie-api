@@ -10,14 +10,14 @@ public class TeamDTO {
     private String teamName;
 
     @NotNull
-    private Long captainID;
+    private String captainUsername;
 
     public String getTeamName() {
         return teamName;
     }
 
-    public Long getCaptainID() {
-        return captainID;
+    public String getCaptainUsername() {
+        return captainUsername;
     }
 
 }

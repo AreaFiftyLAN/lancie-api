@@ -20,14 +20,17 @@ public class Team {
     @ManyToOne(optional = false, cascade = CascadeType.MERGE)
     User captain;
 
+    int size;
+
     public Team(String teamName, User captain) {
         this.teamName = teamName;
         this.captain = captain;
         members = new HashSet<>();
         members.add(captain);
+        size = 1;
     }
 
-    public Team(){
+    public Team() {
         //jpa only
     }
 
@@ -55,11 +58,19 @@ public class Team {
         this.members.add(member);
     }
 
+    public boolean removeMember(User member) {
+        return this.members.remove(member);
+    }
+
     public User getCaptain() {
         return captain;
     }
 
     public void setCaptain(User captain) {
         this.captain = captain;
+    }
+
+    public int getSize() {
+        return members.size();
     }
 }
