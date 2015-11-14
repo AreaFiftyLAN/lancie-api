@@ -7,4 +7,8 @@ import org.springframework.security.core.userdetails.UserDetails;
  */
 public interface CurrentUserService {
     boolean canAccessUser(Object principal, Long userId);
+
+    boolean canAccessTeam(Object principal, Long teamId);
+
+    boolean canEditTeam(Object principal, Long teamId);
 }

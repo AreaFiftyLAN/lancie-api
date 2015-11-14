@@ -28,9 +28,10 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     }
 
     @Override
-    public boolean canAccessTeam(UserDetails currentUser, Long teamId) {
-        if (currentUser != null) {
-            User user = (User) currentUser;
+    public boolean canAccessTeam(Object principal, Long teamId) {
+
+        if (principal instanceof UserDetails) {
+            User user = (User) principal;
             Team team = teamService.getTeamById(teamId).orElseThrow(() -> new TeamNotFoundException(teamId));
             return team.getMembers().contains(user) || user.getAuthorities().contains(Role.ADMIN);
         } else {
@@ -39,11 +40,12 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     }
 
     @Override
-    public boolean canEditTeam(UserDetails currentUser, Long teamId) {
-        if (currentUser != null) {
-            User user = (User) currentUser;
+    public boolean canEditTeam(Object principal, Long teamId) {
+        if (principal instanceof UserDetails) {
+            UserDetails user = (UserDetails) principal;
             Team team = teamService.getTeamById(teamId).orElseThrow(() -> new TeamNotFoundException(teamId));
-            return team.getCaptain().equals(user) || user.getAuthorities().contains(Role.ADMIN);
+            return team.getCaptain().getUsername().equals(user.getUsername()) ||
+                    user.getAuthorities().contains(Role.ADMIN);
         } else {
             return false;
         }
