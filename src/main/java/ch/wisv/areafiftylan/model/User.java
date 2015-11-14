@@ -1,7 +1,9 @@
 package ch.wisv.areafiftylan.model;
 
 import ch.wisv.areafiftylan.model.util.Role;
+import ch.wisv.areafiftylan.model.view.View;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -26,6 +28,7 @@ public class User implements Serializable, UserDetails {
     protected String email;
 
     @OneToOne(targetEntity = Profile.class, cascade = CascadeType.ALL)
+    @JsonView(View.Public.class)
     protected Profile profile;
 
     @GeneratedValue(strategy = GenerationType.AUTO)

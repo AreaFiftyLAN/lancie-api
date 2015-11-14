@@ -1,6 +1,8 @@
 package ch.wisv.areafiftylan.model;
 
 import ch.wisv.areafiftylan.model.util.Gender;
+import ch.wisv.areafiftylan.model.view.View;
+import com.fasterxml.jackson.annotation.JsonView;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -12,6 +14,8 @@ public class Profile implements Serializable {
 
     public String firstName;
     public String lastName;
+
+    @JsonView(View.Public.class)
     public String displayName;
 
     public Gender gender;

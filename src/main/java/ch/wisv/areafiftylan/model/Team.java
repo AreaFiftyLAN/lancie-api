@@ -1,5 +1,8 @@
 package ch.wisv.areafiftylan.model;
 
+import ch.wisv.areafiftylan.model.view.View;
+import com.fasterxml.jackson.annotation.JsonView;
+
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
@@ -12,15 +15,19 @@ public class Team {
     @GeneratedValue
     Long id;
 
+    @JsonView(View.Public.class)
     @Column(nullable = false)
     String teamName;
 
+    @JsonView(View.Public.class)
     @ManyToMany
     Set<User> members;
 
+    @JsonView(View.Public.class)
     @ManyToOne(optional = false, cascade = CascadeType.MERGE)
     User captain;
 
+    @JsonView(View.Public.class)
     int size;
 
     public Team(String teamName, User captain) {

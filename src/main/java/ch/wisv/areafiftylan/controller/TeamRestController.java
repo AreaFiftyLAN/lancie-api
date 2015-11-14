@@ -5,7 +5,9 @@ import ch.wisv.areafiftylan.exception.TeamNotFoundException;
 import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.util.Role;
+import ch.wisv.areafiftylan.model.view.View;
 import ch.wisv.areafiftylan.service.TeamService;
+import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
@@ -44,6 +46,7 @@ public class TeamRestController {
      * @return Return status message of the operation
      */
     @PreAuthorize("isAuthenticated()")
+    @JsonView(View.Public.class)
     @RequestMapping(method = RequestMethod.POST)
     ResponseEntity<?> add(@Validated @RequestBody TeamDTO teamDTO, Authentication auth) {
         Team team;
@@ -86,6 +89,7 @@ public class TeamRestController {
      * @return A representation the Team with given Id.
      */
     @PreAuthorize("@currentUserServiceImpl.canAccessTeam(principal, #teamId)")
+    @JsonView(View.Public.class)
     @RequestMapping(method = RequestMethod.GET, value = "/{teamId}")
     public Team getTeamById(@PathVariable Long teamId) {
         return this.teamService.getTeamById(teamId).get();
@@ -99,6 +103,7 @@ public class TeamRestController {
      * @return A list of the members of the Team with the given Id
      */
     @PreAuthorize("@currentUserServiceImpl.canAccessTeam(principal, #teamId)")
+    @JsonView(View.Public.class)
     @RequestMapping(method = RequestMethod.GET, value = "/{teamId}/members")
     public Set<User> getTeamMembersById(@PathVariable Long teamId) {
         Team team = teamService.getTeamById(teamId).orElseThrow(() -> new TeamNotFoundException(teamId));
@@ -131,6 +136,7 @@ public class TeamRestController {
      * @return The updated Team
      */
     @PreAuthorize("@currentUserServiceImpl.canEditTeam(principal, #teamId)")
+    @JsonView(View.Public.class)
     @RequestMapping(method = RequestMethod.PUT, value = "/{teamId}")
     public Team update(@PathVariable Long teamId, @RequestBody TeamDTO input) {
         return this.teamService.update(teamId, input);
@@ -160,6 +166,7 @@ public class TeamRestController {
      * @return The deleted Team
      */
     @PreAuthorize("@currentUserServiceImpl.canEditTeam(principal, #teamId)")
+    @JsonView(View.Public.class)
     @RequestMapping(method = RequestMethod.DELETE, value = "{teamId}")
     public ResponseEntity<?> delete(@PathVariable Long teamId) {
 
