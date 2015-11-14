@@ -5,13 +5,14 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
+@Table(uniqueConstraints = { @UniqueConstraint(name = "teamName", columnNames = { "teamName" }) })
 public class Team {
 
     @Id
     @GeneratedValue
     Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     String teamName;
 
     @ManyToMany
