@@ -316,6 +316,70 @@ public class TeamRestIntegrationTest extends IntegrationTest {
             .statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
         //@formatter:on
     }
+
+    @Test
+    public void testRemoveMember_captain(){
+        String location = createTeamWithCaptain();
+
+        addUserAsCaptain(location, user);
+
+        //@formatter:off
+        given().
+            auth().form("captain", "password", formAuthConfig).
+        when().
+            content(user.getUsername()).delete(location + "/members").
+        then().log().all()
+            .statusCode(HttpStatus.SC_OK);
+        //@formatter:on
+    }
+
+    @Test
+    public void testRemoveMember_admin(){
+        String location = createTeamWithCaptain();
+
+        addUserAsCaptain(location, user);
+
+        //@formatter:off
+        given().
+            auth().form("captain", "password", formAuthConfig).
+        when().
+            content(user.getUsername()).delete(location + "/members").
+        then().log().all()
+            .statusCode(HttpStatus.SC_OK);
+        //@formatter:on
+    }
+
+    @Test
+    public void testRemoveMember_member(){
+        String location = createTeamWithCaptain();
+
+        addUserAsCaptain(location, user);
+
+        //@formatter:off
+        given().
+            auth().form("user", "password", formAuthConfig).
+        when().
+            content(user.getUsername()).delete(location + "/members").
+        then().log().all()
+            .statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
+    }
+
+    @Test
+    public void testRemoveMember_user(){
+        String location = createTeamWithCaptain();
+
+        addUserAsCaptain(location, admin);
+
+        //@formatter:off
+        given().
+            auth().form("user", "password", formAuthConfig).
+        when().
+            content(admin.getUsername()).delete(location + "/members").
+        then().log().all()
+            .statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
+    }
 }
 
 
