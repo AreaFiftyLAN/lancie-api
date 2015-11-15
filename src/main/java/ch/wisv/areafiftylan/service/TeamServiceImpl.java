@@ -95,8 +95,11 @@ public class TeamServiceImpl implements TeamService {
     public void addMember(Long teamId, String username) {
         Team team = teamRepository.findById(teamId).orElseThrow(() -> new TeamNotFoundException(teamId));
         User user = userService.getUserByUsername(username).orElseThrow(() -> new UserNotFoundException(username));
-        team.addMember(user);
-        teamRepository.saveAndFlush(team);
+        if(team.addMember(user)) {
+            teamRepository.saveAndFlush(team);
+        } else {
+            throw new IllegalArgumentException("Could not add User to Team");
+        }
     }
 
     @Override

@@ -33,7 +33,9 @@ public class CurrentUserServiceImpl implements CurrentUserService {
         if (principal instanceof UserDetails) {
             User user = (User) principal;
             Team team = teamService.getTeamById(teamId).orElseThrow(() -> new TeamNotFoundException(teamId));
-            return team.getMembers().contains(user) || user.getAuthorities().contains(Role.ADMIN);
+            // Check for each of the teammembers if the username matches the requester
+            return team.getMembers().stream().anyMatch(u -> u.getUsername().equals(user.getUsername())) ||
+                    user.getAuthorities().contains(Role.ADMIN);
         } else {
             return false;
         }

@@ -63,8 +63,8 @@ public class Team {
         return members;
     }
 
-    public void addMember(User member) {
-        this.members.add(member);
+    public boolean addMember(User member) {
+        return this.members.add(member);
     }
 
     public boolean removeMember(User member) {

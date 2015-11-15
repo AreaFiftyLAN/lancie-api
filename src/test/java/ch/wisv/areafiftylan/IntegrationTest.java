@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 
 import static com.jayway.restassured.config.RedirectConfig.redirectConfig;
 import static com.jayway.restassured.config.RestAssuredConfig.config;
@@ -33,8 +34,6 @@ public abstract class IntegrationTest {
 
     @Before
     public void initIntegrationTest() {
-        userRepository.deleteAll();
-
         user = new User("user", new BCryptPasswordEncoder().encode("password"), "user@mail.com");
         user.getProfile()
                 .setAllFields("Jan", "de Groot", "MonsterKiller9001", Gender.MALE, "Mekelweg 4", "2826CD", "Delft",
@@ -55,7 +54,8 @@ public abstract class IntegrationTest {
 
     @After
     public void tearDownIntegrationTest() {
+        userRepository.delete(user);
+        userRepository.delete(admin);
         RestAssured.reset();
-        userRepository.deleteAll();
     }
 }
