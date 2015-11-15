@@ -39,8 +39,8 @@ public class TeamRestController {
      * The method to handle POST requests on the /teams endpoint. This creates a new team. Users can only create new
      * Teams with themselves as Captain. Admins can also create Teams with other Users as Captain.
      *
-     * @param teamDTO Object containig the Teamname and Captain username. When coming from a user, username should equal
-     *                their own username.
+     * @param teamDTO Object containing the Team name and Captain username. When coming from a user, username should
+     *                equal their own username.
      * @param auth    Authentication object from Spring Security
      *
      * @return Return status message of the operation
@@ -66,7 +66,7 @@ public class TeamRestController {
                 ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(team.getId()).toUri());
 
         return createResponseEntity(HttpStatus.CREATED, httpHeaders,
-                "Team succesfully created at " + httpHeaders.getLocation(), team);
+                "Team successfully created at " + httpHeaders.getLocation(), team);
     }
 
 
@@ -106,14 +106,14 @@ public class TeamRestController {
     @JsonView(View.Public.class)
     @RequestMapping(method = RequestMethod.GET, value = "/{teamId}/members")
     public Set<User> getTeamMembersById(@PathVariable Long teamId) {
-        System.out.println("Calling normal method");
         Team team = teamService.getTeamById(teamId).orElseThrow(() -> new TeamNotFoundException(teamId));
         return team.getMembers();
     }
 
     /**
      * This is the admin version of the above method. Instead of showing only the public fields, this method returns the
-     * full users with profiles. This method can be reached with the "/teams/{teamId}/members?admin" url. Ofcourse, only accessible by admins.
+     * full users with profiles. This method can be reached with the "/teams/{teamId}/members?admin" url. Of course,
+     * only accessible by admins.
      *
      * @param teamId Id of the Team
      *
@@ -122,7 +122,6 @@ public class TeamRestController {
     @PreAuthorize("hasRole('ADMIN')")
     @RequestMapping(method = RequestMethod.GET, value = "/{teamId}/members", params = "admin")
     public Set<User> getTeamMembersByIdAdmin(@PathVariable Long teamId) {
-        System.out.println("Calling admin method");
         Team team = teamService.getTeamById(teamId).orElseThrow(() -> new TeamNotFoundException(teamId));
         return team.getMembers();
     }
@@ -134,7 +133,7 @@ public class TeamRestController {
      * @param teamId   Id of the Team to which the User should be added.
      * @param username Username of the User to be added to the Team
      *
-     * @return Resultmessage of the request
+     * @return Result message of the request
      */
     @PreAuthorize("@currentUserServiceImpl.canEditTeam(principal, #teamId)")
     @RequestMapping(method = RequestMethod.POST, value = "/{teamId}")
@@ -148,7 +147,7 @@ public class TeamRestController {
      * Captain or an Admin.
      *
      * @param teamId Id of the Team to be changed
-     * @param input  Object containing the teamname and Captain username
+     * @param input  Object containing the team name and Captain username
      *
      * @return The updated Team
      */
@@ -166,7 +165,7 @@ public class TeamRestController {
      * @param teamId   Id of the Team to be edited
      * @param username Username of the member to be deleted
      *
-     * @return A statusmessage of the operation
+     * @return A status message of the operation
      */
     @PreAuthorize("@currentUserServiceImpl.canEditTeam(principal, #teamId)")
     @RequestMapping(method = RequestMethod.DELETE, value = "/{teamId}/members")
