@@ -11,6 +11,7 @@ import java.util.Set;
 @Table(uniqueConstraints = { @UniqueConstraint(name = "teamName", columnNames = { "teamName" }) })
 public class Team {
 
+    @JsonView(View.Public.class)
     @Id
     @GeneratedValue
     Long id;
