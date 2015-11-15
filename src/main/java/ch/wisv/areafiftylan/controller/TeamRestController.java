@@ -100,12 +100,29 @@ public class TeamRestController {
      *
      * @param teamId Id of the Team
      *
-     * @return A list of the members of the Team with the given Id
+     * @return A list of the members of the Team with the given Id. Public information only.
      */
     @PreAuthorize("@currentUserServiceImpl.canAccessTeam(principal, #teamId)")
     @JsonView(View.Public.class)
     @RequestMapping(method = RequestMethod.GET, value = "/{teamId}/members")
     public Set<User> getTeamMembersById(@PathVariable Long teamId) {
+        System.out.println("Calling normal method");
+        Team team = teamService.getTeamById(teamId).orElseThrow(() -> new TeamNotFoundException(teamId));
+        return team.getMembers();
+    }
+
+    /**
+     * This is the admin version of the above method. Instead of showing only the public fields, this method returns the
+     * full users with profiles. This method can be reached with the "/teams/{teamId}/members?admin" url. Ofcourse, only accessible by admins.
+     *
+     * @param teamId Id of the Team
+     *
+     * @return A list of the members of the Team with the given Id
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @RequestMapping(method = RequestMethod.GET, value = "/{teamId}/members", params = "admin")
+    public Set<User> getTeamMembersByIdAdmin(@PathVariable Long teamId) {
+        System.out.println("Calling admin method");
         Team team = teamService.getTeamById(teamId).orElseThrow(() -> new TeamNotFoundException(teamId));
         return team.getMembers();
     }
@@ -175,7 +192,7 @@ public class TeamRestController {
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<?> handleDataIntegrityViolation(DataIntegrityViolationException e){
+    public ResponseEntity<?> handleDataIntegrityViolation(DataIntegrityViolationException e) {
         return createResponseEntity(HttpStatus.CONFLICT, e.getMessage());
     }
 }
