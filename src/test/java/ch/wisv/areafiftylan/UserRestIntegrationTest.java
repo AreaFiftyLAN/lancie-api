@@ -48,7 +48,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
     @Test
     public void testGetAllUsersAnonymous() {
         when().get("/users").
-                then().statusCode(HttpStatus.SC_MOVED_TEMPORARILY).header("location", containsString("/login"));
+                then().statusCode(HttpStatus.SC_FORBIDDEN);
     }
 
 
@@ -76,14 +76,14 @@ public class UserRestIntegrationTest extends IntegrationTest {
     @Test
     public void testGetCurrentUserAnonymous() {
         when().get("/users/current").
-                then().statusCode(HttpStatus.SC_MOVED_TEMPORARILY).header("location", containsString("/login"));
+                then().log().all().statusCode(HttpStatus.SC_FORBIDDEN);
     }
 
     // PROFILE
     @Test
     public void testGetCurrentProfileAnonymous() {
         when().get("/users/current/profile").
-                then().statusCode(HttpStatus.SC_MOVED_TEMPORARILY).header("location", containsString("/login"));
+                then().statusCode(HttpStatus.SC_FORBIDDEN);
     }
 
     // GET CURRENT USER AS USER
@@ -132,13 +132,13 @@ public class UserRestIntegrationTest extends IntegrationTest {
     @Test
     public void testGetOtherUserAnonymous() {
         when().get("/users/1").
-                then().statusCode(HttpStatus.SC_MOVED_TEMPORARILY).header("location", containsString("/login"));
+                then().statusCode(HttpStatus.SC_FORBIDDEN);
     }
 
     @Test
     public void testGetOtherProfileAnonymous() {
         when().get("/users/1/profile").
-                then().statusCode(HttpStatus.SC_MOVED_TEMPORARILY).header("location", containsString("/login"));
+                then().statusCode(HttpStatus.SC_FORBIDDEN);
     }
 
     // GET OTHER USER AS USER

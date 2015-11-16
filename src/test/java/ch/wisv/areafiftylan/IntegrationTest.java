@@ -34,6 +34,8 @@ public abstract class IntegrationTest {
 
     @Before
     public void initIntegrationTest() {
+        userRepository.deleteAll();
+
         user = new User("user", new BCryptPasswordEncoder().encode("password"), "user@mail.com");
         user.getProfile()
                 .setAllFields("Jan", "de Groot", "MonsterKiller9001", Gender.MALE, "Mekelweg 4", "2826CD", "Delft",
