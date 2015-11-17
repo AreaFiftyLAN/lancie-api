@@ -23,7 +23,7 @@ public class Application {
 
         return (evt) -> {
             User testUser1 = new User("user", new BCryptPasswordEncoder().encode("password"), "user@mail.com");
-            testUser1.addRole(Role.ADMIN);
+            testUser1.addRole(Role.ROLE_ADMIN);
             testUser1.getProfile()
                     .setAllFields("Jan", "de Groot", "MonsterKiller9001", Gender.MALE, "Mekelweg 4", "2826CD", "Delft",
                             "0906-0666", null);

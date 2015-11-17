@@ -18,7 +18,7 @@ public class UserDTO {
     private String password = "";
 
     @NotNull
-    private Role role = Role.USER;
+    private Role role = Role.ROLE_USER;
 
     public String getUsername() {
         return username;

@@ -51,7 +51,7 @@ public class TeamRestController {
     ResponseEntity<?> add(@Validated @RequestBody TeamDTO teamDTO, Authentication auth) {
         Team team;
         // Users can only create teams with themselves as Captain
-        if (auth.getAuthorities().contains(Role.ADMIN)) {
+        if (auth.getAuthorities().contains(Role.ROLE_ADMIN)) {
             team = teamService.create(teamDTO.getCaptainUsername(), teamDTO.getTeamName());
         } else {
             // If the DTO contains another username as the the current user, return an error.
