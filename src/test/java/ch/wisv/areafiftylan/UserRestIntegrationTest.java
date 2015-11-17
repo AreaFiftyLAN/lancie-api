@@ -94,7 +94,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
                 then().statusCode(HttpStatus.SC_OK).
                 body("username", equalTo(user.getUsername())).
                 body("email", equalTo(user.getEmail())).
-                body("authorities", hasItem("USER"));
+                body("authorities", hasItem("ROLE_USER"));
     }
 
     // PROFILE
