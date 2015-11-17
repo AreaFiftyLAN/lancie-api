@@ -1,9 +1,10 @@
 package ch.wisv.areafiftylan.model;
 
+import ch.wisv.areafiftylan.model.util.SeatGroup;
+
 import javax.persistence.*;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(name = "groupname", columnNames = { "seatgroup" }))
 public class Seat {
 
     boolean taken;
@@ -11,7 +12,7 @@ public class Seat {
     @OneToOne(cascade = CascadeType.MERGE)
     User user;
 
-    String seatgroup;
+    SeatGroup seatgroup;
 
     int seatnumber;
 
@@ -19,7 +20,7 @@ public class Seat {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long Id;
 
-    public Seat(String seatgroup, int seatnumber) {
+    public Seat(SeatGroup seatgroup, int seatnumber) {
         this.seatgroup = seatgroup;
         this.seatnumber = seatnumber;
         this.taken = false;
@@ -47,11 +48,11 @@ public class Seat {
         this.taken = this.user != null;
     }
 
-    public String getSeatgroup() {
+    public SeatGroup getSeatgroup() {
         return seatgroup;
     }
 
-    public void setSeatgroup(String seatgroup) {
+    public void setSeatgroup(SeatGroup seatgroup) {
         this.seatgroup = seatgroup;
     }
 

@@ -28,9 +28,9 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     protected User teamCaptain;
 
     @Autowired
-    private TeamRepository teamRepository;
+    protected TeamRepository teamRepository;
 
-    private Map<String, String> team1;
+    protected Map<String, String> team1;
 
     @Before
     public void initTeamTest() {
