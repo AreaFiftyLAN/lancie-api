@@ -11,7 +11,6 @@ import org.junit.Before;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.transaction.annotation.Transactional;
 
 import static com.jayway.restassured.config.RedirectConfig.redirectConfig;
 import static com.jayway.restassured.config.RestAssuredConfig.config;
@@ -42,7 +41,7 @@ public abstract class IntegrationTest {
                         "0906-0666", null);
 
         admin = new User("admin", new BCryptPasswordEncoder().encode("password"), "bert@mail.com");
-        admin.addRole(Role.ADMIN);
+        admin.addRole(Role.ROLE_ADMIN);
         admin.getProfile()
                 .setAllFields("Bert", "Kleijn", "ILoveZombies", Gender.OTHER, "Mekelweg 20", "2826CD", "Amsterdam",
                         "0611", null);

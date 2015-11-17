@@ -94,7 +94,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
                 then().statusCode(HttpStatus.SC_OK).
                 body("username", equalTo(user.getUsername())).
                 body("email", equalTo(user.getEmail())).
-                body("authorities", hasItem("USER"));
+                body("authorities", hasItem("ROLE_USER"));
     }
 
     // PROFILE
@@ -115,7 +115,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
                 then().statusCode(HttpStatus.SC_OK).
                 body("username", equalTo(admin.getUsername())).
                 body("email", equalTo(admin.getEmail())).
-                body("authorities", hasItem("ADMIN"));
+                body("authorities", hasItem("ROLE_ADMIN"));
     }
 
     // PROFILE
@@ -128,7 +128,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
                 body("gender", equalTo(admin.getProfile().getGender().toString()));
     }
 
-    // GET OTHER USER AS ANONYMOUS
+    // GET OTHER ROLE_USER AS ANONYMOUS
     @Test
     public void testGetOtherUserAnonymous() {
         when().get("/users/1").
@@ -141,7 +141,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
                 then().statusCode(HttpStatus.SC_FORBIDDEN);
     }
 
-    // GET OTHER USER AS USER
+    // GET OTHER ROLE_USER AS ROLE_USER
     @Test
     public void testGetOtherUserUser() {
         long id = user.getId();
@@ -151,7 +151,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
                 then().statusCode(HttpStatus.SC_FORBIDDEN).body("message", equalTo("Access denied"));
     }
 
-    // GET OTHER USER AS ADMIN
+    // GET OTHER ROLE_USER AS ROLE_ADMIN
     @Test
     public void testGetOtherUserAdmin() {
         long userId = user.getId();
@@ -162,7 +162,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
                 body("email", equalTo(user.getEmail()));
     }
 
-    // GET OWN USER VIA ID
+    // GET OWN ROLE_USER VIA ID
     @Test
     public void testGetOwnUserId() {
         given().auth().form("admin", "password", formAuthConfig).

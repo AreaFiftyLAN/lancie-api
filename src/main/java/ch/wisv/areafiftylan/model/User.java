@@ -55,7 +55,7 @@ public class User implements Serializable, UserDetails {
         this.email = email;
         this.profile = new Profile();
         this.roles = new HashSet<>();
-        roles.add(Role.USER);
+        roles.add(Role.ROLE_USER);
     }
 
     User() { // jpa only

@@ -19,7 +19,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
 
         if (principal instanceof UserDetails) {
             User user = (User) principal;
-            return user.getId().equals(userId) || user.getAuthorities().contains(Role.ADMIN);
+            return user.getId().equals(userId) || user.getAuthorities().contains(Role.ROLE_ADMIN);
         } else {
             return false;
         }
@@ -35,7 +35,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
             Team team = teamService.getTeamById(teamId).orElseThrow(() -> new TeamNotFoundException(teamId));
             // Check for each of the teammembers if the username matches the requester
             return team.getMembers().stream().anyMatch(u -> u.getUsername().equals(user.getUsername())) ||
-                    user.getAuthorities().contains(Role.ADMIN);
+                    user.getAuthorities().contains(Role.ROLE_ADMIN);
         } else {
             return false;
         }
@@ -47,7 +47,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
             UserDetails user = (UserDetails) principal;
             Team team = teamService.getTeamById(teamId).orElseThrow(() -> new TeamNotFoundException(teamId));
             return team.getCaptain().getUsername().equals(user.getUsername()) ||
-                    user.getAuthorities().contains(Role.ADMIN);
+                    user.getAuthorities().contains(Role.ROLE_ADMIN);
         } else {
             return false;
         }
