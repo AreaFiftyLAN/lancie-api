@@ -1,10 +1,14 @@
 package ch.wisv.areafiftylan.service;
 
 import ch.wisv.areafiftylan.dto.TeamDTO;
+import ch.wisv.areafiftylan.exception.TeamNotFoundException;
+import ch.wisv.areafiftylan.exception.UserNotFoundException;
 import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.service.repository.TeamRepository;
+import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -22,9 +26,10 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public Team create(TeamDTO teamDTO) {
-        User captain = userService.getUserById(teamDTO.getCaptainID()).get();
-        Team team = new Team(teamDTO.getTeamName(), captain);
+    public Team create(String username, String teamname) {
+        User captain =
+                userService.getUserByUsername(username).orElseThrow(() -> new UsernameNotFoundException(username));
+        Team team = new Team(teamname, captain);
 
         return teamRepository.saveAndFlush(team);
     }
@@ -56,23 +61,59 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public Collection<Team> getTeamsByUsername(String username) {
-//        return teamRepository.findByMembersUsername(username);
+        //        return teamRepository.findByMembersUsername(username);
+        //FIXME
         return null;
     }
 
     @Override
     public Team update(Long teamId, TeamDTO input) {
         Team current = this.getTeamById(teamId).get();
-        current.setTeamName(input.getTeamName());
 
-        User captain = userService.getUserById(input.getCaptainID()).get();
-        current.setCaptain(captain);
+        // If the Teamname is set, change the Teamname
+        if (!Strings.isNullOrEmpty(input.getTeamName())) {
+            current.setTeamName(input.getTeamName());
+        }
+
+        // If the Captain username is set, change the Captain
+        if (!Strings.isNullOrEmpty(input.getCaptainUsername())) {
+            User captain = userService.getUserByUsername(input.getCaptainUsername()).get();
+            current.setCaptain(captain);
+        }
 
         return teamRepository.saveAndFlush(current);
     }
 
     @Override
-    public void delete(Long teamId) {
+    public Team delete(Long teamId) {
+        Team team = teamRepository.getOne(teamId);
         teamRepository.delete(teamId);
+        return team;
+    }
+
+    @Override
+    public void addMember(Long teamId, String username) {
+        Team team = teamRepository.findById(teamId).orElseThrow(() -> new TeamNotFoundException(teamId));
+        User user = userService.getUserByUsername(username).orElseThrow(() -> new UserNotFoundException(username));
+        if(team.addMember(user)) {
+            teamRepository.saveAndFlush(team);
+        } else {
+            throw new IllegalArgumentException("Could not add User to Team");
+        }
+    }
+
+    @Override
+    public boolean removeMember(Long teamId, String username) {
+        Team team = teamRepository.findById(teamId).orElseThrow(() -> new TeamNotFoundException(teamId));
+        User user = userService.getUserByUsername(username).orElseThrow(() -> new UserNotFoundException(username));
+        if (team.getCaptain().equals(user)) {
+            return false;
+        }
+        boolean success = team.removeMember(user);
+        if (success) {
+            teamRepository.saveAndFlush(team);
+        }
+        return success;
+
     }
 }

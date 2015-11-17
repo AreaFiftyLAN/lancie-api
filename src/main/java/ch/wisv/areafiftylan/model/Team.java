@@ -1,33 +1,45 @@
 package ch.wisv.areafiftylan.model;
 
+import ch.wisv.areafiftylan.model.view.View;
+import com.fasterxml.jackson.annotation.JsonView;
+
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
+@Table(uniqueConstraints = { @UniqueConstraint(name = "teamName", columnNames = { "teamName" }) })
 public class Team {
 
+    @JsonView(View.Public.class)
     @Id
     @GeneratedValue
     Long id;
 
-    @Column(nullable = false, unique = true)
+    @JsonView(View.Public.class)
+    @Column(nullable = false)
     String teamName;
 
+    @JsonView(View.Public.class)
     @ManyToMany
     Set<User> members;
 
+    @JsonView(View.Public.class)
     @ManyToOne(optional = false, cascade = CascadeType.MERGE)
     User captain;
+
+    @JsonView(View.Public.class)
+    int size;
 
     public Team(String teamName, User captain) {
         this.teamName = teamName;
         this.captain = captain;
         members = new HashSet<>();
         members.add(captain);
+        size = 1;
     }
 
-    public Team(){
+    public Team() {
         //jpa only
     }
 
@@ -51,8 +63,12 @@ public class Team {
         return members;
     }
 
-    public void addMember(User member) {
-        this.members.add(member);
+    public boolean addMember(User member) {
+        return this.members.add(member);
+    }
+
+    public boolean removeMember(User member) {
+        return this.members.remove(member);
     }
 
     public User getCaptain() {
@@ -61,5 +77,9 @@ public class Team {
 
     public void setCaptain(User captain) {
         this.captain = captain;
+    }
+
+    public int getSize() {
+        return members.size();
     }
 }

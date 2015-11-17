@@ -1,80 +1,25 @@
 package ch.wisv.areafiftylan;
 
-import ch.wisv.areafiftylan.model.User;
-import ch.wisv.areafiftylan.model.util.Gender;
-import ch.wisv.areafiftylan.model.util.Role;
-import ch.wisv.areafiftylan.service.repository.UserRepository;
-import com.jayway.restassured.RestAssured;
-import com.jayway.restassured.authentication.FormAuthConfig;
 import org.apache.http.HttpStatus;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.WebIntegrationTest;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.RestAssured.when;
-import static com.jayway.restassured.config.RedirectConfig.redirectConfig;
-import static com.jayway.restassured.config.RestAssuredConfig.config;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.IsCollectionContaining.hasItem;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
 
-
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = Application.class)
+@SpringApplicationConfiguration(classes = ApplicationTest.class)
 @WebIntegrationTest("server.port=0")
 @ActiveProfiles("test")
-public class UserRestIntegrationTest {
-
-    @Value("${local.server.port}")
-    int port;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    private User user;
-
-    private User admin;
-
-    private static FormAuthConfig formAuthConfig = new FormAuthConfig("/login", "username", "password");
-
-    @Before
-    public void init() {
-        userRepository.deleteAll();
-
-        user = new User("user", new BCryptPasswordEncoder().encode("password"), "user@mail.com");
-        user.getProfile()
-                .setAllFields("Jan", "de Groot", "MonsterKiller9001", Gender.MALE, "Mekelweg 4", "2826CD", "Delft",
-                        "0906-0666", null);
-
-        admin = new User("admin", new BCryptPasswordEncoder().encode("password"), "bert@mail.com");
-        admin.addRole(Role.ADMIN);
-        admin.getProfile()
-                .setAllFields("Bert", "Kleijn", "ILoveZombies", Gender.OTHER, "Mekelweg 20", "2826CD", "Amsterdam",
-                        "0611", null);
-
-        userRepository.saveAndFlush(user);
-        userRepository.saveAndFlush(admin);
-
-        RestAssured.port = port;
-        RestAssured.config = config().redirect(redirectConfig().followRedirects(false));
-    }
-
-    @After
-    public void tearDown() {
-        RestAssured.reset();
-        userRepository.deleteAll();
-    }
-
+public class UserRestIntegrationTest extends IntegrationTest {
 
     // CHECK AVAILABILITY
     @Test
@@ -103,7 +48,7 @@ public class UserRestIntegrationTest {
     @Test
     public void testGetAllUsersAnonymous() {
         when().get("/users").
-                then().statusCode(HttpStatus.SC_MOVED_TEMPORARILY).header("location", containsString("/login"));
+                then().statusCode(HttpStatus.SC_FORBIDDEN);
     }
 
 
@@ -131,14 +76,14 @@ public class UserRestIntegrationTest {
     @Test
     public void testGetCurrentUserAnonymous() {
         when().get("/users/current").
-                then().statusCode(HttpStatus.SC_MOVED_TEMPORARILY).header("location", containsString("/login"));
+                then().log().all().statusCode(HttpStatus.SC_FORBIDDEN);
     }
 
     // PROFILE
     @Test
     public void testGetCurrentProfileAnonymous() {
         when().get("/users/current/profile").
-                then().statusCode(HttpStatus.SC_MOVED_TEMPORARILY).header("location", containsString("/login"));
+                then().statusCode(HttpStatus.SC_FORBIDDEN);
     }
 
     // GET CURRENT USER AS USER
@@ -187,13 +132,13 @@ public class UserRestIntegrationTest {
     @Test
     public void testGetOtherUserAnonymous() {
         when().get("/users/1").
-                then().statusCode(HttpStatus.SC_MOVED_TEMPORARILY).header("location", containsString("/login"));
+                then().statusCode(HttpStatus.SC_FORBIDDEN);
     }
 
     @Test
     public void testGetOtherProfileAnonymous() {
         when().get("/users/1/profile").
-                then().statusCode(HttpStatus.SC_MOVED_TEMPORARILY).header("location", containsString("/login"));
+                then().statusCode(HttpStatus.SC_FORBIDDEN);
     }
 
     // GET OTHER USER AS USER

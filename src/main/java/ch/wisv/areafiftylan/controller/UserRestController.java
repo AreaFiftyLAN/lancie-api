@@ -141,17 +141,13 @@ public class UserRestController {
      *
      * @return The currently logged in User.
      */
+    @PreAuthorize("isAuthenticated()")
     @RequestMapping(value = "/current", method = RequestMethod.GET)
     public ResponseEntity<?> getCurrentUser(Authentication auth) {
-        if (auth != null) {
-            // Get the currently logged in user from the autowired Authentication object.
-            UserDetails currentUser = (UserDetails) auth.getPrincipal();
-            User user = userService.getUserByUsername(currentUser.getUsername()).get();
-            return new ResponseEntity<>(user, HttpStatus.OK);
-        } else {
-            return createResponseEntity(HttpStatus.NOT_FOUND, null, "No user currently logged in!", null);
-        }
-
+        // Get the currently logged in user from the autowired Authentication object.
+        UserDetails currentUser = (UserDetails) auth.getPrincipal();
+        User user = userService.getUserByUsername(currentUser.getUsername()).get();
+        return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
     /**
