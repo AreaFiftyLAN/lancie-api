@@ -16,7 +16,7 @@ import static org.hamcrest.core.IsCollectionContaining.hasItem;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = Application.class)
+@SpringApplicationConfiguration(classes = ApplicationTest.class)
 @WebIntegrationTest("server.port=0")
 @ActiveProfiles("test")
 public class UserRestIntegrationTest extends IntegrationTest {
