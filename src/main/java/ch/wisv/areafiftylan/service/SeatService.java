@@ -15,4 +15,8 @@ public interface SeatService {
     Seat getSeatByCoordinate(Coordinate coordinate);
 
     Seat reserveSeat(Coordinate coordinate, User user);
+
+    Seat getSeatByGroupAndNumber(String groupName, int seatNumber);
+
+    void addSeats(String groupName, int seats);
 }

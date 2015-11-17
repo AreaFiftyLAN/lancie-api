@@ -1,23 +1,27 @@
 package ch.wisv.areafiftylan.model;
 
-import ch.wisv.areafiftylan.model.util.Coordinate;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
 
 @Entity
+@Table(uniqueConstraints = @UniqueConstraint(name = "groupname", columnNames = { "seatgroup" }))
 public class Seat {
 
     boolean taken;
+
     @OneToOne(cascade = CascadeType.MERGE)
     User user;
-    @Id
-    private Coordinate coordinate;
 
-    public Seat(Coordinate coordinate) {
-        this.coordinate = coordinate;
+    String seatgroup;
+
+    int seatnumber;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long Id;
+
+    public Seat(String seatgroup, int seatnumber) {
+        this.seatgroup = seatgroup;
+        this.seatnumber = seatnumber;
         this.taken = false;
     }
 
@@ -43,7 +47,19 @@ public class Seat {
         this.taken = this.user != null;
     }
 
-    public Coordinate getCoordinate() {
-        return coordinate;
+    public String getSeatgroup() {
+        return seatgroup;
+    }
+
+    public void setSeatgroup(String seatgroup) {
+        this.seatgroup = seatgroup;
+    }
+
+    public int getSeatnumber() {
+        return seatnumber;
+    }
+
+    public void setSeatnumber(int seatnumber) {
+        this.seatnumber = seatnumber;
     }
 }
