@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
@@ -43,14 +44,13 @@ public class AuthenticationController {
 
 
     /**
-     * This basic GET method for the /login endpoint returns a simple json object telling you to log in. Can be replaced
-     * by a login form by Spring if desired.
+     * This basic GET method for the /login endpoint returns a simple login form.
      *
-     * @return Login message
+     * @return Login view
      */
     @RequestMapping(value = "/login", method = RequestMethod.GET)
-    public ResponseEntity<?> getLoginPage() {
-        return createResponseEntity(HttpStatus.UNAUTHORIZED, "Please log in");
+    public ModelAndView getLoginPage() {
+        return new ModelAndView("loginForm");
     }
 
     /**
