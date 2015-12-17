@@ -1,33 +1,26 @@
 package ch.wisv.areafiftylan.model;
 
-import ch.wisv.areafiftylan.model.util.SeatGroup;
+import ch.wisv.areafiftylan.model.view.View;
+import com.fasterxml.jackson.annotation.JsonView;
 
 import javax.persistence.*;
 
 @Entity
 public class Seat {
 
-    boolean taken;
+    @JsonView(View.Public.class)
+    public boolean taken;
 
     @OneToOne(cascade = CascadeType.MERGE)
-    User user;
-
-    SeatGroup seatgroup;
-
-    int seatnumber;
+    @JsonView(View.Public.class)
+    public User user;
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long Id;
 
-    public Seat(SeatGroup seatgroup, int seatnumber) {
-        this.seatgroup = seatgroup;
-        this.seatnumber = seatnumber;
-        this.taken = false;
-    }
-
     public Seat() {
-        //JPA only
+        this.taken = false;
     }
 
     public boolean isTaken() {
@@ -48,19 +41,5 @@ public class Seat {
         this.taken = this.user != null;
     }
 
-    public SeatGroup getSeatgroup() {
-        return seatgroup;
-    }
 
-    public void setSeatgroup(SeatGroup seatgroup) {
-        this.seatgroup = seatgroup;
-    }
-
-    public int getSeatnumber() {
-        return seatnumber;
-    }
-
-    public void setSeatnumber(int seatnumber) {
-        this.seatnumber = seatnumber;
-    }
 }

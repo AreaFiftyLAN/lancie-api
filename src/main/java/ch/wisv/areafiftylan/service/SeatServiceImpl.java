@@ -3,62 +3,82 @@ package ch.wisv.areafiftylan.service;
 import ch.wisv.areafiftylan.exception.SeatNotFoundException;
 import ch.wisv.areafiftylan.model.Seat;
 import ch.wisv.areafiftylan.model.User;
-import ch.wisv.areafiftylan.model.util.Coordinate;
-import ch.wisv.areafiftylan.service.repository.SeatRepository;
+import ch.wisv.areafiftylan.model.util.SeatGroup;
+import ch.wisv.areafiftylan.service.repository.SeatGroupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class SeatServiceImpl implements SeatService {
 
-    SeatRepository seatRepository;
+    SeatGroupRepository seatGroupRepository;
 
     @Autowired
-    public SeatServiceImpl(SeatRepository seatRepository) {
-        this.seatRepository = seatRepository;
+    public SeatServiceImpl(SeatGroupRepository seatGroupRepository) {
+        this.seatGroupRepository = seatGroupRepository;
     }
 
     @Override
     public Seat getSeatByUser(User user) {
-        return this.seatRepository.findByUser(user);
+        SeatGroup seatGroup = this.seatGroupRepository.findBySeats_User_Username(user.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException(user.getUsername()));
+
+        for (Seat seat : seatGroup.getSeats().values()) {
+            if (seat.getUser().equals(user)) {
+                return seat;
+            }
+        }
+        throw new UsernameNotFoundException(user.getUsername());
     }
 
     @Override
     public List<Seat> getAllSeats() {
-        return seatRepository.findAll();
+        // Have fun deciphering this one
+        return seatGroupRepository.findAll().stream().map(seatGroup -> seatGroup.getSeats().values())
+                .flatMap(Collection::stream).collect(Collectors.toList());
     }
 
     @Override
-    public Seat getSeatByCoordinate(Coordinate coordinate) {
-        return seatRepository.findByCoordinate(coordinate);
+    public List<SeatGroup> getAllSeatGroups() {
+        return seatGroupRepository.findAll();
     }
 
     @Override
-    public Seat reserveSeat(Coordinate coordinate, User user) {
-        Seat seat = seatRepository.findByCoordinate(coordinate);
-        seat.setUser(user);
-        return seatRepository.saveAndFlush(seat);
+    public SeatGroup getSeatGroupByName(String groupname) {
+        return seatGroupRepository.findByName(groupname).orElseThrow(() -> new SeatNotFoundException(groupname, 0));
+    }
+
+    @Override
+    public boolean reserveSeat(String groupname, int seatnumber, User user) {
+        SeatGroup seatGroup = seatGroupRepository.findByName(groupname)
+                .orElseThrow(() -> new SeatNotFoundException(groupname, seatnumber));
+        Seat seat = seatGroup.getSeats().get(seatnumber);
+        if (!seat.isTaken()) {
+            seat.setUser(user);
+            seatGroupRepository.saveAndFlush(seatGroup);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @Override
     public Seat getSeatByGroupAndNumber(String groupName, int seatNumber) {
-        return seatRepository.findByGroupnameAndSeatnumber(groupName, seatNumber)
+        SeatGroup seatGroup = seatGroupRepository.findByName(groupName)
                 .orElseThrow(() -> new SeatNotFoundException(groupName, seatNumber));
+        return seatGroup.getSeats().get(seatNumber);
     }
 
     @Override
     public void addSeats(String groupName, int seats) {
-        List<Seat> seatsList = new ArrayList<>(seats);
+        SeatGroup seatGroup = new SeatGroup(groupName, seats);
 
-        for (int i = 1; i <= seats; i++) {
-            Seat seat = new Seat(groupName, i);
-            seatsList.add(seat);
-        }
-
-        seatRepository.save(seatsList);
-        seatRepository.flush();
+        seatGroupRepository.save(seatGroup);
+        seatGroupRepository.flush();
     }
 }
