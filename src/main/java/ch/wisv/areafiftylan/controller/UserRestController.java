@@ -36,8 +36,6 @@ public class UserRestController {
         this.userService = userService;
     }
 
-    //////////// USER MAPPINGS //////////////////
-
     /**
      * This method accepts POST requests on /users. It will send the input to the {@link UserService} to create a new
      * user
@@ -77,22 +75,6 @@ public class UserRestController {
     }
 
     /**
-     * This method accepts PUT requests on /users/current. It replaces all fields with the new user provided in the
-     * RequestBody and resets the profile fields. All references to the old user are maintained (Team membership ect).
-     *
-     * @param input A UserDTO object containing data of the new user
-     *
-     * @return The User object.
-     */
-    @PreAuthorize("isAuthenticated()")
-    @RequestMapping(value = "/current", method = RequestMethod.PUT)
-    public ResponseEntity<?> replaceCurrentUser(@Validated @RequestBody UserDTO input, Authentication auth) {
-        User user = (User) auth.getPrincipal();
-        user = userService.replace(user.getId(), input);
-        return createResponseEntity(HttpStatus.OK, "User successfully replaced", user);
-    }
-
-    /**
      * Edit the current user. Only change the fields which have been set. All fields should be in the requestbody.
      * <p>
      * TODO: The UserDTO needs to be valid right now, this should allow for null fields.
@@ -110,15 +92,6 @@ public class UserRestController {
         return createResponseEntity(HttpStatus.OK, "User successfully updated", user);
     }
 
-    @PreAuthorize("isAuthenticated()")
-    @RequestMapping(value = "/current", method = RequestMethod.PATCH)
-    public ResponseEntity<?> updateCurrentUser(@Validated @RequestBody UserDTO input, Authentication auth) {
-        //TODO: Differentiate between PATCH and PUT
-        User user = (User) auth.getPrincipal();
-        user = userService.replace(user.getId(), input);
-        return createResponseEntity(HttpStatus.OK, "User successfully replaced", user);
-    }
-
     /**
      * Get the user with a specific userId
      *
@@ -130,24 +103,6 @@ public class UserRestController {
     @RequestMapping(value = "/{userId}", method = RequestMethod.GET)
     public User getUserById(@PathVariable Long userId) {
         return this.userService.getUserById(userId).get();
-    }
-
-    /**
-     * Get the User currently logged in. Because our User model implements the Spring Security UserDetails, this can be
-     * directly derived from the Authentication object which is automatically added. Returns a not-found entity if
-     * there's no user logged in. Returns the user
-     *
-     * @param auth Current Authentication object, automatically taken from the SecurityContext
-     *
-     * @return The currently logged in User.
-     */
-    @PreAuthorize("isAuthenticated()")
-    @RequestMapping(value = "/current", method = RequestMethod.GET)
-    public ResponseEntity<?> getCurrentUser(Authentication auth) {
-        // Get the currently logged in user from the autowired Authentication object.
-        UserDetails currentUser = (UserDetails) auth.getPrincipal();
-        User user = userService.getUserByUsername(currentUser.getUsername()).get();
-        return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
     /**
@@ -201,115 +156,12 @@ public class UserRestController {
         return userService.checkUsernameAvailable(username);
     }
 
-    //////////// PROFILE MAPPINGS //////////////////
-
-    /**
-     * Add a profile to a user. An empty profile is created when a user is created, so this method fills the existing
-     * fields
-     *
-     * @param userId The userId of the user to which the profile needs to be added
-     * @param input  A representation of the profile
-     *
-     * @return The user with the new profile
-     */
-    @PreAuthorize("@currentUserServiceImpl.canAccessUser(principal, #userId)")
-    @RequestMapping(value = "/{userId}/profile", method = RequestMethod.POST)
-    public ResponseEntity<?> addProfile(@PathVariable Long userId, @Validated @RequestBody ProfileDTO input) {
-        User user = userService.addProfile(userId, input);
-
-        // Create HttpHeaders to include the location of the newly created profile
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setLocation(
-                ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}/profile").buildAndExpand(user.getId())
-                        .toUri());
-
-        return createResponseEntity(HttpStatus.CREATED, httpHeaders,
-                "Profile succesfully created at" + httpHeaders.getLocation(), user.getProfile());
-    }
-
-    /**
-     * Add a profile to the current user. An empty profile is created when a user is created, so this method fills the
-     * existing fields
-     *
-     * @param input A representation of the profile
-     *
-     * @return The user with the new profile
-     */
-    @PreAuthorize("isAuthenticated()")
-    @RequestMapping(value = "/current/profile", method = RequestMethod.POST)
-    public ResponseEntity<?> addProfile(@Validated @RequestBody ProfileDTO input, Authentication auth) {
-        return this.addProfile(((User) auth.getPrincipal()).getId(), input);
-    }
-
-    /**
-     * Change the profile fields of the User. Basically the same as the POST request.
-     *
-     * @param userId The userId of the user to which the profile needs to be added
-     * @param input  A representation of the profile
-     *
-     * @return The user with the changed profile
-     */
-    @PreAuthorize("@currentUserServiceImpl.canAccessUser(principal, #userId)")
-    @RequestMapping(value = "/{userId}/profile", method = RequestMethod.PUT)
-    public ResponseEntity<?> changeProfile(@PathVariable Long userId, @Validated @RequestBody ProfileDTO input) {
-        User user = userService.changeProfile(userId, input);
-
-        return createResponseEntity(HttpStatus.OK, "Profile successfully updated", user.getProfile());
-    }
-
-    /**
-     * Get the profile view without the related User
-     *
-     * @param userId UserId of the user
-     *
-     * @return The profile of the specific user
-     */
-    @PreAuthorize("@currentUserServiceImpl.canAccessUser(principal, #userId)")
-    @RequestMapping(value = "/{userId}/profile", method = RequestMethod.GET)
-    public Profile readProfile(@PathVariable Long userId) {
-        return userService.getUserById(userId).get().getProfile();
-    }
-
-    /**
-     * Get the profile from the currently logged on user
-     *
-     * @param auth Authentication of the current user
-     *
-     * @return The profile of the currently logged on user
-     */
-    @PreAuthorize("isAuthenticated()")
-    @RequestMapping(value = "/current/profile", method = RequestMethod.GET)
-    public ResponseEntity<?> readCurrentProfile(Authentication auth) {
-        if (auth != null) {
-            User user = (User) auth.getPrincipal();
-            Profile profile = userService.getUserById(user.getId()).
-                    orElseThrow(() -> new UserNotFoundException(user.getId())).getProfile();
-            return new ResponseEntity<>(profile, HttpStatus.OK);
-        } else {
-            return createResponseEntity(HttpStatus.NOT_FOUND, null, "No user currently logged in!", null);
-        }
-    }
-
-    /**
-     * Resets the profile fields to null. The profile can't actually be deleted as it is a required field.
-     *
-     * @param userId The userId of the user which needs the profile reset
-     *
-     * @return Empty body with StatusCode OK.
-     */
-    @PreAuthorize("hasRole('ADMIN')")
-    @RequestMapping(value = "/{userId}/profile", method = RequestMethod.DELETE)
-    public ResponseEntity<?> resetProfile(@PathVariable Long userId) {
-        Profile profile = userService.resetProfile(userId);
-        return createResponseEntity(HttpStatus.OK, "Profile successfully reset", profile);
-    }
-
     //////////// EXCEPTION HANDLING //////////////////
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<?> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
         HttpStatus status;
-        String message = "Database contraint violated!";
+        String message = "Database constraint violated!";
 
         try {
             throw ex.getCause();
@@ -325,10 +177,5 @@ public class UserRestController {
         }
 
         return createResponseEntity(HttpStatus.CONFLICT, null, message, null);
-    }
-
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<?> handleAccessDeniedException(AccessDeniedException ex) {
-        return createResponseEntity(HttpStatus.FORBIDDEN, "Access denied");
     }
 }
