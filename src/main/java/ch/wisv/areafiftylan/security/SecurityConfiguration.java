@@ -12,6 +12,9 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.csrf.CsrfFilter;
+import org.springframework.security.web.csrf.CsrfToken;
+
+import static ch.wisv.areafiftylan.util.ResponseEntityBuilder.createLoginResponseString;
 
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
@@ -25,30 +28,40 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
      * This method is responsible for the main security configuration. The formlogin() section defines how to login.
      * POST requests should be made to /login with a username and password field. Errors are redirected to /login?error.
      * The logout section is similar.
-     *
-     * The last section is about permissions. Anything related to Login is accessible for everyone. Use this
-     * for URL-based permissions if that's the best way. Use Method specific permissions if this is not feasible.
-     *
+     * <p>
+     * The last section is about permissions. Anything related to Login is accessible for everyone. Use this for
+     * URL-based permissions if that's the best way. Use Method specific permissions if this is not feasible.
+     * <p>
      * By default, all requests to the API should come from authenticated sources. (USER or ADMIN)
+     *
      * @param http default parameter
+     *
      * @throws Exception
      */
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+        //@formatter:off
         http.formLogin()
                 .loginPage("/login")
                 .failureUrl("/login?error")
                 .usernameParameter("username")
                 .permitAll()
-            .and()
+                //@formatter:on
+                .successHandler((request, response, authentication) -> {
+                    String token = ((CsrfToken) request.getAttribute(CsrfToken.class.getName())).getToken();
+                    response.getWriter().write(createLoginResponseString(token));
+                    response.getWriter().flush();
+                })
+                //@formatter:off
+                .and()
                 .logout()
                 .logoutUrl("/logout")
                 .logoutSuccessUrl("/")
                 .permitAll()
-            .and().authorizeRequests()
+                .and().authorizeRequests()
                 .antMatchers("/mail").hasAuthority("ADMIN")
                 .anyRequest().permitAll();
-//                .anyRequest().authenticated();
+        //                .anyRequest().authenticated();
         http.addFilterAfter(new CsrfTokenResponseHeaderBindingFilter(), CsrfFilter.class);
     }
 
@@ -56,5 +69,4 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetailsService).passwordEncoder(new BCryptPasswordEncoder());
     }
-
 }

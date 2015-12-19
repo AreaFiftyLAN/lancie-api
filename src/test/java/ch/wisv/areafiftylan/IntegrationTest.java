@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.config.RedirectConfig.redirectConfig;
 import static com.jayway.restassured.config.RestAssuredConfig.config;
 
@@ -30,6 +31,11 @@ public abstract class IntegrationTest {
     protected User admin;
 
     protected static FormAuthConfig formAuthConfig = new FormAuthConfig("/login", "username", "password");
+
+    protected static FormAuthConfig springFormConfig =
+            new FormAuthConfig("/login", "username", "password").withAutoDetectionOfCsrf().withLoggingEnabled();
+
+    protected String csrfToken;
 
     @Before
     public void initIntegrationTest() {
@@ -50,7 +56,8 @@ public abstract class IntegrationTest {
         userRepository.saveAndFlush(admin);
 
         RestAssured.port = port;
-        RestAssured.config = config().redirect(redirectConfig().followRedirects(false));
+        RestAssured.config = config().redirect(redirectConfig().followRedirects(true));
+        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
     }
 
     @After
@@ -58,5 +65,10 @@ public abstract class IntegrationTest {
         userRepository.delete(user);
         userRepository.delete(admin);
         RestAssured.reset();
+    }
+
+    protected String getCsrfToken() {
+        String token = given().when().get("/login").header("X-CSRF-TOKEN");
+        return token;
     }
 }

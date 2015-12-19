@@ -144,21 +144,21 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void getTeamAsAdmin(){
+    public void getTeamAsAdmin() {
         Response team = getTeam(createTeamWithCaptain(), "admin", "password");
 
         team.then().statusCode(HttpStatus.SC_OK);
     }
 
     @Test
-    public void getTeamAsCaptain(){
+    public void getTeamAsCaptain() {
         Response team = getTeam(createTeamWithCaptain(), "captain", "password");
 
         team.then().statusCode(HttpStatus.SC_OK);
     }
 
     @Test
-    public void getTeamAsMember(){
+    public void getTeamAsMember() {
         String location = createTeamWithCaptain();
         addUserAsCaptain(location, user);
         Response team = getTeam(location, "user", "password");
@@ -167,7 +167,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void getTeamAsUser(){
+    public void getTeamAsUser() {
         String location = createTeamWithCaptain();
         Response team = getTeam(location, "user", "password");
 
@@ -176,7 +176,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
     private void addUserAsCaptain(String location, User user) {
         given().
-                auth().form("captain", "password", formAuthConfig).
+                auth().form("captain", "password", springFormConfig).
                 when().
                 content(user.getUsername()).post(location).
                 then().log().ifValidationFails().statusCode(HttpStatus.SC_OK);
@@ -186,7 +186,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
         team1.put("captainUsername", teamCaptain.getUsername());
 
         return given().
-                auth().form("captain", "password", formAuthConfig).
+                auth().form("captain", "password", springFormConfig).log().all().
                 when().
                 content(team1).contentType(ContentType.JSON).post("/teams").
                 then().log().all().extract().response().header("Location");
@@ -236,7 +236,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
         addUserAsCaptain(location, user);
 
         given().
-            auth().form("captain", "password", formAuthConfig).
+            auth().form("captain", "password", formAuthConfig).log().all().
         when().
             get(location).
         then().log().ifValidationFails().
@@ -318,7 +318,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void testRemoveMember_captain(){
+    public void testRemoveMember_captain() {
         String location = createTeamWithCaptain();
 
         addUserAsCaptain(location, user);
@@ -334,7 +334,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void testRemoveMember_admin(){
+    public void testRemoveMember_admin() {
         String location = createTeamWithCaptain();
 
         addUserAsCaptain(location, user);
@@ -350,7 +350,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void testRemoveMember_member(){
+    public void testRemoveMember_member() {
         String location = createTeamWithCaptain();
 
         addUserAsCaptain(location, user);
@@ -366,7 +366,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void testRemoveMember_user(){
+    public void testRemoveMember_user() {
         String location = createTeamWithCaptain();
 
         addUserAsCaptain(location, admin);
