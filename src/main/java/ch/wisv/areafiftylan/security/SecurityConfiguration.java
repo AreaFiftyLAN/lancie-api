@@ -12,9 +12,6 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.csrf.CsrfFilter;
-import org.springframework.security.web.csrf.CsrfToken;
-
-import static ch.wisv.areafiftylan.util.ResponseEntityBuilder.createLoginResponseString;
 
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
