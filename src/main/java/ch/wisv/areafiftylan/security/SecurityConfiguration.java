@@ -12,9 +12,6 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.csrf.CsrfFilter;
-import org.springframework.security.web.csrf.CsrfToken;
-
-import static ch.wisv.areafiftylan.util.ResponseEntityBuilder.createLoginResponseString;
 
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
@@ -46,22 +43,19 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .failureUrl("/login?error")
                 .usernameParameter("username")
                 .permitAll()
-                //@formatter:on
-                .successHandler((request, response, authentication) -> {
-                    String token = ((CsrfToken) request.getAttribute(CsrfToken.class.getName())).getToken();
-                    response.getWriter().write(createLoginResponseString(token));
-                    response.getWriter().flush();
-                })
-                //@formatter:off
-                .and()
+            .and()
                 .logout()
                 .logoutUrl("/logout")
                 .logoutSuccessUrl("/")
                 .permitAll()
-                .and().authorizeRequests()
+            .and().authorizeRequests()
                 .antMatchers("/mail").hasAuthority("ADMIN")
                 .anyRequest().permitAll();
         //                .anyRequest().authenticated();
+        //@formatter:on
+
+        // This is the filter that adds the CSRF Token to the header. CSRF is enabled by default in Spring, this just
+        // copies the content to the X-CSRF-TOKEN header field.
         http.addFilterAfter(new CsrfTokenResponseHeaderBindingFilter(), CsrfFilter.class);
     }
 

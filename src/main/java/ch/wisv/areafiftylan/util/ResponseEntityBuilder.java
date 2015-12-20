@@ -1,13 +1,10 @@
 package ch.wisv.areafiftylan.util;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -48,21 +45,6 @@ public class ResponseEntityBuilder {
     public static ResponseEntity<?> createResponseEntity(HttpStatus httpStatus, HttpHeaders httpHeaders,
                                                          String message) {
         return createResponseEntity(httpStatus, httpHeaders, message, null);
-    }
-
-    public static String createLoginResponseString(String token) {
-        Map<String, Object> responseBody = new HashMap<>();
-        responseBody.put("status", HttpStatus.OK);
-        responseBody.put("timestamp", LocalDateTime.now().toString());
-        responseBody.put("message", "Successfully logged in");
-        responseBody.put("_csrf", token);
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            return mapper.writeValueAsString(responseBody);
-        } catch (JsonProcessingException ignored) {
-        }
-        return "Useful error";
-
     }
 }
 

@@ -4,8 +4,6 @@ security.user.password =
 #Default Property file, which is committed in Git
 spring.mail.host=
 spring.mail.port=
-spring.mail.username=
-spring.mail.password=
 
 # THYMELEAF (ThymeleafAutoConfiguration)
 spring.thymeleaf.check-template-location=true
