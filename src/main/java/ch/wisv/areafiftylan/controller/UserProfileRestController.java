@@ -17,8 +17,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import static ch.wisv.areafiftylan.util.ResponseEntityBuilder.createResponseEntity;
 
 @RestController
-@RequestMapping("/users/current")
-@PreAuthorize("isAuthenticated()")
+@RequestMapping("/users")
 public class UserProfileRestController {
 
     private UserService userService;
