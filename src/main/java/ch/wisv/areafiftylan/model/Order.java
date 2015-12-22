@@ -1,33 +1,56 @@
 package ch.wisv.areafiftylan.model;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import java.util.Collection;
-import java.util.HashSet;
+import ch.wisv.areafiftylan.model.util.OrderStatus;
 
+import javax.persistence.*;
+import java.time.LocalDateTime;
+import java.util.Collection;
+
+@Entity
 public class Order {
 
     @Id
     @GeneratedValue
     Long id;
 
-    double amount;
+    @OneToMany(cascade = CascadeType.MERGE, targetEntity = Ticket.class)
+    Collection<Ticket> tickets;
 
-    Collection<Ticket> tickets = new HashSet<>();
+    OrderStatus status;
 
-    boolean paid;
+    LocalDateTime creationDateTime;
+
+    /**
+     * This String can be used to store an external reference. Payment providers often have their own id.
+     */
+    String reference;
 
     @ManyToOne
     User user;
 
-    public Order(double amount, User user, Collection<Ticket> tickets) {
-        this.amount = amount;
+    public Order(User user) {
         this.user = user;
-        this.tickets = tickets;
+        status = OrderStatus.CREATING;
+        creationDateTime = LocalDateTime.now();
     }
 
-    public void setPaid(boolean paid) {
-        this.paid = paid;
+    public Long getId() {
+        return id;
+    }
+
+    public Collection<Ticket> getTickets() {
+        return tickets;
+    }
+
+    public LocalDateTime getCreationDateTime() {
+        return creationDateTime;
+    }
+
+    public String getReference() {
+        return reference;
+    }
+
+    public User getUser() {
+        return user;
     }
 }

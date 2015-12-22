@@ -1,6 +1,6 @@
 package ch.wisv.areafiftylan.service;
 
-import ch.wisv.areafiftylan.dto.OrderDTO;
+import ch.wisv.areafiftylan.dto.TicketDTO;
 import ch.wisv.areafiftylan.exception.UserNotFoundException;
 import ch.wisv.areafiftylan.model.Order;
 import ch.wisv.areafiftylan.model.Ticket;
@@ -8,11 +8,12 @@ import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.util.TicketType;
 import ch.wisv.areafiftylan.service.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 
+@Service
 public class OrderServiceImpl implements OrderService {
 
     OrderRepository orderRepository;
@@ -40,26 +41,38 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Order addOrder(Long userId, OrderDTO orderDTO) {
+    public Order create(Long userId, TicketDTO ticketDTO) {
         User user = userService.getUserById(userId).orElseThrow(() -> new UserNotFoundException(userId));
-        int amountOfTickets = orderDTO.getNumberOfTickets();
+        Order order = new Order(user);
 
-        Collection<Ticket> tickets = new HashSet<>();
-        for (int i = 0; i < amountOfTickets; i++) {
-            //TODO: Make this dependent on orderDTO!
-            tickets.add(new Ticket(user, TicketType.FULL, false));
-        }
-
-        //TODO: Price calculation
-        double price = amountOfTickets * 32.5;
-        Order order = new Order(price, user, tickets);
+        //FIXME: Process the DTO
 
         return order;
     }
 
     @Override
-    public void setPaid(Long id) {
-        Order order = orderRepository.findOne(id);
-        order.setPaid(true);
+    public void addTicketToOrder(Long orderId, TicketDTO ticketDTO) {
+        //TODO
+    }
+
+    @Override
+    public Ticket requestTicketOfType(TicketType type) {
+        //TODO
+        return null;
+    }
+
+    @Override
+    public void transferTicket(User user, String ticketKey) {
+        //TODO
+    }
+
+    @Override
+    public void requestPayment(Long orderId) {
+        //TODO
+    }
+
+    @Override
+    public void updateOrderStatus(Long orderId) {
+        //TODO
     }
 }

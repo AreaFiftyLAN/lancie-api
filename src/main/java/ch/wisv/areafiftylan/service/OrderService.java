@@ -1,7 +1,10 @@
 package ch.wisv.areafiftylan.service;
 
-import ch.wisv.areafiftylan.dto.OrderDTO;
+import ch.wisv.areafiftylan.dto.TicketDTO;
 import ch.wisv.areafiftylan.model.Order;
+import ch.wisv.areafiftylan.model.Ticket;
+import ch.wisv.areafiftylan.model.User;
+import ch.wisv.areafiftylan.model.util.TicketType;
 
 import java.util.Collection;
 import java.util.List;
@@ -14,8 +17,16 @@ public interface OrderService {
 
     Collection<Order> findOrdersByUsername(String username);
 
-    Order addOrder(Long userId, OrderDTO orderDTO);
+    Order create(Long userId, TicketDTO ticketDTO);
 
-    void setPaid(Long id);
+    void addTicketToOrder(Long orderId, TicketDTO ticketDTO);
+
+    Ticket requestTicketOfType(TicketType type);
+
+    void transferTicket(User user, String ticketKey);
+
+    void requestPayment(Long orderId);
+
+    void updateOrderStatus(Long orderId);
 
 }
