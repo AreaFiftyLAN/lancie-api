@@ -62,16 +62,20 @@ public abstract class IntegrationTest {
         userRepository.saveAndFlush(admin);
 
         RestAssured.port = port;
-        RestAssured.config = config().redirect(redirectConfig().followRedirects(true));
+        RestAssured.config = config().redirect(redirectConfig().followRedirects(false));
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
     }
 
     @After
     public void tearDownIntegrationTest() {
-        userRepository.delete(user);
-        userRepository.delete(admin);
+        userRepository.deleteAll();
         RestAssured.reset();
     }
+
+    protected SessionData login(String username) {
+        return login(username, "password");
+    }
+
 
     protected SessionData login(String username, String password) {
         //@formatter:off
@@ -87,7 +91,7 @@ public abstract class IntegrationTest {
         String token = getLoginResponse.header("X-CSRF-TOKEN");
 
         //@formatter:off
-        given().log().all().
+        given().
             filter(sessionFilter).
             param("username", username).
             param("password", password).
@@ -96,11 +100,11 @@ public abstract class IntegrationTest {
             post("/login");
 
         Response tokenResponse =
-            given().log().all().
+            given().
                 filter(sessionFilter).
             when().
                 get("/token").
-            then().log().all().
+            then().
                 extract().response();
 
         sessionFilter.getSessionId();
@@ -121,12 +125,12 @@ public abstract class IntegrationTest {
 
         String token = getLoginResponse.header("X-CSRF-TOKEN");
 
-        given().log().all().
+        given().
             filter(sessionFilter).
             param("_csrf", token).
         when().
             post("/logout").
-        then().log().all();
+        then();
         //@formatter:on
     }
 }

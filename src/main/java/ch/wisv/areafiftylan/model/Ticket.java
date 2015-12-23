@@ -18,7 +18,6 @@ public class Ticket {
     String key;
 
     @ManyToOne(cascade = CascadeType.MERGE)
-    @JsonView(View.NoProfile.class)
     User owner;
 
     @ManyToOne(cascade = CascadeType.MERGE)

@@ -55,6 +55,7 @@ public class OrderRestController {
      */
     @PreAuthorize("isAuthenticated()")
     @RequestMapping(value = "/orders", method = RequestMethod.POST)
+    @JsonView(View.OrderOverview.class)
     public ResponseEntity<?> createOrder(Authentication auth, @RequestBody TicketDTO ticketDTO) {
         HttpHeaders headers = new HttpHeaders();
         User user = (User) auth.getPrincipal();
@@ -64,7 +65,7 @@ public class OrderRestController {
         headers.setLocation(
                 ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(order.getId()).toUri());
 
-        return createResponseEntity(HttpStatus.OK, headers,
+        return createResponseEntity(HttpStatus.CREATED, headers,
                 "Ticket available and order successfully created at " + headers.getLocation(), order);
     }
 
