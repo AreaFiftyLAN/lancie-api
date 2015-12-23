@@ -1,6 +1,8 @@
 package ch.wisv.areafiftylan.model;
 
 import ch.wisv.areafiftylan.model.util.TicketType;
+import ch.wisv.areafiftylan.model.view.View;
+import com.fasterxml.jackson.annotation.JsonView;
 
 import javax.persistence.*;
 import java.util.UUID;
@@ -10,19 +12,23 @@ public class Ticket {
 
     @Id
     @GeneratedValue
+    @JsonView(View.OrderOverview.class)
     Long id;
 
     String key;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.MERGE)
+    @JsonView(View.NoProfile.class)
     User owner;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.MERGE)
     User previousOwner;
 
     @Enumerated(EnumType.STRING)
+    @JsonView(View.OrderOverview.class)
     TicketType type;
 
+    @JsonView(View.OrderOverview.class)
     boolean pickupService;
 
     boolean lockedForTransfer;
@@ -34,6 +40,10 @@ public class Ticket {
         this.pickupService = pickupService;
         lockedForTransfer = false;
         key = UUID.randomUUID().toString();
+    }
+
+    public Ticket() {
+        //JPA Only
     }
 
     public boolean isLockedForTransfer() {

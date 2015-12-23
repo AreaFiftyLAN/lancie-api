@@ -22,9 +22,11 @@ public class User implements Serializable, UserDetails {
     private String passwordHash;
 
     @Column(nullable = false)
+    @JsonView(View.NoProfile.class)
     protected String username;
 
     @Column(nullable = false)
+    @JsonView(View.NoProfile.class)
     protected String email;
 
     @OneToOne(targetEntity = Profile.class, cascade = CascadeType.ALL)
@@ -33,6 +35,7 @@ public class User implements Serializable, UserDetails {
 
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Id
+    @JsonView(View.NoProfile.class)
     private Long id;
 
     @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)

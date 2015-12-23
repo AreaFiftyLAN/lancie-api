@@ -4,12 +4,15 @@ import ch.wisv.areafiftylan.dto.TicketDTO;
 import ch.wisv.areafiftylan.exception.TicketUnavailableException;
 import ch.wisv.areafiftylan.model.Order;
 import ch.wisv.areafiftylan.model.User;
+import ch.wisv.areafiftylan.model.view.View;
 import ch.wisv.areafiftylan.service.OrderService;
 import ch.wisv.areafiftylan.service.UserService;
+import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -34,8 +37,10 @@ public class OrderRestController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @RequestMapping(value = "/orders", method = RequestMethod.GET)
+    @JsonView(View.OrderOverview.class)
     public Collection<Order> getAllOrders() {
         return orderService.getAllOrders();
+
     }
 
     /**
@@ -119,5 +124,11 @@ public class OrderRestController {
     @ExceptionHandler(TicketUnavailableException.class)
     public ResponseEntity<?> handleTicketUnavailableException(TicketUnavailableException e) {
         return createResponseEntity(HttpStatus.GONE, e.getMessage());
+    }
+
+    //TODO: Move this to central ControllerAdvice class
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<?> handleAccessDeniedException(AccessDeniedException ex) {
+        return createResponseEntity(HttpStatus.FORBIDDEN, "Access denied");
     }
 }

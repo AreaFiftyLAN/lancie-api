@@ -36,6 +36,7 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-mail")
     compile("org.springframework.boot:spring-boot-starter-thymeleaf")
     compile("com.allanditzel:spring-security-csrf-token-filter:1.1")
+    compile("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.6.4")
     runtime("org.hsqldb:hsqldb")
     runtime("org.postgresql:postgresql:9.4-1203-jdbc42")
     compile("com.google.guava:guava:19.0")

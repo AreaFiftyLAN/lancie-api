@@ -54,8 +54,8 @@ public class AuthenticationController {
     }
 
     @RequestMapping(value = "/token", method = RequestMethod.GET)
-    public ResponseEntity<?> checkSession(HttpServletRequest request) {
-        return createResponseEntity(HttpStatus.OK, "Here's your token!", request);
+    public ResponseEntity<?> checkSession() {
+        return createResponseEntity(HttpStatus.OK, "Here's your token!");
     }
 
     /**
