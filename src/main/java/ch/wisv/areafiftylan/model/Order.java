@@ -1,37 +1,53 @@
 package ch.wisv.areafiftylan.model;
 
 import ch.wisv.areafiftylan.model.util.OrderStatus;
+import ch.wisv.areafiftylan.model.view.View;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonView;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.HashSet;
 
 @Entity
+
 public class Order {
 
     @Id
     @GeneratedValue
     Long id;
 
-    @OneToMany(cascade = CascadeType.MERGE, targetEntity = Ticket.class)
+    @OneToMany(cascade = CascadeType.MERGE, targetEntity = Ticket.class, fetch = FetchType.EAGER)
+    @JsonView(View.OrderOverview.class)
     Collection<Ticket> tickets;
 
+    @JsonView(View.OrderOverview.class)
     OrderStatus status;
 
+    @JsonView(View.OrderOverview.class)
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     LocalDateTime creationDateTime;
 
     /**
      * This String can be used to store an external reference. Payment providers often have their own id.
      */
+    @JsonView(View.OrderOverview.class)
     String reference;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.MERGE)
+    @JsonView(View.OrderOverview.class)
     User user;
 
     public Order(User user) {
         this.user = user;
         status = OrderStatus.CREATING;
         creationDateTime = LocalDateTime.now();
+        this.tickets = new HashSet<>();
+    }
+
+    public Order() {
+        //JPA only
     }
 
     public Long getId() {
@@ -42,8 +58,12 @@ public class Order {
         return tickets;
     }
 
-    public boolean addTicket(Ticket ticket){
+    public boolean addTicket(Ticket ticket) {
         return tickets.add(ticket);
+    }
+
+    public void clearTickets() {
+        tickets.clear();
     }
 
     public LocalDateTime getCreationDateTime() {
