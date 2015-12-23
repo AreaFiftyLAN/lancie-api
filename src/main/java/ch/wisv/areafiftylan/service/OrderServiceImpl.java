@@ -1,12 +1,13 @@
 package ch.wisv.areafiftylan.service;
 
 import ch.wisv.areafiftylan.dto.TicketDTO;
-import ch.wisv.areafiftylan.exception.UserNotFoundException;
+import ch.wisv.areafiftylan.exception.TicketUnavailableException;
 import ch.wisv.areafiftylan.model.Order;
 import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.util.TicketType;
 import ch.wisv.areafiftylan.service.repository.OrderRepository;
+import ch.wisv.areafiftylan.service.repository.TicketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,11 +18,14 @@ import java.util.List;
 public class OrderServiceImpl implements OrderService {
 
     OrderRepository orderRepository;
+    TicketRepository ticketRepository;
     UserService userService;
 
     @Autowired
-    public OrderServiceImpl(OrderRepository orderRepository, UserService userService) {
+    public OrderServiceImpl(OrderRepository orderRepository, UserService userService,
+                            TicketRepository ticketRepository) {
         this.orderRepository = orderRepository;
+        this.ticketRepository = ticketRepository;
         this.userService = userService;
     }
 
@@ -32,33 +36,52 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<Order> getAllOrders() {
-        return null;
+        return orderRepository.findAll();
     }
 
     @Override
     public Collection<Order> findOrdersByUsername(String username) {
-        return null;
+        return orderRepository.findAllByUserUsername(username);
     }
 
     @Override
     public Order create(Long userId, TicketDTO ticketDTO) {
-        User user = userService.getUserById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+        User user = userService.getUserById(userId);
+
+        // Request a ticket to see if one is available. If a ticket is sold out, the method ends here due to the
+        // exception thrown. Else, we'll get a new ticket to add to the order.
+        Ticket ticket = this.requestTicketOfType(ticketDTO.getType(), user, ticketDTO.hasPickupService());
+
         Order order = new Order(user);
 
-        //FIXME: Process the DTO
+        order.addTicket(ticket);
 
-        return order;
+        return orderRepository.save(order);
     }
 
     @Override
     public void addTicketToOrder(Long orderId, TicketDTO ticketDTO) {
-        //TODO
+        Order order = orderRepository.getOne(orderId);
+
+        User user = order.getUser();
+
+        // Request a ticket to see if one is available. If a ticket is sold out, the method ends here due to the
+        // exception thrown. Else, we'll get a new ticket to add to the order.
+        Ticket ticket = this.requestTicketOfType(ticketDTO.getType(), user, ticketDTO.hasPickupService());
+
+        order.addTicket(ticket);
+
+        orderRepository.save(order);
     }
 
     @Override
-    public Ticket requestTicketOfType(TicketType type) {
-        //TODO
-        return null;
+    public Ticket requestTicketOfType(TicketType type, User owner, boolean pickupService) {
+        if (ticketRepository.countByType(type) >= type.getLimit()) {
+            throw new TicketUnavailableException(type);
+        } else {
+            Ticket ticket = new Ticket(owner, type, pickupService);
+            return ticketRepository.save(ticket);
+        }
     }
 
     @Override

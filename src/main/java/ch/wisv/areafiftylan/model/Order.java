@@ -42,6 +42,10 @@ public class Order {
         return tickets;
     }
 
+    public boolean addTicket(Ticket ticket){
+        return tickets.add(ticket);
+    }
+
     public LocalDateTime getCreationDateTime() {
         return creationDateTime;
     }

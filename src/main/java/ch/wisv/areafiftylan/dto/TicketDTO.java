@@ -13,7 +13,7 @@ public class TicketDTO {
         return type;
     }
 
-    public boolean isPickupService() {
+    public boolean hasPickupService() {
         return pickupService;
     }
 }
