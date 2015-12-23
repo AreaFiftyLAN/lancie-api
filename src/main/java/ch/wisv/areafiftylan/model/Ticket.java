@@ -36,8 +36,36 @@ public class Ticket {
         key = UUID.randomUUID().toString();
     }
 
+    public boolean isLockedForTransfer() {
+        return lockedForTransfer;
+    }
+
+    public void setLockedForTransfer(boolean lockedForTransfer) {
+        this.lockedForTransfer = lockedForTransfer;
+    }
+
+    public boolean isPickupService() {
+        return pickupService;
+    }
+
+    public void setPickupService(boolean pickupService) {
+        this.pickupService = pickupService;
+    }
+
+    public User getPreviousOwner() {
+        return previousOwner;
+    }
+
+    public void setPreviousOwner(User previousOwner) {
+        this.previousOwner = previousOwner;
+    }
+
     public User getOwner() {
         return owner;
+    }
+
+    public void setOwner(User owner) {
+        this.owner = owner;
     }
 
     public TicketType getType() {

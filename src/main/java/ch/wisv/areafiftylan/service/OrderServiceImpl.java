@@ -2,6 +2,7 @@ package ch.wisv.areafiftylan.service;
 
 import ch.wisv.areafiftylan.dto.TicketDTO;
 import ch.wisv.areafiftylan.exception.TicketUnavailableException;
+import ch.wisv.areafiftylan.exception.TokenNotFoundException;
 import ch.wisv.areafiftylan.model.Order;
 import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.User;
@@ -86,16 +87,28 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public void transferTicket(User user, String ticketKey) {
-        //TODO
+        Ticket ticket = ticketRepository.findByKey(ticketKey).orElseThrow(() -> new TokenNotFoundException(ticketKey));
+
+        if (ticket.isLockedForTransfer()) {
+            ticket.setPreviousOwner(ticket.getOwner());
+
+            ticket.setOwner(user);
+
+            ticket.setLockedForTransfer(true);
+
+            ticketRepository.save(ticket);
+        } else {
+            //TODO: Deal with invalid transfer attempt
+        }
     }
 
     @Override
     public void requestPayment(Long orderId) {
-        //TODO
+        //TODO: Create a payment through the paymentservice
     }
 
     @Override
     public void updateOrderStatus(Long orderId) {
-        //TODO
+        //TODO: request an update of an order through the paymentservice
     }
 }
