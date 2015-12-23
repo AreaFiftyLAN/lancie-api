@@ -42,8 +42,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public Optional<User> getUserById(long id) {
-        return Optional.ofNullable(userRepository.findOne(id));
+    public User getUserById(long id) {
+        return userRepository.findOne(id);
     }
 
     @Override
