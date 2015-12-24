@@ -3,9 +3,11 @@ package ch.wisv.areafiftylan.service;
 import ch.wisv.areafiftylan.dto.TicketDTO;
 import ch.wisv.areafiftylan.exception.TicketUnavailableException;
 import ch.wisv.areafiftylan.exception.TokenNotFoundException;
+import ch.wisv.areafiftylan.exception.WrongOrderStatusException;
 import ch.wisv.areafiftylan.model.Order;
 import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.User;
+import ch.wisv.areafiftylan.model.util.OrderStatus;
 import ch.wisv.areafiftylan.model.util.TicketType;
 import ch.wisv.areafiftylan.service.repository.OrderRepository;
 import ch.wisv.areafiftylan.service.repository.TicketRepository;
@@ -61,18 +63,22 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void addTicketToOrder(Long orderId, TicketDTO ticketDTO) {
+    public Order addTicketToOrder(Long orderId, TicketDTO ticketDTO) {
         Order order = orderRepository.getOne(orderId);
 
-        User user = order.getUser();
+        if (order.getStatus().equals(OrderStatus.CREATING)) {
+            User user = order.getUser();
 
-        // Request a ticket to see if one is available. If a ticket is sold out, the method ends here due to the
-        // exception thrown. Else, we'll get a new ticket to add to the order.
-        Ticket ticket = this.requestTicketOfType(ticketDTO.getType(), user, ticketDTO.hasPickupService());
+            // Request a ticket to see if one is available. If a ticket is sold out, the method ends here due to the
+            // exception thrown. Else, we'll get a new ticket to add to the order.
+            Ticket ticket = this.requestTicketOfType(ticketDTO.getType(), user, ticketDTO.hasPickupService());
 
-        order.addTicket(ticket);
+            order.addTicket(ticket);
 
-        orderRepository.save(order);
+            return orderRepository.save(order);
+        } else {
+            throw new WrongOrderStatusException(orderId);
+        }
     }
 
     @Override

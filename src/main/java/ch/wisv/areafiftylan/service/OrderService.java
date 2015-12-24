@@ -28,7 +28,7 @@ public interface OrderService {
      */
     Order create(Long userId, TicketDTO ticketDTO);
 
-    void addTicketToOrder(Long orderId, TicketDTO ticketDTO);
+    Order addTicketToOrder(Long orderId, TicketDTO ticketDTO);
 
     /**
      * Check if a ticket is available, and return when it is. When a ticket is unavailable (sold out for instance) a

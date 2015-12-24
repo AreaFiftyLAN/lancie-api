@@ -66,6 +66,10 @@ public class Order {
         tickets.clear();
     }
 
+    public OrderStatus getStatus() {
+        return status;
+    }
+
     public LocalDateTime getCreationDateTime() {
         return creationDateTime;
     }
@@ -76,5 +80,13 @@ public class Order {
 
     public User getUser() {
         return user;
+    }
+
+    public void setStatus(OrderStatus status) {
+        this.status = status;
+    }
+
+    public void setReference(String reference) {
+        this.reference = reference;
     }
 }

@@ -2,6 +2,7 @@ package ch.wisv.areafiftylan.controller;
 
 import ch.wisv.areafiftylan.dto.TicketDTO;
 import ch.wisv.areafiftylan.exception.TicketUnavailableException;
+import ch.wisv.areafiftylan.exception.WrongOrderStatusException;
 import ch.wisv.areafiftylan.model.Order;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.view.View;
@@ -95,9 +96,10 @@ public class OrderRestController {
      */
     @PreAuthorize("@currentUserServiceImpl.canAccessOrder(principal, #orderId)")
     @RequestMapping(value = "/orders/{orderId}", method = RequestMethod.POST)
-    public ResponseEntity<?> addToOrder(@PathVariable Long orderId, @RequestBody TicketDTO ticketDTO) {
-        orderService.addTicketToOrder(orderId, ticketDTO);
-        return createResponseEntity(HttpStatus.OK, "Ticket successfully added to your order");
+    @JsonView(View.OrderOverview.class)
+    public ResponseEntity<?> addToOrder(@PathVariable Long orderId, @RequestBody @Validated TicketDTO ticketDTO) {
+        Order modifiedOrder = orderService.addTicketToOrder(orderId, ticketDTO);
+        return createResponseEntity(HttpStatus.OK, "Ticket successfully added to your order", modifiedOrder);
     }
 
     /**
@@ -127,6 +129,11 @@ public class OrderRestController {
     @ExceptionHandler(TicketUnavailableException.class)
     public ResponseEntity<?> handleTicketUnavailableException(TicketUnavailableException e) {
         return createResponseEntity(HttpStatus.GONE, e.getMessage());
+    }
+
+    @ExceptionHandler(WrongOrderStatusException.class)
+    public ResponseEntity<?> handleWrongOrderStatusException(WrongOrderStatusException e) {
+        return createResponseEntity(HttpStatus.CONFLICT, e.getMessage());
     }
 
     //TODO: Move this to central ControllerAdvice class
