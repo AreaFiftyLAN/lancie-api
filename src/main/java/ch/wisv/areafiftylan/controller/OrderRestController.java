@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -56,7 +57,7 @@ public class OrderRestController {
     @PreAuthorize("isAuthenticated()")
     @RequestMapping(value = "/orders", method = RequestMethod.POST)
     @JsonView(View.OrderOverview.class)
-    public ResponseEntity<?> createOrder(Authentication auth, @RequestBody TicketDTO ticketDTO) {
+    public ResponseEntity<?> createOrder(Authentication auth, @RequestBody @Validated TicketDTO ticketDTO) {
         HttpHeaders headers = new HttpHeaders();
         User user = (User) auth.getPrincipal();
 
@@ -76,8 +77,9 @@ public class OrderRestController {
      *
      * @return The requested Order.
      */
-    @PreAuthorize("@currentUserServiceImpl.canAccessOrder(principal, #userId)")
+    @PreAuthorize("@currentUserServiceImpl.canAccessOrder(principal, #orderId)")
     @RequestMapping(value = "/orders/{orderId}", method = RequestMethod.GET)
+    @JsonView(View.OrderOverview.class)
     public Order getOrderById(@PathVariable Long orderId) {
         return orderService.getOrderById(orderId);
     }
@@ -91,7 +93,7 @@ public class OrderRestController {
      *
      * @return Message about the result of the request
      */
-    @PreAuthorize("@currentUserServiceImpl.canAccessOrder(principal, #userId)")
+    @PreAuthorize("@currentUserServiceImpl.canAccessOrder(principal, #orderId)")
     @RequestMapping(value = "/orders/{orderId}", method = RequestMethod.POST)
     public ResponseEntity<?> addToOrder(@PathVariable Long orderId, @RequestBody TicketDTO ticketDTO) {
         orderService.addTicketToOrder(orderId, ticketDTO);
@@ -106,7 +108,7 @@ public class OrderRestController {
      *
      * @return Instructions on how to proceed.
      */
-    @PreAuthorize("@currentUserServiceImpl.canAccessOrder(principal, #userId)")
+    @PreAuthorize("@currentUserServiceImpl.canAccessOrder(principal, #orderId)")
     @RequestMapping(value = "/orders/{orderId}/checkout", method = RequestMethod.GET)
     public ResponseEntity<?> payOrder(@PathVariable Long orderId) {
         //TODO: Implement Paymentprovider calls here.

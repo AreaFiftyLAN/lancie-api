@@ -106,8 +106,6 @@ public abstract class IntegrationTest {
                 get("/token").
             then().
                 extract().response();
-
-        sessionFilter.getSessionId();
         //@formatter:on
 
         return new SessionData(tokenResponse.header("X-CSRF-TOKEN"), sessionFilter.getSessionId());
