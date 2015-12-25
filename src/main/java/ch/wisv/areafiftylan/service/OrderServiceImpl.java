@@ -23,13 +23,15 @@ public class OrderServiceImpl implements OrderService {
     OrderRepository orderRepository;
     TicketRepository ticketRepository;
     UserService userService;
+    PaymentService paymentService;
 
     @Autowired
-    public OrderServiceImpl(OrderRepository orderRepository, UserService userService,
-                            TicketRepository ticketRepository) {
+    public OrderServiceImpl(OrderRepository orderRepository, UserService userService, TicketRepository ticketRepository,
+                            PaymentService paymentService) {
         this.orderRepository = orderRepository;
         this.ticketRepository = ticketRepository;
         this.userService = userService;
+        this.paymentService = paymentService;
     }
 
     @Override
@@ -109,12 +111,17 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void requestPayment(Long orderId) {
-        //TODO: Create a payment through the paymentservice
+    public String requestPayment(Long orderId) {
+        Order order = orderRepository.findOne(orderId);
+        order.setStatus(OrderStatus.WAITING);
+        String paymentUrl = paymentService.initOrder(order);
+        orderRepository.save(order);
+        return paymentUrl;
     }
 
     @Override
-    public void updateOrderStatus(Long orderId) {
+    public Order updateOrderStatus(String orderReference) {
+        return paymentService.updateStatus(orderReference);
         //TODO: request an update of an order through the paymentservice
     }
 }

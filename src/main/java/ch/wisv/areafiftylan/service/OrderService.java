@@ -46,7 +46,7 @@ public interface OrderService {
 
     void transferTicket(User user, String ticketKey);
 
-    void requestPayment(Long orderId);
+    String requestPayment(Long orderId);
 
-    void updateOrderStatus(Long orderId);
+    Order updateOrderStatus(String orderReference);
 }

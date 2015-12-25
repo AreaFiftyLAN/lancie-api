@@ -89,4 +89,12 @@ public class Order {
     public void setReference(String reference) {
         this.reference = reference;
     }
+
+    public double getPrice() {
+        double price = 0F;
+        for (Ticket ticket : this.tickets) {
+            price += ticket.getPrice();
+        }
+        return price;
+    }
 }

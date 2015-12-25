@@ -20,6 +20,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collection;
 
 import static ch.wisv.areafiftylan.util.ResponseEntityBuilder.createResponseEntity;
@@ -112,17 +114,20 @@ public class OrderRestController {
      */
     @PreAuthorize("@currentUserServiceImpl.canAccessOrder(principal, #orderId)")
     @RequestMapping(value = "/orders/{orderId}/checkout", method = RequestMethod.GET)
-    public ResponseEntity<?> payOrder(@PathVariable Long orderId) {
+    public ResponseEntity<?> payOrder(@PathVariable Long orderId) throws URISyntaxException {
         //TODO: Implement Paymentprovider calls here.
-        orderService.requestPayment(orderId);
+        String paymentUrl = orderService.requestPayment(orderId);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setLocation(new URI(paymentUrl));
 
-        return createResponseEntity(HttpStatus.OK, "Please go to ... to finish your payment");
+        return createResponseEntity(HttpStatus.OK, headers, "Please go to" + paymentUrl + "to finish your payment");
     }
 
     @RequestMapping(value = "/orders/status", method = RequestMethod.POST)
-    public ResponseEntity<?> addToOrder(@RequestParam String orderId) {
-        //TODO: Implement webhook for payment provider
-        return null;
+    public ResponseEntity<?> updateOrderStatus(@RequestParam String orderReference) {
+        //TODO: Figure out how Mollie sends this request
+        orderService.updateOrderStatus(orderReference);
+        return createResponseEntity(HttpStatus.OK, "Status is being updated");
     }
 
 
