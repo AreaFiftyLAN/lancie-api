@@ -28,7 +28,7 @@ import static org.hamcrest.Matchers.*;
 public class OrderRestIntegrationTest extends IntegrationTest {
 
     @Autowired
-    private OrderRepository orderRepository;
+    protected OrderRepository orderRepository;
 
     @Autowired
     private TicketRepository ticketRepository;
@@ -239,7 +239,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
 
     //     @RequestMapping(value = "/orders/{orderId}", method = RequestMethod.GET)
 
-    private String createOrderAndReturnLocation(){
+    protected String createOrderAndReturnLocation() {
         Map<String, String> order = new HashMap<>();
         order.put("pickupService", "false");
         order.put("type", TicketType.EARLY_FULL.toString());
@@ -572,6 +572,83 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         then().
             statusCode(HttpStatus.SC_CONFLICT);
         //@formatter:on
+    }
+
+    @Test
+    public void testOrderCheckout_User() {
+        String location = createOrderAndReturnLocation();
+        logout();
+
+        String locationParse = location.substring(location.lastIndexOf('/') + 1);
+        Long orderId = Long.parseLong(locationParse);
+
+
+        SessionData login = login("user");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            get(location + "/checkout").
+        then().
+            statusCode(HttpStatus.SC_OK).
+            header("Location", containsString("https://www.mollie")).
+            body("message", containsString("https://www.mollie"));
+        //@formatter:on
+
+        Order order = orderRepository.findOne(orderId);
+
+        assertThat("Orderstatus updated", order.getStatus(), equalTo(OrderStatus.WAITING));
+    }
+
+    @Test
+    public void testOrderCheckout_Admin() {
+        String location = createOrderAndReturnLocation();
+        logout();
+
+        String locationParse = location.substring(location.lastIndexOf('/') + 1);
+        Long orderId = Long.parseLong(locationParse);
+
+
+        SessionData login = login("admin");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            get(location + "/checkout").
+        then().
+            statusCode(HttpStatus.SC_OK).
+            header("Location", containsString("https://www.mollie")).
+            body("message", containsString("https://www.mollie"));
+        //@formatter:on
+
+        Order order = orderRepository.findOne(orderId);
+
+        assertThat("Orderstatus updated", order.getStatus(), equalTo(OrderStatus.WAITING));
+    }
+
+    @Test
+    public void testOrderCheckout_Anon() {
+        String location = createOrderAndReturnLocation();
+        logout();
+
+        String locationParse = location.substring(location.lastIndexOf('/') + 1);
+        Long orderId = Long.parseLong(locationParse);
+
+        //@formatter:off
+        given().
+        when().
+            get(location + "/checkout").
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
+
+        Order order = orderRepository.findOne(orderId);
+
+        assertThat("Orderstatus updated", order.getStatus(), equalTo(OrderStatus.CREATING));
     }
 }
 
