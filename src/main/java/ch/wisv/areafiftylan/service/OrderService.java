@@ -49,4 +49,6 @@ public interface OrderService {
     String requestPayment(Long orderId);
 
     Order updateOrderStatus(String orderReference);
+
+    Order updateOrderStatus(Long orderId);
 }

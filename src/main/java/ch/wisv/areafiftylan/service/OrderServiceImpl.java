@@ -122,6 +122,10 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Order updateOrderStatus(String orderReference) {
         return paymentService.updateStatus(orderReference);
-        //TODO: request an update of an order through the paymentservice
+    }
+
+    @Override
+    public Order updateOrderStatus(Long orderId) {
+        return paymentService.updateStatusByOrderId(orderId);
     }
 }

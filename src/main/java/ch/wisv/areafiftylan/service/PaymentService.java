@@ -10,4 +10,6 @@ public interface PaymentService {
     public String initOrder(Order order);
 
     public Order updateStatus(String orderReference);
+
+    public Order updateStatusByOrderId(Long orderId);
 }

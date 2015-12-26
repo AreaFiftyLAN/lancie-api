@@ -1,9 +1,11 @@
 package ch.wisv.areafiftylan.service;
 
+import ch.wisv.areafiftylan.exception.PaymentException;
 import ch.wisv.areafiftylan.exception.UserNotFoundException;
 import ch.wisv.areafiftylan.model.Order;
 import ch.wisv.areafiftylan.model.util.OrderStatus;
 import ch.wisv.areafiftylan.service.repository.OrderRepository;
+import com.google.common.base.Strings;
 import nl.stil4m.mollie.Client;
 import nl.stil4m.mollie.ClientBuilder;
 import nl.stil4m.mollie.ResponseOrError;
@@ -34,8 +36,6 @@ public class PaymentServiceImpl implements PaymentService {
 
     String method = "ideal";
 
-    private final String RETURN_URL = "https://areafiftylan.nl/ordersuccess";
-
     @Autowired
     public PaymentServiceImpl(OrderRepository orderRepository) {
         this.orderRepository = orderRepository;
@@ -46,21 +46,23 @@ public class PaymentServiceImpl implements PaymentService {
     public String initOrder(Order order) {
         Map<String, Object> metadata = new HashMap<>();
         metadata.put("A5LId", order.getId());
+        String returnUrl = "https://areafiftylan.nl/ordersuccess";
+
         CreatePayment payment =
-                new CreatePayment(method, order.getPrice(), "Area FiftyLAN Ticket", RETURN_URL, metadata);
+                new CreatePayment(method, order.getPrice(), "Area FiftyLAN Ticket", returnUrl, metadata);
         try {
             ResponseOrError<CreatedPayment> molliePayment = mollie.createPayment(payment);
             if (molliePayment.getSuccess()) {
                 order.setReference(molliePayment.getData().getId());
+                orderRepository.save(order);
                 return molliePayment.getData().getLinks().getPaymentUrl();
             } else {
                 ErrorData molliePaymentError = molliePayment.getError();
-                throw new RuntimeException("Payment Creation Failed");
+                throw new PaymentException((String) molliePaymentError.get("message"));
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new PaymentException("Something went wrong requesting the payment", e.getCause());
         }
-        return null;
     }
 
     @Override
@@ -84,8 +86,18 @@ public class PaymentServiceImpl implements PaymentService {
                 order = orderRepository.save(order);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new PaymentException(e.getMessage());
         }
         return order;
+    }
+
+    @Override
+    public Order updateStatusByOrderId(Long orderId) {
+        Order order = orderRepository.findOne(orderId);
+        if (!Strings.isNullOrEmpty(order.getReference())) {
+            return updateStatus(order.getReference());
+        } else {
+            return order;
+        }
     }
 }

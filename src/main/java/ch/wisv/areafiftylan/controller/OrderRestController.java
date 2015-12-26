@@ -124,7 +124,7 @@ public class OrderRestController {
     }
 
     @RequestMapping(value = "/orders/status", method = RequestMethod.POST)
-    public ResponseEntity<?> updateOrderStatus(@RequestParam String orderReference) {
+    public ResponseEntity<?> updateOrderStatus(@RequestParam(name = "id") String orderReference) {
         //TODO: Figure out how Mollie sends this request
         orderService.updateOrderStatus(orderReference);
         return createResponseEntity(HttpStatus.OK, "Status is being updated");
