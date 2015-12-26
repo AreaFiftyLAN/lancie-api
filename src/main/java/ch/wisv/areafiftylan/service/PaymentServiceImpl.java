@@ -31,13 +31,13 @@ public class PaymentServiceImpl implements PaymentService {
 
     Client mollie;
 
-    @Value("mollie.testkey")
+    @Value("${a5l.molliekey}")
     String apiKey;
 
     String method = "ideal";
 
     @Autowired
-    public PaymentServiceImpl(OrderRepository orderRepository) {
+    public PaymentServiceImpl(OrderRepository orderRepository, @Value("${a5l.molliekey}") String apiKey){
         this.orderRepository = orderRepository;
         this.mollie = new ClientBuilder().withApiKey(apiKey).build();
     }
@@ -54,11 +54,13 @@ public class PaymentServiceImpl implements PaymentService {
             ResponseOrError<CreatedPayment> molliePayment = mollie.createPayment(payment);
             if (molliePayment.getSuccess()) {
                 order.setReference(molliePayment.getData().getId());
+                order.setStatus(OrderStatus.WAITING);
                 orderRepository.save(order);
                 return molliePayment.getData().getLinks().getPaymentUrl();
             } else {
                 ErrorData molliePaymentError = molliePayment.getError();
-                throw new PaymentException((String) molliePaymentError.get("message"));
+                HashMap<String, Object> errorMap = (HashMap<String, Object>) molliePaymentError.get("error");
+                throw new PaymentException((String) errorMap.get("message"));
             }
         } catch (IOException e) {
             throw new PaymentException("Something went wrong requesting the payment", e.getCause());
