@@ -123,6 +123,15 @@ public class OrderRestController {
         return createResponseEntity(HttpStatus.OK, headers, "Please go to" + paymentUrl + "to finish your payment");
     }
 
+
+    /**
+     * This method handles the webhook from the payment provider. It requests the status of the order with the given
+     * reference
+     *
+     * @param orderReference Id of the order at the paymentprovider, stored in the reference field
+     *
+     * @return Statusmessage
+     */
     @RequestMapping(value = "/orders/status", method = RequestMethod.POST)
     public ResponseEntity<?> updateOrderStatus(@RequestParam(name = "id") String orderReference) {
         //TODO: Figure out how Mollie sends this request

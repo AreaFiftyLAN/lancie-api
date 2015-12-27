@@ -28,6 +28,14 @@ public interface OrderService {
      */
     Order create(Long userId, TicketDTO ticketDTO);
 
+    /**
+     * Add a ticket to an order. Checks if a ticket is available first
+     *
+     * @param orderId   Order to which the ticket should be added
+     * @param ticketDTO DTO of the ticket to be added
+     *
+     * @return The updated Order
+     */
     Order addTicketToOrder(Long orderId, TicketDTO ticketDTO);
 
     /**
@@ -44,8 +52,21 @@ public interface OrderService {
      */
     Ticket requestTicketOfType(TicketType type, User owner, boolean pickupService) throws TicketUnavailableException;
 
+    /**
+     * Transfer the ticket to another user
+     *
+     * @param user      The user to transfer the ticket to
+     * @param ticketKey The key of the ticket to be transferred
+     */
     void transferTicket(User user, String ticketKey);
 
+    /**
+     * Register the order with the payment provider
+     *
+     * @param orderId The order to be checked out
+     *
+     * @return The URL for payment
+     */
     String requestPayment(Long orderId);
 
     Order updateOrderStatus(String orderReference);

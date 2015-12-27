@@ -2,6 +2,7 @@ package ch.wisv.areafiftylan.service;
 
 import ch.wisv.areafiftylan.dto.TicketDTO;
 import ch.wisv.areafiftylan.exception.ImmutableOrderException;
+import ch.wisv.areafiftylan.exception.PaymentException;
 import ch.wisv.areafiftylan.exception.TicketUnavailableException;
 import ch.wisv.areafiftylan.exception.TokenNotFoundException;
 import ch.wisv.areafiftylan.model.Order;
@@ -11,6 +12,7 @@ import ch.wisv.areafiftylan.model.util.OrderStatus;
 import ch.wisv.areafiftylan.model.util.TicketType;
 import ch.wisv.areafiftylan.service.repository.OrderRepository;
 import ch.wisv.areafiftylan.service.repository.TicketRepository;
+import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -113,10 +115,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public String requestPayment(Long orderId) {
         Order order = orderRepository.findOne(orderId);
-        order.setStatus(OrderStatus.WAITING);
-        String paymentUrl = paymentService.initOrder(order);
-        orderRepository.save(order);
-        return paymentUrl;
+        return paymentService.registerOrder(order);
     }
 
     @Override
@@ -126,6 +125,11 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Order updateOrderStatus(Long orderId) {
-        return paymentService.updateStatusByOrderId(orderId);
+        Order order = orderRepository.findOne(orderId);
+        if (!Strings.isNullOrEmpty(order.getReference())) {
+            return paymentService.updateStatus(order.getReference());
+        } else {
+            throw new PaymentException("Order with id " + order + " has not been checked out yet");
+        }
     }
 }

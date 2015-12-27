@@ -82,7 +82,7 @@ public class Ticket {
     }
 
     public float getPrice() {
-        return type.getPrice();
+        return pickupService ? type.getPrice() + 5 : type.getPrice();
     }
 
     public boolean hasPickupService() {

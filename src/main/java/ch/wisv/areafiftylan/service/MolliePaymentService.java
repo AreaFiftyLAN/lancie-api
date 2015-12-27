@@ -6,7 +6,6 @@ import ch.wisv.areafiftylan.exception.PaymentServiceConnectionException;
 import ch.wisv.areafiftylan.model.Order;
 import ch.wisv.areafiftylan.model.util.OrderStatus;
 import ch.wisv.areafiftylan.service.repository.OrderRepository;
-import com.google.common.base.Strings;
 import nl.stil4m.mollie.Client;
 import nl.stil4m.mollie.ClientBuilder;
 import nl.stil4m.mollie.ResponseOrError;
@@ -44,7 +43,7 @@ public class MolliePaymentService implements PaymentService {
     }
 
     @Override
-    public String initOrder(Order order) {
+    public String registerOrder(Order order) {
         Map<String, Object> metadata = new HashMap<>();
         metadata.put("A5LId", order.getId());
         //TODO: Replace this with a config-based URL
@@ -119,16 +118,6 @@ public class MolliePaymentService implements PaymentService {
         } catch (IOException e) {
             // This indicates the HttpClient encountered some error
             throw new PaymentServiceConnectionException(e.getMessage());
-        }
-    }
-
-    @Override
-    public Order updateStatusByOrderId(Long orderId) {
-        Order order = orderRepository.findOne(orderId);
-        if (!Strings.isNullOrEmpty(order.getReference())) {
-            return updateStatus(order.getReference());
-        } else {
-            throw new PaymentException("Order with id " + order + " has not been checked out yet");
         }
     }
 
