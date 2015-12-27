@@ -1,9 +1,9 @@
 package ch.wisv.areafiftylan.service;
 
 import ch.wisv.areafiftylan.dto.TicketDTO;
+import ch.wisv.areafiftylan.exception.ImmutableOrderException;
 import ch.wisv.areafiftylan.exception.TicketUnavailableException;
 import ch.wisv.areafiftylan.exception.TokenNotFoundException;
-import ch.wisv.areafiftylan.exception.WrongOrderStatusException;
 import ch.wisv.areafiftylan.model.Order;
 import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.User;
@@ -79,7 +79,7 @@ public class OrderServiceImpl implements OrderService {
 
             return orderRepository.save(order);
         } else {
-            throw new WrongOrderStatusException(orderId);
+            throw new ImmutableOrderException(orderId);
         }
     }
 

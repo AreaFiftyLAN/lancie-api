@@ -1,8 +1,8 @@
 package ch.wisv.areafiftylan.controller;
 
 import ch.wisv.areafiftylan.dto.TicketDTO;
+import ch.wisv.areafiftylan.exception.ImmutableOrderException;
 import ch.wisv.areafiftylan.exception.TicketUnavailableException;
-import ch.wisv.areafiftylan.exception.WrongOrderStatusException;
 import ch.wisv.areafiftylan.model.Order;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.view.View;
@@ -136,8 +136,8 @@ public class OrderRestController {
         return createResponseEntity(HttpStatus.GONE, e.getMessage());
     }
 
-    @ExceptionHandler(WrongOrderStatusException.class)
-    public ResponseEntity<?> handleWrongOrderStatusException(WrongOrderStatusException e) {
+    @ExceptionHandler(ImmutableOrderException.class)
+    public ResponseEntity<?> handleWrongOrderStatusException(ImmutableOrderException e) {
         return createResponseEntity(HttpStatus.CONFLICT, e.getMessage());
     }
 

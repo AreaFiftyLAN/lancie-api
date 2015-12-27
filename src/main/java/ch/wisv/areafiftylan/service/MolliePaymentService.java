@@ -1,7 +1,8 @@
 package ch.wisv.areafiftylan.service;
 
+import ch.wisv.areafiftylan.exception.OrderNotFoundException;
 import ch.wisv.areafiftylan.exception.PaymentException;
-import ch.wisv.areafiftylan.exception.UserNotFoundException;
+import ch.wisv.areafiftylan.exception.PaymentServiceConnectionException;
 import ch.wisv.areafiftylan.model.Order;
 import ch.wisv.areafiftylan.model.util.OrderStatus;
 import ch.wisv.areafiftylan.service.repository.OrderRepository;
@@ -46,6 +47,7 @@ public class MolliePaymentService implements PaymentService {
     public String initOrder(Order order) {
         Map<String, Object> metadata = new HashMap<>();
         metadata.put("A5LId", order.getId());
+        //TODO: Replace this with a config-based URL
         String returnUrl = "https://areafiftylan.nl/ordersuccess";
 
         CreatePayment payment =
@@ -58,37 +60,32 @@ public class MolliePaymentService implements PaymentService {
 
             if (molliePayment.getSuccess()) {
                 // All good, update the order
-                // Insert the Mollie ID for future reference
-                order.setReference(molliePayment.getData().getId());
-                order.setStatus(OrderStatus.WAITING);
-
-                // Save the changes to the order
-                orderRepository.save(order);
-
-                // Return the payment URL so the User can pay.
+                updateOrder(order, molliePayment);
                 return molliePayment.getData().getLinks().getPaymentUrl();
             } else {
-                // Some error occured, but connection to Mollie succeeded, which means they have something to say.
-                ErrorData molliePaymentError = molliePayment.getError();
-
-                // Make the compiler shut up, this is something stupid in the Mollie API Client
-                @SuppressWarnings("unchecked")
-                HashMap<String, Object> errorMap = (HashMap<String, Object>) molliePaymentError.get("error");
-                //TODO: This should be a BAD REQUEST exception
-                throw new PaymentException((String) errorMap.get("message"));
+                // Mollie returned an error.
+                handleMollieError(molliePayment);
+                return null;
             }
         } catch (IOException e) {
             // This indicates the HttpClient encountered some error
-            // TODO: Make this throw a different Status 500 Exception.
-            throw new PaymentException("Something went wrong requesting the payment", e.getCause());
+            throw new PaymentException("Could not connect to the Paymentprovider");
         }
+    }
+
+    private void updateOrder(Order order, ResponseOrError<CreatedPayment> molliePayment) {
+        // Insert the Mollie ID for future reference
+        order.setReference(molliePayment.getData().getId());
+        order.setStatus(OrderStatus.WAITING);
+
+        // Save the changes to the order
+        orderRepository.save(order);
     }
 
     @Override
     public Order updateStatus(String orderReference) {
-        // TODO: Make this throw a proper BAD REQUEST exception
         Order order = orderRepository.findByReference(orderReference)
-                .orElseThrow(() -> new UserNotFoundException("Order with reference " + orderReference + " not found"));
+                .orElseThrow(() -> new OrderNotFoundException("Order with reference " + orderReference + " not found"));
 
         // This try is for the Mollie API internal HttpClient
         try {
@@ -115,19 +112,13 @@ public class MolliePaymentService implements PaymentService {
                 }
                 return orderRepository.save(order);
             } else {
-                // Some error occured, but connection to Mollie succeeded, which means they have something to say.
-                ErrorData molliePaymentError = molliePaymentStatus.getError();
-
-                // Make the compiler shut up, this is something stupid in the Mollie API Client
-                @SuppressWarnings("unchecked") HashMap<String, Object> errorMap =
-                        (HashMap<String, Object>) molliePaymentError.get("error");
-                //TODO: This should be a BAD REQUEST exception
-                throw new PaymentException((String) errorMap.get("message"));
+                // Order status could not be updated for some reason. Return the original order
+                handleMollieError(molliePaymentStatus);
+                return order;
             }
         } catch (IOException e) {
             // This indicates the HttpClient encountered some error
-            // TODO: Make this throw a different Status 500 Exception.
-            throw new PaymentException(e.getMessage());
+            throw new PaymentServiceConnectionException(e.getMessage());
         }
     }
 
@@ -137,7 +128,18 @@ public class MolliePaymentService implements PaymentService {
         if (!Strings.isNullOrEmpty(order.getReference())) {
             return updateStatus(order.getReference());
         } else {
-            return order;
+            throw new PaymentException("Order with id " + order + " has not been checked out yet");
         }
     }
+
+    private void handleMollieError(ResponseOrError<?> mollieResponseWithError) {
+        // Some error occured, but connection to Mollie succeeded, which means they have something to say.
+        ErrorData molliePaymentError = mollieResponseWithError.getError();
+
+        // Make the compiler shut up, this is something stupid in the Mollie API Client
+        @SuppressWarnings("unchecked") HashMap<String, Object> errorMap =
+                (HashMap<String, Object>) molliePaymentError.get("error");
+        throw new PaymentException((String) errorMap.get("message"));
+    }
+
 }
