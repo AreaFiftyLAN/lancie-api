@@ -118,7 +118,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
     @Test
     public void testCreateSingleOrder_User() {
         Map<String, String> order = new HashMap<>();
-        order.put("pickupService", "false");
+        order.put("pickupService", "true");
         order.put("type", TicketType.EARLY_FULL.toString());
         SessionData login = login("user");
 
@@ -134,8 +134,9 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             body("object.user.username", is("user")).
             body("object.status", is("CREATING")).
             body("object.tickets", hasSize(1)).
-            body("object.tickets.pickupService", hasItem(false)).
-            body("object.tickets.type", hasItem(is("EARLY_FULL")));
+            body("object.tickets.pickupService", hasItem(true)).
+            body("object.tickets.type", hasItem(is("EARLY_FULL"))).
+            body("object.amount",equalTo(40.00F));
         //@formatter:on
     }
 
@@ -290,7 +291,9 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             body("reference", is(nullValue())).
             body("user.username", is("user")).
             body("tickets.type", hasItem(is("EARLY_FULL"))).
-            body("tickets.pickupService", hasItem(is(false)));
+            body("tickets.pickupService", hasItem(is(false))).
+            body("amount",equalTo(35.00F));
+
         //@formatter:on
     }
 
@@ -336,7 +339,8 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             body("reference", is(nullValue())).
             body("user.username", is("user")).
             body("tickets.type", hasItem(is("EARLY_FULL"))).
-            body("tickets.pickupService", hasItem(is(false)));
+            body("tickets.pickupService", hasItem(is(false))).
+            body("amount",equalTo(35.00F));
         //@formatter:on
     }
 
@@ -384,7 +388,9 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         then().
             statusCode(HttpStatus.SC_OK).
             body("object.tickets", hasSize(2)).
-            body("object.tickets.type", hasItems(equalTo("REGULAR_FULL"), equalTo("EARLY_FULL")));
+            body("object.tickets.type", hasItems(equalTo("REGULAR_FULL"), equalTo("EARLY_FULL"))).
+            body("object.amount",equalTo(80.00F));
+
         //@formatter:on
     }
 
@@ -441,7 +447,8 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         then().
             statusCode(HttpStatus.SC_OK).
             body("object.tickets", hasSize(2)).
-            body("object.tickets.type", hasItems(equalTo("REGULAR_FULL"), equalTo("EARLY_FULL")));
+            body("object.tickets.type", hasItems(equalTo("REGULAR_FULL"), equalTo("EARLY_FULL"))).
+            body("object.amount",equalTo(80.00F));
         //@formatter:on
     }
 

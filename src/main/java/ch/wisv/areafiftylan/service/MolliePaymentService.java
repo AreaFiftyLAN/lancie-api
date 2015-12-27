@@ -50,7 +50,7 @@ public class MolliePaymentService implements PaymentService {
         String returnUrl = "https://areafiftylan.nl/ordersuccess";
 
         CreatePayment payment =
-                new CreatePayment(method, order.getPrice(), "Area FiftyLAN Ticket", returnUrl, metadata);
+                new CreatePayment(method, (double) order.getAmount(), "Area FiftyLAN Ticket", returnUrl, metadata);
 
         //First try is for IOExceptions coming from the Mollie Client.
         try {

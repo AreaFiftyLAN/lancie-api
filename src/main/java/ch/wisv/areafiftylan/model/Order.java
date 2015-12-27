@@ -29,6 +29,9 @@ public class Order {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     LocalDateTime creationDateTime;
 
+    @JsonView(View.OrderOverview.class)
+    float amount;
+
     /**
      * This String can be used to store an external reference. Payment providers often have their own id.
      */
@@ -59,6 +62,7 @@ public class Order {
     }
 
     public boolean addTicket(Ticket ticket) {
+        amount += ticket.getPrice();
         return tickets.add(ticket);
     }
 
@@ -90,8 +94,8 @@ public class Order {
         this.reference = reference;
     }
 
-    public double getPrice() {
-        double price = 0F;
+    public float getAmount() {
+        float price = 0F;
         for (Ticket ticket : this.tickets) {
             price += ticket.getPrice();
         }
