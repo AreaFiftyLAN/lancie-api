@@ -120,7 +120,17 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Order updateOrderStatus(String orderReference) {
-        return paymentService.updateStatus(orderReference);
+
+        Order order = paymentService.updateStatus(orderReference);
+
+        // Set all tickets from this Order to valid
+        if (order.getStatus().equals(OrderStatus.PAID)) {
+            for (Ticket ticket : order.getTickets()) {
+                ticket.setValid(true);
+                ticketRepository.save(ticket);
+            }
+        }
+        return order;
     }
 
     @Override

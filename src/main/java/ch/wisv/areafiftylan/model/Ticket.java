@@ -32,12 +32,16 @@ public class Ticket {
 
     boolean lockedForTransfer;
 
+    @JsonView(View.OrderOverview.class)
+    boolean valid;
+
     public Ticket(User owner, TicketType type, Boolean pickupService) {
         this.owner = owner;
         this.previousOwner = null;
         this.type = type;
         this.pickupService = pickupService;
-        lockedForTransfer = false;
+        lockedForTransfer = true;
+        this.valid = false;
         key = UUID.randomUUID().toString();
     }
 
@@ -87,5 +91,13 @@ public class Ticket {
 
     public boolean hasPickupService() {
         return pickupService;
+    }
+
+    public boolean isValid() {
+        return valid;
+    }
+
+    public void setValid(boolean valid) {
+        this.valid = valid;
     }
 }
