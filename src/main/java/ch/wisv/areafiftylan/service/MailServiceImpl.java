@@ -4,6 +4,7 @@ import ch.wisv.areafiftylan.dto.MailDTO;
 import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,9 @@ public class MailServiceImpl implements MailService {
 
     private SpringTemplateEngine templateEngine;
 
+    @Value("${a5l.mail.sender}")
+    String sender;
+
     @Autowired
     public MailServiceImpl(JavaMailSender mailSender, SpringTemplateEngine templateEngine) {
         this.mailSender = mailSender;
@@ -37,7 +41,7 @@ public class MailServiceImpl implements MailService {
         final MimeMessageHelper message = new MimeMessageHelper(mimeMessage, true, "UTF-8"); // true = multipart
 
         message.setSubject(subject);
-        message.setFrom("LANcie <lancie@ch.tudelft.nl>");
+        message.setFrom(sender);
         message.setTo(recipientEmail);
 
         // Create the HTML body using Thymeleaf

@@ -36,6 +36,9 @@ public class MolliePaymentService implements PaymentService {
 
     String method = "ideal";
 
+    @Value("${a5l.paymentReturnUrl}")
+    String returnUrl;
+
     @Autowired
     public MolliePaymentService(OrderRepository orderRepository, @Value("${a5l.molliekey}") String apiKey) {
         this.orderRepository = orderRepository;
@@ -46,8 +49,6 @@ public class MolliePaymentService implements PaymentService {
     public String registerOrder(Order order) {
         Map<String, Object> metadata = new HashMap<>();
         metadata.put("A5LId", order.getId());
-        //TODO: Replace this with a config-based URL
-        String returnUrl = "https://areafiftylan.nl/ordersuccess";
 
         CreatePayment payment =
                 new CreatePayment(method, (double) order.getAmount(), "Area FiftyLAN Ticket", returnUrl, metadata);
@@ -130,5 +131,4 @@ public class MolliePaymentService implements PaymentService {
                 (HashMap<String, Object>) molliePaymentError.get("error");
         throw new PaymentException((String) errorMap.get("message"));
     }
-
 }
