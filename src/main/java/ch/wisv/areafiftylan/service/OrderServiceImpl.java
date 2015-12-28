@@ -5,11 +5,13 @@ import ch.wisv.areafiftylan.exception.ImmutableOrderException;
 import ch.wisv.areafiftylan.exception.PaymentException;
 import ch.wisv.areafiftylan.exception.TicketUnavailableException;
 import ch.wisv.areafiftylan.exception.TokenNotFoundException;
+import ch.wisv.areafiftylan.model.ExpiredOrder;
 import ch.wisv.areafiftylan.model.Order;
 import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.util.OrderStatus;
 import ch.wisv.areafiftylan.model.util.TicketType;
+import ch.wisv.areafiftylan.service.repository.ExpiredOrderRepository;
 import ch.wisv.areafiftylan.service.repository.OrderRepository;
 import ch.wisv.areafiftylan.service.repository.TicketRepository;
 import com.google.common.base.Strings;
@@ -23,17 +25,19 @@ import java.util.List;
 public class OrderServiceImpl implements OrderService {
 
     OrderRepository orderRepository;
+    ExpiredOrderRepository expiredOrderRepository;
     TicketRepository ticketRepository;
     UserService userService;
     PaymentService paymentService;
 
     @Autowired
     public OrderServiceImpl(OrderRepository orderRepository, UserService userService, TicketRepository ticketRepository,
-                            PaymentService paymentService) {
+                            PaymentService paymentService, ExpiredOrderRepository expiredOrderRepository) {
         this.orderRepository = orderRepository;
         this.ticketRepository = ticketRepository;
         this.userService = userService;
         this.paymentService = paymentService;
+        this.expiredOrderRepository = expiredOrderRepository;
     }
 
     @Override
@@ -143,5 +147,13 @@ public class OrderServiceImpl implements OrderService {
         } else {
             throw new PaymentException("Order with id " + order + " has not been checked out yet");
         }
+    }
+
+    @Override
+    public void expireOrder(Order o){
+        orderRepository.delete(o);
+        ExpiredOrder eo = new ExpiredOrder(o);
+        expiredOrderRepository.save(eo);
+        o.getTickets().forEach(t -> ticketRepository.delete(t));
     }
 }
