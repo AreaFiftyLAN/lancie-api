@@ -10,7 +10,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.RestAssured.when;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.IsCollectionContaining.hasItem;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
@@ -79,13 +78,6 @@ public class UserRestIntegrationTest extends IntegrationTest {
                 then().log().all().statusCode(HttpStatus.SC_FORBIDDEN);
     }
 
-    // PROFILE
-    @Test
-    public void testGetCurrentProfileAnonymous() {
-        when().get("/users/current/profile").
-                then().statusCode(HttpStatus.SC_FORBIDDEN);
-    }
-
     // GET CURRENT USER AS USER
     @Test
     public void testGetCurrentUserUser() {
@@ -95,16 +87,6 @@ public class UserRestIntegrationTest extends IntegrationTest {
                 body("username", equalTo(user.getUsername())).
                 body("email", equalTo(user.getEmail())).
                 body("authorities", hasItem("ROLE_USER"));
-    }
-
-    // PROFILE
-    @Test
-    public void testGetCurrentProfileUser() {
-        given().auth().form("user", "password", formAuthConfig).
-                when().get("/users/current/profile").
-                then().statusCode(HttpStatus.SC_OK).
-                body("firstName", equalTo(user.getProfile().getFirstName())).
-                body("gender", equalTo(user.getProfile().getGender().toString()));
     }
 
     // GET CURRENT USER AS ADMIN
@@ -118,26 +100,10 @@ public class UserRestIntegrationTest extends IntegrationTest {
                 body("authorities", hasItem("ROLE_ADMIN"));
     }
 
-    // PROFILE
-    @Test
-    public void testGetCurrentProfileAdmin() {
-        given().auth().form("admin", "password", formAuthConfig).
-                when().get("/users/current/profile").
-                then().statusCode(HttpStatus.SC_OK).
-                body("firstName", equalTo(admin.getProfile().getFirstName())).
-                body("gender", equalTo(admin.getProfile().getGender().toString()));
-    }
-
     // GET OTHER ROLE_USER AS ANONYMOUS
     @Test
     public void testGetOtherUserAnonymous() {
         when().get("/users/1").
-                then().statusCode(HttpStatus.SC_FORBIDDEN);
-    }
-
-    @Test
-    public void testGetOtherProfileAnonymous() {
-        when().get("/users/1/profile").
                 then().statusCode(HttpStatus.SC_FORBIDDEN);
     }
 
