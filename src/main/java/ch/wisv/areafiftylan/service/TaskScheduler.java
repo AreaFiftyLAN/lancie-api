@@ -1,6 +1,5 @@
 package ch.wisv.areafiftylan.service;
 
-import ch.wisv.areafiftylan.model.ExpiredOrder;
 import ch.wisv.areafiftylan.model.Order;
 import ch.wisv.areafiftylan.service.repository.ExpiredOrderRepository;
 import ch.wisv.areafiftylan.service.repository.OrderRepository;
@@ -17,18 +16,19 @@ import java.util.Collection;
  * Class with all scheduled tasks
  */
 @Component
-public class ScheduledTasksService {
+public class TaskScheduler {
     private final int ORDER_STAY_ALIVE_MINUTES = 30;
     private final int ORDER_EXPIRY_CHECK_INTERVAL_SECONDS = 60;
 
-    @Autowired
     private OrderRepository orderRepository;
-
-    @Autowired
-    private ExpiredOrderRepository expiredOrderRepository;
-
-    @Autowired
     private OrderService orderService;
+
+    @Autowired
+    public TaskScheduler(OrderRepository orderRepository, OrderService orderService) {
+        this.orderRepository = orderRepository;
+        this.orderService = orderService;
+    }
+
 
     @Scheduled(fixedRate = ORDER_EXPIRY_CHECK_INTERVAL_SECONDS * 1000)
     public void ExpireOrders(){
