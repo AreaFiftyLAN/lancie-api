@@ -53,6 +53,11 @@ public class AuthenticationController {
         return new ModelAndView("loginForm");
     }
 
+    @RequestMapping(value = "/token", method = RequestMethod.GET)
+    public ResponseEntity<?> checkSession(HttpServletRequest request) {
+        return createResponseEntity(HttpStatus.OK, "Here's your token!", request);
+    }
+
     /**
      * This method requests a passwordResetToken and sends it to the user. With this token, the user can reset his
      * password.

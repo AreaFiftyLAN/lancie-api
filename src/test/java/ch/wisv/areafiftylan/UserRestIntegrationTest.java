@@ -1,12 +1,8 @@
 package ch.wisv.areafiftylan;
 
+import ch.wisv.areafiftylan.util.SessionData;
 import org.apache.http.HttpStatus;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.boot.test.WebIntegrationTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.RestAssured.when;
@@ -14,10 +10,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.IsCollectionContaining.hasItem;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = ApplicationTest.class)
-@WebIntegrationTest("server.port=0")
-@ActiveProfiles("test")
 public class UserRestIntegrationTest extends IntegrationTest {
 
     // CHECK AVAILABILITY
@@ -54,7 +46,12 @@ public class UserRestIntegrationTest extends IntegrationTest {
     // GET ALL USERS AS USER
     @Test
     public void testGetAllUsersUser() {
-        given().auth().form("user", "password", formAuthConfig).
+        SessionData login = login("user", "password");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
                 when().get("/users").
                 then().statusCode(HttpStatus.SC_FORBIDDEN).body("message", equalTo("Access denied"));
     }
@@ -62,13 +59,20 @@ public class UserRestIntegrationTest extends IntegrationTest {
     // GET ALL USERS AS ADMIN
     @Test
     public void testGetAllUsersAdmin() {
-        given().auth().form("admin", "password", formAuthConfig).
-                when().get("/users").
-                then().
-                statusCode(HttpStatus.SC_OK).
-                body("username", hasItems(user.getUsername(), admin.getUsername())).
-                body("profile.displayName",
-                        hasItems(user.getProfile().getDisplayName(), admin.getProfile().getDisplayName()));
+        SessionData login = login("admin", "password");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            get("/users").
+        then().
+            statusCode(HttpStatus.SC_OK).
+            body("username", hasItems(user.getUsername(), admin.getUsername())).
+            body("profile.displayName",
+                    hasItems(user.getProfile().getDisplayName(), admin.getProfile().getDisplayName()));
+        //@formatter:on
     }
 
     // GET CURRENT USER AS ANONYMOUS
@@ -81,23 +85,39 @@ public class UserRestIntegrationTest extends IntegrationTest {
     // GET CURRENT USER AS USER
     @Test
     public void testGetCurrentUserUser() {
-        given().auth().form("user", "password", formAuthConfig).
-                when().get("/users/current").
-                then().statusCode(HttpStatus.SC_OK).
-                body("username", equalTo(user.getUsername())).
-                body("email", equalTo(user.getEmail())).
-                body("authorities", hasItem("ROLE_USER"));
+
+        SessionData login = login("user", "password");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            get("/users/current").
+        then().statusCode(HttpStatus.SC_OK).
+            body("username", equalTo(user.getUsername())).
+            body("email", equalTo(user.getEmail())).
+            body("authorities", hasItem("ROLE_USER"));
+        //@formatter:on
     }
 
     // GET CURRENT USER AS ADMIN
     @Test
     public void testGetCurrentUserAdmin() {
-        given().auth().form("admin", "password", formAuthConfig).
-                when().get("/users/current").
-                then().statusCode(HttpStatus.SC_OK).
-                body("username", equalTo(admin.getUsername())).
-                body("email", equalTo(admin.getEmail())).
-                body("authorities", hasItem("ROLE_ADMIN"));
+
+        SessionData login = login("admin", "password");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            get("/users/current").
+        then().statusCode(HttpStatus.SC_OK).
+            body("username", equalTo(admin.getUsername())).
+            body("email", equalTo(admin.getEmail())).
+            body("authorities", hasItem("ROLE_ADMIN"));
+        //@formatter:on
     }
 
     // GET OTHER ROLE_USER AS ANONYMOUS
@@ -112,31 +132,52 @@ public class UserRestIntegrationTest extends IntegrationTest {
     public void testGetOtherUserUser() {
         long id = user.getId();
         id++;
-        given().auth().form("user", "password", formAuthConfig).
-                when().get("/users/" + id).
-                then().statusCode(HttpStatus.SC_FORBIDDEN).body("message", equalTo("Access denied"));
+        SessionData login = login("user", "password");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().get("/users/" + id).
+            then().statusCode(HttpStatus.SC_FORBIDDEN).body("message", equalTo("Access denied"));
+        //@formatter:on
     }
 
     // GET OTHER ROLE_USER AS ROLE_ADMIN
     @Test
     public void testGetOtherUserAdmin() {
         long userId = user.getId();
-        given().auth().form("admin", "password", formAuthConfig).
-                when().get("/users/" + userId).
-                then().statusCode(HttpStatus.SC_OK).
-                body("username", equalTo(user.getUsername())).
-                body("email", equalTo(user.getEmail()));
+        SessionData login = login("admin", "password");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            get("/users/" + userId).
+        then().statusCode(HttpStatus.SC_OK).
+            body("username", equalTo(user.getUsername())).
+            body("email", equalTo(user.getEmail()));
+        //@formatter:on
     }
 
     // GET OWN ROLE_USER VIA ID
     @Test
     public void testGetOwnUserId() {
-        given().auth().form("admin", "password", formAuthConfig).
-                when().get("/users/" + user.getId()).
-                then().statusCode(HttpStatus.SC_OK).
-                body("username", equalTo(user.getUsername())).
-                body("email", equalTo(user.getEmail()));
+        SessionData login = login("admin", "password");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            get("/users/" + user.getId()).
+        then().statusCode(HttpStatus.SC_OK).
+            body("username", equalTo(user.getUsername())).
+            body("email", equalTo(user.getEmail()));
+        //@formatter:on
     }
+
 
     // USER POST
     // CREATE USER AND VERIFY IN DB

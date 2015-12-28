@@ -4,6 +4,7 @@ import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.util.Gender;
 import ch.wisv.areafiftylan.service.repository.TeamRepository;
+import ch.wisv.areafiftylan.util.SessionData;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Response;
 import org.apache.http.HttpStatus;
@@ -11,25 +12,17 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.boot.test.WebIntegrationTest;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static com.jayway.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
+import static org.hamcrest.core.IsCollectionContaining.hasItem;
 
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = ApplicationTest.class)
-@WebIntegrationTest("server.port=0")
-@ActiveProfiles("test")
 public class TeamRestIntegrationTest extends IntegrationTest {
 
     protected User teamCaptain;
@@ -55,6 +48,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
     @After
     public void teamTestsCleanup() {
+        logout();
         teamRepository.deleteAll();
         userRepository.delete(teamCaptain);
     }
@@ -63,19 +57,23 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     public void testCreateTeam_nonAdmin_correct() {
         team1.put("captainUsername", teamCaptain.getUsername());
 
+        SessionData login = login("captain", "password");
+
         //@formatter:off
         Integer teamId =
-                given().
-                        auth().form("captain", "password", formAuthConfig).
-                        when().
-                        content(team1).contentType(ContentType.JSON).post("/teams").
-                        then().log().all().
-                        statusCode(HttpStatus.SC_CREATED).
-                        header("Location", containsString("/teams/")).
-                        body("object.teamName", equalTo(team1.get("teamName"))).
-                        body("object.captain.profile.displayName", equalTo(teamCaptain.getProfile().getDisplayName())).
-                        body("object.members", hasSize(1)).
-                        extract().response().path("object.id");
+            given().
+                filter(sessionFilter).
+                header(login.getCsrfHeader()).
+            when().
+                content(team1).contentType(ContentType.JSON).
+                post("/teams").
+            then().
+                statusCode(HttpStatus.SC_CREATED).
+                header("Location", containsString("/teams/")).
+                body("object.teamName", equalTo(team1.get("teamName"))).
+                body("object.captain.profile.displayName", equalTo(teamCaptain.getProfile().getDisplayName())).
+                body("object.members", hasSize(1)).
+            extract().response().path("object.id");
         //@formatter:on
 
         Team team = teamRepository.getOne(new Long(teamId));
@@ -86,13 +84,17 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     public void testCreateTeam_nonAdmin_differentCaptain() {
         team1.put("captainUsername", user.getUsername());
 
+        SessionData login = login("captain", "password");
+
         //@formatter:off
         given().
-                auth().form("captain", "password", formAuthConfig).
-                when().
-                content(team1).contentType(ContentType.JSON).post("/teams").
-                then().log().ifValidationFails().
-                statusCode(HttpStatus.SC_BAD_REQUEST);
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            content(team1).contentType(ContentType.JSON).
+            post("/teams").
+        then().
+            statusCode(HttpStatus.SC_BAD_REQUEST);
         //@formatter:on
     }
 
@@ -100,17 +102,21 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     public void testCreateTeam_Admin_differentCaptain() {
         team1.put("captainUsername", teamCaptain.getUsername());
 
+        SessionData login = login("admin", "password");
+
         //@formatter:off
         given().
-                auth().form("admin", "password", formAuthConfig).
-                when().
-                content(team1).contentType(ContentType.JSON).post("/teams").
-                then().log().all().
-                statusCode(HttpStatus.SC_CREATED).
-                header("Location", containsString("/teams/")).
-                body("object.teamName", equalTo(team1.get("teamName"))).
-                body("object.captain.profile.displayName", equalTo(teamCaptain.getProfile().getDisplayName())).
-                body("object.members", hasSize(1));
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            content(team1).contentType(ContentType.JSON).
+            post("/teams").
+        then().
+            statusCode(HttpStatus.SC_CREATED).
+            header("Location", containsString("/teams/")).
+            body("object.teamName", equalTo(team1.get("teamName"))).
+            body("object.captain.profile.displayName", equalTo(teamCaptain.getProfile().getDisplayName())).
+            body("object.members", hasSize(1));
         //@formatter:on
     }
 
@@ -118,47 +124,57 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     public void testCreateTeam_nonAdmin_duplicateTeamName() {
         team1.put("captainUsername", teamCaptain.getUsername());
 
+        SessionData login = login("captain", "password");
+
         //@formatter:off
         given().
-                auth().form("captain", "password", formAuthConfig).
-                when().
-                content(team1).contentType(ContentType.JSON).post("/teams").
-                then().log().all().
-                statusCode(HttpStatus.SC_CREATED).
-                header("Location", containsString("/teams/")).
-                body("object.teamName", equalTo(team1.get("teamName"))).
-                body("object.captain.profile.displayName", equalTo(teamCaptain.getProfile().getDisplayName())).
-                body("object.members.profile.displayName", hasItem(teamCaptain.getProfile().getDisplayName()));
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            content(team1).contentType(ContentType.JSON).
+            post("/teams").
+        then().
+            statusCode(HttpStatus.SC_CREATED).
+            header("Location", containsString("/teams/")).
+            body("object.teamName", equalTo(team1.get("teamName"))).
+            body("object.captain.profile.displayName", equalTo(teamCaptain.getProfile().getDisplayName())).
+            body("object.members.profile.displayName", hasItem(teamCaptain.getProfile().getDisplayName()));
         //@formatter:on
+
+        logout();
 
         team1.put("captainUsername", user.getUsername());
 
+        SessionData login2 = login("user", "password");
+
         //@formatter:off
         given().
-            auth().form("user", "password", formAuthConfig).
+            filter(sessionFilter).
+            header(login2.getCsrfHeader()).
         when().
-            content(team1).contentType(ContentType.JSON).post("/teams").
+            content(team1).contentType(ContentType.JSON).
+            post("/teams").
         then().log().ifValidationFails().
             statusCode(HttpStatus.SC_CONFLICT);
         //@formatter:on
     }
 
     @Test
-    public void getTeamAsAdmin(){
+    public void getTeamAsAdmin() {
         Response team = getTeam(createTeamWithCaptain(), "admin", "password");
 
         team.then().statusCode(HttpStatus.SC_OK);
     }
 
     @Test
-    public void getTeamAsCaptain(){
+    public void getTeamAsCaptain() {
         Response team = getTeam(createTeamWithCaptain(), "captain", "password");
 
         team.then().statusCode(HttpStatus.SC_OK);
     }
 
     @Test
-    public void getTeamAsMember(){
+    public void getTeamAsMember() {
         String location = createTeamWithCaptain();
         addUserAsCaptain(location, user);
         Response team = getTeam(location, "user", "password");
@@ -167,7 +183,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void getTeamAsUser(){
+    public void getTeamAsUser() {
         String location = createTeamWithCaptain();
         Response team = getTeam(location, "user", "password");
 
@@ -175,29 +191,57 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     }
 
     private void addUserAsCaptain(String location, User user) {
-        given().
-                auth().form("captain", "password", formAuthConfig).
-                when().
-                content(user.getUsername()).post(location).
-                then().log().ifValidationFails().statusCode(HttpStatus.SC_OK);
+        SessionData sessionData = login("captain", "password");
+
+        //@formatter:off
+        given().log().all().
+            filter(sessionFilter).
+            header(sessionData.getCsrfHeader()).
+        when().
+            content(user.getUsername()).post(location).
+        then().
+            statusCode(HttpStatus.SC_OK);
+        //@formatter:on
+
+        logout();
     }
 
     private String createTeamWithCaptain() {
-        team1.put("captainUsername", teamCaptain.getUsername());
+        SessionData sessionData = login("captain", "password");
 
-        return given().
-                auth().form("captain", "password", formAuthConfig).
-                when().
-                content(team1).contentType(ContentType.JSON).post("/teams").
-                then().log().all().extract().response().header("Location");
+        team1.put("captainUsername", teamCaptain.getUsername());
+        //        team1.put("_csrf", csrfToken.getToken());
+
+        //@formatter:off
+        Response response =
+            given().
+                    header(sessionData.getCsrfHeader()).
+//                        cookie(sessionData.getCookie()).
+                    filter(sessionFilter).
+            when().
+                content(team1).contentType(ContentType.JSON).
+                post("/teams").
+            then().
+                extract().response();
+        //@formatter:on
+
+
+        logout();
+        return response.header("Location");
     }
 
     private Response getTeam(String location, String user, String password) {
-        return given().
-                auth().form(user, password, formAuthConfig).
-                when().
+        SessionData login = login(user, password);
+
+        //@formatter:off
+        return
+            given().
+                filter(sessionFilter).
+                header(login.getCsrfHeader()).
+            when().
                 get(location).
-                then().log().all().extract().response();
+            then().extract().response();
+        //@formatter:on
     }
 
     @Test
@@ -206,18 +250,28 @@ public class TeamRestIntegrationTest extends IntegrationTest {
         //@formatter:off
         String location = createTeamWithCaptain();
 
+        SessionData login = login("admin", "password");
+
+        //@formatter:off
         given().
-            auth().form("admin", "password", formAuthConfig).
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
         when().
             content(user.getUsername()).post(location).
         then().log().ifValidationFails()
             .statusCode(HttpStatus.SC_OK);
 
+        logout();
+
+        SessionData login2 = login("admin", "password");
+
+        //@formatter:off
         given().
-            auth().form("admin", "password", formAuthConfig).
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
         when().
             get(location).
-        then().log().ifValidationFails().
+        then().
             statusCode(HttpStatus.SC_OK).
             body("members.profile.displayName", hasItems(
                     teamCaptain.getProfile().getDisplayName(),
@@ -235,8 +289,12 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
         addUserAsCaptain(location, user);
 
+        SessionData login = login("captain", "password");
+
+        //@formatter:off
         given().
-            auth().form("captain", "password", formAuthConfig).
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
         when().
             get(location).
         then().log().ifValidationFails().
@@ -257,8 +315,12 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
         addUserAsCaptain(location, user);
 
+        SessionData login = login("user", "password");
+
+        //@formatter:off
         given().
-            auth().form("user", "password", formAuthConfig).
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
         when().
             content(admin.getUsername()).post(location).
         then().log().ifValidationFails()
@@ -273,8 +335,12 @@ public class TeamRestIntegrationTest extends IntegrationTest {
         //@formatter:off
         String location = createTeamWithCaptain();
 
+        SessionData login = login("user", "password");
+
+        //@formatter:off
         given().
-            auth().form("user", "password", formAuthConfig).
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
         when().
             content(user.getUsername()).post(location).
         then().log().ifValidationFails()
@@ -286,9 +352,12 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     public void testAddMember_captain() {
         String location = createTeamWithCaptain();
 
+        SessionData login = login("captain", "password");
+
         //@formatter:off
         given().
-            auth().form("captain", "password", formAuthConfig).
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
         when().
             content(teamCaptain.getUsername()).post(location).
         then().log().all()
@@ -300,16 +369,24 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     public void testAddMember_duplicate() {
         String location = createTeamWithCaptain();
 
+        SessionData login = login("captain", "password");
+
         //@formatter:off
         given().
-            auth().form("captain", "password", formAuthConfig).
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
         when().
             content(user.getUsername()).post(location).
         then().log().all()
             .statusCode(HttpStatus.SC_OK);
 
+        logout();
+
+        SessionData login2 = login("captain", "password");
+
         given().
-            auth().form("captain", "password", formAuthConfig).
+            filter(sessionFilter).
+            header(login2.getCsrfHeader()).
         when().
             content(user.getUsername()).post(location).
         then().log().all()
@@ -318,14 +395,17 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void testRemoveMember_captain(){
+    public void testRemoveMember_captain() {
         String location = createTeamWithCaptain();
 
         addUserAsCaptain(location, user);
 
+        SessionData login = login("captain", "password");
+
         //@formatter:off
         given().
-            auth().form("captain", "password", formAuthConfig).
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
         when().
             content(user.getUsername()).delete(location + "/members").
         then().log().all()
@@ -334,14 +414,17 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void testRemoveMember_admin(){
+    public void testRemoveMember_admin() {
         String location = createTeamWithCaptain();
 
         addUserAsCaptain(location, user);
 
+        SessionData login = login("captain", "password");
+
         //@formatter:off
         given().
-            auth().form("captain", "password", formAuthConfig).
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
         when().
             content(user.getUsername()).delete(location + "/members").
         then().log().all()
@@ -350,14 +433,17 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void testRemoveMember_member(){
+    public void testRemoveMember_member() {
         String location = createTeamWithCaptain();
 
         addUserAsCaptain(location, user);
 
+        SessionData login = login("user", "password");
+
         //@formatter:off
         given().
-            auth().form("user", "password", formAuthConfig).
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
         when().
             content(user.getUsername()).delete(location + "/members").
         then().log().all()
@@ -366,14 +452,17 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void testRemoveMember_user(){
+    public void testRemoveMember_user() {
         String location = createTeamWithCaptain();
 
         addUserAsCaptain(location, admin);
 
+        SessionData login = login("user", "password");
+
         //@formatter:off
         given().
-            auth().form("user", "password", formAuthConfig).
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
         when().
             content(admin.getUsername()).delete(location + "/members").
         then().log().all()

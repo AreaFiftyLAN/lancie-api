@@ -4,20 +4,32 @@ import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.util.Gender;
 import ch.wisv.areafiftylan.model.util.Role;
 import ch.wisv.areafiftylan.service.repository.UserRepository;
+import ch.wisv.areafiftylan.util.SessionData;
 import com.jayway.restassured.RestAssured;
-import com.jayway.restassured.authentication.FormAuthConfig;
+import com.jayway.restassured.filter.session.SessionFilter;
+import com.jayway.restassured.response.Response;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.WebIntegrationTest;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.config.RedirectConfig.redirectConfig;
 import static com.jayway.restassured.config.RestAssuredConfig.config;
 
 /**
  * Created by sille on 12-11-15.
  */
+@RunWith(SpringJUnit4ClassRunner.class)
+@SpringApplicationConfiguration(classes = ApplicationTest.class)
+@WebIntegrationTest("server.port=0")
+@ActiveProfiles("test")
 public abstract class IntegrationTest {
     @Value("${local.server.port}")
     int port;
@@ -29,7 +41,7 @@ public abstract class IntegrationTest {
 
     protected User admin;
 
-    protected static FormAuthConfig formAuthConfig = new FormAuthConfig("/login", "username", "password");
+    SessionFilter sessionFilter = new SessionFilter();
 
     @Before
     public void initIntegrationTest() {
@@ -50,7 +62,8 @@ public abstract class IntegrationTest {
         userRepository.saveAndFlush(admin);
 
         RestAssured.port = port;
-        RestAssured.config = config().redirect(redirectConfig().followRedirects(false));
+        RestAssured.config = config().redirect(redirectConfig().followRedirects(true));
+        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
     }
 
     @After
@@ -58,5 +71,62 @@ public abstract class IntegrationTest {
         userRepository.delete(user);
         userRepository.delete(admin);
         RestAssured.reset();
+    }
+
+    protected SessionData login(String username, String password) {
+        //@formatter:off
+        Response getLoginResponse =
+            given().
+                filter(sessionFilter).
+            when().
+                get("/login").
+            then().
+                extract().response();
+        //@formatter:on
+
+        String token = getLoginResponse.header("X-CSRF-TOKEN");
+
+        //@formatter:off
+        given().log().all().
+            filter(sessionFilter).
+            param("username", username).
+            param("password", password).
+            param("_csrf", token).
+        when().
+            post("/login");
+
+        Response tokenResponse =
+            given().log().all().
+                filter(sessionFilter).
+            when().
+                get("/token").
+            then().log().all().
+                extract().response();
+
+        sessionFilter.getSessionId();
+        //@formatter:on
+
+        return new SessionData(tokenResponse.header("X-CSRF-TOKEN"), sessionFilter.getSessionId());
+    }
+
+    protected void logout() {
+        //@formatter:off
+        Response getLoginResponse =
+            given().
+                filter(sessionFilter).
+            when().
+                get("/login").
+            then().
+                extract().response();
+
+        String token = getLoginResponse.header("X-CSRF-TOKEN");
+
+        given().log().all().
+            filter(sessionFilter).
+            param("_csrf", token).
+        when().
+            post("/logout").
+        then().log().all();
+        //@formatter:on
     }
 }
