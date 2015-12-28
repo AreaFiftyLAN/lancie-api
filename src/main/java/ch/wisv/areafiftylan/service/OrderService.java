@@ -73,4 +73,11 @@ public interface OrderService {
     Order updateOrderStatus(String orderReference);
 
     Order updateOrderStatus(Long orderId);
+
+    /**
+     * Expire an order which will remove the order from the orders table and enter a relevant
+     * entry in the expired orders table
+     * @param o The order to expire
+     */
+    void expireOrder(Order o);
 }

@@ -21,6 +21,10 @@ public class ExpiredOrder {
 
     String createdBy;
 
+    public ExpiredOrder(){
+        //JPA Only
+    }
+
     public ExpiredOrder(Long id, int numberOfTickets, String createdAt, String expiredAt, String createdBy) {
         this.id = id;
         this.numberOfTickets = numberOfTickets;
