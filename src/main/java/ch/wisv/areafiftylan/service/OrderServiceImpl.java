@@ -57,7 +57,8 @@ public class OrderServiceImpl implements OrderService {
 
         // Request a ticket to see if one is available. If a ticket is sold out, the method ends here due to the
         // exception thrown. Else, we'll get a new ticket to add to the order.
-        Ticket ticket = this.requestTicketOfType(ticketDTO.getType(), user, ticketDTO.hasPickupService());
+        Ticket ticket = this.requestTicketOfType(ticketDTO.getType(), user, ticketDTO.hasPickupService(),
+                ticketDTO.isCHMember());
 
         Order order = new Order(user);
 
@@ -75,7 +76,8 @@ public class OrderServiceImpl implements OrderService {
 
             // Request a ticket to see if one is available. If a ticket is sold out, the method ends here due to the
             // exception thrown. Else, we'll get a new ticket to add to the order.
-            Ticket ticket = this.requestTicketOfType(ticketDTO.getType(), user, ticketDTO.hasPickupService());
+            Ticket ticket = this.requestTicketOfType(ticketDTO.getType(), user, ticketDTO.hasPickupService(),
+                    ticketDTO.isCHMember());
 
             order.addTicket(ticket);
 
@@ -86,11 +88,11 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Ticket requestTicketOfType(TicketType type, User owner, boolean pickupService) {
+    public Ticket requestTicketOfType(TicketType type, User owner, boolean pickupService, boolean chMember) {
         if (ticketRepository.countByType(type) >= type.getLimit()) {
             throw new TicketUnavailableException(type);
         } else {
-            Ticket ticket = new Ticket(owner, type, pickupService);
+            Ticket ticket = new Ticket(owner, type, pickupService, chMember);
             return ticketRepository.save(ticket);
         }
     }

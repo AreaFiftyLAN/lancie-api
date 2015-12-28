@@ -14,6 +14,9 @@ public class TicketDTO {
     @NotNull
     Boolean pickupService;
 
+    @NotNull
+    Boolean chMember;
+
     public TicketType getType() {
         return type;
     }
@@ -28,5 +31,13 @@ public class TicketDTO {
 
     public void setPickupService(Boolean pickupService) {
         this.pickupService = pickupService;
+    }
+
+    public Boolean isCHMember() {
+        return chMember;
+    }
+
+    public void setChMember(Boolean chMember) {
+        this.chMember = chMember;
     }
 }

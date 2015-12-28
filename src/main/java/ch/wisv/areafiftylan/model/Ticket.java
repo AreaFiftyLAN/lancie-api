@@ -1,5 +1,6 @@
 package ch.wisv.areafiftylan.model;
 
+import ch.wisv.areafiftylan.model.util.TicketOptions;
 import ch.wisv.areafiftylan.model.util.TicketType;
 import ch.wisv.areafiftylan.model.view.View;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -30,16 +31,20 @@ public class Ticket {
     @JsonView(View.OrderOverview.class)
     boolean pickupService;
 
+    @JsonView(View.OrderOverview.class)
+    boolean chMember;
+
     boolean lockedForTransfer;
 
     @JsonView(View.OrderOverview.class)
     boolean valid;
 
-    public Ticket(User owner, TicketType type, Boolean pickupService) {
+    public Ticket(User owner, TicketType type, Boolean pickupService, Boolean chMember) {
         this.owner = owner;
         this.previousOwner = null;
         this.type = type;
         this.pickupService = pickupService;
+        this.chMember = chMember;
         lockedForTransfer = true;
         this.valid = false;
         key = UUID.randomUUID().toString();
@@ -86,7 +91,13 @@ public class Ticket {
     }
 
     public float getPrice() {
-        return pickupService ? type.getPrice() + 5 : type.getPrice();
+        float finalPrice = type.getPrice();
+
+        finalPrice += pickupService ? TicketOptions.PICKUPSERVICE.getPrice() : 0;
+
+        finalPrice += chMember ? TicketOptions.CHMEMBER.getPrice() : 0;
+
+        return finalPrice;
     }
 
     public boolean hasPickupService() {

@@ -39,10 +39,10 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         Order order1 = new Order(user);
         Order order2 = new Order(admin);
 
-        Ticket earlyAndPickup = new Ticket(user, TicketType.EARLY_FULL, true);
-        Ticket earlyNoPickup = new Ticket(user, TicketType.EARLY_FULL, false);
-        Ticket regularNoPickup = new Ticket(user, TicketType.REGULAR_FULL, false);
-        Ticket lateAndPickup = new Ticket(user, TicketType.LATE_FULL, true);
+        Ticket earlyAndPickup = new Ticket(user, TicketType.EARLY_FULL, true, false);
+        Ticket earlyNoPickup = new Ticket(user, TicketType.EARLY_FULL, false, false);
+        Ticket regularNoPickup = new Ticket(user, TicketType.REGULAR_FULL, false, false);
+        Ticket lateAndPickup = new Ticket(user, TicketType.LATE_FULL, true, false);
 
         earlyAndPickup = ticketRepository.save(earlyAndPickup);
         earlyNoPickup = ticketRepository.save(earlyNoPickup);
@@ -120,6 +120,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         Map<String, String> order = new HashMap<>();
         order.put("pickupService", "true");
         order.put("type", TicketType.EARLY_FULL.toString());
+        order.put("chMember", "false");
         SessionData login = login("user");
 
         //@formatter:off
@@ -137,6 +138,32 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             body("object.tickets.pickupService", hasItem(true)).
             body("object.tickets.type", hasItem(is("EARLY_FULL"))).
             body("object.amount",equalTo(40.00F));
+        //@formatter:on
+    }
+
+    @Test
+    public void testCreateSingleOrder_UserCHMember() {
+        Map<String, String> order = new HashMap<>();
+        order.put("pickupService", "false");
+        order.put("chMember", "true");
+        order.put("type", TicketType.EARLY_FULL.toString());
+        SessionData login = login("user");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            content(order).contentType(ContentType.JSON).
+            post(ORDER_ENDPOINT)
+        .then().
+            statusCode(HttpStatus.SC_CREATED).
+            body("object.user.username", is("user")).
+            body("object.status", is("CREATING")).
+            body("object.tickets", hasSize(1)).
+            body("object.tickets.pickupService", hasItem(false)).
+            body("object.tickets.type", hasItem(is("EARLY_FULL"))).
+            body("object.amount",equalTo(30.00F));
         //@formatter:on
     }
 
@@ -161,6 +188,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
     public void testCreateSingleOrder_AnonWithCSRF() {
         Map<String, String> order = new HashMap<>();
         order.put("pickupService", "false");
+        order.put("chMember", "false");
         order.put("type", TicketType.EARLY_FULL.toString());
 
         //@formatter:off
@@ -188,6 +216,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
     public void testCreateSingleOrderMissingPickupParameter() {
         Map<String, String> order = new HashMap<>();
         order.put("type", TicketType.EARLY_FULL.toString());
+        order.put("chMember", "false");
         SessionData login = login("user");
 
         //@formatter:off
@@ -204,6 +233,25 @@ public class OrderRestIntegrationTest extends IntegrationTest {
     @Test
     public void testCreateSingleOrderMissingTypeParameter(){
         Map<String, String> order = new HashMap<>();
+        order.put("pickupService", "true");
+        order.put("chMember", "false");
+        SessionData login = login("user");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            content(order).contentType(ContentType.JSON).
+            post(ORDER_ENDPOINT)
+        .then().statusCode(HttpStatus.SC_BAD_REQUEST);
+        //@formatter:on
+    }
+
+    @Test
+    public void testCreateSingleOrderMissingChParameter(){
+        Map<String, String> order = new HashMap<>();
+        order.put("type", TicketType.EARLY_FULL.toString());
         order.put("pickupService", "true");
         SessionData login = login("user");
 
@@ -222,6 +270,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
     public void testCreateSingleOrderUnknownType() {
         Map<String, String> order = new HashMap<>();
         order.put("pickupService", "true");
+        order.put("chMember", "false");
         order.put("type", "UNKNOWN");
 
         SessionData login = login("user");
@@ -244,6 +293,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         Map<String, String> order = new HashMap<>();
         order.put("pickupService", "false");
         order.put("type", TicketType.EARLY_FULL.toString());
+        order.put("chMember", "false");
         SessionData login = login("user");
 
         //@formatter:off
@@ -352,6 +402,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         Map<String, String> ticket = new HashMap<>(2);
         ticket.put("pickupService", "true");
         ticket.put("type", TicketType.REGULAR_FULL.toString());
+        ticket.put("chMember", "false");
 
         String location = createOrderAndReturnLocation();
         logout();
@@ -370,6 +421,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
     public void testAddToOrder_User() {
         Map<String, String> ticket = new HashMap<>(2);
         ticket.put("pickupService", "true");
+        ticket.put("chMember", "false");
         ticket.put("type", TicketType.REGULAR_FULL.toString());
 
         String location = createOrderAndReturnLocation();
@@ -401,6 +453,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
 
         Map<String, String> ticket = new HashMap<>(2);
         ticket.put("pickupService", "true");
+        ticket.put("chMember", "false");
         ticket.put("type", TicketType.REGULAR_FULL.toString());
 
         String location = createOrderAndReturnLocation();
@@ -429,6 +482,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
     public void testAddToOrder_Admin() {
         Map<String, String> ticket = new HashMap<>(2);
         ticket.put("pickupService", "true");
+        ticket.put("chMember", "true");
         ticket.put("type", TicketType.REGULAR_FULL.toString());
 
         String location = createOrderAndReturnLocation();
@@ -448,13 +502,14 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             statusCode(HttpStatus.SC_OK).
             body("object.tickets", hasSize(2)).
             body("object.tickets.type", hasItems(equalTo("REGULAR_FULL"), equalTo("EARLY_FULL"))).
-            body("object.amount",equalTo(80.00F));
+            body("object.amount",equalTo(75.00F));
         //@formatter:on
     }
 
     @Test
     public void testAddToOrderMissingPickupParameter() {
         Map<String, String> ticket = new HashMap<>(2);
+        ticket.put("chMember", "false");
         ticket.put("type", TicketType.REGULAR_FULL.toString());
 
         String location = createOrderAndReturnLocation();
@@ -478,6 +533,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
     @Test
     public void testAddToOrderMissingTypeParameter() {
         Map<String, String> ticket = new HashMap<>(2);
+        ticket.put("chMember", "false");
         ticket.put("pickupService", "false");
 
         String location = createOrderAndReturnLocation();
@@ -500,11 +556,12 @@ public class OrderRestIntegrationTest extends IntegrationTest {
     @Test
     public void testAddToOrderUnavailableTicket() {
         for (int i = 0; i < TicketType.EARLY_FULL.getLimit() -1; i++) {
-            ticketRepository.save(new Ticket(user, TicketType.EARLY_FULL, false));
+            ticketRepository.save(new Ticket(user, TicketType.EARLY_FULL, false, false));
         }
 
         Map<String, String> ticket = new HashMap<>(2);
         ticket.put("pickupService", "true");
+        ticket.put("chMember", "false");
         ticket.put("type", TicketType.EARLY_FULL.toString());
 
         String location = createOrderAndReturnLocation();
@@ -532,6 +589,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
     public void testAddToOrderUnknownType() {
         Map<String, String> ticket = new HashMap<>(2);
         ticket.put("pickupService", "true");
+        ticket.put("chMember", "false");
         ticket.put("type", "UNKNOWN");
 
         String location = createOrderAndReturnLocation();
@@ -555,6 +613,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
     public void testAddToOrderWrongStatus() {
         Map<String, String> ticket = new HashMap<>(2);
         ticket.put("pickupService", "true");
+        ticket.put("chMember", "false");
         ticket.put("type", TicketType.REGULAR_FULL.toString());
 
         String location = createOrderAndReturnLocation();

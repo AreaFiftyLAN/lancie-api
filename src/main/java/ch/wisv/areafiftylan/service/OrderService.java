@@ -50,7 +50,8 @@ public interface OrderService {
      *
      * @throws TicketUnavailableException If the requested ticket is sold out.
      */
-    Ticket requestTicketOfType(TicketType type, User owner, boolean pickupService) throws TicketUnavailableException;
+    Ticket requestTicketOfType(TicketType type, User owner, boolean pickupService, boolean chMember)
+            throws TicketUnavailableException;
 
     /**
      * Transfer the ticket to another user
