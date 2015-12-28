@@ -11,6 +11,9 @@ package ch.wisv.areafiftylan.model.view;
  * create visibilty levels.
  */
 public class View {
+
+    public interface NoProfile {}
+
     /**
      * The Public view only displays fields that are truly public so that no private information is shown
      */
@@ -20,4 +23,6 @@ public class View {
      * The participant view shows information only accessible by event participants, such as seating information
      */
     public interface Participants extends Public {}
+
+    public interface OrderOverview extends NoProfile {}
 }

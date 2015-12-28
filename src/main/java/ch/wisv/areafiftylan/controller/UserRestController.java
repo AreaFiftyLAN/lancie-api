@@ -1,9 +1,6 @@
 package ch.wisv.areafiftylan.controller;
 
-import ch.wisv.areafiftylan.dto.ProfileDTO;
 import ch.wisv.areafiftylan.dto.UserDTO;
-import ch.wisv.areafiftylan.exception.UserNotFoundException;
-import ch.wisv.areafiftylan.model.Profile;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.service.UserService;
 import org.hibernate.exception.ConstraintViolationException;
@@ -12,10 +9,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -102,7 +96,7 @@ public class UserRestController {
     @PreAuthorize("@currentUserServiceImpl.canAccessUser(principal, #userId)")
     @RequestMapping(value = "/{userId}", method = RequestMethod.GET)
     public User getUserById(@PathVariable Long userId) {
-        return this.userService.getUserById(userId).get();
+        return this.userService.getUserById(userId);
     }
 
     /**

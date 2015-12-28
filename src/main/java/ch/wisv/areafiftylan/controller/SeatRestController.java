@@ -40,7 +40,7 @@ public class SeatRestController {
 
     @RequestMapping(value = "/users/{userId}/seat", method = RequestMethod.GET)
     public Seat getSeatByUser(@PathVariable Long userId) {
-        User user = userService.getUserById(userId).get();
+        User user = userService.getUserById(userId);
 
         return seatService.getSeatByUser(user);
     }

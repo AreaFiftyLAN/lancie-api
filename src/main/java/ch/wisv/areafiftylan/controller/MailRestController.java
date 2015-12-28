@@ -2,7 +2,6 @@ package ch.wisv.areafiftylan.controller;
 
 import ch.wisv.areafiftylan.dto.MailDTO;
 import ch.wisv.areafiftylan.exception.TeamNotFoundException;
-import ch.wisv.areafiftylan.exception.UserNotFoundException;
 import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.service.MailService;
@@ -34,7 +33,7 @@ public class MailRestController {
 
     @RequestMapping(value = "/user/{userId}", method = RequestMethod.POST)
     ResponseEntity<?> sendMailToUser(@PathVariable Long userId, @Validated @RequestBody MailDTO mailDTO) {
-        User user = userService.getUserById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+        User user = userService.getUserById(userId);
 
         try {
             mailService.sendTemplateMailToUser(user, mailDTO);
