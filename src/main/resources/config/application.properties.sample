@@ -27,3 +27,11 @@ spring.jpa.generate-ddl=true
 spring.jpa.hibernate.ddl-auto=create-drop
 spring.jpa.properties.hibernate.default_schema=public
 server.port =
+
+
+##AREA FIFTYLAN SETTINGS
+
+a5l.molliekey=
+a5l.paymentReturnUrl=https://areafiftylan.nl/ordersuccess
+a5l.mail.confirmUrl=https://areafiftylan.nl/confirmRegistration
+a5l.mail.sender=LANcie <lancie@ch.tudelft.nl>

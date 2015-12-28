@@ -11,6 +11,7 @@ import ch.wisv.areafiftylan.service.repository.UserRepository;
 import ch.wisv.areafiftylan.service.repository.VerificationTokenRepository;
 import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -31,6 +32,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     private final VerificationTokenRepository verificationTokenRepository;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final MailService mailService;
+
+    @Value("${a5l.mail.confirmUrl}")
+    String requestUrl;
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository, VerificationTokenRepository verificationTokenRepository,
@@ -87,7 +91,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
         try {
             // Build the URL and send this to the mailservice for sending.
-            String confirmUrl = getAppUrl(request) + "/confirmRegistration?token=" + token;
+            String confirmUrl = requestUrl + "?token=" + token;
             mailService.sendVerificationmail(user, confirmUrl);
         } catch (MessagingException e) {
             e.printStackTrace();
