@@ -48,7 +48,6 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
     @After
     public void teamTestsCleanup() {
-        logout();
         teamRepository.deleteAll();
         userRepository.delete(teamCaptain);
     }

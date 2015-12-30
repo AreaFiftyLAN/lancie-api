@@ -38,6 +38,7 @@ public class User implements Serializable, UserDetails {
     @JsonView(View.NoProfile.class)
     private Long id;
 
+    @JsonIgnore
     @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
     @CollectionTable(name = "user_role")

@@ -1,7 +1,6 @@
 package ch.wisv.areafiftylan.dto;
 
 import ch.wisv.areafiftylan.model.util.Role;
-import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
@@ -11,7 +10,7 @@ public class UserDTO {
     @NotEmpty
     private String username = "";
 
-    @Email
+    @NotEmpty
     private String email = "";
 
     @NotEmpty
@@ -34,5 +33,21 @@ public class UserDTO {
 
     public Role getRole() {
         return role;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
     }
 }

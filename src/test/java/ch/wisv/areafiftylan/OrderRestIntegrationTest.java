@@ -61,7 +61,6 @@ public class OrderRestIntegrationTest extends IntegrationTest {
 
     @After
     public void orderTestCleanup() {
-        logout();
         orderRepository.findAll().forEach((order) -> {
             order.clearTickets();
             orderRepository.save(order);
