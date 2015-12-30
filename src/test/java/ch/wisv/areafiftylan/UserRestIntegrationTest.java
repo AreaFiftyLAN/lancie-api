@@ -1,11 +1,15 @@
 package ch.wisv.areafiftylan;
 
+import ch.wisv.areafiftylan.dto.ProfileDTO;
+import ch.wisv.areafiftylan.model.User;
+import ch.wisv.areafiftylan.model.util.Gender;
 import ch.wisv.areafiftylan.service.repository.VerificationTokenRepository;
 import ch.wisv.areafiftylan.util.SessionData;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Header;
 import com.jayway.restassured.response.Response;
 import org.apache.http.HttpStatus;
+import org.hamcrest.core.StringEndsWith;
 import org.junit.After;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +19,7 @@ import java.util.Map;
 
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.RestAssured.when;
+import static org.hamcrest.CoreMatchers.endsWith;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
@@ -44,6 +49,45 @@ public class UserRestIntegrationTest extends IntegrationTest {
         //@formatter:on
 
         return new Header("X-CSRF-TOKEN", getLoginResponse.header("X-CSRF-TOKEN"));
+    }
+
+    private String createEnabledTestUser(){
+        Map<String, String> userDTO = new HashMap<>();
+        userDTO.put("username", "testuser");
+        userDTO.put("password", "password");
+        userDTO.put("email", "testuser@mail.com");
+
+        //@formatter:off
+        Response response = given().log().all().
+            header(getCSRFHeader()).
+            filter(sessionFilter).
+        when().
+            content(userDTO).contentType(ContentType.JSON).
+            post("/users").
+        then().log().all().
+            extract().response();
+        //@formatter:on
+
+        User testuser = userRepository.findOneByUsername("testuser").get();
+        testuser.setEnabled(true);
+        userRepository.saveAndFlush(testuser);
+
+        return response.getHeader("Location");
+    }
+
+    private Map<String, String> getProfileDTO() {
+        Map<String, String> profileDTO = new HashMap<>();
+        profileDTO.put("gender", "MALE");
+        profileDTO.put("address", "Testaddress");
+        profileDTO.put("zipcode", "Testzipcode");
+        profileDTO.put("city", "Testcity");
+        profileDTO.put("phoneNumber", "TestphoneNumber");
+        profileDTO.put("notes", "Testnotes");
+        profileDTO.put("firstName", "TestfirstName");
+        profileDTO.put("lastName", "TestlastName");
+        profileDTO.put("firstName", "TestfirstName");
+        profileDTO.put("displayName", "TestdisplayName");
+        return profileDTO;
     }
 
     // CHECK AVAILABILITY
@@ -385,6 +429,222 @@ public class UserRestIntegrationTest extends IntegrationTest {
         then().
             statusCode(HttpStatus.SC_CONFLICT);
         //@formatter:on
+    }
+
+    @Test
+    public void createProfileAsCurrentUser(){
+        createEnabledTestUser();
+
+        Map<String, String> profileDTO = getProfileDTO();
+
+        SessionData login = login("testuser");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            content(profileDTO).
+            contentType(ContentType.JSON).
+            post("/users/current/profile").
+        then().
+            statusCode(HttpStatus.SC_OK).
+            body("object.gender", is("MALE")).
+            body("object.address", equalTo("Testaddress")).
+            body("object.zipcode", equalTo("Testzipcode")).
+            body("object.city", equalTo("Testcity")).
+            body("object.phoneNumber", equalTo("TestphoneNumber")).
+            body("object.notes", equalTo("Testnotes")).
+            body("object.firstName", equalTo("TestfirstName")).
+            body("object.lastName", equalTo("TestlastName")).
+            body("object.displayName", equalTo("TestdisplayName"));
+        //@formatter:on
+    }
+
+    @Test
+    public void createProfileAsUser(){
+        String location = createEnabledTestUser();
+
+        Map<String, String> profileDTO = getProfileDTO();
+
+        SessionData login = login("testuser");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            content(profileDTO).
+            contentType(ContentType.JSON).
+            post(location + "/profile").
+        then().
+            statusCode(HttpStatus.SC_OK).
+            body("object.gender", is("MALE")).
+            body("object.address", equalTo("Testaddress")).
+            body("object.zipcode", equalTo("Testzipcode")).
+            body("object.city", equalTo("Testcity")).
+            body("object.phoneNumber", equalTo("TestphoneNumber")).
+            body("object.notes", equalTo("Testnotes")).
+            body("object.firstName", equalTo("TestfirstName")).
+            body("object.lastName", equalTo("TestlastName")).
+            body("object.displayName", equalTo("TestdisplayName"));
+        //@formatter:on
+    }
+
+    @Test
+    public void createProfileAsAdmin(){
+        String location = createEnabledTestUser();
+
+        Map<String, String> profileDTO = getProfileDTO();
+
+        SessionData login = login("admin");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            content(profileDTO).
+            contentType(ContentType.JSON).
+            post(location + "/profile").
+        then().
+            statusCode(HttpStatus.SC_OK).
+            body("object.gender", is("MALE")).
+            body("object.address", equalTo("Testaddress")).
+            body("object.zipcode", equalTo("Testzipcode")).
+            body("object.city", equalTo("Testcity")).
+            body("object.phoneNumber", equalTo("TestphoneNumber")).
+            body("object.notes", equalTo("Testnotes")).
+            body("object.firstName", equalTo("TestfirstName")).
+            body("object.lastName", equalTo("TestlastName")).
+            body("object.displayName", equalTo("TestdisplayName"));
+        //@formatter:on
+    }
+
+    @Test
+    public void createProfileAsOtherUser(){
+        String location = createEnabledTestUser();
+
+        Map<String, String> profileDTO = getProfileDTO();
+
+        SessionData login = login("user");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            content(profileDTO).
+            contentType(ContentType.JSON).
+            post(location + "/profile").
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
+    }
+
+    @Test
+    public void createProfileMissingField(){
+        createEnabledTestUser();
+
+        Map<String, String> profileDTO = getProfileDTO();
+        profileDTO.remove("city");
+
+        SessionData login = login("testuser");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            content(profileDTO).
+            contentType(ContentType.JSON).
+            post("/users/current/profile").
+        then().
+            statusCode(HttpStatus.SC_BAD_REQUEST);
+        //@formatter:on
+    }
+
+    @Test
+    public void createProfileInvalidGender(){
+        createEnabledTestUser();
+
+        Map<String, String> profileDTO = getProfileDTO();
+        profileDTO.put("gender", "unknown");
+
+        SessionData login = login("testuser");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            content(profileDTO).
+            contentType(ContentType.JSON).
+            post("/users/current/profile").
+        then().
+            statusCode(HttpStatus.SC_BAD_REQUEST);
+        //@formatter:on
+    }
+
+    @Test
+    public void createProfileEmptyDisplayName(){
+        createEnabledTestUser();
+
+        Map<String, String> profileDTO = getProfileDTO();
+        profileDTO.put("displayName", "");
+
+        SessionData login = login("testuser");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            content(profileDTO).
+            contentType(ContentType.JSON).
+            post("/users/current/profile").
+        then().
+            statusCode(HttpStatus.SC_OK).
+            body("object.gender", is("MALE")).
+            body("object.address", equalTo("Testaddress")).
+            body("object.zipcode", equalTo("Testzipcode")).
+            body("object.city", equalTo("Testcity")).
+            body("object.phoneNumber", equalTo("TestphoneNumber")).
+            body("object.notes", equalTo("Testnotes")).
+            body("object.firstName", equalTo("TestfirstName")).
+            body("object.lastName", equalTo("TestlastName")).
+            body("object.displayName", equalTo(""));
+        //@formatter:on
+    }
+
+    @Test
+    public void createProfileEmptyNotes(){
+        createEnabledTestUser();
+
+        Map<String, String> profileDTO = getProfileDTO();
+        profileDTO.remove("notes");
+
+        SessionData login = login("testuser");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            content(profileDTO).
+            contentType(ContentType.JSON).
+            post("/users/current/profile").
+        then().
+        statusCode(HttpStatus.SC_OK).
+                body("object.gender", is("MALE")).
+                body("object.address", equalTo("Testaddress")).
+                body("object.zipcode", equalTo("Testzipcode")).
+                body("object.city", equalTo("Testcity")).
+                body("object.phoneNumber", equalTo("TestphoneNumber")).
+                body("object.notes", equalTo("")).
+                body("object.firstName", equalTo("TestfirstName")).
+                body("object.lastName", equalTo("TestlastName")).
+                body("object.displayName", equalTo("TestdisplayName"));
     }
 
     // USER PATCH
