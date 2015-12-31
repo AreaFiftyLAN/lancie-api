@@ -16,6 +16,7 @@ public class Order {
 
     @Id
     @GeneratedValue
+    @JsonView(View.OrderOverview.class)
     Long id;
 
     @OneToMany(cascade = CascadeType.MERGE, targetEntity = Ticket.class, fetch = FetchType.EAGER)
