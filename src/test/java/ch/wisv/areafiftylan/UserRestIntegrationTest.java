@@ -1,15 +1,12 @@
 package ch.wisv.areafiftylan;
 
-import ch.wisv.areafiftylan.dto.ProfileDTO;
 import ch.wisv.areafiftylan.model.User;
-import ch.wisv.areafiftylan.model.util.Gender;
 import ch.wisv.areafiftylan.service.repository.VerificationTokenRepository;
 import ch.wisv.areafiftylan.util.SessionData;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Header;
 import com.jayway.restassured.response.Response;
 import org.apache.http.HttpStatus;
-import org.hamcrest.core.StringEndsWith;
 import org.junit.After;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +16,6 @@ import java.util.Map;
 
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.RestAssured.when;
-import static org.hamcrest.CoreMatchers.endsWith;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
@@ -51,7 +47,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
         return new Header("X-CSRF-TOKEN", getLoginResponse.header("X-CSRF-TOKEN"));
     }
 
-    private String createEnabledTestUser(){
+    private String createEnabledTestUser() {
         Map<String, String> userDTO = new HashMap<>();
         userDTO.put("username", "testuser");
         userDTO.put("password", "password");
@@ -432,7 +428,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void createProfileAsCurrentUser(){
+    public void createProfileAsCurrentUser() {
         createEnabledTestUser();
 
         Map<String, String> profileDTO = getProfileDTO();
@@ -462,7 +458,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void createProfileAsUser(){
+    public void createProfileAsUser() {
         String location = createEnabledTestUser();
 
         Map<String, String> profileDTO = getProfileDTO();
@@ -492,7 +488,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void createProfileAsAdmin(){
+    public void createProfileAsAdmin() {
         String location = createEnabledTestUser();
 
         Map<String, String> profileDTO = getProfileDTO();
@@ -522,7 +518,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void createProfileAsOtherUser(){
+    public void createProfileAsOtherUser() {
         String location = createEnabledTestUser();
 
         Map<String, String> profileDTO = getProfileDTO();
@@ -543,7 +539,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void createProfileMissingField(){
+    public void createProfileMissingField() {
         createEnabledTestUser();
 
         Map<String, String> profileDTO = getProfileDTO();
@@ -565,7 +561,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void createProfileInvalidGender(){
+    public void createProfileInvalidGender() {
         createEnabledTestUser();
 
         Map<String, String> profileDTO = getProfileDTO();
@@ -587,7 +583,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void createProfileEmptyDisplayName(){
+    public void createProfileEmptyDisplayName() {
         createEnabledTestUser();
 
         Map<String, String> profileDTO = getProfileDTO();
@@ -618,7 +614,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void createProfileEmptyNotes(){
+    public void createProfileEmptyNotes() {
         createEnabledTestUser();
 
         Map<String, String> profileDTO = getProfileDTO();
@@ -645,17 +641,68 @@ public class UserRestIntegrationTest extends IntegrationTest {
                 body("object.firstName", equalTo("TestfirstName")).
                 body("object.lastName", equalTo("TestlastName")).
                 body("object.displayName", equalTo("TestdisplayName"));
+        //@formatter:on
     }
 
-    // USER PATCH
+    @Test
+    public void deleteUserAsAdmin() {
+        createEnabledTestUser();
 
+        User testuser = userRepository.findOneByUsername("testuser").get();
+        long userId = testuser.getId();
 
-    // USER PUT
+        SessionData login = login("admin");
 
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            delete("/users/" + userId).
+        then().
+            statusCode(HttpStatus.SC_OK).
+            body("message", equalTo("User disabled"));
+        //@formatter:on
 
-    // USER DELETE
+        testuser = userRepository.findOneByUsername("testuser").get();
+        assert (!testuser.isAccountNonLocked());
+    }
 
+    @Test
+    public void deleteUserAsUser() {
+        createEnabledTestUser();
 
+        User testuser = userRepository.findOneByUsername("testuser").get();
+        long userId = testuser.getId();
+
+        SessionData login = login("testuser");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            delete("/users/" + userId).
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
+
+    }
+
+    @Test
+    public void deleteUserAsAnon() {
+        createEnabledTestUser();
+
+        User testuser = userRepository.findOneByUsername("testuser").get();
+        long userId = testuser.getId();
+
+        //@formatter:off
+        when().
+            delete("/users/" + userId).
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
+    }
 }
 
 
