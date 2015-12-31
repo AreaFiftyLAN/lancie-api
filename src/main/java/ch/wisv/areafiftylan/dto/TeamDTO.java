@@ -7,10 +7,10 @@ import javax.validation.constraints.NotNull;
 public class TeamDTO {
 
     @NotEmpty
-    private String teamName;
+    private String teamName = "";
 
-    @NotNull
-    private String captainUsername;
+    @NotEmpty
+    private String captainUsername = "";
 
     public String getTeamName() {
         return teamName;
@@ -20,4 +20,11 @@ public class TeamDTO {
         return captainUsername;
     }
 
+    public void setTeamName(String teamName) {
+        this.teamName = teamName;
+    }
+
+    public void setCaptainUsername(String captainUsername) {
+        this.captainUsername = captainUsername;
+    }
 }

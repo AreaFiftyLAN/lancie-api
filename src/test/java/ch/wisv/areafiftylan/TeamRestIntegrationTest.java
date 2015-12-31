@@ -80,6 +80,23 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
+    public void testCreateTeamAsUserMissingCaptainParameter() {
+
+        SessionData login = login("captain", "password");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            content(team1).contentType(ContentType.JSON).
+            post("/teams").
+        then().
+            statusCode(HttpStatus.SC_BAD_REQUEST);
+        //@formatter:on
+    }
+
+    @Test
     public void testCreateTeam_nonAdmin_differentCaptain() {
         team1.put("captainUsername", user.getUsername());
 
