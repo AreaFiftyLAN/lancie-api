@@ -7,8 +7,8 @@ import com.fasterxml.jackson.annotation.JsonView;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 
@@ -21,7 +21,7 @@ public class Order {
 
     @OneToMany(cascade = CascadeType.MERGE, targetEntity = Ticket.class, fetch = FetchType.EAGER)
     @JsonView(View.OrderOverview.class)
-    Collection<Ticket> tickets;
+    Set<Ticket> tickets;
 
     @JsonView(View.OrderOverview.class)
     OrderStatus status;
@@ -58,7 +58,7 @@ public class Order {
         return id;
     }
 
-    public Collection<Ticket> getTickets() {
+    public Set<Ticket> getTickets() {
         return tickets;
     }
 
