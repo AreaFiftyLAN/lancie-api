@@ -230,7 +230,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void testCreateSingleOrderMissingTypeParameter(){
+    public void testCreateSingleOrderMissingTypeParameter() {
         Map<String, String> order = new HashMap<>();
         order.put("pickupService", "true");
         order.put("chMember", "false");
@@ -248,7 +248,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void testCreateSingleOrderMissingChParameter(){
+    public void testCreateSingleOrderMissingChParameter() {
         Map<String, String> order = new HashMap<>();
         order.put("type", TicketType.EARLY_FULL.toString());
         order.put("pickupService", "true");
@@ -307,7 +307,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void testGetOrder_Anon(){
+    public void testGetOrder_Anon() {
         String location = createOrderAndReturnLocation();
         logout();
 
@@ -339,10 +339,10 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             body("status", is("CREATING")).
             body("reference", is(nullValue())).
             body("user.username", is("user")).
+            body("tickets", hasSize(1)).
             body("tickets.type", hasItem(is("EARLY_FULL"))).
             body("tickets.pickupService", hasItem(is(false))).
             body("amount",equalTo(35.00F));
-
         //@formatter:on
     }
 
@@ -554,7 +554,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testAddToOrderUnavailableTicket() {
-        for (int i = 0; i < TicketType.EARLY_FULL.getLimit() -1; i++) {
+        for (int i = 0; i < TicketType.EARLY_FULL.getLimit() - 1; i++) {
             ticketRepository.save(new Ticket(user, TicketType.EARLY_FULL, false, false));
         }
 
