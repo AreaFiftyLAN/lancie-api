@@ -65,13 +65,4 @@ public class CurrentUserRestController {
         user = userService.replace(user.getId(), input);
         return createResponseEntity(HttpStatus.OK, "User successfully replaced", user);
     }
-
-    @RequestMapping(method = RequestMethod.PATCH)
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> updateCurrentUser(@Validated @RequestBody UserDTO input, Authentication auth) {
-        //TODO: Differentiate between PATCH and PUT
-        User user = (User) auth.getPrincipal();
-        user = userService.replace(user.getId(), input);
-        return createResponseEntity(HttpStatus.OK, "User successfully replaced", user);
-    }
 }

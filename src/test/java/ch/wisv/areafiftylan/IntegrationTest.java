@@ -68,6 +68,7 @@ public abstract class IntegrationTest {
 
     @After
     public void tearDownIntegrationTest() {
+        logout();
         userRepository.deleteAll();
         RestAssured.reset();
     }

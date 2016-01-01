@@ -48,7 +48,6 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
     @After
     public void teamTestsCleanup() {
-        logout();
         teamRepository.deleteAll();
         userRepository.delete(teamCaptain);
     }
@@ -78,6 +77,23 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
         Team team = teamRepository.getOne(new Long(teamId));
         Assert.assertNotNull(team);
+    }
+
+    @Test
+    public void testCreateTeamAsUserMissingCaptainParameter() {
+
+        SessionData login = login("captain", "password");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            content(team1).contentType(ContentType.JSON).
+            post("/teams").
+        then().
+            statusCode(HttpStatus.SC_BAD_REQUEST);
+        //@formatter:on
     }
 
     @Test

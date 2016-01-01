@@ -69,24 +69,6 @@ public class UserRestController {
     }
 
     /**
-     * Edit the current user. Only change the fields which have been set. All fields should be in the requestbody.
-     * <p>
-     * TODO: The UserDTO needs to be valid right now, this should allow for null fields.
-     *
-     * @param userId The id of the user to be updated
-     * @param input  A userDTO object with updated fields. empty fields will be ignored
-     *
-     * @return The updated User object
-     */
-    @PreAuthorize("@currentUserServiceImpl.canAccessUser(principal, #userId)")
-    @RequestMapping(value = "/{userId}", method = RequestMethod.PATCH)
-    public ResponseEntity<?> updateUser(@PathVariable Long userId, @RequestBody UserDTO input) {
-        //TODO: Differentiate between PATCH and PUT
-        User user = this.userService.replace(userId, input);
-        return createResponseEntity(HttpStatus.OK, "User successfully updated", user);
-    }
-
-    /**
      * Get the user with a specific userId
      *
      * @param userId The user to be retrieved

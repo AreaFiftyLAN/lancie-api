@@ -41,14 +41,7 @@ public class UserProfileRestController {
     public ResponseEntity<?> addProfile(@PathVariable Long userId, @Validated @RequestBody ProfileDTO input) {
         User user = userService.addProfile(userId, input);
 
-        // Create HttpHeaders to include the location of the newly created profile
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setLocation(
-                ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}/profile").buildAndExpand(user.getId())
-                        .toUri());
-
-        return createResponseEntity(HttpStatus.CREATED, httpHeaders,
-                "Profile succesfully created at" + httpHeaders.getLocation(), user.getProfile());
+        return createResponseEntity(HttpStatus.OK, "Profile successfully set", user.getProfile());
     }
 
     /**

@@ -154,7 +154,7 @@ public class TeamRestController {
     @PreAuthorize("@currentUserServiceImpl.canEditTeam(principal, #teamId)")
     @JsonView(View.Public.class)
     @RequestMapping(method = RequestMethod.PUT, value = "/{teamId}")
-    public Team update(@PathVariable Long teamId, @RequestBody TeamDTO input) {
+    public Team update(@PathVariable Long teamId, @Validated @RequestBody TeamDTO input) {
         return this.teamService.update(teamId, input);
     }
 
