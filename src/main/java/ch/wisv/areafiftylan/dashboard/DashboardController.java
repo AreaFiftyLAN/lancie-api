@@ -1,10 +1,13 @@
 package ch.wisv.areafiftylan.dashboard;
 
 import ch.wisv.areafiftylan.model.User;
+import ch.wisv.areafiftylan.service.OrderService;
+import ch.wisv.areafiftylan.service.TeamService;
 import ch.wisv.areafiftylan.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -21,9 +24,15 @@ public class DashboardController {
 
     UserService userService;
 
+    OrderService orderService;
+
+    TeamService teamService;
+
     @Autowired
-    public DashboardController(UserService userService) {
+    public DashboardController(UserService userService, OrderService orderService, TeamService teamService) {
         this.userService = userService;
+        this.orderService = orderService;
+        this.teamService = teamService;
     }
 
     @RequestMapping(method = RequestMethod.GET)
@@ -39,7 +48,15 @@ public class DashboardController {
     }
 
     @RequestMapping(value = "/overview", method = RequestMethod.GET)
-    public String getOverviewPage() {
+    public String getOverviewPage(Model model, Authentication auth) {
+
+        User currentUser = userService.getUserById(((User) auth.getPrincipal()).getId());
+        model.addAttribute("currentUser", currentUser);
+
+        model.addAttribute("usercount", userService.getAllUsers().size());
+        model.addAttribute("ordercount", orderService.getAllOrders().size());
+        model.addAttribute("teamcount", teamService.getAllTeams().size());
+
         return "admin/overview";
     }
 

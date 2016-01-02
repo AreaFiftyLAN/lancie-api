@@ -45,17 +45,19 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-jetty")
     compile("org.springframework.boot:spring-boot-starter-mail")
     compile("org.springframework.boot:spring-boot-starter-thymeleaf")
+    compile("org.springframework.boot:spring-boot-devtools")
     compile("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     compile("com.zaxxer:HikariCP")
-    
+
     compile("com.allanditzel:spring-security-csrf-token-filter:1.1")
     compile("org.projectlombok:lombok:1.16.6")
     compile("com.google.guava:guava:19.0")
     compile("nl.stil4m:mollie-api:1.0.1")
-    
+
     runtime("org.hsqldb:hsqldb")
     runtime("org.postgresql:postgresql")
-    
+    runtime("net.sourceforge.nekohtml:nekohtml:1.9.22")
+
     testCompile("org.springframework.boot:spring-boot-starter-test")
     testCompile("com.jayway.restassured:rest-assured:2.8.0")
 }
