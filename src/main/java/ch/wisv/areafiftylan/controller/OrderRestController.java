@@ -137,7 +137,7 @@ public class OrderRestController {
         HttpHeaders headers = new HttpHeaders();
         headers.setLocation(new URI(paymentUrl));
 
-        return createResponseEntity(HttpStatus.OK, headers, "Please go to" + paymentUrl + "to finish your payment");
+        return createResponseEntity(HttpStatus.OK, headers, "Please go to " + paymentUrl + " to finish your payment");
     }
 
 
