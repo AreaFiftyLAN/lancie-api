@@ -99,15 +99,19 @@ public class MolliePaymentService implements PaymentService {
                 switch (molliePaymentStatus.getData().getStatus()) {
                     case "cancelled": {
                         order.setStatus(OrderStatus.EXPIRED);
+                        break;
                     }
                     case "expired": {
                         order.setStatus(OrderStatus.EXPIRED);
+                        break;
                     }
                     case "paid": {
                         order.setStatus(OrderStatus.PAID);
+                        break;
                     }
                     case "paidout": {
                         order.setStatus(OrderStatus.PAID);
+                        break;
                     }
                 }
                 return orderRepository.save(order);
