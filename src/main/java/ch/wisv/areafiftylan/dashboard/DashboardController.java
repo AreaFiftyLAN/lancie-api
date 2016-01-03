@@ -60,6 +60,13 @@ public class DashboardController {
         return "admin/overview";
     }
 
+    @RequestMapping(value = "/orders", method = RequestMethod.GET)
+    public String getOrdersPage(Model model){
+        model.addAttribute("orders", orderService.getAllOrders());
+
+        return "admin/orders";
+    }
+
     @ExceptionHandler(AccessDeniedException.class)
     public ModelAndView loginRedirect(AccessDeniedException ex) {
         return new ModelAndView("admin/login");
