@@ -7,11 +7,10 @@ import ch.wisv.areafiftylan.web.model.Tournament;
 import ch.wisv.areafiftylan.web.service.EventServiceImpl;
 import ch.wisv.areafiftylan.web.service.SponsorServiceImpl;
 import ch.wisv.areafiftylan.web.service.TournamentServiceImpl;
+import ch.wisv.areafiftylan.web.service.CommitteeMemberServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.ArrayList;
 import java.util.Collection;
 
 @RestController
@@ -21,13 +20,15 @@ public class WebRestController {
     TournamentServiceImpl tournamentService;
     EventServiceImpl eventService;
     SponsorServiceImpl sponsorService;
+    CommitteeMemberServiceImpl committeeService;
 
     @Autowired
     public WebRestController(TournamentServiceImpl tournamentService, EventServiceImpl eventService,
-                             SponsorServiceImpl sponsorService) {
+                             SponsorServiceImpl sponsorService, CommitteeMemberServiceImpl committeeService) {
         this.tournamentService = tournamentService;
         this.eventService = eventService;
         this.sponsorService = sponsorService;
+        this.committeeService = committeeService;
     }
 
     @RequestMapping("/tournaments")
@@ -47,12 +48,7 @@ public class WebRestController {
      */
     @RequestMapping("/committee")
     public Collection<CommitteeMember> getCommittee(){
-        Collection<CommitteeMember> committeeMembers = new ArrayList<>();
-        committeeMembers.add(new CommitteeMember("Sille Kamoen", "Chairman", "people"));
-        committeeMembers.add(new CommitteeMember("Rebecca Glans", "Secretary", "women"));
-        committeeMembers.add(new CommitteeMember("Sven Popping", "Treasurer", "money"));
-
-        return committeeMembers;
+        return committeeService.getAllCommitteeMembers();
     }
 
     @RequestMapping("/sponsors")
