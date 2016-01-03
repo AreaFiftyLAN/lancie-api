@@ -1,7 +1,7 @@
 package ch.wisv.areafiftylan.service;
 
 import ch.wisv.areafiftylan.model.Order;
-import ch.wisv.areafiftylan.service.repository.ExpiredOrderRepository;
+import ch.wisv.areafiftylan.model.util.OrderStatus;
 import ch.wisv.areafiftylan.service.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -9,6 +9,9 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * Created by beer on 28-12-15.
@@ -34,8 +37,14 @@ public class TaskScheduler {
     public void ExpireOrders(){
         LocalDateTime expireBeforeDate = LocalDateTime.now().minusMinutes(ORDER_STAY_ALIVE_MINUTES);
 
-        Collection<Order> ordersToExpire = orderRepository.findAllByCreationDateTimeBefore(expireBeforeDate);
+        Collection<Order> allOrdersBeforeDate = orderRepository.findAllByCreationDateTimeBefore(expireBeforeDate);
 
-        ordersToExpire.forEach(o -> orderService.expireOrder(o));
+        List<Order> expiredOrders = allOrdersBeforeDate.stream().filter(isExpired()).collect(Collectors.toList());
+
+        expiredOrders.forEach(o -> orderService.expireOrder(o));
+    }
+
+    public static Predicate<Order> isExpired() {
+        return o -> o.getStatus().equals(OrderStatus.CREATING) || o.getStatus().equals(OrderStatus.EXPIRED);
     }
 }
