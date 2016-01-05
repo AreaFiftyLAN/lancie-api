@@ -42,9 +42,10 @@ dependencies {
     compile("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.6.4")
     compile("org.projectlombok:lombok:1.16.6")
     compile group: 'nl.stil4m', name: 'mollie-api', version: '1.0.0'
+    compile("com.google.guava:guava:19.0")
+    compile group: 'nl.stil4m', name: 'mollie-api', version: '1.0.1'
     runtime("org.hsqldb:hsqldb")
     runtime("org.postgresql:postgresql:9.4-1203-jdbc42")
-    compile("com.google.guava:guava:19.0")
     testCompile("org.springframework.boot:spring-boot-starter-test")
     testCompile("com.jayway.restassured:rest-assured:2.8.0")
 }
