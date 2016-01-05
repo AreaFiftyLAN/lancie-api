@@ -1,5 +1,6 @@
 package ch.wisv.areafiftylan.dashboard;
 
+import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.service.OrderService;
 import ch.wisv.areafiftylan.service.TeamService;
@@ -40,6 +41,15 @@ public class DashboardController {
         return "redirect:dashboard/overview";
     }
 
+    @RequestMapping(value = "/overview", method = RequestMethod.GET)
+    public String getOverviewPage(Model model, Authentication auth) {
+        model.addAttribute("usercount", userService.getAllUsers().size());
+        model.addAttribute("ordercount", orderService.getAllOrders().size());
+        model.addAttribute("teamcount", teamService.getAllTeams().size());
+
+        return "admin/overview";
+    }
+
     @RequestMapping(value = "/users", method = RequestMethod.GET)
     public String getUsersPage(Model model) {
         Collection<User> allUsers = userService.getAllUsers();
@@ -47,17 +57,11 @@ public class DashboardController {
         return "admin/users";
     }
 
-    @RequestMapping(value = "/overview", method = RequestMethod.GET)
-    public String getOverviewPage(Model model, Authentication auth) {
-
-        User currentUser = userService.getUserById(((User) auth.getPrincipal()).getId());
-        model.addAttribute("currentUser", currentUser);
-
-        model.addAttribute("usercount", userService.getAllUsers().size());
-        model.addAttribute("ordercount", orderService.getAllOrders().size());
-        model.addAttribute("teamcount", teamService.getAllTeams().size());
-
-        return "admin/overview";
+    @RequestMapping(value = "/teams", method = RequestMethod.GET)
+    public String getTeamsPage(Model model) {
+        Collection<Team> allTeams = teamService.getAllTeams();
+        model.addAttribute("teams", allTeams);
+        return "admin/teams";
     }
 
     @RequestMapping(value = "/orders", method = RequestMethod.GET)

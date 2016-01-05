@@ -8,7 +8,6 @@ security.user.password =
 # THYMELEAF (ThymeleafAutoConfiguration)
 spring.thymeleaf.check-template-location=true
 spring.thymeleaf.prefix=classpath:/templates/
-spring.thymeleaf.view-names= MailTemplate, loginForm
 spring.thymeleaf.suffix=.html
 spring.thymeleaf.mode=HTML5
 spring.thymeleaf.encoding=UTF-8

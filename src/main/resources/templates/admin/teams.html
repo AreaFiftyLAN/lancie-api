@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorator="dashboard-index">
+<head>
+    <title>Area FiftyLAN - Overview</title>
+</head>
+<body>
+    <section layout:fragment="content">
+        <div>
+            <h2>Teams</h2>
+
+            <br />
+
+            <script type="text/javascript">
+                jQuery(document).ready(function ($) {
+                    var $teamtable = jQuery('#teamtable');
+
+                    // Initialize DataTable
+                    var teamtable = $teamtable.DataTable({
+                        "bStateSave": true
+                    });
+
+                    // Initalize Select Dropdown after DataTables is created
+                    $teamtable.closest('.dataTables_wrapper').find('select').select2({
+                        minimumResultsForSearch: -1
+                    });
+
+                    // Setup - add a text input to each footer cell
+                    $('#teamtable tfoot th').each(function () {
+                        var title = $('#teamtable thead th').eq($(this).index()).text();
+                        $(this).html('<input type="text" class="form-control" placeholder="Search ' + title + '" />');
+                    });
+
+                    // Apply the search
+                    teamtable.columns().every(function () {
+                        var that = this;
+                        $('input', this.footer()).on('keyup change', function () {
+                            if (that.search() !== this.value) {
+                                that.search(this.value).draw();
+                            }
+                        });
+                    });
+                });
+            </script>
+
+            <table class="table table-bordered datatable" id="teamtable">
+                <thead>
+                    <tr>
+                        <th>id</th>
+                        <th>Teamname</th>
+                        <th>Team Captain</th>
+                        <th>Team size</th>
+                        <th>Team Members</th>
+                        <th class="actions">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="team : ${teams}" class="">
+                        <td th:text="${team.id}">Team ID</td>
+                        <td th:text="${team.teamName}">Teamname</td>
+                        <td th:text="${team.captain.username}">Team Captain</td>
+                        <td th:text="${team.size}">Team Size</td>
+                        <td>
+                            <div th:each="member : ${team.members}" th:text="${member.username}">Members</div>
+                        </td>
+                        <td>
+                            <a href="#" class="btn btn-default btn-sm btn-icon icon-left">
+                                <i class="entypo-pencil"></i>
+                                Edit
+                            </a>
+                            <a href="#" class="btn btn-danger btn-sm btn-icon icon-left">
+                                <i class="entypo-cancel"></i>
+                                Delete
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th>id</th>
+                        <th>Teamname</th>
+                        <th>Team Captain</th>
+                        <th>Team size</th>
+                        <th>Team Members</th>
+                        <th class="actions">Action</th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <!-- Imported scripts on this page -->
+        <script src="assets/js/datatables/datatables.js"></script>
+        <script src="assets/js/select2/select2.min.js"></script>
+
+        <!-- Imported styles on this page -->
+        <link rel="stylesheet" href="assets/js/datatables/datatables.css">
+        <link rel="stylesheet" href="assets/js/select2/select2-bootstrap.css">
+        <link rel="stylesheet" href="assets/js/select2/select2.css">
+    </section>
+</body>
+</html>
