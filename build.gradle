@@ -40,6 +40,7 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-thymeleaf")
     compile("com.allanditzel:spring-security-csrf-token-filter:1.1")
     compile("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.6.4")
+    compile("org.projectlombok:lombok:1.16.6")
     compile("com.google.guava:guava:19.0")
     compile group: 'nl.stil4m', name: 'mollie-api', version: '1.0.1'
     runtime("org.hsqldb:hsqldb")
