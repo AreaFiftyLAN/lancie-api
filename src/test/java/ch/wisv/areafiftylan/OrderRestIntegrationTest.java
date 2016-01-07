@@ -372,6 +372,31 @@ public class OrderRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
+    public void testGetOrderCurrentUser() {
+        createOrderAndReturnLocation();
+        logout();
+
+        SessionData login = login("user");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            get("/users/current/orders").
+        then().
+            statusCode(HttpStatus.SC_OK).
+            body("[0].status", equalTo("CREATING")).
+            body("[0].reference", is(nullValue())).
+            body("[0].user.username", is("user")).
+            body("[0].tickets", hasSize(1)).
+            body("[0].tickets.type", hasItem(is("EARLY_FULL"))).
+            body("[0].tickets.pickupService", hasItem(is(false))).
+            body("[0].amount",equalTo(35.00F));
+        //@formatter:on
+    }
+
+    @Test
     public void testGetOrder_OtherUser() {
         User otherUser = new User("otherUser", new BCryptPasswordEncoder().encode("password"), "otheruser@mail.com");
         userRepository.save(otherUser);
