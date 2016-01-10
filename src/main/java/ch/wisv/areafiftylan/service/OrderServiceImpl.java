@@ -1,6 +1,7 @@
 package ch.wisv.areafiftylan.service;
 
 import ch.wisv.areafiftylan.dto.TicketDTO;
+import ch.wisv.areafiftylan.dto.TicketInformationResponse;
 import ch.wisv.areafiftylan.exception.ImmutableOrderException;
 import ch.wisv.areafiftylan.exception.PaymentException;
 import ch.wisv.areafiftylan.exception.TicketUnavailableException;
@@ -18,6 +19,7 @@ import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -155,5 +157,17 @@ public class OrderServiceImpl implements OrderService {
         ExpiredOrder eo = new ExpiredOrder(o);
         expiredOrderRepository.save(eo);
         o.getTickets().forEach(t -> ticketRepository.delete(t));
+    }
+
+    @Override
+    public Collection<TicketInformationResponse> getAvailableTickets() {
+        List<TicketInformationResponse> ticketInformationList = new ArrayList<>();
+
+        for (TicketType ticketType : TicketType.values()) {
+            Integer typeSold = ticketRepository.countByType(ticketType);
+            ticketInformationList.add(new TicketInformationResponse(ticketType, typeSold));
+        }
+
+        return ticketInformationList;
     }
 }

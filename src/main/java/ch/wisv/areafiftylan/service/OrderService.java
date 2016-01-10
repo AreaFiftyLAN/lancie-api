@@ -1,6 +1,7 @@
 package ch.wisv.areafiftylan.service;
 
 import ch.wisv.areafiftylan.dto.TicketDTO;
+import ch.wisv.areafiftylan.dto.TicketInformationResponse;
 import ch.wisv.areafiftylan.exception.TicketUnavailableException;
 import ch.wisv.areafiftylan.model.Order;
 import ch.wisv.areafiftylan.model.Ticket;
@@ -80,4 +81,10 @@ public interface OrderService {
      * @param o The order to expire
      */
     void expireOrder(Order o);
+
+    /**
+     * This method returns an overview of all available tickets, and information about them
+     * @return A collection of TicketInformationResponse objects
+     */
+    Collection<TicketInformationResponse> getAvailableTickets();
 }

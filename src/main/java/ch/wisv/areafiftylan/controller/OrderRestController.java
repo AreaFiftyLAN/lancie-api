@@ -1,6 +1,7 @@
 package ch.wisv.areafiftylan.controller;
 
 import ch.wisv.areafiftylan.dto.TicketDTO;
+import ch.wisv.areafiftylan.dto.TicketInformationResponse;
 import ch.wisv.areafiftylan.exception.ImmutableOrderException;
 import ch.wisv.areafiftylan.exception.TicketUnavailableException;
 import ch.wisv.areafiftylan.model.Order;
@@ -137,6 +138,16 @@ public class OrderRestController {
         //TODO: Figure out how Mollie sends this request
         orderService.updateOrderStatus(orderReference);
         return createResponseEntity(HttpStatus.OK, "Status is being updated");
+    }
+
+    /**
+     * This method returns an overview of available tickets with some additional information
+     * @return A collection of all TicketTypes and their availability
+     */
+    @RequestMapping(value = "/tickets/available", method = RequestMethod.GET)
+    public Collection<TicketInformationResponse> getAvailableTickets() {
+        return orderService.getAvailableTickets();
+
     }
 
 

@@ -20,5 +20,5 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
     Collection<Ticket> findByPickupService_True();
 
-    Long countByType(TicketType type);
+    Integer countByType(TicketType type);
 }
