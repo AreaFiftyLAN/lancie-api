@@ -19,7 +19,13 @@ public class Seat {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long Id;
 
-    public Seat() {
+    public String seatGroup;
+
+    public int seatNumber;
+
+    public Seat(String seatGroup, int seatNumber) {
+        this.seatGroup = seatGroup;
+        this.seatNumber = seatNumber;
         this.taken = false;
     }
 
@@ -41,5 +47,19 @@ public class Seat {
         this.taken = this.user != null;
     }
 
+    public String getSeatGroup() {
+        return seatGroup;
+    }
 
+    public void setSeatGroup(String seatGroup) {
+        this.seatGroup = seatGroup;
+    }
+
+    public int getSeatNumber() {
+        return seatNumber;
+    }
+
+    public void setSeatNumber(int seatNumber) {
+        this.seatNumber = seatNumber;
+    }
 }

@@ -1,11 +1,10 @@
 package ch.wisv.areafiftylan;
 
-import ch.wisv.areafiftylan.service.repository.SeatGroupRepository;
+import ch.wisv.areafiftylan.service.repository.SeatRespository;
 import org.apache.http.HttpStatus;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.RestAssured.when;
 
 /**
@@ -14,7 +13,7 @@ import static com.jayway.restassured.RestAssured.when;
 public class SeatRestIntegrationTest extends TeamRestIntegrationTest {
 
     @Autowired
-    SeatGroupRepository seatGroupRepository;
+    SeatRespository seatRespository;
 
 
     @Test

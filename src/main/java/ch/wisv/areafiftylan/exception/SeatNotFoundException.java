@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  */
 @ResponseStatus(HttpStatus.NOT_FOUND)
 public class SeatNotFoundException extends RuntimeException {
-    public SeatNotFoundException(String groupName, int seatName) {
-        super("could not find seat '" + groupName + seatName + "'.");
+    public SeatNotFoundException(String message) {
+        super(message);
     }
 
 }
