@@ -1,6 +1,7 @@
 package ch.wisv.areafiftylan.controller;
 
 import ch.wisv.areafiftylan.dto.TicketDTO;
+import ch.wisv.areafiftylan.dto.TicketInformation;
 import ch.wisv.areafiftylan.exception.ImmutableOrderException;
 import ch.wisv.areafiftylan.exception.TicketUnavailableException;
 import ch.wisv.areafiftylan.model.Order;
@@ -23,6 +24,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
+import java.util.Map;
 
 import static ch.wisv.areafiftylan.util.ResponseEntityBuilder.createResponseEntity;
 
@@ -137,6 +139,16 @@ public class OrderRestController {
         //TODO: Figure out how Mollie sends this request
         orderService.updateOrderStatus(orderReference);
         return createResponseEntity(HttpStatus.OK, "Status is being updated");
+    }
+
+    /**
+     * This method returns an overview of available tickets with some additional information
+     * @return A collection of all TicketTypes and their availability
+     */
+    @RequestMapping(value = "/tickets/available", method = RequestMethod.GET)
+    public Map<String, TicketInformation> getAvailableTickets() {
+        return orderService.getAvailableTickets();
+
     }
 
 

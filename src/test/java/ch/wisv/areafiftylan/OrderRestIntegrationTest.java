@@ -715,6 +715,25 @@ public class OrderRestIntegrationTest extends IntegrationTest {
 
         assertThat("Orderstatus updated", order.getStatus(), equalTo(OrderStatus.CREATING));
     }
+
+    @Test
+    public void testGetTicketAvailability(){
+        insertTestOrders();
+
+        //@formatter:off
+        when().
+            get("/tickets/available").
+        then().
+            body("EARLY_FULL", hasEntry("limit", 50)).
+            body("EARLY_FULL", hasEntry("sold", 2)).
+            body("EARLY_FULL", hasEntry("price", 35.0f)).
+            body("REGULAR_FULL", hasEntry("limit", 100)).
+            body("REGULAR_FULL", hasEntry("sold", 1)).
+            body("REGULAR_FULL", hasEntry("price", 40.0f)).
+            body("LATE_FULL", hasEntry("limit", 50)).
+            body("LATE_FULL", hasEntry("sold", 1)).
+            body("LATE_FULL", hasEntry("price", 45.0f));
+    }
 }
 
 
