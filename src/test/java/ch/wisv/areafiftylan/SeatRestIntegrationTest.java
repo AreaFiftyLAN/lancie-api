@@ -14,24 +14,28 @@ import java.util.List;
 
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.RestAssured.when;
-import static org.hamcrest.Matchers.arrayWithSize;
+import static org.hamcrest.Matchers.*;
 
 /**
  * Created by sille on 17-11-15.
  */
-public class SeatRestIntegrationTest extends TeamRestIntegrationTest {
+public class SeatRestIntegrationTest extends IntegrationTest {
 
     @Autowired
     SeatRespository seatRespository;
 
     @Before
     public void setupSeatIntegrationTests() {
-        List<Seat> seatList = new ArrayList<>(20);
+        List<Seat> seatList = new ArrayList<>(19);
+
+        Seat seat = new Seat("A", 1);
+        seat.setUser(user);
 
         for (int i = 1; i <= 20; i++) {
             seatList.add(new Seat("A", i));
         }
 
+        seatRespository.save(seat);
         seatRespository.save(seatList);
     }
 
@@ -62,23 +66,54 @@ public class SeatRestIntegrationTest extends TeamRestIntegrationTest {
             get("/seats").
         then().log().all().
             statusCode(HttpStatus.SC_OK).
+            body("seatmap.A.user", not(hasItem("username"))).
+            body("seatmap.A.user.profile", hasItem("displayName")).
             body("seatmap.A", arrayWithSize(20));
         //@formatter:on
     }
 
     @Test
     public void getAllSeatsAdminViewAsAnon(){
-
+        //@formatter:off
+        when().
+            get("/seats?admin").
+        then().log().all().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
     }
 
     @Test
     public void getAllSeatsAdminViewAsUser(){
+        SessionData login = login("user");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            get("/seats?admin").
+        then().log().all().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
 
     }
 
     @Test
     public void getAllSeatsAdminViewAsAdmin(){
+        SessionData login = login("admin");
 
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            get("/seats?admin").
+        then().log().all().
+            statusCode(HttpStatus.SC_OK).
+            body("seatmap.A.user", hasItem("username")).
+            body("seatmap.A.user.profile", hasItem("displayName")).
+            body("seatmap.A", arrayWithSize(20));
+        //@formatter:on
     }
 
     @Test
