@@ -11,4 +11,6 @@ public interface CurrentUserService {
     boolean canEditTeam(Object principal, Long teamId);
 
     boolean canAccessOrder(Object principal, Long orderId);
+
+    boolean canReserveSeat(Object principal, String username);
 }

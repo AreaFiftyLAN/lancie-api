@@ -11,5 +11,5 @@ public interface SeatRespository extends JpaRepository<Seat, Long> {
 
     List<Seat> findBySeatGroup(String seatGroup);
 
-    Seat findBySeatGroupSeatNumber(String seatGroup, int seatNumber);
+    Seat findBySeatGroupAndSeatNumber(String seatGroup, int seatNumber);
 }

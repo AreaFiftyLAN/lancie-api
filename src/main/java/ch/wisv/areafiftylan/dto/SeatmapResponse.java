@@ -1,6 +1,8 @@
 package ch.wisv.areafiftylan.dto;
 
 import ch.wisv.areafiftylan.model.Seat;
+import ch.wisv.areafiftylan.model.view.View;
+import com.fasterxml.jackson.annotation.JsonView;
 
 import java.util.List;
 import java.util.Map;
@@ -10,6 +12,7 @@ import java.util.Map;
  */
 public class SeatmapResponse {
 
+    @JsonView(View.Public.class)
     public Map<String, List<Seat>> seatmap;
 
     public SeatmapResponse(Map<String, List<Seat>> seatmap) {

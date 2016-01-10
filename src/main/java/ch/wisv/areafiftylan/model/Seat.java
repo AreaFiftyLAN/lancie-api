@@ -19,14 +19,20 @@ public class Seat {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long Id;
 
+    @JsonView(View.Public.class)
     public String seatGroup;
 
+    @JsonView(View.Public.class)
     public int seatNumber;
 
     public Seat(String seatGroup, int seatNumber) {
         this.seatGroup = seatGroup;
         this.seatNumber = seatNumber;
         this.taken = false;
+    }
+
+    public Seat(){
+        //JPA ONLY
     }
 
     public boolean isTaken() {

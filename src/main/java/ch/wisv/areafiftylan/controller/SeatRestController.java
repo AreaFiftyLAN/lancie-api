@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -51,10 +50,22 @@ public class SeatRestController {
     }
 
 
+//    @RequestMapping(value = "seats/{group}/{number}", method = RequestMethod.POST)
+//    ResponseEntity<?> reserveSingleSeat(@PathVariable String group, @PathVariable int number, Authentication auth) {
+//        User user = (User) auth.getPrincipal();
+//        if (seatService.reserveSeat(group, number, user.getUsername())) {
+//            return createResponseEntity(HttpStatus.OK, "Seat successfully reserved");
+//        } else {
+//            return createResponseEntity(HttpStatus.CONFLICT, "Seat is already taken");
+//        }
+//    }
+
+
+    @PreAuthorize("@currentUserServiceImpl.canReserveSeat(principal, #username)")
     @RequestMapping(value = "seats/{group}/{number}", method = RequestMethod.POST)
-    ResponseEntity<?> reserveSingleSeat(@PathVariable String group, @PathVariable int number, Authentication auth) {
-        User user = (User) auth.getPrincipal();
-        if (seatService.reserveSeat(group, number, user.getUsername())) {
+    ResponseEntity<?> reserveSingleSeat(@PathVariable String group, @PathVariable int number,
+                                        @RequestParam String username) {
+        if (seatService.reserveSeat(group, number, username)) {
             return createResponseEntity(HttpStatus.OK, "Seat successfully reserved");
         } else {
             return createResponseEntity(HttpStatus.CONFLICT, "Seat is already taken");
@@ -62,6 +73,7 @@ public class SeatRestController {
     }
 
     @JsonView(View.Public.class)
+    @PreAuthorize("isAuthenticated()")
     @RequestMapping(value = "/seats", method = RequestMethod.GET)
     SeatmapResponse getAllSeats() {
         return seatService.getAllSeats();
