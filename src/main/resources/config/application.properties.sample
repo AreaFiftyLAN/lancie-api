@@ -1,9 +1,9 @@
 # Basic auth
 security.user.password =
 
-#Default Property file, which is committed in Git
-spring.mail.host=
-spring.mail.port=
+# Retriever for sending e-mails. Used for verify created users
+#spring.mail.host=
+#spring.mail.port=
 
 # THYMELEAF (ThymeleafAutoConfiguration)
 spring.thymeleaf.check-template-location=true
@@ -14,24 +14,35 @@ spring.thymeleaf.mode=HTML5
 spring.thymeleaf.encoding=UTF-8
 spring.thymeleaf.content-type=text/html
 
-##DATABASE PROPERTIES
+## DATABASE PROPERTIES
 spring.datasource.driverClassName=org.postgresql.Driver
-spring.datasource.url=jdbc:postgresql://localhost:5432/<MyDB>
-spring.datasource.username=<dbUser>
-spring.datasource.password=<dbUserPassword>
+# Change <MyDB> with the name of your database name
+#spring.datasource.url=jdbc:postgresql://localhost:5432/<MyDB>
+# Username to log in to the database
+# It's recommended to create a dedicated AreaFiftyLAN Database user instead of using the default postgres user
+#spring.datasource.username=<dbUser>
+# Password to log in with <dbUser> in database <MyDB>
+#spring.datasource.password=<dbUserPassword>
 spring.data.jpa.repositories.enabled=true
+# Set to false in production to prevent spamming of console
 spring.jpa.show-sql=true
 spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
 spring.jpa.database=postgresql
 spring.jpa.generate-ddl=true
+# This setting should change to "update" for production.
 spring.jpa.hibernate.ddl-auto=create-drop
 spring.jpa.properties.hibernate.default_schema=public
-server.port =
+
+# Default port used by frontend
+server.port=9000
 
 
-##AREA FIFTYLAN SETTINGS
-
-a5l.molliekey=
+## AREA FIFTYLAN SETTINGS
+# Key for sending a paymentrequest to the Mollie api
+#a5l.molliekey=
+# The return url for the frontend that displays the success message
 a5l.paymentReturnUrl=https://areafiftylan.nl/ordersuccess
+# The return url for the frontend that confirms a registration
 a5l.mail.confirmUrl=https://areafiftylan.nl/confirmRegistration
+# E-mail address used for sending e-mails
 a5l.mail.sender=LANcie <lancie@ch.tudelft.nl>
