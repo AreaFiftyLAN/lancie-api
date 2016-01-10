@@ -7,7 +7,6 @@ buildscript {
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-        classpath("io.spring.gradle:dependency-management-plugin:0.5.3.RELEASE")
     }
 }
 
@@ -15,7 +14,6 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'spring-boot'
-apply plugin: 'io.spring.dependency-management'
 
 jar {
     baseName = 'landev'
@@ -32,19 +30,32 @@ repositories {
 }
 
 
+configurations {
+    // We're using Jetty instead
+    compile.exclude module: "spring-boot-starter-tomcat"
+    // We're using HikariCP instead
+    compile.exclude module: "tomcat-jdbc"
+}
+
 dependencies {
+    // Some dependency versions are managed by Spring Boot, refer to
+    // https://docs.spring.io/spring-boot/docs/current/reference/html/appendix-dependency-versions.html
     compile("org.springframework.boot:spring-boot-starter-data-jpa")
     compile("org.springframework.boot:spring-boot-starter-security")
-    compile("org.springframework.boot:spring-boot-starter-web")
+    compile("org.springframework.boot:spring-boot-starter-jetty")
     compile("org.springframework.boot:spring-boot-starter-mail")
     compile("org.springframework.boot:spring-boot-starter-thymeleaf")
+    compile("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+    compile("com.zaxxer:HikariCP")
+    
     compile("com.allanditzel:spring-security-csrf-token-filter:1.1")
-    compile("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.6.4")
     compile("org.projectlombok:lombok:1.16.6")
     compile("com.google.guava:guava:19.0")
-    compile group: 'nl.stil4m', name: 'mollie-api', version: '1.0.1'
+    compile("nl.stil4m:mollie-api:1.0.1")
+    
     runtime("org.hsqldb:hsqldb")
-    runtime("org.postgresql:postgresql:9.4-1203-jdbc42")
+    runtime("org.postgresql:postgresql")
+    
     testCompile("org.springframework.boot:spring-boot-starter-test")
     testCompile("com.jayway.restassured:rest-assured:2.8.0")
 }
@@ -57,5 +68,5 @@ eclipse {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.3'
+    gradleVersion = '2.9'
 }
