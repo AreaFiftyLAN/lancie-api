@@ -1,6 +1,5 @@
 package ch.wisv.areafiftylan.service;
 
-import ch.wisv.areafiftylan.exception.TeamNotFoundException;
 import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.util.Role;
@@ -31,7 +30,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     public boolean canAccessTeam(Object principal, Long teamId) {
         if (principal instanceof UserDetails) {
             User user = (User) principal;
-            Team team = teamService.getTeamById(teamId).orElseThrow(() -> new TeamNotFoundException(teamId));
+            Team team = teamService.getTeamById(teamId);
             // Check for each of the teammembers if the username matches the requester
             return team.getMembers().stream().anyMatch(u -> u.getUsername().equals(user.getUsername())) ||
                     user.getAuthorities().contains(Role.ROLE_ADMIN);
@@ -44,7 +43,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     public boolean canEditTeam(Object principal, Long teamId) {
         if (principal instanceof UserDetails) {
             UserDetails user = (UserDetails) principal;
-            Team team = teamService.getTeamById(teamId).orElseThrow(() -> new TeamNotFoundException(teamId));
+            Team team = teamService.getTeamById(teamId);
             return team.getCaptain().getUsername().equals(user.getUsername()) ||
                     user.getAuthorities().contains(Role.ROLE_ADMIN);
         } else {
