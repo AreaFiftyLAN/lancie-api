@@ -1,7 +1,7 @@
 package ch.wisv.areafiftylan.service;
 
 import ch.wisv.areafiftylan.dto.TicketDTO;
-import ch.wisv.areafiftylan.dto.TicketInformationResponse;
+import ch.wisv.areafiftylan.dto.TicketInformation;
 import ch.wisv.areafiftylan.exception.TicketUnavailableException;
 import ch.wisv.areafiftylan.model.Order;
 import ch.wisv.areafiftylan.model.Ticket;
@@ -10,6 +10,7 @@ import ch.wisv.areafiftylan.model.util.TicketType;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public interface OrderService {
 
@@ -84,7 +85,7 @@ public interface OrderService {
 
     /**
      * This method returns an overview of all available tickets, and information about them
-     * @return A collection of TicketInformationResponse objects
+     * @return A collection of TicketInformation objects
      */
-    Collection<TicketInformationResponse> getAvailableTickets();
+    Map<String, TicketInformation> getAvailableTickets();
 }

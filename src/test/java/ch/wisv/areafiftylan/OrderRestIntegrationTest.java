@@ -715,6 +715,15 @@ public class OrderRestIntegrationTest extends IntegrationTest {
 
         assertThat("Orderstatus updated", order.getStatus(), equalTo(OrderStatus.CREATING));
     }
+
+    @Test
+    public void testGetTicketAvailability() {
+        insertTestOrders();
+
+        //@formatter:off
+
+        //@formatter:on
+    }
 }
 
 
