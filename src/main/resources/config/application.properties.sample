@@ -38,11 +38,11 @@ server.port=9000
 
 
 ## AREA FIFTYLAN SETTINGS
-# Key for sending an e-mailbody to the Mollie client
+# Key for sending a paymentrequest to the Mollie api
 #a5l.molliekey=
 # The return url for the frontend that displays the success message
 a5l.paymentReturnUrl=https://areafiftylan.nl/ordersuccess
 # The return url for the frontend that confirms a registration
 a5l.mail.confirmUrl=https://areafiftylan.nl/confirmRegistration
-# E-mail address used for sending e-mails using Mollie
+# E-mail address used for sending e-mails
 a5l.mail.sender=LANcie <lancie@ch.tudelft.nl>
