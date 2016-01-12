@@ -61,6 +61,12 @@ public class OrderServiceImpl implements OrderService {
     public Order create(Long userId, TicketDTO ticketDTO) {
         User user = userService.getUserById(userId);
 
+        for (Order order : orderRepository.findAllByUserUsername(user.getUsername())) {
+            if(order.getStatus().equals(OrderStatus.CREATING)){
+                throw new RuntimeException("User already created a new Order: " + order.getId());
+            }
+        }
+
         // Request a ticket to see if one is available. If a ticket is sold out, the method ends here due to the
         // exception thrown. Else, we'll get a new ticket to add to the order.
         Ticket ticket = this.requestTicketOfType(ticketDTO.getType(), user, ticketDTO.hasPickupService(),

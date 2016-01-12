@@ -141,6 +141,29 @@ public class OrderRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
+    public void testCreateSingleOrderAlreadyOpen_User() {
+
+        insertTestOrders();
+
+        Map<String, String> order = new HashMap<>();
+        order.put("pickupService", "true");
+        order.put("type", TicketType.EARLY_FULL.toString());
+        order.put("chMember", "false");
+        SessionData login = login("user");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            content(order).contentType(ContentType.JSON).
+            post(ORDER_ENDPOINT)
+        .then().
+            statusCode(HttpStatus.SC_BAD_REQUEST);
+        //@formatter:on
+    }
+
+    @Test
     public void testCreateSingleOrder_UserCHMember() {
         Map<String, String> order = new HashMap<>();
         order.put("pickupService", "false");
