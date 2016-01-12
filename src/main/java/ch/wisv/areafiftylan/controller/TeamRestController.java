@@ -9,7 +9,6 @@ import ch.wisv.areafiftylan.model.view.View;
 import ch.wisv.areafiftylan.service.TeamService;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -188,10 +187,5 @@ public class TeamRestController {
 
         Team deletedTeam = teamService.delete(teamId);
         return createResponseEntity(HttpStatus.OK, "Deleted team with " + teamId, deletedTeam);
-    }
-
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<?> handleDataIntegrityViolation(DataIntegrityViolationException e) {
-        return createResponseEntity(HttpStatus.CONFLICT, e.getMessage());
     }
 }

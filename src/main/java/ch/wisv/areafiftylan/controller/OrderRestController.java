@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
@@ -157,11 +156,5 @@ public class OrderRestController {
     @ExceptionHandler(ImmutableOrderException.class)
     public ResponseEntity<?> handleWrongOrderStatusException(ImmutableOrderException e) {
         return createResponseEntity(HttpStatus.CONFLICT, e.getMessage());
-    }
-
-    //TODO: Move this to central ControllerAdvice class
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<?> handleAccessDeniedException(AccessDeniedException ex) {
-        return createResponseEntity(HttpStatus.FORBIDDEN, "Access denied");
     }
 }

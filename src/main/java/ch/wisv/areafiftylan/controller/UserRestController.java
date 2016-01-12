@@ -152,6 +152,6 @@ public class UserRestController {
             message = throwable.toString();
         }
 
-        return createResponseEntity(HttpStatus.CONFLICT, null, message, null);
+        return createResponseEntity(HttpStatus.CONFLICT, message);
     }
 }
