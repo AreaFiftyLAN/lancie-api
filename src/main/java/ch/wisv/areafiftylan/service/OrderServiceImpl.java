@@ -63,7 +63,7 @@ public class OrderServiceImpl implements OrderService {
 
         for (Order order : orderRepository.findAllByUserUsername(user.getUsername())) {
             if(order.getStatus().equals(OrderStatus.CREATING)){
-                throw new RuntimeException("User already created a new Order: " + order.getId());
+                throw new IllegalStateException("User already created a new Order: " + order.getId());
             }
         }
 
