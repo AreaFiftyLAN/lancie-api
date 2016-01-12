@@ -26,15 +26,8 @@ class GlobalControllerExceptionHandler {
         return createResponseEntity(HttpStatus.CONFLICT, e.getMessage());
     }
 
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<?> handleRunTimeException(RuntimeException ex) {
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<?> handleIllegalStateException(IllegalStateException ex) {
         return createResponseEntity(HttpStatus.BAD_REQUEST, ex.getMessage());
-    }
-
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<?> handleGeneralException(Exception ex) {
-        ex.printStackTrace();
-        return createResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR,
-                "Something went wrong. Please contact the Administrators.");
     }
 }
