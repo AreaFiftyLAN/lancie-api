@@ -158,15 +158,15 @@ public class TeamRestController {
     }
 
     /**
-     * Delete a member from a team. Expects only a username in the RequestBody. Can only be done by the Captain or an
-     * Admin
+     * Delete a member from a team. Expects only a username in the RequestBody. Can only be done by the Captain,
+     * yourself or an Admin
      *
      * @param teamId   Id of the Team to be edited
      * @param username Username of the member to be deleted
      *
      * @return A status message of the operation
      */
-    @PreAuthorize("@currentUserServiceImpl.canEditTeam(principal, #teamId)")
+    @PreAuthorize("@currentUserServiceImpl.canRemoveFromTeam(principal, #teamId, #username)")
     @RequestMapping(method = RequestMethod.DELETE, value = "/{teamId}/members")
     public ResponseEntity<?> removeTeamMember(@PathVariable Long teamId, @RequestBody String username) {
         teamService.removeMember(teamId, username);
