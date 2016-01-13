@@ -1,6 +1,7 @@
 package ch.wisv.areafiftylan;
 
 import ch.wisv.areafiftylan.model.Seat;
+import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.service.repository.SeatRespository;
 import ch.wisv.areafiftylan.util.SessionData;
 import org.apache.http.HttpStatus;
@@ -26,22 +27,25 @@ public class SeatRestIntegrationTest extends IntegrationTest {
 
     @Before
     public void setupSeatIntegrationTests() {
-        List<Seat> seatList = new ArrayList<>(19);
+        List<Seat> seatList = new ArrayList<>(5);
 
-        Seat seat = new Seat("A", 1);
-        seat.setUser(user);
-
-        for (int i = 1; i <= 20; i++) {
+        for (int i = 1; i <= 5; i++) {
             seatList.add(new Seat("A", i));
         }
 
-        seatRespository.save(seat);
         seatRespository.save(seatList);
     }
 
     @After
     public void cleanupSeatIntegrationTest() {
         seatRespository.deleteAll();
+    }
+
+    private void setUserOnA1(User user) {
+        Seat seat = seatRespository.findAll().get(0);
+        seat.setUser(user);
+
+        seatRespository.save(seat);
     }
 
     @Test
@@ -56,6 +60,8 @@ public class SeatRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void getAllSeatAsUser() {
+        setUserOnA1(user);
+
         SessionData login = login("user");
 
         //@formatter:off
@@ -66,9 +72,9 @@ public class SeatRestIntegrationTest extends IntegrationTest {
             get("/seats").
         then().log().all().
             statusCode(HttpStatus.SC_OK).
-            body("seatmap.A.user", not(hasItem("username"))).
-            body("seatmap.A.user.profile", hasItem("displayName")).
-            body("seatmap.A", arrayWithSize(20));
+            body("seatmap.A.user", not(contains(hasKey("username")))).
+            body("seatmap.A.user.profile", contains(hasKey("displayName"))).
+            body("seatmap.A", hasSize(5));
         //@formatter:on
     }
 
@@ -84,6 +90,8 @@ public class SeatRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void getAllSeatsAdminViewAsUser(){
+        setUserOnA1(user);
+
         SessionData login = login("user");
 
         //@formatter:off
@@ -95,11 +103,12 @@ public class SeatRestIntegrationTest extends IntegrationTest {
         then().log().all().
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
-
     }
 
     @Test
     public void getAllSeatsAdminViewAsAdmin(){
+        setUserOnA1(user);
+
         SessionData login = login("admin");
 
         //@formatter:off
@@ -108,42 +117,126 @@ public class SeatRestIntegrationTest extends IntegrationTest {
             header(login.getCsrfHeader()).
         when().
             get("/seats?admin").
-        then().log().all().
+        then().
             statusCode(HttpStatus.SC_OK).
-            body("seatmap.A.user", hasItem("username")).
-            body("seatmap.A.user.profile", hasItem("displayName")).
-            body("seatmap.A", arrayWithSize(20));
+            body("seatmap.A.user", hasItem(hasKey("username"))).
+            body("seatmap.A.user.profile", contains(hasKey("displayName"))).
+            body("seatmap.A.user", hasItem(hasKey("authorities"))).
+            body("seatmap.A", hasSize(5));
         //@formatter:on
     }
 
     @Test
     public void getSeatGroupAsUser(){
+        setUserOnA1(user);
 
+        SessionData login = login("user");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            get("/seats/A").
+        then().log().all().
+            statusCode(HttpStatus.SC_OK).
+            body("seatmap.A.user", not(contains(hasKey("username")))).
+            body("seatmap.A.user.profile", contains(hasKey("displayName"))).
+            body("seatmap.A", hasSize(5));
+        //@formatter:on
     }
 
     @Test
     public void getSeatGroupAdminViewAsUser(){
+        SessionData login = login("user");
 
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            get("/seats/A?admin").
+        then().log().all().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
     }
 
     @Test
     public void getSeatGroupAdminViewAsAdmin(){
+        setUserOnA1(user);
 
+        SessionData login = login("admin");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            get("/seats/A?admin").
+        then().
+            statusCode(HttpStatus.SC_OK).
+            body("seatmap.A.user", hasItem(hasKey("username"))).
+            body("seatmap.A.user.profile", hasItem(hasKey("displayName"))).
+            body("seatmap.A.user", hasItem(hasKey("authorities"))).
+            body("seatmap.A", hasSize(5));
+        //@formatter:on
     }
 
     @Test
     public void getSeatAsUser(){
+        setUserOnA1(user);
 
+        SessionData login = login("user");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            get("/seats/A/1").
+        then().
+            statusCode(HttpStatus.SC_OK).
+            body("user", not(hasKey("username"))).
+            body("user.profile", hasKey("displayName")).
+            body("user", not(hasItem(hasKey("authorities"))));
+        //@formatter:on
     }
 
     @Test
     public void getSeatAdminViewAsUser(){
+        setUserOnA1(user);
 
+        SessionData login = login("user");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            get("/seats/A/1?admin").
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
     }
 
     @Test
     public void getCurrentSeatAsUser(){
+        setUserOnA1(user);
 
+        SessionData login = login("user");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            get("/users/current/seat").
+        then().
+            statusCode(HttpStatus.SC_OK).
+            body("user.username", is("user")).
+            body("user.profile", hasKey("displayName")).
+            body("user.profile", hasKey("firstName"));
+        //@formatter:on
     }
 
     @Test
@@ -168,12 +261,18 @@ public class SeatRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void reserveSeatAsAnon(){
-
+        //@formatter:off
+        given().
+        when().
+            param("username", "user").
+            post("/seats/A/1").
+        then().log().all().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
     }
 
     @Test
     public void reserveSeatAsUser(){
-
         SessionData login = login("user");
 
         //@formatter:off
@@ -186,7 +285,22 @@ public class SeatRestIntegrationTest extends IntegrationTest {
         then().log().all().
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
+    }
 
+    @Test
+    public void reserveSeatAsOtherUser(){
+        SessionData login = login("user");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            param("username", "admin").
+            post("/seats/A/1").
+        then().log().all().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
     }
 
     @Test

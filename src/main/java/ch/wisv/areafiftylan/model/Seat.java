@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import javax.persistence.*;
 
 @Entity
+@Table(uniqueConstraints = { @UniqueConstraint(name = "seatConstraint", columnNames = { "seatGroup","seatNumber" }) } )
 public class Seat {
 
     @JsonView(View.Public.class)

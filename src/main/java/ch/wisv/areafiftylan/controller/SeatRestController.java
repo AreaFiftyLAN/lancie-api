@@ -31,6 +31,7 @@ public class SeatRestController {
     }
 
     @JsonView(View.Public.class)
+    @PreAuthorize("isAuthenticated()")
     @RequestMapping(value = "seats/{group}/{number}", method = RequestMethod.GET)
     Seat getSeatByGroupAndNumber(@PathVariable String group, @PathVariable int number) {
         return seatService.getSeatBySeatGroupAndSeatNumber(group, number);
@@ -42,24 +43,18 @@ public class SeatRestController {
         return seatService.getSeatBySeatGroupAndSeatNumber(group, number);
     }
 
-
     @JsonView(View.Public.class)
+    @PreAuthorize("isAuthenticated()")
     @RequestMapping(value = "seats/{group}", method = RequestMethod.GET)
     SeatmapResponse getSeatGroupByName(@PathVariable String group) {
         return seatService.getSeatGroupByName(group);
     }
 
-
-//    @RequestMapping(value = "seats/{group}/{number}", method = RequestMethod.POST)
-//    ResponseEntity<?> reserveSingleSeat(@PathVariable String group, @PathVariable int number, Authentication auth) {
-//        User user = (User) auth.getPrincipal();
-//        if (seatService.reserveSeat(group, number, user.getUsername())) {
-//            return createResponseEntity(HttpStatus.OK, "Seat successfully reserved");
-//        } else {
-//            return createResponseEntity(HttpStatus.CONFLICT, "Seat is already taken");
-//        }
-//    }
-
+    @PreAuthorize("hasRole('ADMIN')")
+    @RequestMapping(value = "seats/{group}", method = RequestMethod.GET, params = "admin")
+    SeatmapResponse getSeatGroupByNameAdminView(@PathVariable String group) {
+        return seatService.getSeatGroupByName(group);
+    }
 
     @PreAuthorize("@currentUserServiceImpl.canReserveSeat(principal, #username)")
     @RequestMapping(value = "seats/{group}/{number}", method = RequestMethod.POST)
@@ -76,6 +71,12 @@ public class SeatRestController {
     @PreAuthorize("isAuthenticated()")
     @RequestMapping(value = "/seats", method = RequestMethod.GET)
     SeatmapResponse getAllSeats() {
+        return seatService.getAllSeats();
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @RequestMapping(value = "/seats", method = RequestMethod.GET, params = "admin")
+    SeatmapResponse getAllSeatsAdminView() {
         return seatService.getAllSeats();
     }
 
