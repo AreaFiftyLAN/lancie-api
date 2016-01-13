@@ -16,6 +16,8 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -529,6 +531,45 @@ public class OrderRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
+    public void testAddToOrderLimit_User() {
+
+        Map<String, String> ticket = new HashMap<>(3);
+        ticket.put("pickupService", "true");
+        ticket.put("chMember", "false");
+        ticket.put("type", TicketType.EARLY_FULL.toString());
+
+        Order order1 = new Order(user);
+
+        Collection<Ticket> ticketList=  new ArrayList<>(5);
+
+        ticketList.add(ticketRepository.save(new Ticket(user, TicketType.EARLY_FULL, true, false)));
+        ticketList.add(ticketRepository.save(new Ticket(user, TicketType.EARLY_FULL, true, false)));
+        ticketList.add(ticketRepository.save(new Ticket(user, TicketType.EARLY_FULL, true, false)));
+        ticketList.add(ticketRepository.save(new Ticket(user, TicketType.EARLY_FULL, true, false)));
+        ticketList.add(ticketRepository.save(new Ticket(user, TicketType.EARLY_FULL, true, false)));
+
+        for (Ticket ticket1 : ticketList) {
+            order1.addTicket(ticket1);
+        }
+
+        Order save = orderRepository.save(order1);
+
+        SessionData login = login("user");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            content(ticket).
+            contentType(ContentType.JSON).
+            post("/orders/" + save.getId()).
+        then().
+            statusCode(HttpStatus.SC_BAD_REQUEST);
+        //@formatter:on
+    }
+
+    @Test
     public void testAddToOrderMissingPickupParameter() {
         Map<String, String> ticket = new HashMap<>(2);
         ticket.put("chMember", "false");
@@ -659,6 +700,77 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             post(location).
         then().
             statusCode(HttpStatus.SC_CONFLICT);
+        //@formatter:on
+    }
+
+    @Test
+    public void testRemoveTicketFromOrder() {
+
+        Map<String, String> ticket = new HashMap<>(3);
+        ticket.put("pickupService", "true");
+        ticket.put("chMember", "false");
+        ticket.put("type", TicketType.EARLY_FULL.toString());
+
+        Order order1 = new Order(user);
+
+        Ticket earlyAndPickup = new Ticket(user, TicketType.EARLY_FULL, true, false);
+        Ticket earlyNoPickup = new Ticket(user, TicketType.EARLY_FULL, false, false);
+
+        earlyAndPickup = ticketRepository.save(earlyAndPickup);
+        earlyNoPickup = ticketRepository.save(earlyNoPickup);
+
+        order1.addTicket(earlyAndPickup);
+        order1.addTicket(earlyNoPickup);
+
+        Order save = orderRepository.save(order1);
+
+        SessionData login = login("user");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            content(ticket).contentType(ContentType.JSON).
+            delete("/orders/" + save.getId()).
+        then().
+            statusCode(HttpStatus.SC_OK).
+            body("object.tickets", hasSize(1));
+        //@formatter:on
+    }
+
+    @Test
+    public void testRemoveTicketFromOrderNotFound() {
+
+        Map<String, String> ticket = new HashMap<>(3);
+        ticket.put("pickupService", "true");
+        ticket.put("chMember", "false");
+        ticket.put("type", TicketType.REGULAR_FULL.toString());
+
+        Order order1 = new Order(user);
+
+        Ticket earlyAndPickup = new Ticket(user, TicketType.EARLY_FULL, true, false);
+        Ticket earlyNoPickup = new Ticket(user, TicketType.EARLY_FULL, false, false);
+
+        earlyAndPickup = ticketRepository.save(earlyAndPickup);
+        earlyNoPickup = ticketRepository.save(earlyNoPickup);
+
+        order1.addTicket(earlyAndPickup);
+        order1.addTicket(earlyNoPickup);
+
+        Order save = orderRepository.save(order1);
+
+        SessionData login = login("user");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            content(ticket).contentType(ContentType.JSON).
+            delete("/orders/" + save.getId()).
+        then().
+            statusCode(HttpStatus.SC_NOT_MODIFIED);
         //@formatter:on
     }
 

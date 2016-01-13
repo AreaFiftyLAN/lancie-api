@@ -3,6 +3,7 @@ package ch.wisv.areafiftylan.controller;
 import ch.wisv.areafiftylan.dto.TicketDTO;
 import ch.wisv.areafiftylan.dto.TicketInformationResponse;
 import ch.wisv.areafiftylan.exception.ImmutableOrderException;
+import ch.wisv.areafiftylan.exception.TicketNotFoundException;
 import ch.wisv.areafiftylan.exception.TicketUnavailableException;
 import ch.wisv.areafiftylan.model.Order;
 import ch.wisv.areafiftylan.model.User;
@@ -105,6 +106,22 @@ public class OrderRestController {
     }
 
     /**
+     * Removes a ticket to an existing Order.
+     *
+     * @param orderId   Id of the Order
+     * @param ticketDTO TicketDTO of the Ticket to be removed to the Order
+     *
+     * @return Message about the result of the request
+     */
+    @PreAuthorize("@currentUserServiceImpl.canAccessOrder(principal, #orderId)")
+    @RequestMapping(value = "/orders/{orderId}", method = RequestMethod.DELETE)
+    @JsonView(View.OrderOverview.class)
+    public ResponseEntity<?> removeFromOrder(@PathVariable Long orderId, @RequestBody @Validated TicketDTO ticketDTO) {
+        Order modifiedOrder = orderService.removeTicketFromOrder(orderId, ticketDTO);
+        return createResponseEntity(HttpStatus.OK, "Ticket successfully removed from Order", modifiedOrder);
+    }
+
+    /**
      * This method requests payment of the order, locks the order and needs to return information on how to proceed.
      * Depending on PaymentService.
      *
@@ -156,5 +173,10 @@ public class OrderRestController {
     @ExceptionHandler(ImmutableOrderException.class)
     public ResponseEntity<?> handleWrongOrderStatusException(ImmutableOrderException e) {
         return createResponseEntity(HttpStatus.CONFLICT, e.getMessage());
+    }
+
+    @ExceptionHandler(TicketNotFoundException.class)
+    public ResponseEntity<?> handleTicketNotFoundException(TicketNotFoundException e) {
+        return createResponseEntity(HttpStatus.NOT_MODIFIED, e.getMessage());
     }
 }

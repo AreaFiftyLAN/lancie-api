@@ -2,10 +2,7 @@ package ch.wisv.areafiftylan.service;
 
 import ch.wisv.areafiftylan.dto.TicketDTO;
 import ch.wisv.areafiftylan.dto.TicketInformationResponse;
-import ch.wisv.areafiftylan.exception.ImmutableOrderException;
-import ch.wisv.areafiftylan.exception.PaymentException;
-import ch.wisv.areafiftylan.exception.TicketUnavailableException;
-import ch.wisv.areafiftylan.exception.TokenNotFoundException;
+import ch.wisv.areafiftylan.exception.*;
 import ch.wisv.areafiftylan.model.ExpiredOrder;
 import ch.wisv.areafiftylan.model.Order;
 import ch.wisv.areafiftylan.model.Ticket;
@@ -23,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Predicate;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -87,28 +85,53 @@ public class OrderServiceImpl implements OrderService {
     public Order addTicketToOrder(Long orderId, TicketDTO ticketDTO) {
         Order order = orderRepository.getOne(orderId);
 
+        // Check Order status
+        if (!order.getStatus().equals(OrderStatus.CREATING)) {
+            throw new ImmutableOrderException(orderId);
+        }
+
+        // Check amount of Tickets already in Order
+        if (order.getTickets().size() >= ORDER_LIMIT) {
+            throw new IllegalStateException("Order limit reached");
+        }
+
+        User user = order.getUser();
+
+        // Request a ticket to see if one is available. If a ticket is sold out, the method ends here due to the
+        // exception thrown. Else, we'll get a new ticket to add to the order.
+        Ticket ticket = this.requestTicketOfType(ticketDTO.getType(), user, ticketDTO.hasPickupService(),
+                ticketDTO.isCHMember());
+
+        order.addTicket(ticket);
+        return orderRepository.save(order);
+    }
+
+    @Override
+    public Order removeTicketFromOrder(Long orderId, TicketDTO ticketDTO) {
+        Order order = orderRepository.getOne(orderId);
         if (order.getStatus().equals(OrderStatus.CREATING)) {
-            User user = order.getUser();
 
-            // Request a ticket to see if one is available. If a ticket is sold out, the method ends here due to the
-            // exception thrown. Else, we'll get a new ticket to add to the order.
-            Ticket ticket = this.requestTicketOfType(ticketDTO.getType(), user, ticketDTO.hasPickupService(),
-                    ticketDTO.isCHMember());
+            // Find a Ticket in the order, equal to the given DTO. Throw an exception when the ticket doesn't exist
+            Ticket ticket = order.getTickets().stream().filter(isEqualToDTO(ticketDTO)).findFirst()
+                    .orElseThrow(() -> new TicketNotFoundException("No such ticket in this Order"));
 
-            if (order.getTickets().size() <= ORDER_LIMIT) {
-                order.addTicket(ticket);
-            } else {
-                throw new IllegalStateException("Order limit reached");
-            }
+            order.getTickets().remove(ticket);
+            ticketRepository.delete(ticket);
 
             return orderRepository.save(order);
+
         } else {
             throw new ImmutableOrderException(orderId);
         }
     }
 
+    private static Predicate<Ticket> isEqualToDTO(TicketDTO ticketDTO) {
+        return t -> (t.getType() == ticketDTO.getType()) && (t.isChMember() == ticketDTO.isCHMember()) &&
+                (t.hasPickupService() == ticketDTO.hasPickupService());
+    }
+
     @Override
-    public Ticket requestTicketOfType(TicketType type, User owner, boolean pickupService, boolean chMember) {
+    public synchronized Ticket requestTicketOfType(TicketType type, User owner, boolean pickupService, boolean chMember) {
         if (ticketRepository.countByType(type) >= type.getLimit()) {
             throw new TicketUnavailableException(type);
         } else {

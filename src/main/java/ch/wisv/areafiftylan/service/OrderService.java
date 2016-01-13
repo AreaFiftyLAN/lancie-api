@@ -40,6 +40,14 @@ public interface OrderService {
     Order addTicketToOrder(Long orderId, TicketDTO ticketDTO);
 
     /**
+     * Removes a ticket with the given DTO from an order. Throws a NotFoundException when a ticket with such a DTO can't be found
+     * @param orderId Order from which the Ticket should be removed
+     * @param ticketDTO Ticket which should be removed from the Order
+     * @return The modified Order
+     */
+    Order removeTicketFromOrder(Long orderId, TicketDTO ticketDTO);
+
+    /**
      * Check if a ticket is available, and return when it is. When a ticket is unavailable (sold out for instance) a
      * TicketUnavailableException is thrown
      *
