@@ -46,3 +46,5 @@ a5l.paymentReturnUrl=https://areafiftylan.nl/ordersuccess
 a5l.mail.confirmUrl=https://areafiftylan.nl/confirmRegistration
 # E-mail address used for sending e-mails
 a5l.mail.sender=LANcie <lancie@ch.tudelft.nl>
+a5l.orderLimit=5
+
