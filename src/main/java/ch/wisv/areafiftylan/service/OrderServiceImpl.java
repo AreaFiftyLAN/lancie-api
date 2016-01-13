@@ -17,6 +17,7 @@ import ch.wisv.areafiftylan.service.repository.OrderRepository;
 import ch.wisv.areafiftylan.service.repository.TicketRepository;
 import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -31,6 +32,9 @@ public class OrderServiceImpl implements OrderService {
     TicketRepository ticketRepository;
     UserService userService;
     PaymentService paymentService;
+
+    @Value("${a5l.orderLimit}")
+    private int ORDER_LIMIT;
 
     @Autowired
     public OrderServiceImpl(OrderRepository orderRepository, UserService userService, TicketRepository ticketRepository,
@@ -91,7 +95,11 @@ public class OrderServiceImpl implements OrderService {
             Ticket ticket = this.requestTicketOfType(ticketDTO.getType(), user, ticketDTO.hasPickupService(),
                     ticketDTO.isCHMember());
 
-            order.addTicket(ticket);
+            if (order.getTickets().size() <= ORDER_LIMIT) {
+                order.addTicket(ticket);
+            } else {
+                throw new IllegalStateException("Order limit reached");
+            }
 
             return orderRepository.save(order);
         } else {
