@@ -20,7 +20,6 @@ import static ch.wisv.areafiftylan.util.ResponseEntityBuilder.createResponseEnti
 
 @RestController
 @RequestMapping("/users/current")
-@PreAuthorize("isAuthenticated()")
 public class CurrentUserRestController {
 
     private UserService userService;
@@ -41,10 +40,14 @@ public class CurrentUserRestController {
      */
     @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<?> getCurrentUser(Authentication auth) {
-        // Get the currently logged in user from the autowired Authentication object.
-        UserDetails currentUser = (UserDetails) auth.getPrincipal();
-        User user = userService.getUserByUsername(currentUser.getUsername()).get();
-        return new ResponseEntity<>(user, HttpStatus.OK);
+        if(auth != null) {
+            // Get the currently logged in user from the autowired Authentication object.
+            UserDetails currentUser = (UserDetails) auth.getPrincipal();
+            User user = userService.getUserByUsername(currentUser.getUsername()).get();
+            return new ResponseEntity<>(user, HttpStatus.OK);
+        } else {
+            return createResponseEntity(HttpStatus.OK, "Not logged in");
+        }
     }
 
     /**

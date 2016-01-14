@@ -17,8 +17,7 @@ import java.util.Map;
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.RestAssured.when;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.*;
 import static org.hamcrest.core.IsCollectionContaining.hasItem;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
 
@@ -158,7 +157,10 @@ public class UserRestIntegrationTest extends IntegrationTest {
         when().
             get("/users/current").
         then().
-            statusCode(HttpStatus.SC_FORBIDDEN);
+            statusCode(HttpStatus.SC_OK).
+            body("object", nullValue()).
+            body("message", containsString("Not logged in"));
+
         //@formatter:on
     }
 
