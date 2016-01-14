@@ -1,14 +1,18 @@
 package ch.wisv.areafiftylan;
 
 import ch.wisv.areafiftylan.model.Seat;
+import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.model.User;
+import ch.wisv.areafiftylan.model.util.Gender;
 import ch.wisv.areafiftylan.service.repository.SeatRespository;
+import ch.wisv.areafiftylan.service.repository.TeamRepository;
 import ch.wisv.areafiftylan.util.SessionData;
 import org.apache.http.HttpStatus;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +29,13 @@ public class SeatRestIntegrationTest extends IntegrationTest {
     @Autowired
     SeatRespository seatRespository;
 
+    @Autowired
+    TeamRepository teamRepository;
+
+    User teamCaptain;
+
+    Team team;
+
     @Before
     public void setupSeatIntegrationTests() {
         List<Seat> seatList = new ArrayList<>(5);
@@ -39,6 +50,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
     @After
     public void cleanupSeatIntegrationTest() {
         seatRespository.deleteAll();
+        teamRepository.deleteAll();
     }
 
     private void setUserOnA1(User user) {
@@ -46,6 +58,20 @@ public class SeatRestIntegrationTest extends IntegrationTest {
         seat.setUser(user);
 
         seatRespository.save(seat);
+    }
+
+    private void createCaptainAndTeam() {
+        teamCaptain = new User("captain", new BCryptPasswordEncoder().encode("password"), "captain@mail.com");
+        teamCaptain.getProfile()
+                .setAllFields("Captain", "Hook", "PeterPanKiller", Gender.MALE, "High Road 3", "2826ZZ", "Neverland",
+                        "0906-0777", null);
+
+        teamCaptain = userRepository.saveAndFlush(teamCaptain);
+
+        team = new Team("team", teamCaptain);
+        team.addMember(user);
+
+        team = teamRepository.save(team);
     }
 
     @Test
@@ -241,7 +267,26 @@ public class SeatRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void getSeatsForTeam(){
+        createCaptainAndTeam();
 
+        setUserOnA1(teamCaptain);
+
+        // Seat User on seat A2
+        Seat seat = seatRespository.findAll().get(1);
+        seat.setUser(user);
+        seatRespository.save(seat);
+
+        SessionData login = login("user");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            get("/teams/" + team.getTeamName() + "/seats").
+        then().
+            statusCode(HttpStatus.SC_OK);
+        //@formatter:on
     }
 
     @Test

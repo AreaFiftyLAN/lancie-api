@@ -15,6 +15,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collection;
+
 import static ch.wisv.areafiftylan.util.ResponseEntityBuilder.createResponseEntity;
 
 @RestController
@@ -89,12 +91,16 @@ public class SeatRestController {
                 seatGroupDTO.getNumberOfSeats() + " added in group " + seatGroupDTO.getSeatGroupName());
     }
 
-
     @PreAuthorize("hasRole('ADMIN')")
     @RequestMapping(value = "/users/{userId}/seat", method = RequestMethod.GET)
     public Seat getSeatByUser(@PathVariable Long userId) {
         User user = userService.getUserById(userId);
 
         return seatService.getSeatByUsername(user.getUsername());
+    }
+
+    @RequestMapping(value = "/teams/{teamName}/seats", method = RequestMethod.GET)
+    public Collection<Seat> getSeatsForTeam(@PathVariable String teamName) {
+        return seatService.getSeatsByTeamName(teamName);
     }
 }
