@@ -2,10 +2,14 @@ package ch.wisv.areafiftylan.controller;
 
 
 import ch.wisv.areafiftylan.dto.UserDTO;
+import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.model.Order;
 import ch.wisv.areafiftylan.model.User;
+import ch.wisv.areafiftylan.model.view.View;
+import ch.wisv.areafiftylan.service.TeamService;
 import ch.wisv.areafiftylan.service.OrderService;
 import ch.wisv.areafiftylan.service.UserService;
+import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,13 +31,15 @@ import static ch.wisv.areafiftylan.util.ResponseEntityBuilder.createResponseEnti
 public class CurrentUserRestController {
 
     private UserService userService;
+    private TeamService teamService;
 
     private OrderService orderService;
 
     @Autowired
-    CurrentUserRestController(UserService userService, OrderService orderService) {
+    CurrentUserRestController(UserService userService, OrderService orderService, TeamService teamService) {
         this.userService = userService;
         this.orderService = orderService;
+        this.teamService = teamService;
     }
 
     /**
@@ -47,7 +53,7 @@ public class CurrentUserRestController {
      */
     @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<?> getCurrentUser(Authentication auth) {
-        if(auth != null) {
+        if (auth != null) {
             // Get the currently logged in user from the autowired Authentication object.
             UserDetails currentUser = (UserDetails) auth.getPrincipal();
             User user = userService.getUserByUsername(currentUser.getUsername()).get();
@@ -58,11 +64,24 @@ public class CurrentUserRestController {
     }
 
     /**
+     * Get all the Teams the current user is a member of.
+     * @param auth Current Authentication object, automatically taken from the SecurityContext
+     * @return A Collection of Teams of which the current User is a member
+     */
+    @JsonView(View.Public.class)
+    @PreAuthorize("isAuthenticated()")
+    @RequestMapping(value = "/teams", method = RequestMethod.GET)
+    public Collection<Team> getCurrentTeams(Authentication auth) {
+        UserDetails currentUser = (UserDetails) auth.getPrincipal();
+        return teamService.getTeamsByUsername(currentUser.getUsername());
+    }
+
+    /**
      * This method accepts PUT requests on /users/current. It replaces all fields with the new user provided in the
      * RequestBody and resets the profile fields. All references to the old user are maintained (Team membership ect).
-     *
-     * This is limited to admin use, because users should not be able to change their core information with a
-     * single PUT request. Use the profile mapping for editing profile fields.
+     * <p>
+     * This is limited to admin use, because users should not be able to change their core information with a single PUT
+     * request. Use the profile mapping for editing profile fields.
      *
      * @param input A UserDTO object containing data of the new user
      *
