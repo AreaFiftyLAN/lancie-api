@@ -70,6 +70,10 @@ public class Ticket {
         this.pickupService = pickupService;
     }
 
+    public boolean isChMember() {
+        return chMember;
+    }
+
     public User getPreviousOwner() {
         return previousOwner;
     }

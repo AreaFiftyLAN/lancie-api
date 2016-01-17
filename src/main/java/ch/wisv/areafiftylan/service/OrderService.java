@@ -1,7 +1,7 @@
 package ch.wisv.areafiftylan.service;
 
 import ch.wisv.areafiftylan.dto.TicketDTO;
-import ch.wisv.areafiftylan.dto.TicketInformation;
+import ch.wisv.areafiftylan.dto.TicketInformationResponse;
 import ch.wisv.areafiftylan.exception.TicketUnavailableException;
 import ch.wisv.areafiftylan.model.Order;
 import ch.wisv.areafiftylan.model.Ticket;
@@ -10,7 +10,6 @@ import ch.wisv.areafiftylan.model.util.TicketType;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 public interface OrderService {
 
@@ -39,6 +38,14 @@ public interface OrderService {
      * @return The updated Order
      */
     Order addTicketToOrder(Long orderId, TicketDTO ticketDTO);
+
+    /**
+     * Removes a ticket with the given DTO from an order. Throws a NotFoundException when a ticket with such a DTO can't be found
+     * @param orderId Order from which the Ticket should be removed
+     * @param ticketDTO Ticket which should be removed from the Order
+     * @return The modified Order
+     */
+    Order removeTicketFromOrder(Long orderId, TicketDTO ticketDTO);
 
     /**
      * Check if a ticket is available, and return when it is. When a ticket is unavailable (sold out for instance) a
@@ -87,5 +94,5 @@ public interface OrderService {
      * This method returns an overview of all available tickets, and information about them
      * @return A collection of TicketInformation objects
      */
-    Map<String, TicketInformation> getAvailableTickets();
+    Collection<TicketInformationResponse> getAvailableTickets();
 }

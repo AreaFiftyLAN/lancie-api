@@ -1,5 +1,6 @@
 package ch.wisv.areafiftylan.exception;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -18,5 +19,15 @@ class GlobalControllerExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<?> handleAccessDeniedException(AccessDeniedException ex) {
         return createResponseEntity(HttpStatus.FORBIDDEN, "Access denied");
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<?> handleDataIntegrityViolation(DataIntegrityViolationException e) {
+        return createResponseEntity(HttpStatus.CONFLICT, e.getMessage());
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<?> handleIllegalStateException(IllegalStateException ex) {
+        return createResponseEntity(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 }

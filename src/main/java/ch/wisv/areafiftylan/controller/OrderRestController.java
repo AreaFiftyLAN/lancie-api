@@ -1,8 +1,9 @@
 package ch.wisv.areafiftylan.controller;
 
 import ch.wisv.areafiftylan.dto.TicketDTO;
-import ch.wisv.areafiftylan.dto.TicketInformation;
+import ch.wisv.areafiftylan.dto.TicketInformationResponse;
 import ch.wisv.areafiftylan.exception.ImmutableOrderException;
+import ch.wisv.areafiftylan.exception.TicketNotFoundException;
 import ch.wisv.areafiftylan.exception.TicketUnavailableException;
 import ch.wisv.areafiftylan.model.Order;
 import ch.wisv.areafiftylan.model.User;
@@ -14,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
@@ -24,7 +24,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
-import java.util.Map;
 
 import static ch.wisv.areafiftylan.util.ResponseEntityBuilder.createResponseEntity;
 
@@ -107,6 +106,22 @@ public class OrderRestController {
     }
 
     /**
+     * Removes a ticket to an existing Order.
+     *
+     * @param orderId   Id of the Order
+     * @param ticketDTO TicketDTO of the Ticket to be removed to the Order
+     *
+     * @return Message about the result of the request
+     */
+    @PreAuthorize("@currentUserServiceImpl.canAccessOrder(principal, #orderId)")
+    @RequestMapping(value = "/orders/{orderId}", method = RequestMethod.DELETE)
+    @JsonView(View.OrderOverview.class)
+    public ResponseEntity<?> removeFromOrder(@PathVariable Long orderId, @RequestBody @Validated TicketDTO ticketDTO) {
+        Order modifiedOrder = orderService.removeTicketFromOrder(orderId, ticketDTO);
+        return createResponseEntity(HttpStatus.OK, "Ticket successfully removed from Order", modifiedOrder);
+    }
+
+    /**
      * This method requests payment of the order, locks the order and needs to return information on how to proceed.
      * Depending on PaymentService.
      *
@@ -146,11 +161,9 @@ public class OrderRestController {
      * @return A collection of all TicketTypes and their availability
      */
     @RequestMapping(value = "/tickets/available", method = RequestMethod.GET)
-    public Map<String, TicketInformation> getAvailableTickets() {
+    public Collection<TicketInformationResponse> getAvailableTickets() {
         return orderService.getAvailableTickets();
-
     }
-
 
     @ExceptionHandler(TicketUnavailableException.class)
     public ResponseEntity<?> handleTicketUnavailableException(TicketUnavailableException e) {
@@ -162,9 +175,8 @@ public class OrderRestController {
         return createResponseEntity(HttpStatus.CONFLICT, e.getMessage());
     }
 
-    //TODO: Move this to central ControllerAdvice class
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<?> handleAccessDeniedException(AccessDeniedException ex) {
-        return createResponseEntity(HttpStatus.FORBIDDEN, "Access denied");
+    @ExceptionHandler(TicketNotFoundException.class)
+    public ResponseEntity<?> handleTicketNotFoundException(TicketNotFoundException e) {
+        return createResponseEntity(HttpStatus.NOT_MODIFIED, e.getMessage());
     }
 }
