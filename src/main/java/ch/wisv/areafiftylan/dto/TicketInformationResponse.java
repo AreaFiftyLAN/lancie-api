@@ -9,7 +9,7 @@ import lombok.Getter;
  */
 public class TicketInformationResponse {
     @Getter
-    private TicketType ticketType;
+    private String ticketType;
 
     @Getter
     private int limit;
@@ -21,13 +21,17 @@ public class TicketInformationResponse {
     private double price;
 
     @Getter
-    private double discountPrice;
+    private double chMemberDiscountPrice;
+
+    @Getter
+    private double pickupServicePrice;
 
     public TicketInformationResponse(TicketType type, int numberSold) {
-        this.ticketType = type;
+        this.ticketType = type.name();
         this.limit = type.getLimit();
         this.numberSold = numberSold;
         this.price = type.getPrice();
-        this.discountPrice = type.getPrice() + TicketOptions.CHMEMBER.getPrice();
+        this.chMemberDiscountPrice = TicketOptions.CHMEMBER.getPrice();
+        this.pickupServicePrice = TicketOptions.PICKUPSERVICE.getPrice();
     }
 }
