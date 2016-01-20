@@ -61,9 +61,7 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public Collection<Team> getTeamsByUsername(String username) {
-        //        return teamRepository.findByMembersUsername(username);
-        //FIXME
-        return null;
+        return teamRepository.findAllByMembersUsername(username);
     }
 
     @Override
@@ -95,7 +93,7 @@ public class TeamServiceImpl implements TeamService {
     public void addMember(Long teamId, String username) {
         Team team = teamRepository.findById(teamId).orElseThrow(() -> new TeamNotFoundException(teamId));
         User user = userService.getUserByUsername(username).orElseThrow(() -> new UserNotFoundException(username));
-        if(team.addMember(user)) {
+        if (team.addMember(user)) {
             teamRepository.saveAndFlush(team);
         } else {
             throw new IllegalArgumentException("Could not add User to Team");
