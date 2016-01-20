@@ -60,6 +60,13 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public Order getOpenOrder(String username) {
+        Collection<Order> ordersByUsername = findOrdersByUsername(username);
+        return ordersByUsername.stream().filter(o -> o.getStatus().equals(OrderStatus.CREATING)).findFirst()
+                .orElseThrow(() -> new OrderNotFoundException("User has no open order"));
+    }
+
+    @Override
     public Order create(Long userId, TicketDTO ticketDTO) {
         User user = userService.getUserById(userId);
 
