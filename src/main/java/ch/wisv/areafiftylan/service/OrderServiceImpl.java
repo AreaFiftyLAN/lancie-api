@@ -1,6 +1,7 @@
 package ch.wisv.areafiftylan.service;
 
 import ch.wisv.areafiftylan.dto.TicketDTO;
+import ch.wisv.areafiftylan.exception.*;
 import ch.wisv.areafiftylan.dto.TicketInformationResponse;
 import ch.wisv.areafiftylan.exception.*;
 import ch.wisv.areafiftylan.model.ExpiredOrder;
@@ -57,6 +58,13 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Collection<Order> findOrdersByUsername(String username) {
         return orderRepository.findAllByUserUsername(username);
+    }
+
+    @Override
+    public Order getOpenOrder(String username) {
+        Collection<Order> ordersByUsername = findOrdersByUsername(username);
+        return ordersByUsername.stream().filter(o -> o.getStatus().equals(OrderStatus.CREATING)).findFirst()
+                .orElseThrow(() -> new OrderNotFoundException("User has no open order"));
     }
 
     @Override

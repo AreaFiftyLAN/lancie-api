@@ -19,6 +19,8 @@ public interface OrderService {
 
     Collection<Order> findOrdersByUsername(String username);
 
+    Order getOpenOrder(String username);
+
     /**
      * Create an order with at least one Ticket.
      *

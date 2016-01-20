@@ -89,4 +89,17 @@ public class CurrentUserRestController {
         UserDetails currentUser = (UserDetails) auth.getPrincipal();
         return orderService.findOrdersByUsername(currentUser.getUsername());
     }
+
+    /**
+     * Get the current open order include expired orders. A User van only have one open order.
+     *
+     * @param auth The current User, injected by Spring
+     *
+     * @return The current open order, if any exist
+     */
+    @RequestMapping(value = "/orders/open", method = RequestMethod.GET)
+    public Order getOpenOrder(Authentication auth) {
+        UserDetails currentUser = (UserDetails) auth.getPrincipal();
+        return orderService.getOpenOrder(currentUser.getUsername());
+    }
 }
