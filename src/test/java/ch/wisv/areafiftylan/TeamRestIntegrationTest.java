@@ -206,11 +206,33 @@ public class TeamRestIntegrationTest extends IntegrationTest {
         team.then().statusCode(HttpStatus.SC_FORBIDDEN);
     }
 
+    @Test
+    public void getTeamCurrentUser() {
+        String location = createTeamWithCaptain();
+        logout();
+
+        SessionData login = login("captain");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            get("/users/current/teams").
+        then().
+            statusCode(HttpStatus.SC_OK).
+            body("[0].teamName", equalTo(team1.get("teamName"))).
+            body("[0].captain.profile.displayName", equalTo(teamCaptain.getProfile().getDisplayName())).
+            body("[0].members.profile.displayName", hasItem(teamCaptain.getProfile().getDisplayName()));
+
+        //@formatter:on
+    }
+
     private void addUserAsCaptain(String location, User user) {
         SessionData sessionData = login("captain", "password");
 
         //@formatter:off
-        given().log().all().
+        given().
             filter(sessionFilter).
             header(sessionData.getCsrfHeader()).
         when().
@@ -226,21 +248,18 @@ public class TeamRestIntegrationTest extends IntegrationTest {
         SessionData sessionData = login("captain", "password");
 
         team1.put("captainUsername", teamCaptain.getUsername());
-        //        team1.put("_csrf", csrfToken.getToken());
 
         //@formatter:off
         Response response =
             given().
-                    header(sessionData.getCsrfHeader()).
-//                        cookie(sessionData.getCookie()).
-                    filter(sessionFilter).
+                header(sessionData.getCsrfHeader()).
+                filter(sessionFilter).
             when().
                 content(team1).contentType(ContentType.JSON).
                 post("/teams").
             then().
                 extract().response();
         //@formatter:on
-
 
         logout();
         return response.header("Location");

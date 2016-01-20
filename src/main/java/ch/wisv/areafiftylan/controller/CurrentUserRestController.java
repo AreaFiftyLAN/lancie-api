@@ -2,12 +2,12 @@ package ch.wisv.areafiftylan.controller;
 
 
 import ch.wisv.areafiftylan.dto.UserDTO;
-import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.model.Order;
+import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.view.View;
-import ch.wisv.areafiftylan.service.TeamService;
 import ch.wisv.areafiftylan.service.OrderService;
+import ch.wisv.areafiftylan.service.TeamService;
 import ch.wisv.areafiftylan.service.UserService;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
