@@ -30,4 +30,9 @@ class GlobalControllerExceptionHandler {
     public ResponseEntity<?> handleIllegalStateException(IllegalStateException ex) {
         return createResponseEntity(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
+
+    @ExceptionHandler(OrderNotFoundException.class)
+    public ResponseEntity<?> handleOrderNotFoundException(OrderNotFoundException ex) {
+        return createResponseEntity(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
 }

@@ -397,6 +397,47 @@ public class OrderRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
+    public void testGetOpenOrderCurrentUser() {
+        createOrderAndReturnLocation();
+        logout();
+
+        SessionData login = login("user");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            get("/users/current/orders/open").
+        then().
+            statusCode(HttpStatus.SC_OK).
+            body("status", equalTo("CREATING")).
+            body("reference", is(nullValue())).
+            body("user.username", is("user")).
+            body("tickets", hasSize(1)).
+            body("tickets.type", hasItem(is("EARLY_FULL"))).
+            body("tickets.pickupService", hasItem(is(false))).
+            body("amount",equalTo(35.00F));
+        //@formatter:on
+    }
+
+    @Test
+    public void testGetOpenOrderCurrentUserNotFound() {
+        SessionData login = login("user");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            get("/users/current/orders/open").
+        then().
+            statusCode(HttpStatus.SC_NOT_FOUND).
+            body("message", equalTo("User has no open order"));
+        //@formatter:on
+    }
+
+    @Test
     public void testGetOrder_OtherUser() {
         User otherUser = new User("otherUser", new BCryptPasswordEncoder().encode("password"), "otheruser@mail.com");
         userRepository.save(otherUser);
