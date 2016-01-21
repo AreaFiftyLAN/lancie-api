@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorator="dashboard-index">
+<head>
+    <title>Area FiftyLAN - Overview</title>
+</head>
+<body>
+    <section layout:fragment="content">
+        <div>
+            <h2>Orders</h2>
+
+            <br />
+
+            <script type="text/javascript">
+                jQuery(document).ready(function ($) {
+                    var $ordertable = jQuery('#ordertable');
+
+                    // Initialize DataTable
+                    var ordertable = $ordertable.DataTable({
+                        "bStateSave": true
+                    });
+
+                    // Initalize Select Dropdown after DataTables is created
+                    $ordertable.closest('.dataTables_wrapper').find('select').select2({
+                        minimumResultsForSearch: -1
+                    });
+
+                    // Setup - add a text input to each footer cell
+                    $('#ordertable tfoot th').each(function () {
+                        var title = $('#ordertable thead th').eq($(this).index()).text();
+                        $(this).html('<input type="text" class="form-control" placeholder="Search ' + title + '" />');
+                    });
+
+                    // Apply the search
+                    ordertable.columns().every(function () {
+                        var that = this;
+                        $('input', this.footer()).on('keyup change', function () {
+                            if (that.search() !== this.value) {
+                                that.search(this.value).draw();
+                            }
+                        });
+                    });
+                });
+            </script>
+
+            <table class="table table-bordered datatable" id="ordertable">
+                <thead>
+                    <tr>
+                        <th>id</th>
+                        <th>Username</th>
+                        <th>Creation Date</th>
+                        <th>Status</th>
+                        <th>Tickets</th>
+                        <th>Amount</th>
+                        <th>Mollie Reference</th>
+                        <th class="actions">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="order : ${orders}" class="">
+                        <td th:text="${order.id}">Order ID</td>
+                        <td th:text="${order.user.username}">Username</td>
+                        <td th:text="${order.creationDateTime}">CreationDate</td>
+                        <td th:text="${order.status}">OrderStatus</td>
+                        <td><div th:each="ticket : ${order.tickets}" th:text="${ticket.type}">Tickets</div></td>
+                        <td th:text="${order.amount}">Order Amount</td>
+                        <td th:text="${order.reference}">Mollie Reference</td>
+                        <td>
+                            <form th:action="@{/orders/status}" method="post" th:id="${order.reference}">
+                                <input type="hidden" name="id" th:value="${order.reference}">
+                                <button type="submit" class="btn btn-info btn-icon">
+                                    Update
+                                    <i class="entypo-search"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th>id</th>
+                        <th>Username</th>
+                        <th>Creation Date</th>
+                        <th>Status</th>
+                        <th>Tickets</th>
+                        <th>Amount</th>
+                        <th>Mollie Reference</th>
+                        <th class="actions">Action</th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <script>
+            $(document).ready(function() {
+                $('form').on('submit',function(e){
+                    e.preventDefault();
+                    $.ajax({
+                        type     : "POST",
+                        cache    : false,
+                        url      : $(this).attr('action'),
+                        data     : $(this).serialize(),
+                        success  : function(data) {
+                            location.reload();
+                        }
+                    });
+
+                });
+            });
+        </script>
+
+        <!-- Imported scripts on this page -->
+        <script src="assets/js/datatables/datatables.js"></script>
+        <script src="assets/js/select2/select2.min.js"></script>
+
+        <!-- Imported styles on this page -->
+        <link rel="stylesheet" href="assets/js/datatables/datatables.css">
+        <link rel="stylesheet" href="assets/js/select2/select2-bootstrap.css">
+        <link rel="stylesheet" href="assets/js/select2/select2.css">
+    </section>
+</body>
+</html>
