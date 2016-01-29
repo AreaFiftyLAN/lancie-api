@@ -1,7 +1,7 @@
 package ch.wisv.areafiftylan.controller;
 
 
-import ch.wisv.areafiftylan.dto.UserDTO;
+import ch.wisv.areafiftylan.dto.PasswordChangeDTO;
 import ch.wisv.areafiftylan.model.Order;
 import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.model.User;
@@ -53,6 +53,8 @@ public class CurrentUserRestController {
      */
     @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<?> getCurrentUser(Authentication auth) {
+        // To prevent 403 errors on this endpoint, we manually handle unauthenticated users, instead of a
+        // preauthorize tag.
         if (auth != null) {
             // Get the currently logged in user from the autowired Authentication object.
             UserDetails currentUser = (UserDetails) auth.getPrincipal();
@@ -61,6 +63,28 @@ public class CurrentUserRestController {
         } else {
             return createResponseEntity(HttpStatus.OK, "Not logged in");
         }
+    }
+
+    /**
+     * This mapping allows the user to change their password while logged in. This is different from the password reset
+     * functionality which works with tokens. Users have to provide both their old and new password, and have to be
+     * fully authenticated, meaning that they can't be coming from a "Remember me" session.
+     *
+     * @param auth The current user
+     * @param passwordChangeDTO DTO containing oldPassword and newPassword
+     *
+     * @return Statusmessage
+     */
+    @PreAuthorize("isFullyAuthenticated()")
+    @RequestMapping(value = "password", method = RequestMethod.PUT)
+    public ResponseEntity<?> changeCurrentUserPassword(Authentication auth,
+                                                       @RequestBody @Validated PasswordChangeDTO passwordChangeDTO) {
+        User currentUser = (User) auth.getPrincipal();
+
+        userService.changePassword(currentUser.getId(), passwordChangeDTO.getOldPassword(),
+                passwordChangeDTO.getNewPassword());
+
+        return createResponseEntity(HttpStatus.OK, "Password succesfully changed");
     }
 
     /**
@@ -74,25 +98,6 @@ public class CurrentUserRestController {
     public Collection<Team> getCurrentTeams(Authentication auth) {
         UserDetails currentUser = (UserDetails) auth.getPrincipal();
         return teamService.getTeamsByUsername(currentUser.getUsername());
-    }
-
-    /**
-     * This method accepts PUT requests on /users/current. It replaces all fields with the new user provided in the
-     * RequestBody and resets the profile fields. All references to the old user are maintained (Team membership ect).
-     * <p>
-     * This is limited to admin use, because users should not be able to change their core information with a single PUT
-     * request. Use the profile mapping for editing profile fields.
-     *
-     * @param input A UserDTO object containing data of the new user
-     *
-     * @return The User object.
-     */
-    @RequestMapping(method = RequestMethod.PUT)
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> replaceCurrentUser(@Validated @RequestBody UserDTO input, Authentication auth) {
-        User user = (User) auth.getPrincipal();
-        user = userService.replace(user.getId(), input);
-        return createResponseEntity(HttpStatus.OK, "User successfully replaced", user);
     }
 
     /**

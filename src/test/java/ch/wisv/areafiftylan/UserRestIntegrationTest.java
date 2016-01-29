@@ -705,6 +705,89 @@ public class UserRestIntegrationTest extends IntegrationTest {
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
     }
+
+    @Test
+    public void testChangePassword() {
+
+        Map<String, String> passwordDTO = new HashMap<>();
+        passwordDTO.put("oldPassword", "password");
+        passwordDTO.put("newPassword", "newPassword");
+
+        SessionData login = login("user", "password");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            content(passwordDTO).
+            contentType(ContentType.JSON).
+            put("/users/current/password").
+        then().
+            statusCode(HttpStatus.SC_OK);
+        //@formatter:on
+
+        logout();
+
+        SessionData login2 = login("user", "newPassword");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login2.getCsrfHeader()).
+        when().
+            get("/users/current").
+        then().statusCode(HttpStatus.SC_OK).
+            body("username", equalTo(user.getUsername())).
+            body("email", equalTo(user.getEmail())).
+            body("authorities", hasItem("ROLE_USER"));
+        //@formatter:on
+    }
+
+    @Test
+    public void testChangePasswordWrongOldPassword() {
+
+        Map<String, String> passwordDTO = new HashMap<>();
+        passwordDTO.put("oldPassword", "wrongPassword");
+        passwordDTO.put("newPassword", "newPassword");
+
+        SessionData login = login("user", "password");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            content(passwordDTO).
+            contentType(ContentType.JSON).
+            put("/users/current/password").
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
+    }
+
+    @Test
+    public void testChangePasswordMissingOldPassword() {
+
+        Map<String, String> passwordDTO = new HashMap<>();
+        passwordDTO.put("newPassword", "newPassword");
+
+        SessionData login = login("user", "password");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            content(passwordDTO).
+            contentType(ContentType.JSON).
+            put("/users/current/password").
+        then().
+            statusCode(HttpStatus.SC_BAD_REQUEST);
+        //@formatter:on
+    }
+
+
 }
 
 
