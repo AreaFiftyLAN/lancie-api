@@ -45,6 +45,8 @@ public interface UserService {
 
     void resetPassword(Long userId, String password);
 
+    void changePassword(Long userId, String oldPassword, String newPassword);
+
     Boolean checkEmailAvailable(String email);
 
     Boolean checkUsernameAvailable(String username);

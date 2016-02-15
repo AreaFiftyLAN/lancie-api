@@ -13,6 +13,7 @@ import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -206,6 +207,18 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         // The token is being checked in the controller, so just set the password here
         user.setPasswordHash(new BCryptPasswordEncoder().encode(password));
         userRepository.saveAndFlush(user);
+    }
+
+    @Override
+    public void changePassword(Long userId, String oldPassword, String newPassword) {
+        User user = userRepository.findOne(userId);
+
+        if(new BCryptPasswordEncoder().matches(oldPassword, user.getPassword())){
+            user.setPasswordHash(getPasswordHash(newPassword));
+            userRepository.save(user);
+        } else {
+            throw new AccessDeniedException("Wrong password");
+        }
     }
 
     @Override
