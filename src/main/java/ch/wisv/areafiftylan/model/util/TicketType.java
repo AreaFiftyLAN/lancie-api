@@ -1,12 +1,15 @@
 package ch.wisv.areafiftylan.model.util;
 
 public enum TicketType {
-    EARLY_FULL(35.00F, 50), REGULAR_FULL(40.00F, 100), LATE_FULL(45.00F, 50);
+    EARLY_FULL("Early Bird", 37.50F, 50), REGULAR_FULL("Regular", 40.00F, 150);
+    //, LATE_FULL("Last Minute", 40.00F, 50)
 
     private final float price;
     private final int limit;
+    private final String text;
 
-    TicketType(float price, int limit) {
+    TicketType(String text, float price, int limit) {
+        this.text = text;
         this.price = price;
         this.limit = limit;
     }
@@ -17,5 +20,9 @@ public enum TicketType {
 
     public int getLimit() {
         return limit;
+    }
+
+    public String getText() {
+        return text;
     }
 }

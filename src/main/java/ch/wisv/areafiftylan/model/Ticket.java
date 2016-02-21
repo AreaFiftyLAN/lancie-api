@@ -29,6 +29,9 @@ public class Ticket {
     TicketType type;
 
     @JsonView(View.OrderOverview.class)
+    String text;
+
+    @JsonView(View.OrderOverview.class)
     boolean pickupService;
 
     @JsonView(View.OrderOverview.class)
@@ -43,6 +46,7 @@ public class Ticket {
         this.owner = owner;
         this.previousOwner = null;
         this.type = type;
+        this.text = type.getText();
         this.pickupService = pickupService;
         this.chMember = chMember;
         lockedForTransfer = true;
