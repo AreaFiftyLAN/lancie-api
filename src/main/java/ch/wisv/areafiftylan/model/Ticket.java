@@ -39,6 +39,9 @@ public class Ticket {
     @JsonView(View.OrderOverview.class)
     boolean valid;
 
+    @JsonView(View.OrderOverview.class)
+    float price;
+
     public Ticket(User owner, TicketType type, Boolean pickupService, Boolean chMember) {
         this.owner = owner;
         this.previousOwner = null;
@@ -48,6 +51,8 @@ public class Ticket {
         lockedForTransfer = true;
         this.valid = false;
         key = UUID.randomUUID().toString();
+
+        price = getPrice();
     }
 
     public Ticket() {
@@ -68,6 +73,7 @@ public class Ticket {
 
     public void setPickupService(boolean pickupService) {
         this.pickupService = pickupService;
+        price = getPrice();
     }
 
     public boolean isChMember() {
