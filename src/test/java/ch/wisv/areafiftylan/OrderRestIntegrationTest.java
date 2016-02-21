@@ -44,18 +44,15 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         Ticket earlyAndPickup = new Ticket(user, TicketType.EARLY_FULL, true, false);
         Ticket earlyNoPickup = new Ticket(user, TicketType.EARLY_FULL, false, false);
         Ticket regularNoPickup = new Ticket(user, TicketType.REGULAR_FULL, false, false);
-        Ticket lateAndPickup = new Ticket(user, TicketType.LATE_FULL, true, false);
 
         earlyAndPickup = ticketRepository.save(earlyAndPickup);
         earlyNoPickup = ticketRepository.save(earlyNoPickup);
         regularNoPickup = ticketRepository.save(regularNoPickup);
-        lateAndPickup = ticketRepository.save(lateAndPickup);
 
         order1.addTicket(earlyAndPickup);
         order1.addTicket(earlyNoPickup);
 
         order2.addTicket(regularNoPickup);
-        order2.addTicket(lateAndPickup);
 
         orderRepository.save(order1);
         orderRepository.save(order2);
@@ -187,7 +184,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             body("object.tickets", hasSize(1)).
             body("object.tickets.pickupService", hasItem(false)).
             body("object.tickets.type", hasItem(is("EARLY_FULL"))).
-            body("object.amount",equalTo(30.00F));
+            body("object.amount",equalTo(32.50F));
         //@formatter:on
     }
 
@@ -367,7 +364,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             body("tickets", hasSize(1)).
             body("tickets.type", hasItem(is("EARLY_FULL"))).
             body("tickets.pickupService", hasItem(is(false))).
-            body("amount",equalTo(35.00F));
+            body("amount",equalTo(37.50F));
         //@formatter:on
     }
 
@@ -392,7 +389,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             body("[0].tickets", hasSize(1)).
             body("[0].tickets.type", hasItem(is("EARLY_FULL"))).
             body("[0].tickets.pickupService", hasItem(is(false))).
-            body("[0].amount",equalTo(35.00F));
+            body("[0].amount",equalTo(37.50F));
         //@formatter:on
     }
 
@@ -417,7 +414,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             body("tickets", hasSize(1)).
             body("tickets.type", hasItem(is("EARLY_FULL"))).
             body("tickets.pickupService", hasItem(is(false))).
-            body("amount",equalTo(35.00F));
+            body("amount",equalTo(37.50F));
         //@formatter:on
     }
 
@@ -480,7 +477,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             body("user.username", is("user")).
             body("tickets.type", hasItem(is("EARLY_FULL"))).
             body("tickets.pickupService", hasItem(is(false))).
-            body("amount",equalTo(35.00F));
+            body("amount",equalTo(37.50F));
         //@formatter:on
     }
 
@@ -925,7 +922,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         when().
             get("/tickets/available").
         then().
-            body("ticketType", hasItems(equalTo("EARLY_FULL"), equalTo("REGULAR_FULL"), equalTo("LATE_FULL")));
+            body("ticketType", hasItems(equalTo("EARLY_FULL"), equalTo("REGULAR_FULL")));
     }
 }
 

@@ -21,6 +21,9 @@ public class TicketInformationResponse {
     private double price;
 
     @Getter
+    private String text;
+
+    @Getter
     private double chMemberDiscountPrice;
 
     @Getter
@@ -31,6 +34,7 @@ public class TicketInformationResponse {
         this.limit = type.getLimit();
         this.numberSold = numberSold;
         this.price = type.getPrice();
+        this.text = type.getText();
         this.chMemberDiscountPrice = TicketOptions.CHMEMBER.getPrice();
         this.pickupServicePrice = TicketOptions.PICKUPSERVICE.getPrice();
     }
