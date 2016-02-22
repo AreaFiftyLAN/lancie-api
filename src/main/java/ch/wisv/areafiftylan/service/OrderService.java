@@ -65,14 +65,6 @@ public interface OrderService {
             throws TicketUnavailableException;
 
     /**
-     * Transfer the ticket to another user
-     *
-     * @param user      The user to transfer the ticket to
-     * @param ticketKey The key of the ticket to be transferred
-     */
-    void transferTicket(User user, String ticketKey);
-
-    /**
      * Register the order with the payment provider
      *
      * @param orderId The order to be checked out

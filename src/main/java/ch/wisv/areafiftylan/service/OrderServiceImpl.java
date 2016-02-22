@@ -154,23 +154,6 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void transferTicket(User user, String ticketKey) {
-        Ticket ticket = ticketRepository.findByKey(ticketKey).orElseThrow(() -> new TokenNotFoundException(ticketKey));
-
-        if (ticket.isLockedForTransfer()) {
-            ticket.setPreviousOwner(ticket.getOwner());
-
-            ticket.setOwner(user);
-
-            ticket.setLockedForTransfer(true);
-
-            ticketRepository.save(ticket);
-        } else {
-            //TODO: Deal with invalid transfer attempt
-        }
-    }
-
-    @Override
     public String requestPayment(Long orderId) {
         Order order = getOrderById(orderId);
         return paymentService.registerOrder(order);
