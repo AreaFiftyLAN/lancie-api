@@ -28,7 +28,7 @@ import static com.jayway.restassured.RestAssured.when;
  * Created by beer on 5-1-16.
  */
 public class TicketTransferRestIntegrationTest extends IntegrationTest{
-    private final String TRANSFER_ENDPOINT = "/tickettransfer";
+    private final String TRANSFER_ENDPOINT = "/tickets/transfer";
 
     private User ticketReciever;
     private Ticket ticket;
@@ -78,7 +78,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
         given()
         .when()
                 .content(transferRequest).contentType(ContentType.JSON)
-                .post("/tickettransfer")
+                .post(TRANSFER_ENDPOINT)
         .then()
                 .statusCode(HttpStatus.SC_FORBIDDEN);
 
@@ -116,7 +116,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
 
         given().
                 when().
-                put("/tickettransfer/" + ticket.getKey()).
+                put(TRANSFER_ENDPOINT + "/" + ticket.getKey()).
                 then().statusCode(HttpStatus.SC_FORBIDDEN);
 
         ticket = ticketRepository.findByKey(ticket.getKey()).orElse(null);
@@ -138,7 +138,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
                 filter(sessionFilter).
                 header(login.getCsrfHeader()).
                 when().
-                put("/tickettransfer/" + ticket.getKey()).
+                put(TRANSFER_ENDPOINT + "/" + ticket.getKey()).
                 then().statusCode(HttpStatus.SC_UNAUTHORIZED);
 
         ticket = ticketRepository.findByKey(ticket.getKey()).orElse(null);
@@ -161,7 +161,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
                 filter(sessionFilter).
                 header(login.getCsrfHeader()).
                 when().
-                put("/tickettransfer/" + ticket.getKey()).
+                put(TRANSFER_ENDPOINT + "/" + ticket.getKey()).
                 then().statusCode(HttpStatus.SC_OK);
 
         ticket = ticketRepository.findByOwnerUsername(ticketReciever.getUsername()).orElse(null);
@@ -183,7 +183,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
                 header(login.getCsrfHeader()).
                 when().
                 content(transferRequest).contentType(ContentType.JSON).
-                post("/tickettransfer")
+                post(TRANSFER_ENDPOINT)
                 .then().extract().response();
     }
 

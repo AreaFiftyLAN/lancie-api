@@ -22,17 +22,19 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class TicketTransferRestController {
-    @Autowired
     private TicketService ticketService;
-
-    @Autowired
     private UserService userService;
-
-    @Autowired
     private TicketRepository ticketRepository;
 
+    @Autowired
+    public TicketTransferRestController(TicketService ticketService, UserService userService, TicketRepository ticketRepository) {
+        this.ticketService = ticketService;
+        this.userService = userService;
+        this.ticketRepository = ticketRepository;
+    }
+
     @PreAuthorize("isAuthenticated()")
-    @RequestMapping(value = "/tickettransfer", method = RequestMethod.POST)
+    @RequestMapping(value = "/tickets/transfer", method = RequestMethod.POST)
     public ResponseEntity<?> requestTicketTransfer(Authentication auth, @RequestBody @Validated TransferDTO transferDTO){
         String username = transferDTO.getGoalUsername();
         String ticketKey = transferDTO.getTicketKey();
@@ -52,7 +54,7 @@ public class TicketTransferRestController {
     }
 
 
-    @RequestMapping(value = "/tickettransfer/{ticketKey}", method = RequestMethod.PUT)
+    @RequestMapping(value = "/tickets/transfer/{ticketKey}", method = RequestMethod.PUT)
     public ResponseEntity<?> transferTicket(Authentication auth, @PathVariable String ticketKey){
         User u = (User)auth.getPrincipal();
 
