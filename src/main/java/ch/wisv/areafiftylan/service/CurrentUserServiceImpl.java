@@ -1,5 +1,7 @@
 package ch.wisv.areafiftylan.service;
 
+import ch.wisv.areafiftylan.exception.TeamNotFoundException;
+import ch.wisv.areafiftylan.exception.TicketNotFoundException;
 import ch.wisv.areafiftylan.exception.TokenNotFoundException;
 import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.model.Ticket;
@@ -30,6 +32,9 @@ public class CurrentUserServiceImpl implements CurrentUserService {
         this.ticketRepository = ticketRepository;
         this.teamInviteTokenRepository = teamInviteTokenRepository;
     }
+
+    @Autowired
+    TicketService ticketService;
 
     @Override
     public boolean canAccessUser(Object principal, Long userId) {
@@ -94,6 +99,16 @@ public class CurrentUserServiceImpl implements CurrentUserService {
             // Check for each of the teammembers if the username matches the requester
             return orderService.getOrderById(orderId).getUser().getUsername().equals(user.getUsername()) ||
                     user.getAuthorities().contains(Role.ROLE_ADMIN);
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean isTicketOwner(Object principal, String key){
+        if (principal instanceof UserDetails) {
+            User user = (User) principal;
+            return ticketService.getTicketByKey(key).orElseThrow(() -> new TicketNotFoundException(key)).getOwner().equals(user);
         } else {
             return false;
         }

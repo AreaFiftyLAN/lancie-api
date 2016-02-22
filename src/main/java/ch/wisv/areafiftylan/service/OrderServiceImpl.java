@@ -29,6 +29,7 @@ public class OrderServiceImpl implements OrderService {
     OrderRepository orderRepository;
     ExpiredOrderRepository expiredOrderRepository;
     TicketRepository ticketRepository;
+    TicketService ticketService;
     UserService userService;
     PaymentService paymentService;
 
@@ -37,10 +38,11 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     public OrderServiceImpl(OrderRepository orderRepository, UserService userService, TicketRepository ticketRepository,
-                            PaymentService paymentService, ExpiredOrderRepository expiredOrderRepository) {
+                            TicketService ticketService, PaymentService paymentService, ExpiredOrderRepository expiredOrderRepository) {
         this.orderRepository = orderRepository;
         this.ticketRepository = ticketRepository;
         this.userService = userService;
+        this.ticketService = ticketService;
         this.paymentService = paymentService;
         this.expiredOrderRepository = expiredOrderRepository;
     }
@@ -81,7 +83,7 @@ public class OrderServiceImpl implements OrderService {
 
         // Request a ticket to see if one is available. If a ticket is sold out, the method ends here due to the
         // exception thrown. Else, we'll get a new ticket to add to the order.
-        Ticket ticket = this.requestTicketOfType(ticketDTO.getType(), user, ticketDTO.hasPickupService(),
+        Ticket ticket = ticketService.requestTicketOfType(ticketDTO.getType(), user, ticketDTO.hasPickupService(),
                 ticketDTO.isCHMember());
 
         Order order = new Order(user);
