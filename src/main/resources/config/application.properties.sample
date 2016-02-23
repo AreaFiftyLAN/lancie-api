@@ -40,9 +40,11 @@ server.port=9000
 # Key for sending a paymentrequest to the Mollie api
 #a5l.molliekey=
 # The return url for the frontend that displays the success message
-a5l.paymentReturnUrl=https://areafiftylan.nl/ordersuccess
+a5l.paymentReturnUrl=https://areafiftylan.nl/#!/ordersuccess
 # The return url for the frontend that confirms a registration
-a5l.mail.confirmUrl=https://areafiftylan.nl/confirmRegistration
+a5l.mail.confirmUrl=https://areafiftylan.nl/#!/confirmRegistration
+# The url for the frontend to change the users password
+a5l.user.resetUrl=https://areafiftylan.nl/#!/resetPassword
 # E-mail address used for sending e-mails
 a5l.mail.sender=LANcie <lancie@ch.tudelft.nl>
 a5l.orderLimit=5

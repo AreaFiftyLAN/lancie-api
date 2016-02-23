@@ -36,6 +36,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Value("${a5l.mail.confirmUrl}")
     String requestUrl;
+    @Value("${a5l.user.resetUrl}")
+    String resetUrl;
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository, VerificationTokenRepository verificationTokenRepository,
@@ -193,7 +195,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
         try {
             // TODO: This is a bit weird. This needs to link to a form.
-            String passwordUrl = getAppUrl(request) + "/resetPassword?token=" + token;
+            String passwordUrl = resetUrl + "?token=" + token;
             // Send the token to the user
             mailService.sendPasswordResetMail(user, passwordUrl);
         } catch (MessagingException e) {
