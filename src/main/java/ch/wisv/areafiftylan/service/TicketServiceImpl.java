@@ -3,14 +3,11 @@ package ch.wisv.areafiftylan.service;
 import ch.wisv.areafiftylan.exception.NotGoalUserException;
 import ch.wisv.areafiftylan.exception.TicketNotTransferrableException;
 import ch.wisv.areafiftylan.exception.TicketUnavailableException;
-import ch.wisv.areafiftylan.exception.TokenNotFoundException;
 import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.util.TicketType;
 import ch.wisv.areafiftylan.service.repository.TicketRepository;
-import ch.wisv.areafiftylan.util.ResponseEntityBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -45,7 +42,7 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public void transferTicket(User user, Ticket ticket) {
-        if (!ticket.isLockedForTransfer()){
+        if (!ticket.isTransferrable()){
             throw new TicketNotTransferrableException(ticket.getKey());
         }
 
@@ -53,7 +50,7 @@ public class TicketServiceImpl implements TicketService {
             throw new NotGoalUserException();
         }
 
-        if (ticket.isLockedForTransfer()) {
+        if (ticket.isTransferrable()) {
             finalizeTransfer(ticket);
 
             ticketRepository.save(ticket);
@@ -63,14 +60,14 @@ public class TicketServiceImpl implements TicketService {
     }
 
     public void setUpForTransfer(Ticket t, User u){
-        t.setLockedForTransfer(true);
+        t.setTransferrable(true);
         t.setTransferGoalOwner(u);
     }
 
     public void finalizeTransfer(Ticket t){
-        if(!t.isLockedForTransfer()) throw new TicketNotTransferrableException(t.getKey());
+        if(!t.isTransferrable()) throw new TicketNotTransferrableException(t.getKey());
 
-        t.setLockedForTransfer(false);
+        t.setTransferrable(false);
 
         User newOwner = t.getTransferGoalOwner();
         t.setOwner(newOwner);

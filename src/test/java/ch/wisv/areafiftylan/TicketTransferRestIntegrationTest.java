@@ -83,7 +83,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
         ticket = ticketRepository.findByKey(ticket.getKey()).orElse(null);
         if(ticket == null) Assert.fail("Could not refresh ticket");
 
-        Assert.assertFalse(ticket.isLockedForTransfer());
+        Assert.assertFalse(ticket.isTransferrable());
     }
 
     @Test
@@ -93,7 +93,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
         ticket = ticketRepository.findByKey(ticket.getKey()).orElse(null);
         if(ticket == null) Assert.fail("Could not refresh ticket");
 
-        Assert.assertTrue(ticket.isLockedForTransfer());
+        Assert.assertTrue(ticket.isTransferrable());
     }
 
     @Test
@@ -103,7 +103,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
         ticket = ticketRepository.findByKey(ticket.getKey()).orElse(null);
         if(ticket == null) Assert.fail("Could not refresh ticket");
 
-        Assert.assertFalse(ticket.isLockedForTransfer());
+        Assert.assertFalse(ticket.isTransferrable());
     }
 
     @Test
@@ -120,7 +120,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
         ticket = ticketRepository.findByKey(ticket.getKey()).orElse(null);
         if(ticket == null) Assert.fail("Could not refresh ticket");
 
-        Assert.assertTrue(ticket.isLockedForTransfer());
+        Assert.assertTrue(ticket.isTransferrable());
         Assert.assertTrue(ticket.getOwner().equals(user));
     }
 
@@ -142,7 +142,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
         ticket = ticketRepository.findByKey(ticket.getKey()).orElse(null);
         if(ticket == null) Assert.fail("Could not refresh ticket");
 
-        Assert.assertTrue(ticket.isLockedForTransfer());
+        Assert.assertTrue(ticket.isTransferrable());
         Assert.assertTrue(ticket.getOwner().equals(user));
     }
 
@@ -165,7 +165,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
         ticket = ticketRepository.findByOwnerUsername(ticketReciever.getUsername()).orElse(null);
         if(ticket == null) Assert.fail("Could not refresh ticket");
 
-        Assert.assertFalse(ticket.isLockedForTransfer());
+        Assert.assertFalse(ticket.isTransferrable());
         Assert.assertTrue(ticket.getOwner().equals(ticketReciever));
     }
 

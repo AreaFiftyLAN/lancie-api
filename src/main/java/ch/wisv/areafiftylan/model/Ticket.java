@@ -1,6 +1,5 @@
 package ch.wisv.areafiftylan.model;
 
-import ch.wisv.areafiftylan.exception.TicketNotTransferrableException;
 import ch.wisv.areafiftylan.model.util.TicketOptions;
 import ch.wisv.areafiftylan.model.util.TicketType;
 import ch.wisv.areafiftylan.model.view.View;
@@ -39,7 +38,7 @@ public class Ticket {
     @JsonView(View.OrderOverview.class)
     boolean chMember;
 
-    boolean lockedForTransfer;
+    boolean transferrable;
 
     @JsonView(View.OrderOverview.class)
     boolean valid;
@@ -54,7 +53,7 @@ public class Ticket {
         this.text = type.getText();
         this.pickupService = pickupService;
         this.chMember = chMember;
-        lockedForTransfer = false;
+        transferrable = false;
         this.valid = false;
         key = UUID.randomUUID().toString();
 
@@ -69,12 +68,12 @@ public class Ticket {
         return id;
     }
 
-    public boolean isLockedForTransfer() {
-        return lockedForTransfer;
+    public boolean isTransferrable() {
+        return transferrable;
     }
 
-    public void setLockedForTransfer(boolean lockedForTransfer) {
-        this.lockedForTransfer = lockedForTransfer;
+    public void setTransferrable(boolean transferrable) {
+        this.transferrable = transferrable;
     }
 
     public boolean isPickupService() {
