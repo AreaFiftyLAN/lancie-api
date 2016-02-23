@@ -9,8 +9,7 @@ import ch.wisv.areafiftylan.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.util.SessionData;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Response;
-import junit.framework.Assert;
-import org.apache.http.HttpResponse;
+import org.junit.Assert;
 import org.apache.http.HttpStatus;
 import org.junit.After;
 import org.junit.Before;
@@ -22,7 +21,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.jayway.restassured.RestAssured.given;
-import static com.jayway.restassured.RestAssured.when;
 
 /**
  * Created by beer on 5-1-16.
@@ -42,7 +40,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
     @Before
     public void initTransferTest(){
         ticketReciever = makeTicketReceiver();
-        ticket = makeMockTicket();
+        ticket = makeTicket();
     }
 
     @After
@@ -62,7 +60,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
         return receiver;
     }
 
-    private Ticket makeMockTicket(){
+    private Ticket makeTicket(){
         Ticket t = new Ticket(user, TicketType.EARLY_FULL, false, false);
         t = ticketRepository.saveAndFlush(t);
 
@@ -85,7 +83,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
         ticket = ticketRepository.findByKey(ticket.getKey()).orElse(null);
         if(ticket == null) Assert.fail("Could not refresh ticket");
 
-        Assert.assertTrue(ticket.isLockedForTransfer());
+        Assert.assertFalse(ticket.isLockedForTransfer());
     }
 
     @Test
@@ -105,7 +103,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
         ticket = ticketRepository.findByKey(ticket.getKey()).orElse(null);
         if(ticket == null) Assert.fail("Could not refresh ticket");
 
-        Assert.assertTrue(ticket.isLockedForTransfer());
+        Assert.assertFalse(ticket.isLockedForTransfer());
     }
 
     @Test

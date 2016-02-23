@@ -69,27 +69,11 @@ public class Ticket {
         return id;
     }
 
-    public void setUpForTransfer(User u){
-        this.setLockedForTransfer(true);
-        this.setTransferGoalOwner(u);
-    }
-
-    public void finalizeTransfer(){
-        if(!this.isLockedForTransfer()) throw new TicketNotTransferrableException(this.key);
-
-        this.setLockedForTransfer(false);
-
-        User newOwner = this.getTransferGoalOwner();
-        this.setOwner(newOwner);
-        this.setTransferGoalOwner(null);
-        this.setNewKey();
-    }
-
     public boolean isLockedForTransfer() {
         return lockedForTransfer;
     }
 
-    private void setLockedForTransfer(boolean lockedForTransfer) {
+    public void setLockedForTransfer(boolean lockedForTransfer) {
         this.lockedForTransfer = lockedForTransfer;
     }
 
@@ -110,7 +94,7 @@ public class Ticket {
         return transferGoalOwner;
     }
 
-    private void setTransferGoalOwner(User transferGoalOwner) {
+    public void setTransferGoalOwner(User transferGoalOwner) {
         this.transferGoalOwner = transferGoalOwner;
     }
 
@@ -118,7 +102,7 @@ public class Ticket {
         return owner;
     }
 
-    private void setOwner(User owner) {
+    public void setOwner(User owner) {
         this.owner = owner;
     }
 
@@ -148,7 +132,7 @@ public class Ticket {
         this.valid = valid;
     }
 
-    private void setNewKey(){
+    public void setNewKey(){
         this.key = UUID.randomUUID().toString();
     }
 

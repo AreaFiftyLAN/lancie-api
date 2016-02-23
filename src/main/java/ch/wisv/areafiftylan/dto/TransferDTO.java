@@ -1,27 +1,18 @@
 package ch.wisv.areafiftylan.dto;
 
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.validation.constraints.NotNull;
+
 /**
  * Created by beer on 7-1-16.
  */
 public class TransferDTO {
 
+    @NotNull @Getter @Setter
     String ticketKey;
 
+    @NotNull @Getter @Setter
     String goalUsername;
-
-    public String getTicketKey(){
-        return ticketKey;
-    }
-
-    public void setTicketKey(String ticketKey){
-        this.ticketKey = ticketKey;
-    }
-
-    public String getGoalUsername(){
-        return goalUsername;
-    }
-
-    public void setGoalUsername(String goalUsername){
-        this.goalUsername = goalUsername;
-    }
 }

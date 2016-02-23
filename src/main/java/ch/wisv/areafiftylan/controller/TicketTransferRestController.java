@@ -20,6 +20,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import static ch.wisv.areafiftylan.util.ResponseEntityBuilder.createResponseEntity;
+
 @RestController
 public class TicketTransferRestController {
     private TicketService ticketService;
@@ -44,15 +46,12 @@ public class TicketTransferRestController {
         User u = userService.getUserByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User " + username + " not found."));
         Ticket t = ticketRepository.findByKey(ticketKey).orElseThrow(() -> new TicketNotFoundException(ticketKey));
 
-        if(!t.getOwner().equals(sender)) return ResponseEntityBuilder.createResponseEntity(HttpStatus.FORBIDDEN, "You are not allowed to set this ticket up for transfer");
+        if(!t.getOwner().equals(sender)) return createResponseEntity(HttpStatus.FORBIDDEN, "You are not allowed to set this ticket up for transfer");
 
-        t.setUpForTransfer(u);
+        ticketService.setupForTransfer(t, u);
 
-        ticketRepository.save(t);
-
-        return new ResponseEntity(HttpStatus.OK);
+        return createResponseEntity(HttpStatus.OK, "Ticket succesfully set up for transfer");
     }
-
 
     @RequestMapping(value = "/tickets/transfer/{ticketKey}", method = RequestMethod.PUT)
     public ResponseEntity<?> transferTicket(Authentication auth, @PathVariable String ticketKey){
@@ -61,18 +60,9 @@ public class TicketTransferRestController {
         //Here an TicketNotTransferrable is thrown instead of ticket not found, otherwise there is an information leak since they know when a ticket doesn't exist or is just not transferrable
         Ticket t = ticketRepository.findByKey(ticketKey).orElseThrow(() -> new TicketNotTransferrableException(ticketKey));
 
-        if (!t.isLockedForTransfer()){
-            throw new TicketNotTransferrableException(ticketKey);
-        }
+        ticketService.transferTicket(u, t);
 
-        if (!t.getTransferGoalOwner().equals(u)){
-            throw new NotGoalUserException();
-        }
-
-        ticketService.transferTicket(u, ticketKey);
-
-        return new ResponseEntity(HttpStatus.OK);
+        return createResponseEntity(HttpStatus.OK, "Ticket succesfully transferred");
     }
-
 
 }
