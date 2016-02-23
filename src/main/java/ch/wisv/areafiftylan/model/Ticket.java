@@ -54,7 +54,7 @@ public class Ticket {
         this.text = type.getText();
         this.pickupService = pickupService;
         this.chMember = chMember;
-        lockedForTransfer = true;
+        lockedForTransfer = false;
         this.valid = false;
         key = UUID.randomUUID().toString();
 
