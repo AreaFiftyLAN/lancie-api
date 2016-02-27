@@ -156,6 +156,11 @@ public class OrderRestController {
         return createResponseEntity(HttpStatus.OK, "Status is being updated");
     }
 
+    @RequestMapping(value = "/orders/status", method = RequestMethod.GET, params = "testByMollie")
+    public ResponseEntity<?> handleMollieTestCall(){
+        return createResponseEntity(HttpStatus.OK, "Mollie webhook available");
+    }
+
     /**
      * This method returns an overview of available tickets with some additional information
      * @return A collection of all TicketTypes and their availability
