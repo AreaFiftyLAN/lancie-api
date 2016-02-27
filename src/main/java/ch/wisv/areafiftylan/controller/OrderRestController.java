@@ -156,7 +156,8 @@ public class OrderRestController {
         return createResponseEntity(HttpStatus.OK, "Status is being updated");
     }
 
-    @RequestMapping(value = "/orders/status", method = RequestMethod.GET, params = "testByMollie")
+    @RequestMapping(value = "/orders/status", method = { RequestMethod.GET,
+            RequestMethod.POST }, params = "testByMollie")
     public ResponseEntity<?> handleMollieTestCall(){
         return createResponseEntity(HttpStatus.OK, "Mollie webhook available");
     }

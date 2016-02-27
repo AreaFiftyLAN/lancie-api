@@ -53,6 +53,8 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers("/mail").hasAuthority("ADMIN")
                 .anyRequest().permitAll();
         //                .anyRequest().authenticated();
+
+        http.csrf().ignoringAntMatchers("/orders/status");
         //@formatter:on
 
         // This is the filter that adds the CSRF Token to the header. CSRF is enabled by default in Spring, this just
