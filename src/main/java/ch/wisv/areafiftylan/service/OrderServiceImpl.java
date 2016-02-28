@@ -49,7 +49,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Order getOrderById(Long id) {
-        return orderRepository.findById(id).orElseThrow(() -> new OrderNotFoundException("Order " + id + " not found"));
+        return orderRepository.findOne(id);
     }
 
     @Override
@@ -111,7 +111,7 @@ public class OrderServiceImpl implements OrderService {
 
         // Request a ticket to see if one is available. If a ticket is sold out, the method ends here due to the
         // exception thrown. Else, we'll get a new ticket to add to the order.
-        Ticket ticket = this.requestTicketOfType(ticketDTO.getType(), user, ticketDTO.hasPickupService(),
+        Ticket ticket = ticketService.requestTicketOfType(ticketDTO.getType(), user, ticketDTO.hasPickupService(),
                 ticketDTO.isCHMember());
 
         order.addTicket(ticket);
@@ -140,17 +140,6 @@ public class OrderServiceImpl implements OrderService {
     private static Predicate<Ticket> isEqualToDTO(TicketDTO ticketDTO) {
         return t -> (t.getType() == ticketDTO.getType()) && (t.isChMember() == ticketDTO.isCHMember()) &&
                 (t.hasPickupService() == ticketDTO.hasPickupService());
-    }
-
-    @Override
-    public synchronized Ticket requestTicketOfType(TicketType type, User owner, boolean pickupService,
-                                                   boolean chMember) {
-        if (ticketRepository.countByType(type) >= type.getLimit()) {
-            throw new TicketUnavailableException(type);
-        } else {
-            Ticket ticket = new Ticket(owner, type, pickupService, chMember);
-            return ticketRepository.save(ticket);
-        }
     }
 
     @Override

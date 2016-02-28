@@ -50,21 +50,6 @@ public interface OrderService {
     Order removeTicketFromOrder(Long orderId, TicketDTO ticketDTO);
 
     /**
-     * Check if a ticket is available, and return when it is. When a ticket is unavailable (sold out for instance) a
-     * TicketUnavailableException is thrown
-     *
-     * @param type          Type of the Ticket requested
-     * @param owner         User that wants the Ticket
-     * @param pickupService If the Ticket includes the pickupService
-     *
-     * @return The requested ticket, if available
-     *
-     * @throws TicketUnavailableException If the requested ticket is sold out.
-     */
-    Ticket requestTicketOfType(TicketType type, User owner, boolean pickupService, boolean chMember)
-            throws TicketUnavailableException;
-
-    /**
      * Register the order with the payment provider
      *
      * @param orderId The order to be checked out
