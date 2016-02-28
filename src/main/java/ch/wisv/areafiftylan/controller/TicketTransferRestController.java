@@ -45,6 +45,7 @@ public class TicketTransferRestController {
         return createResponseEntity(HttpStatus.OK, "Ticket successfully set up for transfer");
     }
 
+    @PreAuthorize("isAuthenticated()")
     @RequestMapping(value = "/tickets/transfer/{ticketKey}", method = RequestMethod.PUT)
     public ResponseEntity<?> transferTicket(Authentication auth, @PathVariable String ticketKey){
         User u = (User)auth.getPrincipal();
