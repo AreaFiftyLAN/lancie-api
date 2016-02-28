@@ -42,7 +42,7 @@ public class TicketTransferRestController {
 
         ticketService.setupForTransfer(t, u);
 
-        return createResponseEntity(HttpStatus.OK, "Ticket succesfully set up for transfer");
+        return createResponseEntity(HttpStatus.OK, "Ticket successfully set up for transfer");
     }
 
     @RequestMapping(value = "/tickets/transfer/{ticketKey}", method = RequestMethod.PUT)
@@ -54,7 +54,7 @@ public class TicketTransferRestController {
 
         ticketService.transferTicket(u, t);
 
-        return createResponseEntity(HttpStatus.OK, "Ticket succesfully transferred");
+        return createResponseEntity(HttpStatus.OK, "Ticket successfully transferred");
     }
 
 }
