@@ -180,4 +180,14 @@ public class CurrentUserServiceImpl implements CurrentUserService {
         }
 
     }
+
+    @Override
+    public boolean isTicketReceiver(Object principal, String ticketKey){
+        if (principal instanceof UserDetails) {
+            User user = (User) principal;
+            return ticketService.getTicketByKey(ticketKey).orElseThrow(() -> new TicketNotFoundException(ticketKey)).getTransferGoalOwner().equals(user);
+        } else {
+            return false;
+        }
+    }
 }

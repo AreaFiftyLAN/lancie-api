@@ -27,16 +27,15 @@ public interface TicketService {
 
     /**
      * Sets up the ticket for transfer
-     * @param ticket Ticket to be transferred
-     * @param goalUser The user which should receive the ticket
+     * @param ticketKey The key of the ticket to be transferred
+     * @param goalUserName The name of the user which should receive the ticket
      */
-    void setupForTransfer(Ticket ticket, User goalUser);
+    void setupForTransfer(String ticketKey, String goalUserName);
 
     /**
      * Transfer the ticket to another user
      *
-     * @param user      The user to transfer the ticket to
-     * @param ticket The ticket to be transferred
+     * @param ticketKey The key of the ticket to be transferred
      */
-    void transferTicket(User user, Ticket ticket);
+    void transferTicket(String ticketKey);
 }

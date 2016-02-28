@@ -1,5 +1,7 @@
 package ch.wisv.areafiftylan.service;
 
+import java.util.Objects;
+
 /**
  * The CurrentUserService is for permissions that require some logic to be determined.
  */
@@ -15,6 +17,8 @@ public interface CurrentUserService {
     boolean canAccessOrder(Object principal, Long orderId);
 
     boolean isTicketOwner(Object principal, String key);
+
+    boolean isTicketReceiver(Object principal, String ticketKey);
 
     boolean canReserveSeat(Object principal, Long ticketId);
 

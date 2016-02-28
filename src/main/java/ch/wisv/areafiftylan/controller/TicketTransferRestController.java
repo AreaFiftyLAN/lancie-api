@@ -22,14 +22,10 @@ import static ch.wisv.areafiftylan.util.ResponseEntityBuilder.createResponseEnti
 @RestController
 public class TicketTransferRestController {
     private TicketService ticketService;
-    private UserService userService;
-    private TicketRepository ticketRepository;
 
     @Autowired
-    public TicketTransferRestController(TicketService ticketService, UserService userService, TicketRepository ticketRepository) {
+    public TicketTransferRestController(TicketService ticketService) {
         this.ticketService = ticketService;
-        this.userService = userService;
-        this.ticketRepository = ticketRepository;
     }
 
     @PreAuthorize("@currentUserServiceImpl.isTicketOwner(principal, #ticketKey)")
@@ -37,23 +33,15 @@ public class TicketTransferRestController {
     public ResponseEntity<?> requestTicketTransfer(@PathVariable String ticketKey, @RequestBody @Validated TransferDTO transferDTO){
         String username = transferDTO.getGoalUsername();
 
-        User u = userService.getUserByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User " + username + " not found."));
-        Ticket t = ticketRepository.findByKey(ticketKey).orElseThrow(() -> new TicketNotFoundException(ticketKey));
-
-        ticketService.setupForTransfer(t, u);
+        ticketService.setupForTransfer(ticketKey, username);
 
         return createResponseEntity(HttpStatus.OK, "Ticket successfully set up for transfer");
     }
 
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("@currentUserServiceImpl.isTicketReceiver(principal, #ticketKey)")
     @RequestMapping(value = "/tickets/transfer/{ticketKey}", method = RequestMethod.PUT)
-    public ResponseEntity<?> transferTicket(Authentication auth, @PathVariable String ticketKey){
-        User u = (User)auth.getPrincipal();
-
-        //Here an TicketNotTransferrable is thrown instead of ticket not found, otherwise there is an information leak since they know when a ticket doesn't exist or is just not transferrable
-        Ticket t = ticketRepository.findByKey(ticketKey).orElseThrow(() -> new TicketNotTransferrableException(ticketKey));
-
-        ticketService.transferTicket(u, t);
+    public ResponseEntity<?> transferTicket(@PathVariable String ticketKey){
+        ticketService.transferTicket(ticketKey);
 
         return createResponseEntity(HttpStatus.OK, "Ticket successfully transferred");
     }

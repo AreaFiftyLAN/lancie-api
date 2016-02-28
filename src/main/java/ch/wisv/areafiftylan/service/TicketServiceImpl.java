@@ -1,13 +1,16 @@
 package ch.wisv.areafiftylan.service;
 
 import ch.wisv.areafiftylan.exception.NotGoalUserException;
+import ch.wisv.areafiftylan.exception.TicketNotFoundException;
 import ch.wisv.areafiftylan.exception.TicketNotTransferrableException;
 import ch.wisv.areafiftylan.exception.TicketUnavailableException;
 import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.util.TicketType;
 import ch.wisv.areafiftylan.service.repository.TicketRepository;
+import ch.wisv.areafiftylan.service.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -15,8 +18,14 @@ import java.util.Optional;
 @Service
 public class TicketServiceImpl implements TicketService {
 
-    @Autowired
     private TicketRepository ticketRepository;
+    private UserService userService;
+
+    @Autowired
+    public TicketServiceImpl(TicketRepository ticketRepository, UserService userService) {
+        this.ticketRepository = ticketRepository;
+        this.userService = userService;
+    }
 
     @Override
     public Optional<Ticket> getTicketByKey(String key){
@@ -34,34 +43,27 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public void setupForTransfer(Ticket ticket, User goalUser){
-        setUpForTransfer(ticket, goalUser);
+    public void setupForTransfer(String ticketKey, String goalUserName){
+        User u = userService.getUserByUsername(goalUserName).orElseThrow(() -> new UsernameNotFoundException("User " + goalUserName + " not found."));
+        Ticket t = ticketRepository.findByKey(ticketKey).orElseThrow(() -> new TicketNotFoundException(ticketKey));
 
-        ticketRepository.save(ticket);
+        t.setTransferrable(true);
+        t.setTransferGoalOwner(u);
+
+        ticketRepository.save(t);
     }
 
     @Override
-    public void transferTicket(User user, Ticket ticket) {
-        if (!ticket.isTransferrable()){
-            throw new TicketNotTransferrableException(ticket.getKey());
-        }
-
-        if (!ticket.getTransferGoalOwner().equals(user)){
-            throw new NotGoalUserException();
-        }
+    public void transferTicket(String ticketKey) {
+        Ticket ticket = ticketRepository.findByKey(ticketKey).orElseThrow(() -> new TicketNotFoundException(ticketKey));
 
         if (ticket.isTransferrable()) {
             finalizeTransfer(ticket);
 
             ticketRepository.save(ticket);
         } else {
-            //TODO: Deal with invalid transfer attempt
+            throw new TicketNotTransferrableException(ticket.getKey());
         }
-    }
-
-    public void setUpForTransfer(Ticket t, User u){
-        t.setTransferrable(true);
-        t.setTransferGoalOwner(u);
     }
 
     public void finalizeTransfer(Ticket t){
