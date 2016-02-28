@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 public interface TicketService {
-    Optional<Ticket> getTicketByKey(String key);
+    Ticket getTicketByKey(String key);
 
     /**
      * Check if a ticket is available, and return when it is. When a ticket is unavailable (sold out for instance) a

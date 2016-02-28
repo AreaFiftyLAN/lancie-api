@@ -1,6 +1,5 @@
 package ch.wisv.areafiftylan.service;
 
-import ch.wisv.areafiftylan.exception.NotGoalUserException;
 import ch.wisv.areafiftylan.exception.TicketNotFoundException;
 import ch.wisv.areafiftylan.exception.TicketNotTransferrableException;
 import ch.wisv.areafiftylan.exception.TicketUnavailableException;
@@ -8,12 +7,9 @@ import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.util.TicketType;
 import ch.wisv.areafiftylan.service.repository.TicketRepository;
-import ch.wisv.areafiftylan.service.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 public class TicketServiceImpl implements TicketService {
@@ -28,8 +24,8 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public Optional<Ticket> getTicketByKey(String key){
-        return ticketRepository.findByKey(key);
+    public Ticket getTicketByKey(String key){
+        return ticketRepository.findByKey(key).orElseThrow(() -> new TicketNotFoundException("Ticket with key " + key + " not found."));
     }
 
     @Override

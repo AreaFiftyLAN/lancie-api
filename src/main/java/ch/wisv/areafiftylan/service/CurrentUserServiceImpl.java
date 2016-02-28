@@ -108,7 +108,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     public boolean isTicketOwner(Object principal, String key){
         if (principal instanceof UserDetails) {
             User user = (User) principal;
-            return ticketService.getTicketByKey(key).orElseThrow(() -> new TicketNotFoundException(key)).getOwner().equals(user);
+            return ticketService.getTicketByKey(key).getOwner().equals(user);
         } else {
             return false;
         }
@@ -185,7 +185,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     public boolean isTicketReceiver(Object principal, String ticketKey){
         if (principal instanceof UserDetails) {
             User user = (User) principal;
-            return ticketService.getTicketByKey(ticketKey).orElseThrow(() -> new TicketNotFoundException(ticketKey)).getTransferGoalOwner().equals(user);
+            return ticketService.getTicketByKey(ticketKey).getTransferGoalOwner().equals(user);
         } else {
             return false;
         }
