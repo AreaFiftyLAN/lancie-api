@@ -21,6 +21,15 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Autowired
     private UserDetailsService userDetailsService;
 
+    @Autowired
+    private RESTAuthenticationEntryPoint authenticationEntryPoint;
+
+    @Autowired
+    private RESTAuthenticationSuccessHandler authenticationSuccessHandler;
+
+    @Autowired
+    private RESTAuthenticationFailureHandler authenticationFailureHandler;
+
     /**
      * This method is responsible for the main security configuration. The formlogin() section defines how to login.
      * POST requests should be made to /login with a username and password field. Errors are redirected to /login?error.
@@ -37,25 +46,27 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
      */
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+
+        // We use our own exception handling for unauthorized request. THis simply returns a 401 when a request
+        // should have been authenticated.
+        http.exceptionHandling().authenticationEntryPoint(authenticationEntryPoint);
+
         //@formatter:off
         http.formLogin()
-                .loginPage("/login")
-                .failureUrl("/login?error")
-                .defaultSuccessUrl("/users/current")
-                .usernameParameter("username")
-                .permitAll()
+                .loginProcessingUrl("/login")
+                .successHandler(authenticationSuccessHandler)
+                .failureHandler(authenticationFailureHandler)
             .and()
                 .logout()
                 .logoutUrl("/logout")
-                .logoutSuccessUrl("/")
                 .permitAll()
             .and().authorizeRequests()
                 .antMatchers("/mail").hasAuthority("ADMIN")
                 .anyRequest().permitAll();
-        //                .anyRequest().authenticated();
-
-        http.csrf().ignoringAntMatchers("/orders/status");
         //@formatter:on
+
+        // This is used for the Mollie webhook, so it shouldn't be protected by CSRF
+        http.csrf().ignoringAntMatchers("/orders/status");
 
         // This is the filter that adds the CSRF Token to the header. CSRF is enabled by default in Spring, this just
         // copies the content to the X-CSRF-TOKEN header field.
@@ -67,3 +78,4 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         auth.userDetailsService(userDetailsService).passwordEncoder(new BCryptPasswordEncoder());
     }
 }
+
