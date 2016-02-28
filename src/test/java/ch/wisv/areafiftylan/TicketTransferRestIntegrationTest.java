@@ -138,7 +138,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
         when().
                 put(TRANSFER_ENDPOINT + "/" + ticket.getKey()).
         then().
-                statusCode(HttpStatus.SC_UNAUTHORIZED);
+                statusCode(HttpStatus.SC_FORBIDDEN);
 
         ticket = ticketRepository.findByKey(ticket.getKey()).orElse(null);
         if(ticket == null) Assert.fail("Could not refresh ticket");
