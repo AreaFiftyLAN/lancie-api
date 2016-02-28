@@ -73,12 +73,12 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
         transferRequest.put("ticketKey", ticket.getKey());
         transferRequest.put("goalUsername", ticketReciever.getUsername());
 
-        given()
-        .when()
-                .content(transferRequest).contentType(ContentType.JSON)
-                .post(TRANSFER_ENDPOINT)
-        .then()
-                .statusCode(HttpStatus.SC_FORBIDDEN);
+        given().
+        when().
+                content(transferRequest).contentType(ContentType.JSON).
+                post(TRANSFER_ENDPOINT).
+        then().
+                statusCode(HttpStatus.SC_FORBIDDEN);
 
         ticket = ticketRepository.findByKey(ticket.getKey()).orElse(null);
         if(ticket == null) Assert.fail("Could not refresh ticket");
@@ -113,9 +113,10 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
         logout();
 
         given().
-                when().
+        when().
                 put(TRANSFER_ENDPOINT + "/" + ticket.getKey()).
-                then().statusCode(HttpStatus.SC_FORBIDDEN);
+        then().
+                statusCode(HttpStatus.SC_FORBIDDEN);
 
         ticket = ticketRepository.findByKey(ticket.getKey()).orElse(null);
         if(ticket == null) Assert.fail("Could not refresh ticket");
@@ -135,9 +136,10 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
         given().
                 filter(sessionFilter).
                 header(login.getCsrfHeader()).
-                when().
+        when().
                 put(TRANSFER_ENDPOINT + "/" + ticket.getKey()).
-                then().statusCode(HttpStatus.SC_UNAUTHORIZED);
+        then().
+                statusCode(HttpStatus.SC_UNAUTHORIZED);
 
         ticket = ticketRepository.findByKey(ticket.getKey()).orElse(null);
         if(ticket == null) Assert.fail("Could not refresh ticket");
@@ -158,9 +160,10 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
         given().
                 filter(sessionFilter).
                 header(login.getCsrfHeader()).
-                when().
+        when().
                 put(TRANSFER_ENDPOINT + "/" + ticket.getKey()).
-                then().statusCode(HttpStatus.SC_OK);
+        then().
+                statusCode(HttpStatus.SC_OK);
 
         ticket = ticketRepository.findByOwnerUsername(ticketReciever.getUsername()).orElse(null);
         if(ticket == null) Assert.fail("Could not refresh ticket");
@@ -176,13 +179,15 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
 
         SessionData login = login(uname, pw);
 
-        return given().
+        return
+        given().
                 filter(sessionFilter).
                 header(login.getCsrfHeader()).
-                when().
+        when().
                 content(transferRequest).contentType(ContentType.JSON).
-                post(TRANSFER_ENDPOINT)
-                .then().extract().response();
+                post(TRANSFER_ENDPOINT).
+        then().
+                extract().response();
     }
 
 }
