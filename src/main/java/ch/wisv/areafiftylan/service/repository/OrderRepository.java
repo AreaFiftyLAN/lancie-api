@@ -10,6 +10,9 @@ import java.util.Optional;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
+
+    Optional<Order> findById(Long orderId);
+
     Collection<Order> findAllByCreationDateTimeBefore(LocalDateTime creationDate);
 
     Collection<Order> findAllByUserUsername(String username);
