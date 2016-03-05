@@ -158,10 +158,20 @@ public class OrderRestController {
 
     @RequestMapping(value = "/orders/status", method = { RequestMethod.GET,
             RequestMethod.POST }, params = "testByMollie")
-    public ResponseEntity<?> handleMollieTestCall(){
+    public ResponseEntity<?> handleMollieTestCall() {
         return createResponseEntity(HttpStatus.OK, "Mollie webhook available");
     }
 
+    /**
+     * This call allows for manual updating of an order status. It updates the status directly at the paymentprovider,
+     * so the status is always current
+     *
+     * @param orderId OrderId of the Order to be updated
+     *
+     * @return The Order with an up-to-date status
+     */
+    @PreAuthorize("@currentUserServiceImpl.canAccessOrder(principal, #orderId)")
+    @JsonView(View.OrderOverview.class)
     @RequestMapping(value = "/orders/{orderId}/status", method = RequestMethod.GET)
     public ResponseEntity<?> updateOrderStatusManual(@PathVariable long orderId) {
         Order order = orderService.updateOrderStatus(orderId);
@@ -170,6 +180,7 @@ public class OrderRestController {
 
     /**
      * This method returns an overview of available tickets with some additional information
+     *
      * @return A collection of all TicketTypes and their availability
      */
     @RequestMapping(value = "/tickets/available", method = RequestMethod.GET)
