@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 /**
  * Created by beer on 28-12-15.
- *
+ * <p>
  * Class with all scheduled tasks
  */
 @Component
@@ -34,7 +34,7 @@ public class TaskScheduler {
 
 
     @Scheduled(fixedRate = ORDER_EXPIRY_CHECK_INTERVAL_SECONDS * 1000)
-    public void ExpireOrders(){
+    public void ExpireOrders() {
         LocalDateTime expireBeforeDate = LocalDateTime.now().minusMinutes(ORDER_STAY_ALIVE_MINUTES);
 
         Collection<Order> allOrdersBeforeDate = orderRepository.findAllByCreationDateTimeBefore(expireBeforeDate);
@@ -45,6 +45,7 @@ public class TaskScheduler {
     }
 
     public static Predicate<Order> isExpired() {
-        return o -> o.getStatus().equals(OrderStatus.CREATING) || o.getStatus().equals(OrderStatus.EXPIRED);
+        return o -> o.getStatus().equals(OrderStatus.CREATING) || o.getStatus().equals(OrderStatus.EXPIRED) ||
+                o.getStatus().equals(OrderStatus.CANCELLED);
     }
 }
