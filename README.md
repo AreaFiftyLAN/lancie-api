@@ -1,33 +1,21 @@
-# landev
-Spring based implementation of the LANcie API
+# Area FiftyLAN API
+This is a Spring based implementation of the LANcie API, used for [Area FiftyLAN](https://areafiftylan.nl/). This API is responsible for everything persistent, from user registration to ordering tickets. 
 
 ## Getting Started
-Most of the developers (if not all) use IntelliJ, the Java IDE from Jetbrains. It's highly recommended, even when you think Eclipse is the best thing out there. Get it here: https://www.jetbrains.com/idea/. If you already have IntelliJ installed, make sure you have the latest version (14.1.4 at the time of writing).
+Most of the developers (if not all) use IntelliJ, the Java IDE from Jetbrains. It's highly recommended, even when you think Eclipse is the best thing out there. Get it here: https://www.jetbrains.com/idea/. If you already have IntelliJ installed, make sure you have the latest version (15.0 at the time of writing). We assume you have a working version (including it running on Java 8) before you read on. 
 
-For the Spring back-end part of the application, that's all you need. For the Polymer front-end, you'll need some more. From the Polymer Starter Kit page:
-
-#### Install dependencies (Polymer)
-
-With Node.js installed, run the following one liner from the root of your Polymer Starter Kit download (which is the /static directory in this repository:
-
-```sh
-npm install -g gulp bower && npm install && bower install
-```
+There's one plugin you need, which is the Lombok plugin. This can be found in IntelliJ's repositories and should be installed before attempting to run the applcation. Next to that, there's one checkbox you need to enable in IntelliJ's settings. Go to `Settings->Build,Execution,Deployment->Compiler->Annotation Processors` and enable the `Enable Annotation Processors` checkbox. 
 
 ### Running the application
 IntelliJ has some neat functionality to make running the application very easy. 
 
-#### Spring Boot (Back-end API)
+#### Set the properties
+The API has a number of properties that need to be set before the applicaiton can run. There's a template in `resources\config\application.properties.sample`. Copy the contents from this file into a `application.properties`. This file is gitignored because it contains private information such as possible database credetials and payment keys. In the near future, this process will be easier. The sample proprties assume a working PostgreSQL installation running in the background. 
+
+#### Spring Boot
 From the Run/Debug Configuration window, add a new Spring Boot configuration. It needs only two settings to run. The *Main class* should be set to **ch.wisv.areafiftylan.Application** and the *Use classpath of mod...* should be set to your project module, which is the only selectable option in nearly all cases. 
 
-That's it! Select your new Spring Boot configuration and click Run!. This should launch the application on localhost:8080
-
-#### Front-end Polymer
-In the /static/ folder, you will find all the files from the Polymer Starter Kit, including the Gulpfile.js. Install the plugin to deal with this in IntelliJ, right click the Gulpfile.js and select "Show Gulp Tasks" to make sure IntelliJ recognizes everything correctly. 
-
-In the Run/Debug Configuration screen, create a new Gulp task. For development, it's useful to create a Run Configuration for the 'serve' task and the 'default' task. 
-
-You can run both configurations simultaneously, so you can test the back-end connection from the Polymer fron-end.
+That's it! Select your new Spring Boot configuration and click Run!. This should launch the application on localhost:9000
 
 ## Contributing
 If you want to contribute, awesome! First, pick an issue and self-assign it. Make your changes in a new branch with 
