@@ -38,4 +38,11 @@ public interface TicketService {
      * @param ticketKey The key of the ticket to be transferred
      */
     void transferTicket(String ticketKey);
+
+    /**
+     * Cancel a ticket transfer
+     *
+     * @param ticketKey The key of the ticket that is in transfer and should be cancelled
+     */
+    void cancelTicketTransfer(String ticketKey);
 }

@@ -60,6 +60,20 @@ public class TicketServiceImpl implements TicketService {
         }
     }
 
+    @Override
+    public void cancelTicketTransfer(String ticketKey){
+        Ticket ticket = ticketRepository.findByKey(ticketKey).orElseThrow(() -> new TicketNotFoundException(ticketKey));
+
+        if (ticket.isTransferrable()) {
+            ticket.setTransferGoalOwner(null);
+            ticket.setTransferrable(false);
+
+            ticketRepository.save(ticket);
+        } else {
+            throw new TicketNotTransferrableException(ticket.getKey());
+        }
+    }
+
     private void finalizeTransfer(Ticket t){
         t.setTransferrable(false);
 

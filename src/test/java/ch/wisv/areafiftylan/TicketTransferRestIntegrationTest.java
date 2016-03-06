@@ -15,6 +15,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.HashMap;
@@ -28,17 +29,16 @@ import static com.jayway.restassured.RestAssured.given;
 public class TicketTransferRestIntegrationTest extends IntegrationTest{
     private final String TRANSFER_ENDPOINT = "/tickets/transfer";
 
+    private User outsider;
     private User ticketReciever;
     private Ticket ticket;
 
     @Autowired
     private TicketRepository ticketRepository;
 
-    @Autowired
-    private OrderService orderService;
-
     @Before
     public void initTransferTest(){
+        outsider = makeOutsider();
         ticketReciever = makeTicketReceiver();
         ticket = makeTicket();
     }
@@ -58,6 +58,17 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
         userRepository.saveAndFlush(receiver);
 
         return receiver;
+    }
+
+    private User makeOutsider(){
+        User outsider = new User("outsider", new BCryptPasswordEncoder().encode("password"), "outsider@gmail.com");
+        outsider.getProfile()
+                .setAllFields("Nottin", "Todoeo Witit", "Lookinin", Gender.FEMALE, "LoserStreet 1", "2826GJ", "China",
+                        "0906-3928", null);
+
+        userRepository.saveAndFlush(outsider);
+
+        return outsider;
     }
 
     private Ticket makeTicket(){
@@ -109,8 +120,6 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
     public void testDoTransfer_Anon(){
         addTicketTransfer(user.getUsername(), "password");
 
-        logout();
-
         given().
         when().
                 put(TRANSFER_ENDPOINT + "/" + ticket.getKey()).
@@ -127,8 +136,6 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
     @Test
     public void testDoTransfer_Owner(){
         addTicketTransfer(user.getUsername(), "password");
-
-        logout();
 
         SessionData login = login(user.getUsername(), "password");
 
@@ -152,8 +159,6 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
     public void testDoTransfer_Receiver(){
         addTicketTransfer(user.getUsername(), "password");
 
-        logout();
-
         SessionData login = login(ticketReciever.getUsername(), "password");
 
         given().
@@ -171,14 +176,175 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
         Assert.assertTrue(ticket.getOwner().equals(ticketReciever));
     }
 
+    @Test
+    public void testCancelTransferNotTransferrable_Anon(){
+        given().
+        when().
+                delete(TRANSFER_ENDPOINT + "/" + ticket.getKey()).
+        then().
+                statusCode(HttpStatus.SC_FORBIDDEN);
+
+        ticket = ticketRepository.findByOwnerUsername(user.getUsername()).orElse(null);
+        if(ticket == null) Assert.fail("Could not refresh ticket");
+
+        Assert.assertTrue(!ticket.isTransferrable());
+        Assert.assertTrue(ticket.getOwner().equals(user));
+        Assert.assertTrue(ticket.getTransferGoalOwner() == null);
+    }
+
+    @Test
+    public void testCancelTransfer_Anon(){
+        addTicketTransfer(user.getUsername(), "password");
+
+        given().
+        when().
+                delete(TRANSFER_ENDPOINT + "/" + ticket.getKey()).
+        then().
+                statusCode(HttpStatus.SC_FORBIDDEN);
+
+        ticket = ticketRepository.findByOwnerUsername(user.getUsername()).orElse(null);
+        if(ticket == null) Assert.fail("Could not refresh ticket");
+
+        Assert.assertTrue(ticket.isTransferrable());
+        Assert.assertTrue(ticket.getOwner().equals(user));
+        Assert.assertTrue(ticket.getTransferGoalOwner().equals(ticketReciever));
+    }
+
+    @Test
+    public void testCancelTransferNotTransferrable_Owner(){
+        SessionData login = login(user.getUsername(), "password");
+
+        given().
+                filter(sessionFilter).
+                header(login.getCsrfHeader()).
+        when().
+                delete(TRANSFER_ENDPOINT + "/" + ticket.getKey()).
+        then().
+                statusCode(HttpStatus.SC_BAD_REQUEST);
+
+        ticket = ticketRepository.findByOwnerUsername(user.getUsername()).orElse(null);
+        if(ticket == null) Assert.fail("Could not refresh ticket");
+
+        Assert.assertTrue(!ticket.isTransferrable());
+        Assert.assertTrue(ticket.getOwner().equals(user));
+        Assert.assertTrue(ticket.getTransferGoalOwner() == null);
+    }
+
+    @Test
+    public void testCancelTransfer_Owner(){
+        addTicketTransfer(user.getUsername(), "password");
+
+        SessionData login = login(user.getUsername(), "password");
+
+        given().
+                filter(sessionFilter).
+                header(login.getCsrfHeader()).
+        when().
+                delete(TRANSFER_ENDPOINT + "/" + ticket.getKey()).
+        then().
+                statusCode(HttpStatus.SC_OK);
+
+        ticket = ticketRepository.findByOwnerUsername(user.getUsername()).orElse(null);
+        if(ticket == null) Assert.fail("Could not refresh ticket");
+
+        Assert.assertTrue(!ticket.isTransferrable());
+        Assert.assertTrue(ticket.getOwner().equals(user));
+        Assert.assertTrue(ticket.getTransferGoalOwner() == null);
+
+    }
+
+    @Test
+    public void testCancelTransferNotTransferrable_Receiver(){
+        SessionData login = login(ticketReciever.getUsername(), "password");
+
+        given().
+                filter(sessionFilter).
+                header(login.getCsrfHeader()).
+        when().
+                delete(TRANSFER_ENDPOINT + "/" + ticket.getKey()).
+        then().
+                statusCode(HttpStatus.SC_FORBIDDEN);
+
+        ticket = ticketRepository.findByOwnerUsername(user.getUsername()).orElse(null);
+        if(ticket == null) Assert.fail("Could not refresh ticket");
+
+        Assert.assertTrue(!ticket.isTransferrable());
+        Assert.assertTrue(ticket.getOwner().equals(user));
+        Assert.assertTrue(ticket.getTransferGoalOwner() == null);
+    }
+
+    @Test
+    public void testCancelTransfer_Receiver(){
+        addTicketTransfer(user.getUsername(), "password");
+
+        SessionData login = login(ticketReciever.getUsername(), "password");
+
+        given().
+                filter(sessionFilter).
+                header(login.getCsrfHeader()).
+        when().
+                delete(TRANSFER_ENDPOINT + "/" + ticket.getKey()).
+        then().
+                statusCode(HttpStatus.SC_FORBIDDEN);
+
+        ticket = ticketRepository.findByOwnerUsername(user.getUsername()).orElse(null);
+        if(ticket == null) Assert.fail("Could not refresh ticket");
+
+        Assert.assertTrue(ticket.isTransferrable());
+        Assert.assertTrue(ticket.getOwner().equals(user));
+        Assert.assertTrue(ticket.getTransferGoalOwner().equals(ticketReciever));
+    }
+
+    @Test
+    public void testCancelTransferNotTransferrable_OutsideUser(){
+        SessionData login = login(outsider.getUsername(), "password");
+
+        given().
+                filter(sessionFilter).
+                header(login.getCsrfHeader()).
+        when().
+                delete(TRANSFER_ENDPOINT + "/" + ticket.getKey()).
+        then().
+                statusCode(HttpStatus.SC_FORBIDDEN);
+
+        ticket = ticketRepository.findByOwnerUsername(user.getUsername()).orElse(null);
+        if(ticket == null) Assert.fail("Could not refresh ticket");
+
+        Assert.assertTrue(!ticket.isTransferrable());
+        Assert.assertTrue(ticket.getOwner().equals(user));
+        Assert.assertTrue(ticket.getTransferGoalOwner() == null);
+    }
+
+    @Test
+    public void testCancelTransfer_OutsideUser(){
+        addTicketTransfer(user.getUsername(), "password");
+
+        SessionData login = login(outsider.getUsername(), "password");
+
+        given().
+                filter(sessionFilter).
+                header(login.getCsrfHeader()).
+                when().
+                delete(TRANSFER_ENDPOINT + "/" + ticket.getKey()).
+                then().
+                statusCode(HttpStatus.SC_FORBIDDEN);
+
+        ticket = ticketRepository.findByOwnerUsername(user.getUsername()).orElse(null);
+        if(ticket == null) Assert.fail("Could not refresh ticket");
+
+        Assert.assertTrue(ticket.isTransferrable());
+        Assert.assertTrue(ticket.getOwner().equals(user));
+        Assert.assertTrue(ticket.getTransferGoalOwner().equals(ticketReciever));
+
+    }
+
     private Response addTicketTransfer(String uname, String pw){
         Map<String, String> transferRequest = new HashMap<>();
         transferRequest.put("goalUsername", ticketReciever.getUsername());
 
         SessionData login = login(uname, pw);
 
-        return
-        given().
+        Response r = given().
                 filter(sessionFilter).
                 header(login.getCsrfHeader()).
         when().
@@ -186,6 +352,10 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
                 post(TRANSFER_ENDPOINT + "/" + ticket.getKey()).
         then().
                 extract().response();
+
+        logout();
+
+        return r;
     }
 
 }

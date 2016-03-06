@@ -46,4 +46,11 @@ public class TicketTransferRestController {
         return createResponseEntity(HttpStatus.OK, "Ticket successfully transferred");
     }
 
+    @PreAuthorize("@currentUserServiceImpl.isTicketOwner(principal, #ticketKey)")
+    @RequestMapping(value = "/tickets/transfer/{ticketKey}", method = RequestMethod.DELETE)
+    public ResponseEntity<?> cancelTicketTransfer(@PathVariable String ticketKey){
+        ticketService.cancelTicketTransfer(ticketKey);
+
+        return createResponseEntity(HttpStatus.OK, "Ticket transfer successfully cancelled");
+    }
 }
