@@ -4,7 +4,6 @@ import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.util.Gender;
 import ch.wisv.areafiftylan.model.util.TicketType;
-import ch.wisv.areafiftylan.service.OrderService;
 import ch.wisv.areafiftylan.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.util.SessionData;
 import com.jayway.restassured.http.ContentType;
@@ -15,7 +14,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.HashMap;
@@ -30,7 +28,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
     private final String TRANSFER_ENDPOINT = "/tickets/transfer";
 
     private User outsider;
-    private User ticketReciever;
+    private User ticketReceiver;
     private Ticket ticket;
 
     @Autowired
@@ -39,14 +37,14 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
     @Before
     public void initTransferTest(){
         outsider = makeOutsider();
-        ticketReciever = makeTicketReceiver();
+        ticketReceiver = makeTicketReceiver();
         ticket = makeTicket();
     }
 
     @After
     public void cleanTransferTest(){
         ticketRepository.deleteAll();
-        userRepository.delete(ticketReciever);
+        userRepository.delete(ticketReceiver);
     }
 
     private User makeTicketReceiver(){
@@ -81,7 +79,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
     @Test
     public void testAddTransfer_Anon(){
         Map<String, String> transferRequest = new HashMap<>();
-        transferRequest.put("goalUsername", ticketReciever.getUsername());
+        transferRequest.put("goalUsername", ticketReceiver.getUsername());
 
         given().
         when().
@@ -105,12 +103,12 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
 
         Assert.assertTrue(ticket.isTransferrable());
         Assert.assertTrue(ticket.getOwner().equals(user));
-        Assert.assertTrue(ticket.getTransferGoalOwner().equals(ticketReciever));
+        Assert.assertTrue(ticket.getTransferGoalOwner().equals(ticketReceiver));
     }
 
     @Test
     public void testAddTransfer_Receiver(){
-        addTicketTransfer(ticketReciever.getUsername(), "password").then().statusCode(HttpStatus.SC_FORBIDDEN);
+        addTicketTransfer(ticketReceiver.getUsername(), "password").then().statusCode(HttpStatus.SC_FORBIDDEN);
 
         ticket = ticketRepository.findByKey(ticket.getKey()).orElse(null);
 
@@ -144,7 +142,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
 
         Assert.assertTrue(ticket.isTransferrable());
         Assert.assertTrue(ticket.getOwner().equals(user));
-        Assert.assertTrue(ticket.getTransferGoalOwner().equals(ticketReciever));
+        Assert.assertTrue(ticket.getTransferGoalOwner().equals(ticketReceiver));
     }
 
     @Test
@@ -165,7 +163,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
 
         Assert.assertTrue(ticket.isTransferrable());
         Assert.assertTrue(ticket.getOwner().equals(user));
-        Assert.assertTrue(ticket.getTransferGoalOwner().equals(ticketReciever));
+        Assert.assertTrue(ticket.getTransferGoalOwner().equals(ticketReceiver));
     }
 
 
@@ -173,7 +171,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
     public void testDoTransfer_Receiver(){
         addTicketTransfer(user.getUsername(), "password");
 
-        SessionData login = login(ticketReciever.getUsername(), "password");
+        SessionData login = login(ticketReceiver.getUsername(), "password");
 
         given().
                 filter(sessionFilter).
@@ -183,10 +181,10 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
         then().
                 statusCode(HttpStatus.SC_OK);
 
-        ticket = ticketRepository.findByOwnerUsername(ticketReciever.getUsername()).orElse(null);
+        ticket = ticketRepository.findByOwnerUsername(ticketReceiver.getUsername()).orElse(null);
 
         Assert.assertTrue(!ticket.isTransferrable());
-        Assert.assertTrue(ticket.getOwner().equals(ticketReciever));
+        Assert.assertTrue(ticket.getOwner().equals(ticketReceiver));
         Assert.assertTrue(ticket.getTransferGoalOwner() == null);
     }
 
@@ -208,7 +206,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
 
         Assert.assertTrue(ticket.isTransferrable());
         Assert.assertTrue(ticket.getOwner().equals(user));
-        Assert.assertTrue(ticket.getTransferGoalOwner().equals(ticketReciever));
+        Assert.assertTrue(ticket.getTransferGoalOwner().equals(ticketReceiver));
     }
 
     @Test
@@ -240,7 +238,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
 
         Assert.assertTrue(ticket.isTransferrable());
         Assert.assertTrue(ticket.getOwner().equals(user));
-        Assert.assertTrue(ticket.getTransferGoalOwner().equals(ticketReciever));
+        Assert.assertTrue(ticket.getTransferGoalOwner().equals(ticketReceiver));
     }
 
     @Test
@@ -286,7 +284,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
 
     @Test
     public void testCancelTransferNotTransferrable_Receiver(){
-        SessionData login = login(ticketReciever.getUsername(), "password");
+        SessionData login = login(ticketReceiver.getUsername(), "password");
 
         given().
                 filter(sessionFilter).
@@ -307,7 +305,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
     public void testCancelTransfer_Receiver(){
         addTicketTransfer(user.getUsername(), "password");
 
-        SessionData login = login(ticketReciever.getUsername(), "password");
+        SessionData login = login(ticketReceiver.getUsername(), "password");
 
         given().
                 filter(sessionFilter).
@@ -321,7 +319,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
 
         Assert.assertTrue(ticket.isTransferrable());
         Assert.assertTrue(ticket.getOwner().equals(user));
-        Assert.assertTrue(ticket.getTransferGoalOwner().equals(ticketReciever));
+        Assert.assertTrue(ticket.getTransferGoalOwner().equals(ticketReceiver));
     }
 
     @Test
@@ -361,13 +359,13 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
 
         Assert.assertTrue(ticket.isTransferrable());
         Assert.assertTrue(ticket.getOwner().equals(user));
-        Assert.assertTrue(ticket.getTransferGoalOwner().equals(ticketReciever));
+        Assert.assertTrue(ticket.getTransferGoalOwner().equals(ticketReceiver));
 
     }
 
     private Response addTicketTransfer(String uname, String pw){
         Map<String, String> transferRequest = new HashMap<>();
-        transferRequest.put("goalUsername", ticketReciever.getUsername());
+        transferRequest.put("goalUsername", ticketReceiver.getUsername());
 
         SessionData login = login(uname, pw);
 
