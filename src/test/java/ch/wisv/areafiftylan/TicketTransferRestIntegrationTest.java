@@ -92,7 +92,9 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
 
         ticket = ticketRepository.findByKey(ticket.getKey()).orElse(null);
 
-        Assert.assertFalse(ticket.isTransferrable());
+        Assert.assertTrue(!ticket.isTransferrable());
+        Assert.assertTrue(ticket.getOwner().equals(user));
+        Assert.assertTrue(ticket.getTransferGoalOwner() == null);
     }
 
     @Test
@@ -102,6 +104,8 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
         ticket = ticketRepository.findByKey(ticket.getKey()).orElse(null);
 
         Assert.assertTrue(ticket.isTransferrable());
+        Assert.assertTrue(ticket.getOwner().equals(user));
+        Assert.assertTrue(ticket.getTransferGoalOwner().equals(ticketReciever));
     }
 
     @Test
@@ -110,7 +114,9 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
 
         ticket = ticketRepository.findByKey(ticket.getKey()).orElse(null);
 
-        Assert.assertFalse(ticket.isTransferrable());
+        Assert.assertTrue(!ticket.isTransferrable());
+        Assert.assertTrue(ticket.getOwner().equals(user));
+        Assert.assertTrue(ticket.getTransferGoalOwner() == null);
     }
 
     @Test
@@ -119,7 +125,9 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
 
         ticket = ticketRepository.findByKey(ticket.getKey()).orElse(null);
 
-        Assert.assertFalse(ticket.isTransferrable());
+        Assert.assertTrue(!ticket.isTransferrable());
+        Assert.assertTrue(ticket.getOwner().equals(user));
+        Assert.assertTrue(ticket.getTransferGoalOwner() == null);
     }
 
     @Test
@@ -136,6 +144,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
 
         Assert.assertTrue(ticket.isTransferrable());
         Assert.assertTrue(ticket.getOwner().equals(user));
+        Assert.assertTrue(ticket.getTransferGoalOwner().equals(ticketReciever));
     }
 
     @Test
@@ -156,6 +165,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
 
         Assert.assertTrue(ticket.isTransferrable());
         Assert.assertTrue(ticket.getOwner().equals(user));
+        Assert.assertTrue(ticket.getTransferGoalOwner().equals(ticketReciever));
     }
 
 
@@ -175,8 +185,9 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
 
         ticket = ticketRepository.findByOwnerUsername(ticketReciever.getUsername()).orElse(null);
 
-        Assert.assertFalse(ticket.isTransferrable());
+        Assert.assertTrue(!ticket.isTransferrable());
         Assert.assertTrue(ticket.getOwner().equals(ticketReciever));
+        Assert.assertTrue(ticket.getTransferGoalOwner() == null);
     }
 
     @Test
@@ -193,10 +204,11 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
         then().
                 statusCode(HttpStatus.SC_FORBIDDEN);
 
-        ticket = ticketRepository.findByOwnerUsername(user.getUsername()).orElse(null);
+        ticket = ticketRepository.findByKey(ticket.getKey()).orElse(null);
 
         Assert.assertTrue(ticket.isTransferrable());
         Assert.assertTrue(ticket.getOwner().equals(user));
+        Assert.assertTrue(ticket.getTransferGoalOwner().equals(ticketReciever));
     }
 
     @Test
@@ -207,7 +219,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
         then().
                 statusCode(HttpStatus.SC_FORBIDDEN);
 
-        ticket = ticketRepository.findByOwnerUsername(user.getUsername()).orElse(null);
+        ticket = ticketRepository.findByKey(ticket.getKey()).orElse(null);
 
         Assert.assertTrue(!ticket.isTransferrable());
         Assert.assertTrue(ticket.getOwner().equals(user));
@@ -224,7 +236,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
         then().
                 statusCode(HttpStatus.SC_FORBIDDEN);
 
-        ticket = ticketRepository.findByOwnerUsername(user.getUsername()).orElse(null);
+        ticket = ticketRepository.findByKey(ticket.getKey()).orElse(null);
 
         Assert.assertTrue(ticket.isTransferrable());
         Assert.assertTrue(ticket.getOwner().equals(user));
@@ -243,7 +255,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
         then().
                 statusCode(HttpStatus.SC_BAD_REQUEST);
 
-        ticket = ticketRepository.findByOwnerUsername(user.getUsername()).orElse(null);
+        ticket = ticketRepository.findByKey(ticket.getKey()).orElse(null);
 
         Assert.assertTrue(!ticket.isTransferrable());
         Assert.assertTrue(ticket.getOwner().equals(user));
@@ -264,7 +276,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
         then().
                 statusCode(HttpStatus.SC_OK);
 
-        ticket = ticketRepository.findByOwnerUsername(user.getUsername()).orElse(null);
+        ticket = ticketRepository.findByKey(ticket.getKey()).orElse(null);
 
         Assert.assertTrue(!ticket.isTransferrable());
         Assert.assertTrue(ticket.getOwner().equals(user));
@@ -284,7 +296,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
         then().
                 statusCode(HttpStatus.SC_FORBIDDEN);
 
-        ticket = ticketRepository.findByOwnerUsername(user.getUsername()).orElse(null);
+        ticket = ticketRepository.findByKey(ticket.getKey()).orElse(null);
 
         Assert.assertTrue(!ticket.isTransferrable());
         Assert.assertTrue(ticket.getOwner().equals(user));
@@ -305,7 +317,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
         then().
                 statusCode(HttpStatus.SC_FORBIDDEN);
 
-        ticket = ticketRepository.findByOwnerUsername(user.getUsername()).orElse(null);
+        ticket = ticketRepository.findByKey(ticket.getKey()).orElse(null);
 
         Assert.assertTrue(ticket.isTransferrable());
         Assert.assertTrue(ticket.getOwner().equals(user));
@@ -324,7 +336,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
         then().
                 statusCode(HttpStatus.SC_FORBIDDEN);
 
-        ticket = ticketRepository.findByOwnerUsername(user.getUsername()).orElse(null);
+        ticket = ticketRepository.findByKey(ticket.getKey()).orElse(null);
 
         Assert.assertTrue(!ticket.isTransferrable());
         Assert.assertTrue(ticket.getOwner().equals(user));
@@ -340,11 +352,12 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
         given().
                 filter(sessionFilter).
                 header(login.getCsrfHeader()).
-                when().
+        when().
                 delete(TRANSFER_ENDPOINT + "/" + ticket.getKey()).
-                then().
+        then().
                 statusCode(HttpStatus.SC_FORBIDDEN);
 
+        ticket = ticketRepository.findByKey(ticket.getKey()).orElse(null);
 
         Assert.assertTrue(ticket.isTransferrable());
         Assert.assertTrue(ticket.getOwner().equals(user));
