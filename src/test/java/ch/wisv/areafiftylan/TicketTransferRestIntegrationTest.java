@@ -117,6 +117,16 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
     }
 
     @Test
+    public void testAddTransfer_Outsider(){
+        addTicketTransfer(outsider.getUsername(), "password").then().statusCode(HttpStatus.SC_FORBIDDEN);
+
+        ticket = ticketRepository.findByKey(ticket.getKey()).orElse(null);
+        if(ticket == null) Assert.fail("Could not refresh ticket");
+
+        Assert.assertFalse(ticket.isTransferrable());
+    }
+
+    @Test
     public void testDoTransfer_Anon(){
         addTicketTransfer(user.getUsername(), "password");
 
@@ -174,6 +184,27 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
 
         Assert.assertFalse(ticket.isTransferrable());
         Assert.assertTrue(ticket.getOwner().equals(ticketReciever));
+    }
+
+    @Test
+    public void testDoTransfer_Outsider(){
+        addTicketTransfer(user.getUsername(), "password");
+
+        SessionData login = login(outsider.getUsername(), "password");
+
+        given().
+                filter(sessionFilter).
+                header(login.getCsrfHeader()).
+        when().
+                put(TRANSFER_ENDPOINT + "/" + ticket.getKey()).
+        then().
+                statusCode(HttpStatus.SC_FORBIDDEN);
+
+        ticket = ticketRepository.findByOwnerUsername(user.getUsername()).orElse(null);
+        if(ticket == null) Assert.fail("Could not refresh ticket");
+
+        Assert.assertTrue(ticket.isTransferrable());
+        Assert.assertTrue(ticket.getOwner().equals(user));
     }
 
     @Test
