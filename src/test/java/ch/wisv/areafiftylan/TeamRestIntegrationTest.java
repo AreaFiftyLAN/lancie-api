@@ -32,6 +32,7 @@ import static org.hamcrest.core.IsCollectionContaining.hasItem;
 public class TeamRestIntegrationTest extends IntegrationTest {
 
     protected User teamCaptain;
+    protected final String teamCaptainCleartextPassword = "password";
     private Ticket captainTicket;
 
     @Autowired
@@ -47,7 +48,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
     @Before
     public void initTeamTest() {
-        teamCaptain = new User("captain", new BCryptPasswordEncoder().encode("password"), "captain@mail.com");
+        teamCaptain = new User("captain", new BCryptPasswordEncoder().encode(teamCaptainCleartextPassword), "captain@mail.com");
         teamCaptain.getProfile()
                 .setAllFields("Captain", "Hook", "PeterPanKiller", Gender.MALE, "High Road 3", "2826ZZ", "Neverland",
                         "0906-0777", null);
@@ -323,7 +324,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     public void getTeamCurrentUser() {
         createTeamWithCaptain();
 
-        SessionData login = login("captain");
+        SessionData login = login(teamCaptain.getUsername(), teamCaptainCleartextPassword);
 
         //@formatter:off
         given().

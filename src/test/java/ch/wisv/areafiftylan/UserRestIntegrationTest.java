@@ -33,11 +33,14 @@ public class UserRestIntegrationTest extends IntegrationTest {
     @Autowired
     VerificationTokenRepository verificationTokenRepository;
 
+    protected User testuser;
+    protected final String testuserCleartextPassword = "password";
     @Autowired
     TaskScheduler taskScheduler;
 
     @After
     public void cleanupUserTest() {
+        testuser = null;
         verificationTokenRepository.deleteAll();
     }
 
@@ -58,7 +61,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
     private String createEnabledTestUser() {
         Map<String, String> userDTO = new HashMap<>();
         userDTO.put("username", "testuser");
-        userDTO.put("password", "password");
+        userDTO.put("password", testuserCleartextPassword);
         userDTO.put("email", "testuser@mail.com");
 
         //@formatter:off
@@ -72,7 +75,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
             extract().response();
         //@formatter:on
 
-        User testuser = userRepository.findOneByUsername("testuser").get();
+        testuser = userRepository.findOneByUsername("testuser").get();
         testuser.setEnabled(true);
         userRepository.saveAndFlush(testuser);
 
@@ -128,7 +131,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testGetAllUsersAsUser() {
-        SessionData login = login("user", "password");
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
         given().
@@ -175,7 +178,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testGetCurrentUserAsUser() {
-        SessionData login = login("user", "password");
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
         given().
@@ -221,7 +224,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
     public void testGetOtherUserAsUser() {
         long id = user.getId();
         id++;
-        SessionData login = login("user", "password");
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
         given().
@@ -251,7 +254,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testGetOwnUserId() {
-        SessionData login = login("user", "password");
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
         given().
@@ -271,7 +274,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
     public void createUser() {
         Map<String, String> userDTO = new HashMap<>();
         userDTO.put("username", "testuser");
-        userDTO.put("password", "password");
+        userDTO.put("password", testuserCleartextPassword);
         userDTO.put("email", "test@mail.com");
 
         //@formatter:off
@@ -330,7 +333,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
     public void createUserMissingEmailField() {
         Map<String, String> userDTO = new HashMap<>();
         userDTO.put("username", "testuser");
-        userDTO.put("password", "password");
+        userDTO.put("password", testuserCleartextPassword);
 
         //@formatter:off
         given().
@@ -348,7 +351,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
     public void createUserEmptyEmailField() {
         Map<String, String> userDTO = new HashMap<>();
         userDTO.put("username", "testuser");
-        userDTO.put("password", "password");
+        userDTO.put("password", testuserCleartextPassword);
         userDTO.put("email", "");
 
         //@formatter:off
@@ -404,7 +407,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
     public void createUserTakenUsername() {
         Map<String, String> userDTO = new HashMap<>();
         userDTO.put("username", "user");
-        userDTO.put("password", "password");
+        userDTO.put("password", userCleartextPassword);
         userDTO.put("email", "test@mail.com");
 
         //@formatter:off
@@ -423,7 +426,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
     public void createUserTakenEmail() {
         Map<String, String> userDTO = new HashMap<>();
         userDTO.put("username", "testuser");
-        userDTO.put("password", "password");
+        userDTO.put("password", testuserCleartextPassword);
         userDTO.put("email", "user@mail.com");
 
         //@formatter:off
@@ -444,7 +447,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
 
         Map<String, String> profileDTO = getProfileDTO();
 
-        SessionData login = login("testuser");
+        SessionData login = login(testuser.getUsername(), testuserCleartextPassword);
 
         //@formatter:off
         given().
@@ -474,7 +477,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
 
         Map<String, String> profileDTO = getProfileDTO();
 
-        SessionData login = login("testuser");
+        SessionData login = login(testuser.getUsername(), testuserCleartextPassword);
 
         //@formatter:off
         given().
@@ -504,7 +507,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
 
         Map<String, String> profileDTO = getProfileDTO();
 
-        SessionData login = login("admin");
+        SessionData login = login(admin.getUsername(), adminCleartextPassword);
 
         //@formatter:off
         given().
@@ -534,7 +537,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
 
         Map<String, String> profileDTO = getProfileDTO();
 
-        SessionData login = login("user");
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
         given().
@@ -556,7 +559,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
         Map<String, String> profileDTO = getProfileDTO();
         profileDTO.remove("city");
 
-        SessionData login = login("testuser");
+        SessionData login = login(testuser.getUsername(), testuserCleartextPassword);
 
         //@formatter:off
         given().
@@ -578,7 +581,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
         Map<String, String> profileDTO = getProfileDTO();
         profileDTO.put("gender", "unknown");
 
-        SessionData login = login("testuser");
+        SessionData login = login(testuser.getUsername(), testuserCleartextPassword);
 
         //@formatter:off
         given().
@@ -600,7 +603,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
         Map<String, String> profileDTO = getProfileDTO();
         profileDTO.put("displayName", "");
 
-        SessionData login = login("testuser");
+        SessionData login = login(testuser.getUsername(), testuserCleartextPassword);
 
         //@formatter:off
         given().
@@ -631,7 +634,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
         Map<String, String> profileDTO = getProfileDTO();
         profileDTO.remove("notes");
 
-        SessionData login = login("testuser");
+        SessionData login = login(testuser.getUsername(), testuserCleartextPassword);
 
         //@formatter:off
         given().
@@ -659,10 +662,10 @@ public class UserRestIntegrationTest extends IntegrationTest {
     public void deleteUserAsAdmin() {
         createEnabledTestUser();
 
-        User testuser = userRepository.findOneByUsername("testuser").get();
+        User testuser = userRepository.findOneByUsername(this.testuser.getUsername()).get();
         long userId = testuser.getId();
 
-        SessionData login = login("admin");
+        SessionData login = login(admin.getUsername(), adminCleartextPassword);
 
         //@formatter:off
         given().
@@ -675,7 +678,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
             body("message", equalTo("User disabled"));
         //@formatter:on
 
-        testuser = userRepository.findOneByUsername("testuser").get();
+        testuser = userRepository.findOneByUsername(testuser.getUsername()).get();
         assert (!testuser.isAccountNonLocked());
     }
 
@@ -683,10 +686,10 @@ public class UserRestIntegrationTest extends IntegrationTest {
     public void deleteUserAsUser() {
         createEnabledTestUser();
 
-        User testuser = userRepository.findOneByUsername("testuser").get();
+        User testuser = userRepository.findOneByUsername(this.testuser.getUsername()).get();
         long userId = testuser.getId();
 
-        SessionData login = login("testuser");
+        SessionData login = login(testuser.getUsername(), testuserCleartextPassword);
 
         //@formatter:off
         given().
@@ -704,7 +707,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
     public void deleteUserAsAnon() {
         createEnabledTestUser();
 
-        User testuser = userRepository.findOneByUsername("testuser").get();
+        User testuser = userRepository.findOneByUsername(this.testuser.getUsername()).get();
         long userId = testuser.getId();
 
         //@formatter:off
@@ -717,12 +720,12 @@ public class UserRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testChangePassword() {
-
+        String newPassword = "newPassword";
         Map<String, String> passwordDTO = new HashMap<>();
-        passwordDTO.put("oldPassword", "password");
-        passwordDTO.put("newPassword", "newPassword");
+        passwordDTO.put("oldPassword", userCleartextPassword);
+        passwordDTO.put("newPassword", newPassword);
 
-        SessionData login = login("user", "password");
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
         given().
@@ -738,7 +741,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
 
         logout();
 
-        SessionData login2 = login("user", "newPassword");
+        SessionData login2 = login(user.getUsername(), newPassword);
 
         //@formatter:off
         given().
@@ -760,7 +763,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
         passwordDTO.put("oldPassword", "wrongPassword");
         passwordDTO.put("newPassword", "newPassword");
 
-        SessionData login = login("user", "password");
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
         given().
@@ -781,7 +784,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
         Map<String, String> passwordDTO = new HashMap<>();
         passwordDTO.put("newPassword", "newPassword");
 
-        SessionData login = login("user", "password");
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
         given().

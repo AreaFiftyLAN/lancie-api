@@ -15,6 +15,7 @@ import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.WebIntegrationTest;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -40,19 +41,23 @@ public abstract class IntegrationTest {
     protected UserRepository userRepository;
 
     protected User user;
+    protected final String userCleartextPassword = "password";
 
     protected User admin;
+    protected final String adminCleartextPassword = "password";
 
     SessionFilter sessionFilter = new SessionFilter();
 
     @Before
     public void initIntegrationTest() {
-        user = new User("user", new BCryptPasswordEncoder().encode("password"), "user@mail.com");
+        userRepository.deleteAll();
+
+        user = new User("user", new BCryptPasswordEncoder().encode(userCleartextPassword), "user@mail.com");
         user.getProfile()
                 .setAllFields("Jan", "de Groot", "MonsterKiller9001", Gender.MALE, "Mekelweg 4", "2826CD", "Delft",
                         "0906-0666", null);
 
-        admin = new User("admin", new BCryptPasswordEncoder().encode("password"), "bert@mail.com");
+        admin = new User("admin", new BCryptPasswordEncoder().encode(adminCleartextPassword), "bert@mail.com");
         admin.addRole(Role.ROLE_ADMIN);
         admin.getProfile()
                 .setAllFields("Bert", "Kleijn", "ILoveZombies", Gender.OTHER, "Mekelweg 20", "2826CD", "Amsterdam",
@@ -72,11 +77,6 @@ public abstract class IntegrationTest {
         userRepository.deleteAll();
         RestAssured.reset();
     }
-
-    protected SessionData login(String username) {
-        return login(username, "password");
-    }
-
 
     protected SessionData login(String username, String password) {
         //@formatter:off

@@ -78,7 +78,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testViewAllOrders_User() {
-        SessionData login = login("user");
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
         given().
@@ -95,7 +95,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
     public void testViewAllOrders_Admin() {
         insertTestOrders();
 
-        SessionData login = login("admin");
+        SessionData login = login(admin.getUsername(), adminCleartextPassword);
 
         //@formatter:off
         given().
@@ -106,7 +106,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         then().
             statusCode(HttpStatus.SC_OK).
             body("$", hasSize(2)).
-            body("user.username", containsInAnyOrder("admin", "user")).
+            body("user.username", containsInAnyOrder(admin.getUsername(), adminCleartextPassword, user.getUsername(), userCleartextPassword)).
             body("status", hasItems("CREATING", "CREATING"));
         //formatter:on
     }
@@ -119,7 +119,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         order.put("pickupService", "true");
         order.put("type", TicketType.EARLY_FULL.toString());
         order.put("chMember", "false");
-        SessionData login = login("user");
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
         given().
@@ -148,7 +148,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         order.put("pickupService", "true");
         order.put("type", TicketType.EARLY_FULL.toString());
         order.put("chMember", "false");
-        SessionData login = login("user");
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
         given().
@@ -168,7 +168,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         order.put("pickupService", "false");
         order.put("chMember", "true");
         order.put("type", TicketType.EARLY_FULL.toString());
-        SessionData login = login("user");
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
         given().
@@ -238,7 +238,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         Map<String, String> order = new HashMap<>();
         order.put("type", TicketType.EARLY_FULL.toString());
         order.put("chMember", "false");
-        SessionData login = login("user");
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
         given().
@@ -256,7 +256,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         Map<String, String> order = new HashMap<>();
         order.put("pickupService", "true");
         order.put("chMember", "false");
-        SessionData login = login("user");
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
         given().
@@ -274,7 +274,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         Map<String, String> order = new HashMap<>();
         order.put("type", TicketType.EARLY_FULL.toString());
         order.put("pickupService", "true");
-        SessionData login = login("user");
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
         given().
@@ -294,7 +294,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         order.put("chMember", "false");
         order.put("type", "UNKNOWN");
 
-        SessionData login = login("user");
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
         given().
@@ -315,7 +315,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         order.put("pickupService", "false");
         order.put("type", TicketType.EARLY_FULL.toString());
         order.put("chMember", "false");
-        SessionData login = login("user");
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
         return given().
@@ -348,7 +348,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         String location = createOrderAndReturnLocation();
         logout();
 
-        SessionData login = login("user");
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
         given().
@@ -373,7 +373,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         createOrderAndReturnLocation();
         logout();
 
-        SessionData login = login("user");
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
         given().
@@ -398,7 +398,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         createOrderAndReturnLocation();
         logout();
 
-        SessionData login = login("user");
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
         given().
@@ -420,7 +420,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testGetOpenOrderCurrentUserNotFound() {
-        SessionData login = login("user");
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
         given().
@@ -442,7 +442,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         String location = createOrderAndReturnLocation();
         logout();
 
-        SessionData login = login("otheruser");
+        SessionData login = login("otheruser", "password");
 
         //@formatter:off
         given().
@@ -462,7 +462,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         String location = createOrderAndReturnLocation();
         logout();
 
-        SessionData login = login("admin");
+        SessionData login = login(admin.getUsername(), adminCleartextPassword);
 
         //@formatter:off
         given().
@@ -514,7 +514,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         String location = createOrderAndReturnLocation();
         logout();
 
-        SessionData login = login("user");
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
         given().
@@ -546,7 +546,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         String location = createOrderAndReturnLocation();
         logout();
 
-        SessionData login = login("otheruser");
+        SessionData login = login("otheruser", "password");
 
         //@formatter:off
         given().
@@ -575,7 +575,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         String location = createOrderAndReturnLocation();
         logout();
 
-        SessionData login = login("admin");
+        SessionData login = login(admin.getUsername(), adminCleartextPassword);
 
         //@formatter:off
         given().
@@ -617,7 +617,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
 
         Order save = orderRepository.save(order1);
 
-        SessionData login = login("user");
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
         given().
@@ -641,7 +641,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         String location = createOrderAndReturnLocation();
         logout();
 
-        SessionData login = login("user");
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
         given().
@@ -664,7 +664,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
 
         String location = createOrderAndReturnLocation();
 
-        SessionData login = login("user");
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
         given().
@@ -694,7 +694,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
 
         long countBefore = ticketRepository.count();
 
-        SessionData login = login("user");
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
         given().
@@ -720,7 +720,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
 
         String location = createOrderAndReturnLocation();
 
-        SessionData login = login("user");
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
         given().
@@ -751,7 +751,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         order.setStatus(OrderStatus.WAITING);
         orderRepository.save(order);
 
-        SessionData login = login("user");
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
         given().
@@ -787,7 +787,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
 
         Order save = orderRepository.save(order1);
 
-        SessionData login = login("user");
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
         given().
@@ -823,7 +823,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
 
         Order save = orderRepository.save(order1);
 
-        SessionData login = login("user");
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
         given().
@@ -846,7 +846,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         Long orderId = Long.parseLong(locationParse);
 
 
-        SessionData login = login("user");
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
         given().
@@ -874,7 +874,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         Long orderId = Long.parseLong(locationParse);
 
 
-        SessionData login = login("admin");
+        SessionData login = login(admin.getUsername(), adminCleartextPassword);
 
         //@formatter:off
         given().
