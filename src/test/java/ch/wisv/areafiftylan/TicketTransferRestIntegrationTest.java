@@ -53,9 +53,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
                 .setAllFields("receiver", " of tickets", "GotYaTicket", Gender.MALE, "Money Owner 4", "2826GJ", "Tomorrowland",
                         "0906-1111", null);
 
-        userRepository.saveAndFlush(receiver);
-
-        return receiver;
+        return userRepository.saveAndFlush(receiver);
     }
 
     private User makeOutsider(){
@@ -64,9 +62,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
                 .setAllFields("Nottin", "Todoeo Witit", "Lookinin", Gender.FEMALE, "LoserStreet 1", "2826GJ", "China",
                         "0906-3928", null);
 
-        userRepository.saveAndFlush(outsider);
-
-        return outsider;
+        return userRepository.saveAndFlush(outsider);
     }
 
     private Ticket makeTicket(){
