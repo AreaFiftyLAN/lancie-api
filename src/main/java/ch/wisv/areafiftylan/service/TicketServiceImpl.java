@@ -62,7 +62,7 @@ public class TicketServiceImpl implements TicketService {
         }
     }
 
-    public void finalizeTransfer(Ticket t){
+    private void finalizeTransfer(Ticket t){
         if(!t.isTransferrable()) throw new TicketNotTransferrableException(t.getKey());
 
         t.setTransferrable(false);
