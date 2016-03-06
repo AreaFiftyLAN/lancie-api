@@ -51,7 +51,7 @@ public class MolliePaymentService implements PaymentService {
         metadata.put("A5LId", order.getId());
 
         CreatePayment payment =
-                new CreatePayment(method, (double) order.getAmount(), "Area FiftyLAN Ticket", returnUrl, metadata);
+                new CreatePayment(method, (double) order.getAmount(), "Area FiftyLAN Ticket", returnUrl + "?order=" + order.getId(), metadata);
 
         //First try is for IOExceptions coming from the Mollie Client.
         try {
@@ -97,8 +97,12 @@ public class MolliePaymentService implements PaymentService {
                 // There are a couple of possible statuses. Enum would have been nice. We select a couple of relevant
                 // statuses to translate to our own status.
                 switch (molliePaymentStatus.getData().getStatus()) {
+                    case "pending": {
+                        order.setStatus(OrderStatus.WAITING);
+                        break;
+                    }
                     case "cancelled": {
-                        order.setStatus(OrderStatus.EXPIRED);
+                        order.setStatus(OrderStatus.CANCELLED);
                         break;
                     }
                     case "expired": {

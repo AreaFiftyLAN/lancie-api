@@ -46,7 +46,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Order getOrderById(Long id) {
-        return orderRepository.findOne(id);
+        return orderRepository.findById(id).orElseThrow(() -> new OrderNotFoundException("Order " + id + " not found"));
     }
 
     @Override
@@ -71,7 +71,7 @@ public class OrderServiceImpl implements OrderService {
         User user = userService.getUserById(userId);
 
         for (Order order : orderRepository.findAllByUserUsername(user.getUsername())) {
-            if(order.getStatus().equals(OrderStatus.CREATING)){
+            if (order.getStatus().equals(OrderStatus.CREATING)) {
                 throw new IllegalStateException("User already created a new Order: " + order.getId());
             }
         }
@@ -138,7 +138,8 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public synchronized Ticket requestTicketOfType(TicketType type, User owner, boolean pickupService, boolean chMember) {
+    public synchronized Ticket requestTicketOfType(TicketType type, User owner, boolean pickupService,
+                                                   boolean chMember) {
         if (ticketRepository.countByType(type) >= type.getLimit()) {
             throw new TicketUnavailableException(type);
         } else {
@@ -166,7 +167,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public String requestPayment(Long orderId) {
-        Order order = orderRepository.findOne(orderId);
+        Order order = getOrderById(orderId);
         return paymentService.registerOrder(order);
     }
 
@@ -196,7 +197,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void expireOrder(Order o){
+    public void expireOrder(Order o) {
         orderRepository.delete(o);
         ExpiredOrder eo = new ExpiredOrder(o);
         expiredOrderRepository.save(eo);
