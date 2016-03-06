@@ -106,7 +106,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         then().
             statusCode(HttpStatus.SC_OK).
             body("$", hasSize(2)).
-            body("user.username", containsInAnyOrder(admin.getUsername(), adminCleartextPassword, user.getUsername(), userCleartextPassword)).
+            body("user.username", containsInAnyOrder(admin.getUsername(), user.getUsername())).
             body("status", hasItems("CREATING", "CREATING"));
         //formatter:on
     }
