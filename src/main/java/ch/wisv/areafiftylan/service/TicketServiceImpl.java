@@ -29,7 +29,7 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public Ticket requestTicketOfType(TicketType type, User owner, boolean pickupService, boolean chMember) {
+    public synchronized Ticket requestTicketOfType(TicketType type, User owner, boolean pickupService, boolean chMember) {
         if (ticketRepository.countByType(type) >= type.getLimit()) {
             throw new TicketUnavailableException(type);
         } else {
