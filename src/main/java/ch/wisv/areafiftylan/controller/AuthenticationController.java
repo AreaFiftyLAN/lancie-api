@@ -10,6 +10,7 @@ import ch.wisv.areafiftylan.service.UserService;
 import ch.wisv.areafiftylan.service.repository.PasswordResetTokenRepository;
 import ch.wisv.areafiftylan.service.repository.VerificationTokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -42,6 +43,8 @@ public class AuthenticationController {
     @Autowired
     PasswordResetTokenRepository passwordResetTokenRepository;
 
+    @Value("${a5l.googleMapsAPIkey}")
+    private String googleMapsKey;
 
     /**
      * This basic GET method for the /login endpoint returns a simple login form.
@@ -56,6 +59,11 @@ public class AuthenticationController {
     @RequestMapping(value = "/token", method = RequestMethod.GET)
     public ResponseEntity<?> checkSession() {
         return createResponseEntity(HttpStatus.OK, "Here's your token!");
+    }
+
+    @RequestMapping(value = "/googlemapskey", method = RequestMethod.GET)
+    public ResponseEntity<?> getGoogleMapsKey() {
+        return createResponseEntity(HttpStatus.OK, this.googleMapsKey);
     }
 
     /**
