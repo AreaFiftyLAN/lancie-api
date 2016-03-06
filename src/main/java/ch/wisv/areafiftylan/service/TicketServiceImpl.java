@@ -63,8 +63,6 @@ public class TicketServiceImpl implements TicketService {
     }
 
     private void finalizeTransfer(Ticket t){
-        if(!t.isTransferrable()) throw new TicketNotTransferrableException(t.getKey());
-
         t.setTransferrable(false);
 
         User newOwner = t.getTransferGoalOwner();
