@@ -55,8 +55,6 @@ public class TicketServiceImpl implements TicketService {
 
         if (ticket.isTransferrable()) {
             finalizeTransfer(ticket);
-
-            ticketRepository.save(ticket);
         } else {
             throw new TicketNotTransferrableException(ticket.getKey());
         }
@@ -69,5 +67,7 @@ public class TicketServiceImpl implements TicketService {
         t.setOwner(newOwner);
         t.setTransferGoalOwner(null);
         t.setNewKey();
+
+        ticketRepository.save(t);
     }
 }
