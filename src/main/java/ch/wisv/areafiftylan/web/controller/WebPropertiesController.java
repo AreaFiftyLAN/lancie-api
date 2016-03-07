@@ -13,8 +13,8 @@ import static ch.wisv.areafiftylan.util.ResponseEntityBuilder.createResponseEnti
 @RequestMapping("/web/properties")
 public class WebPropertiesController {
 
-    @Value("${a5l.googleMapsAPIkey}")
-    private String googleMapsKey = "API_KEY";
+    @Value("${a5l.googleMapsAPIkey?:API_KEY}")
+    private String googleMapsKey;
 
     @RequestMapping(value = "/googlemapskey", method = RequestMethod.GET)
     public ResponseEntity<?> getGoogleMapsKey() {
