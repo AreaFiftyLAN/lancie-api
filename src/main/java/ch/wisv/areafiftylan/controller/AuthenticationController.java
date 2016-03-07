@@ -42,7 +42,6 @@ public class AuthenticationController {
     @Autowired
     PasswordResetTokenRepository passwordResetTokenRepository;
 
-
     /**
      * This basic GET method for the /login endpoint returns a simple login form.
      *
