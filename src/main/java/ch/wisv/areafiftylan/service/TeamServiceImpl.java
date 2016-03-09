@@ -1,27 +1,38 @@
 package ch.wisv.areafiftylan.service;
 
 import ch.wisv.areafiftylan.dto.TeamDTO;
+import ch.wisv.areafiftylan.exception.TeamNotFoundException;
+import ch.wisv.areafiftylan.exception.TokenNotFoundException;
 import ch.wisv.areafiftylan.exception.UserNotFoundException;
 import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.model.User;
+import ch.wisv.areafiftylan.security.TeamInviteToken;
 import ch.wisv.areafiftylan.service.repository.TeamRepository;
+import ch.wisv.areafiftylan.service.repository.token.TeamInviteTokenRepository;
 import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import javax.mail.MessagingException;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class TeamServiceImpl implements TeamService {
     private final TeamRepository teamRepository;
     private final UserService userService;
+    private final MailService mailService;
+    private final TeamInviteTokenRepository teamInviteTokenRepository;
 
     @Autowired
-    public TeamServiceImpl(TeamRepository teamRepository, UserService userService) {
+    public TeamServiceImpl(TeamRepository teamRepository, UserService userService, MailService mailService,
+                           TeamInviteTokenRepository teamInviteTokenRepository) {
         this.teamRepository = teamRepository;
+        this.teamInviteTokenRepository = teamInviteTokenRepository;
         this.userService = userService;
+        this.mailService = mailService;
     }
 
     @Override
@@ -86,6 +97,32 @@ public class TeamServiceImpl implements TeamService {
         Team team = teamRepository.getOne(teamId);
         teamRepository.delete(teamId);
         return team;
+    }
+
+    @Override
+    public void inviteMember(Long teamId, String username) {
+        User user = userService.getUserByUsername(username).orElseThrow(() -> new UsernameNotFoundException(username));
+        Team team = getTeamById(teamId).orElseThrow(() -> new TeamNotFoundException(teamId));
+        String token = UUID.randomUUID().toString();
+
+        TeamInviteToken inviteToken = new TeamInviteToken(token, user, team);
+
+        teamInviteTokenRepository.save(inviteToken);
+
+        try {
+            mailService.sendTeamInviteMail(user, team.getTeamName());
+        } catch (MessagingException e) {
+            // TODO: Fix mailservice exception handling
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void addMemberByInvite(String token) {
+        TeamInviteToken teamInviteToken =
+                teamInviteTokenRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
+        addMember(teamInviteToken.getTeam().getId(), teamInviteToken.getUser().getUsername());
+
     }
 
     @Override

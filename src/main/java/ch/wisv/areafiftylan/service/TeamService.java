@@ -25,6 +25,10 @@ public interface TeamService {
 
     Team delete(Long teamId);
 
+    void inviteMember(Long teamId, String username);
+
+    void addMemberByInvite(String token);
+
     void addMember(Long teamId, String username);
 
     boolean removeMember(Long teamId, String username);
