@@ -60,6 +60,22 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     }
 
     @Override
+    public boolean canRemoveFromTeam(Object principal, Long teamId, String username) {
+        if (principal instanceof UserDetails) {
+            UserDetails currentUser = (UserDetails) principal;
+            Team team = teamService.getTeamById(teamId).orElseThrow(() -> new TeamNotFoundException(teamId));
+
+            // You can remove people from a Team if you're Admin, the Team Captain, or if you want to remove yourself
+            // from the Team
+            return team.getCaptain().getUsername().equals(currentUser.getUsername()) ||
+                    currentUser.getAuthorities().contains(Role.ROLE_ADMIN) ||
+                    currentUser.getUsername().equals(username);
+        } else {
+            return false;
+        }
+    }
+
+    @Override
     public boolean canAccessOrder(Object principal, Long orderId) {
         if (principal instanceof UserDetails) {
             User user = (User) principal;

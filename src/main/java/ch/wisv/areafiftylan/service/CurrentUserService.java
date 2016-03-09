@@ -10,6 +10,8 @@ public interface CurrentUserService {
 
     boolean canEditTeam(Object principal, Long teamId);
 
+    boolean canRemoveFromTeam(Object principal, Long teamId, String username);
+
     boolean canAccessOrder(Object principal, Long orderId);
 
     boolean canReserveSeat(Object principal, Long ticketId);

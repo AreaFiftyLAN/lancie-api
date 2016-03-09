@@ -125,6 +125,22 @@ public class TeamRestController {
     }
 
     /**
+     * Add members to the Team with the given Id. Expects only a username as Requestbody. People can only directly be
+     * added to a team by an Admin. Captains can only invite users.
+     *
+     * @param teamId   Id of the Team to which the User should be added.
+     * @param username Username of the User to be added to the Team
+     *
+     * @return Result message of the request
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @RequestMapping(method = RequestMethod.PUT, value = "/{teamId}")
+    public ResponseEntity<?> addTeamMember(@PathVariable Long teamId, @RequestBody String username) {
+        teamService.addMember(teamId, username);
+        return createResponseEntity(HttpStatus.OK, "User " + username + " successfully added to Team " + teamId);
+    }
+
+    /**
      * Add members to the Team with the given Id. Expects only a username as Requestbody. Can only be done by the
      * Captain or an Admin
      *
@@ -135,9 +151,21 @@ public class TeamRestController {
      */
     @PreAuthorize("@currentUserServiceImpl.canEditTeam(principal, #teamId)")
     @RequestMapping(method = RequestMethod.POST, value = "/{teamId}")
-    public ResponseEntity<?> addTeamMember(@PathVariable Long teamId, @RequestBody String username) {
-        teamService.addMember(teamId, username);
-        return createResponseEntity(HttpStatus.OK, "User " + username + " successfully added to Team " + teamId);
+    public ResponseEntity<?> inviteTeamMember(@PathVariable Long teamId, @RequestBody String username) {
+        teamService.inviteMember(teamId, username);
+        return createResponseEntity(HttpStatus.OK, "User " + username + " successfully invited to Team " + teamId);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/invites")
+    public ResponseEntity<?> acceptTeamInvite(@RequestBody String token) {
+        teamService.addMemberByInvite(token);
+        return createResponseEntity(HttpStatus.OK, "Invite successfully accepted");
+    }
+
+    @RequestMapping(method = RequestMethod.DELETE, value = "/invites")
+    public ResponseEntity<?> declineTeamInvite(@RequestBody String token) {
+        teamService.removeInvite(token);
+        return createResponseEntity(HttpStatus.OK, "Invite successfully declined");
     }
 
     /**

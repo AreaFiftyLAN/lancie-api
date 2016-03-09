@@ -1,12 +1,14 @@
 package ch.wisv.areafiftylan.service;
 
 import ch.wisv.areafiftylan.dto.TeamDTO;
+import ch.wisv.areafiftylan.dto.TeamInviteResponse;
 import ch.wisv.areafiftylan.exception.TeamNotFoundException;
 import ch.wisv.areafiftylan.exception.TokenNotFoundException;
 import ch.wisv.areafiftylan.exception.UserNotFoundException;
 import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.security.TeamInviteToken;
+import ch.wisv.areafiftylan.security.Token;
 import ch.wisv.areafiftylan.service.repository.TeamRepository;
 import ch.wisv.areafiftylan.service.repository.token.TeamInviteTokenRepository;
 import com.google.common.base.Strings;
@@ -15,9 +17,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
-import java.util.Collection;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class TeamServiceImpl implements TeamService {
@@ -118,10 +119,34 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
+    public void removeInvite(String token) {
+        TeamInviteToken teamInviteToken =
+                teamInviteTokenRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
+        teamInviteTokenRepository.delete(teamInviteToken);
+    }
+
+    @Override
+    public List<TeamInviteResponse> findTeamInvitesByUsername(String username) {
+        Collection<TeamInviteToken> inviteTokens = teamInviteTokenRepository.findByUserUsername(username);
+
+        if (!inviteTokens.isEmpty()) {
+            // From all Tokens that exist in the database linked to the user, only display the valid ones. Change
+            // them to TeamInviteResponses for display in the controller.
+            return inviteTokens.stream().filter(Token::isValid)
+                    .map(t -> new TeamInviteResponse(t.getTeam().getId(), t.getTeam().getTeamName(), t.getToken(),
+                            t.getExpiryDate())).collect(Collectors.toList());
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
+    @Override
     public void addMemberByInvite(String token) {
         TeamInviteToken teamInviteToken =
                 teamInviteTokenRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
         addMember(teamInviteToken.getTeam().getId(), teamInviteToken.getUser().getUsername());
+        teamInviteToken.setUsed(true);
+        teamInviteTokenRepository.save(teamInviteToken);
 
     }
 

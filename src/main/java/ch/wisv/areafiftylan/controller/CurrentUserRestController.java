@@ -2,6 +2,7 @@ package ch.wisv.areafiftylan.controller;
 
 
 import ch.wisv.areafiftylan.dto.PasswordChangeDTO;
+import ch.wisv.areafiftylan.dto.TeamInviteResponse;
 import ch.wisv.areafiftylan.model.Order;
 import ch.wisv.areafiftylan.model.Seat;
 import ch.wisv.areafiftylan.model.Team;
@@ -89,7 +90,7 @@ public class CurrentUserRestController {
         userService.changePassword(currentUser.getId(), passwordChangeDTO.getOldPassword(),
                 passwordChangeDTO.getNewPassword());
 
-        return createResponseEntity(HttpStatus.OK, "Password succesfully changed");
+        return createResponseEntity(HttpStatus.OK, "Password successfully changed");
     }
 
     /**
@@ -103,6 +104,14 @@ public class CurrentUserRestController {
     public Collection<Team> getCurrentTeams(Authentication auth) {
         UserDetails currentUser = (UserDetails) auth.getPrincipal();
         return teamService.getTeamsByUsername(currentUser.getUsername());
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @RequestMapping(value = "/teams/invites", method = RequestMethod.GET)
+    public List<TeamInviteResponse> getOpenInvites(Authentication auth) {
+        User currentUser = (User) auth.getPrincipal();
+
+        return teamService.findTeamInvitesByUsername(currentUser.getUsername());
     }
 
     /**

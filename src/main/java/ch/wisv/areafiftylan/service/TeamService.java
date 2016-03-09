@@ -1,9 +1,11 @@
 package ch.wisv.areafiftylan.service;
 
 import ch.wisv.areafiftylan.dto.TeamDTO;
+import ch.wisv.areafiftylan.dto.TeamInviteResponse;
 import ch.wisv.areafiftylan.model.Team;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 public interface TeamService {
@@ -26,6 +28,10 @@ public interface TeamService {
     Team delete(Long teamId);
 
     void inviteMember(Long teamId, String username);
+
+    void removeInvite(String token);
+
+    List<TeamInviteResponse> findTeamInvitesByUsername(String username);
 
     void addMemberByInvite(String token);
 
