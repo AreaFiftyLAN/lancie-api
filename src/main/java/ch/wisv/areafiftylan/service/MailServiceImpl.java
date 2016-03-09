@@ -40,7 +40,7 @@ public class MailServiceImpl implements MailService {
         final MimeMessage mimeMessage = this.mailSender.createMimeMessage();
         final MimeMessageHelper message = new MimeMessageHelper(mimeMessage, true, "UTF-8"); // true = multipart
 
-        message.setSubject(subject);
+        message.setSubject("[Area FiftyLAN] " + subject);
         message.setFrom(sender);
         message.setTo(recipientEmail);
 
@@ -91,5 +91,12 @@ public class MailServiceImpl implements MailService {
     public void sendPasswordResetMail(User user, String url) throws MessagingException {
         String message = "Please click on the following link to reset your password: " + url;
         sendMail(user.getEmail(), user.getUsername(), null, "Password reset requested", message);
+    }
+
+    @Override
+    public void sendTeamInviteMail(User user, String teamName) throws MessagingException {
+        String message =
+                "You've been invited to join Team " + teamName + "! Please log in to My Area to accept the invitation.";
+        sendMail(user.getEmail(), user.getUsername(), null, "You've been invited to Team " + teamName, message);
     }
 }
