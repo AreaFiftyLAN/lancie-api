@@ -64,11 +64,24 @@ public class SeatServiceImpl implements SeatService {
     }
 
     @Override
-    public boolean reserveSeat(String groupname, int seatnumber, String username) {
+    public boolean reserveSeatForUser(String groupname, int seatnumber, String username) {
         User user = userService.getUserByUsername(username).orElseThrow(() -> new UserNotFoundException(username));
         Seat seat = seatRespository.findBySeatGroupAndSeatNumber(groupname, seatnumber);
         if (!seat.isTaken()) {
             seat.setUser(user);
+            seatRespository.saveAndFlush(seat);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean reserveSeat(String groupname, int seatnumber) {
+        Seat seat = seatRespository.findBySeatGroupAndSeatNumber(groupname, seatnumber);
+
+        if (!seat.isTaken()) {
+            seat.setTaken(true);
             seatRespository.saveAndFlush(seat);
             return true;
         } else {
