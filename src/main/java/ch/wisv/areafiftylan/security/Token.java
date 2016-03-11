@@ -34,6 +34,7 @@ public abstract class Token {
     public Token(String token, User user) {
         this(token, user, EXPIRATION);
     }
+
     public Token(String token, User user, int expiration) {
         this.token = token;
         this.user = user;

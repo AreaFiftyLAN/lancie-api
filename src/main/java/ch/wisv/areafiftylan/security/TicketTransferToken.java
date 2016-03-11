@@ -13,6 +13,7 @@ import javax.persistence.OneToOne;
  */
 @Entity
 public class TicketTransferToken extends Token {
+    private static final int EXPIRATION = 0;
 
     @OneToOne(targetEntity = Ticket.class, fetch = FetchType.EAGER)
     @JoinColumn(nullable = false)
@@ -26,7 +27,7 @@ public class TicketTransferToken extends Token {
     }
 
     public TicketTransferToken(String token, User user, Ticket ticket, User goalUser) {
-        super(token, user);
+        super(token, user, EXPIRATION);
         this.ticket = ticket;
         this.goalUser = goalUser;
     }
