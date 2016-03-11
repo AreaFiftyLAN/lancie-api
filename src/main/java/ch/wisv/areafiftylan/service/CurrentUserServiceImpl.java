@@ -64,6 +64,11 @@ public class CurrentUserServiceImpl implements CurrentUserService {
             UserDetails currentUser = (UserDetails) principal;
             Team team = teamService.getTeamById(teamId).orElseThrow(() -> new TeamNotFoundException(teamId));
 
+            // The Teamcaptain can't remove himself
+            if (team.getCaptain().getUsername().equals(username)) {
+                return false;
+            }
+
             // You can remove people from a Team if you're Admin, the Team Captain, or if you want to remove yourself
             // from the Team
             return team.getCaptain().getUsername().equals(currentUser.getUsername()) ||

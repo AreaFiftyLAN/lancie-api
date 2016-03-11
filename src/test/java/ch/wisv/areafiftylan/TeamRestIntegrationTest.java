@@ -757,7 +757,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
     //region Test Remove Members
     @Test
-    public void testRemoveMember_captain() {
+    public void testRemoveMemberAsCaptain() {
         String location = createTeamWithCaptain();
 
         addUserAsAdmin(location, user);
@@ -770,13 +770,13 @@ public class TeamRestIntegrationTest extends IntegrationTest {
             header(login.getCsrfHeader()).
         when().
             content(user.getUsername()).delete(location + "/members").
-        then().log().all()
-            .statusCode(HttpStatus.SC_OK);
+        then().
+            statusCode(HttpStatus.SC_OK);
         //@formatter:on
     }
 
     @Test
-    public void testRemoveMember_admin() {
+    public void testRemoveCaptainAsCaptain() {
         String location = createTeamWithCaptain();
 
         addUserAsAdmin(location, user);
@@ -788,14 +788,34 @@ public class TeamRestIntegrationTest extends IntegrationTest {
             filter(sessionFilter).
             header(login.getCsrfHeader()).
         when().
-            content(user.getUsername()).delete(location + "/members").
-        then().log().all()
-            .statusCode(HttpStatus.SC_OK);
+            content(teamCaptain.getUsername()).
+            delete(location + "/members").
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
     }
 
     @Test
-    public void testRemoveMember_member() {
+    public void testRemoveMemberAsdmin() {
+        String location = createTeamWithCaptain();
+
+        addUserAsAdmin(location, user);
+
+        SessionData login = login("admin", "password");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            content(user.getUsername()).delete(location + "/members").
+        then().
+            statusCode(HttpStatus.SC_OK);
+        //@formatter:on
+    }
+
+    @Test
+    public void testRemoveSelf() {
         String location = createTeamWithCaptain();
 
         addUserAsAdmin(location, user);
@@ -808,13 +828,13 @@ public class TeamRestIntegrationTest extends IntegrationTest {
             header(login.getCsrfHeader()).
         when().
             content(user.getUsername()).delete(location + "/members").
-        then().log().all()
-            .statusCode(HttpStatus.SC_FORBIDDEN);
+        then().
+            statusCode(HttpStatus.SC_OK);
         //@formatter:on
     }
 
     @Test
-    public void testRemoveMember_user() {
+    public void testRemoveMemberAsUser() {
         String location = createTeamWithCaptain();
 
         addUserAsAdmin(location, admin);
@@ -827,8 +847,8 @@ public class TeamRestIntegrationTest extends IntegrationTest {
             header(login.getCsrfHeader()).
         when().
             content(admin.getUsername()).delete(location + "/members").
-        then().log().all()
-            .statusCode(HttpStatus.SC_FORBIDDEN);
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
     }
     //endregion

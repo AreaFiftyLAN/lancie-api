@@ -203,7 +203,7 @@ public class TeamRestController {
      *
      * @return A status message of the operation
      */
-    @PreAuthorize("@currentUserServiceImpl.canEditTeam(principal, #teamId)")
+    @PreAuthorize("@currentUserServiceImpl.canRemoveFromTeam(principal, #teamId, #username)")
     @RequestMapping(method = RequestMethod.DELETE, value = "/{teamId}/members")
     public ResponseEntity<?> removeTeamMember(@PathVariable Long teamId, @RequestBody String username) {
         teamService.removeMember(teamId, username);
@@ -211,13 +211,13 @@ public class TeamRestController {
     }
 
     /**
-     * Delete an entire Team
+     * Delete an entire Team. Limit this for Admins for now
      *
      * @param teamId Id of the Team to be deleted
      *
      * @return The deleted Team
      */
-    @PreAuthorize("@currentUserServiceImpl.canEditTeam(principal, #teamId)")
+    @PreAuthorize("hasRole('ADMIN')")
     @JsonView(View.Public.class)
     @RequestMapping(method = RequestMethod.DELETE, value = "{teamId}")
     public ResponseEntity<?> delete(@PathVariable Long teamId) {
