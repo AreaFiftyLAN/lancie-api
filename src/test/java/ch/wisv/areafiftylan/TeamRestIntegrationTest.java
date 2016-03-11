@@ -1,10 +1,13 @@
 package ch.wisv.areafiftylan;
 
 import ch.wisv.areafiftylan.model.Team;
+import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.util.Gender;
+import ch.wisv.areafiftylan.model.util.TicketType;
 import ch.wisv.areafiftylan.security.TeamInviteToken;
 import ch.wisv.areafiftylan.service.repository.TeamRepository;
+import ch.wisv.areafiftylan.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.service.repository.token.TeamInviteTokenRepository;
 import ch.wisv.areafiftylan.util.SessionData;
 import com.jayway.restassured.http.ContentType;
@@ -29,6 +32,7 @@ import static org.hamcrest.core.IsCollectionContaining.hasItem;
 public class TeamRestIntegrationTest extends IntegrationTest {
 
     protected User teamCaptain;
+    private Ticket captainTicket;
 
     @Autowired
     protected TeamRepository teamRepository;
@@ -36,7 +40,10 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     @Autowired
     private TeamInviteTokenRepository teamInviteTokenRepository;
 
-    private Map<String, String> team1;
+    @Autowired
+    private TicketRepository ticketRepository;
+
+    private Map<String, String> team1 = new HashMap<>();
 
     @Before
     public void initTeamTest() {
@@ -45,15 +52,17 @@ public class TeamRestIntegrationTest extends IntegrationTest {
                 .setAllFields("Captain", "Hook", "PeterPanKiller", Gender.MALE, "High Road 3", "2826ZZ", "Neverland",
                         "0906-0777", null);
 
-        userRepository.saveAndFlush(teamCaptain);
+        teamCaptain = userRepository.saveAndFlush(teamCaptain);
 
-        team1 = new HashMap<>();
+        ticketRepository.save(new Ticket(teamCaptain, TicketType.EARLY_FULL, false, false));
+        ticketRepository.save(new Ticket(user, TicketType.EARLY_FULL, false, false));
 
         team1.put("teamName", "testteam1");
     }
 
     @After
     public void teamTestsCleanup() {
+        ticketRepository.deleteAll();
         teamInviteTokenRepository.deleteAll();
         teamRepository.deleteAll();
         userRepository.delete(teamCaptain);
@@ -156,6 +165,25 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
         Team team = teamRepository.getOne(new Long(teamId));
         Assert.assertNotNull(team);
+    }
+
+    @Test
+    public void testCreateTeamMissingTicket() {
+        ticketRepository.deleteAll();
+        team1.put("captainUsername", teamCaptain.getUsername());
+
+        SessionData login = login("captain", "password");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            content(team1).contentType(ContentType.JSON).
+            post("/teams").
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
     }
 
     @Test
@@ -287,8 +315,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void getTeamCurrentUser() {
-        String location = createTeamWithCaptain();
-        logout();
+        createTeamWithCaptain();
 
         SessionData login = login("captain");
 
@@ -522,6 +549,24 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
+    public void testInviteMemberWithoutTicket() {
+        String location = createTeamWithCaptain();
+
+        SessionData login = login("captain", "password");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            content(admin.getUsername()).
+            post(location + "/invites").
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
+    }
+
+    @Test
     public void testAddMemberAsAdminDuplicate() {
         String location = createTeamWithCaptain();
 
@@ -600,6 +645,8 @@ public class TeamRestIntegrationTest extends IntegrationTest {
         String location = createTeamWithCaptain();
 
         addUserAsAdmin(location, user);
+
+        ticketRepository.save(new Ticket(admin, TicketType.EARLY_FULL, false, false));
 
         inviteUserAsCaptain(location, admin);
 

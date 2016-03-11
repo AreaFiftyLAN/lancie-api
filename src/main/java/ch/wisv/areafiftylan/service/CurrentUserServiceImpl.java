@@ -20,7 +20,6 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     @Autowired
     OrderService orderService;
 
-    // TODO: Move this to the future TicketService
     @Autowired
     TicketRepository ticketRepository;
 
@@ -104,5 +103,20 @@ public class CurrentUserServiceImpl implements CurrentUserService {
         } else {
             return false;
         }
+    }
+
+    @Override
+    public boolean hasTicket(Object principal) {
+        if (principal instanceof UserDetails) {
+            User user = (User) principal;
+            return hasTicket(user.getUsername()) || user.getAuthorities().contains(Role.ROLE_ADMIN);
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean hasTicket(String username) {
+        return ticketRepository.findByOwnerUsername(username).isPresent();
     }
 }
