@@ -33,6 +33,8 @@ public interface TeamService {
 
     List<TeamInviteResponse> findTeamInvitesByUsername(String username);
 
+    List<TeamInviteResponse> findTeamInvitesByTeamId(Long teamId);
+
     void addMemberByInvite(String token);
 
     void addMember(Long teamId, String username);

@@ -106,15 +106,20 @@ public class TeamServiceImpl implements TeamService {
         Team team = getTeamById(teamId).orElseThrow(() -> new TeamNotFoundException(teamId));
         String token = UUID.randomUUID().toString();
 
-        TeamInviteToken inviteToken = new TeamInviteToken(token, user, team);
+        if (!team.getMembers().contains(user)) {
 
-        teamInviteTokenRepository.save(inviteToken);
+            TeamInviteToken inviteToken = new TeamInviteToken(token, user, team);
 
-        try {
-            mailService.sendTeamInviteMail(user, team.getTeamName());
-        } catch (MessagingException e) {
-            // TODO: Fix mailservice exception handling
-            e.printStackTrace();
+            teamInviteTokenRepository.save(inviteToken);
+
+            try {
+                mailService.sendTeamInviteMail(user, team.getTeamName());
+            } catch (MessagingException e) {
+                // TODO: Fix mailservice exception handling
+                e.printStackTrace();
+            }
+        } else {
+            throw new IllegalArgumentException("User is already a member of this team");
         }
     }
 
@@ -129,12 +134,23 @@ public class TeamServiceImpl implements TeamService {
     public List<TeamInviteResponse> findTeamInvitesByUsername(String username) {
         Collection<TeamInviteToken> inviteTokens = teamInviteTokenRepository.findByUserUsername(username);
 
+        return teamInviteTokensToReponses(inviteTokens);
+    }
+
+    @Override
+    public List<TeamInviteResponse> findTeamInvitesByTeamId(Long teamId) {
+        Collection<TeamInviteToken> inviteTokens = teamInviteTokenRepository.findByTeamId(teamId);
+
+        return teamInviteTokensToReponses(inviteTokens);
+    }
+
+    private List<TeamInviteResponse> teamInviteTokensToReponses(Collection<TeamInviteToken> inviteTokens) {
         if (!inviteTokens.isEmpty()) {
             // From all Tokens that exist in the database linked to the user, only display the valid ones. Change
             // them to TeamInviteResponses for display in the controller.
             return inviteTokens.stream().filter(Token::isValid)
                     .map(t -> new TeamInviteResponse(t.getTeam().getId(), t.getTeam().getTeamName(), t.getToken(),
-                            t.getExpiryDate())).collect(Collectors.toList());
+                            t.getUser().getUsername())).collect(Collectors.toList());
         } else {
             return Collections.emptyList();
         }

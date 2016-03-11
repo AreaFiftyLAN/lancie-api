@@ -1,6 +1,8 @@
 package ch.wisv.areafiftylan.controller;
 
 import ch.wisv.areafiftylan.dto.TeamDTO;
+import ch.wisv.areafiftylan.dto.TeamInviteResponse;
+import ch.wisv.areafiftylan.exception.TeamNotFoundException;
 import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.util.Role;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 import static ch.wisv.areafiftylan.util.ResponseEntityBuilder.createResponseEntity;
@@ -134,7 +137,7 @@ public class TeamRestController {
      * @return Result message of the request
      */
     @PreAuthorize("hasRole('ADMIN')")
-    @RequestMapping(method = RequestMethod.PUT, value = "/{teamId}")
+    @RequestMapping(method = RequestMethod.POST, value = "/{teamId}")
     public ResponseEntity<?> addTeamMember(@PathVariable Long teamId, @RequestBody String username) {
         teamService.addMember(teamId, username);
         return createResponseEntity(HttpStatus.OK, "User " + username + " successfully added to Team " + teamId);
@@ -150,10 +153,16 @@ public class TeamRestController {
      * @return Result message of the request
      */
     @PreAuthorize("@currentUserServiceImpl.canEditTeam(principal, #teamId)")
-    @RequestMapping(method = RequestMethod.POST, value = "/{teamId}")
+    @RequestMapping(method = RequestMethod.POST, value = "/{teamId}/invites")
     public ResponseEntity<?> inviteTeamMember(@PathVariable Long teamId, @RequestBody String username) {
         teamService.inviteMember(teamId, username);
         return createResponseEntity(HttpStatus.OK, "User " + username + " successfully invited to Team " + teamId);
+    }
+
+    @PreAuthorize("@currentUserServiceImpl.canEditTeam(principal, #teamId)")
+    @RequestMapping(method = RequestMethod.GET, value = "/{teamId}/invites")
+    public List<TeamInviteResponse> getTeamInvitesByTeam(@PathVariable Long teamId) {
+        return teamService.findTeamInvitesByTeamId(teamId);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/invites")
@@ -214,5 +223,10 @@ public class TeamRestController {
 
         Team deletedTeam = teamService.delete(teamId);
         return createResponseEntity(HttpStatus.OK, "Deleted team with " + teamId, deletedTeam);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<?> handleIllegalArgumentException(IllegalArgumentException e) {
+        return createResponseEntity(HttpStatus.CONFLICT, e.getMessage());
     }
 }

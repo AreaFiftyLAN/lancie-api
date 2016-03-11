@@ -20,6 +20,10 @@ public class TeamInviteToken extends Token {
     @JoinColumn(nullable = false)
     private Team team;
 
+    public TeamInviteToken() {
+        //JPA Only
+    }
+
     public TeamInviteToken(String token, User user, Team team){
         super(token, user, EXPIRATION);
         this.team = team;

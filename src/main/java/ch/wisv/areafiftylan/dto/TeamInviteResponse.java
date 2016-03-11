@@ -2,8 +2,6 @@ package ch.wisv.areafiftylan.dto;
 
 import lombok.Getter;
 
-import java.util.Date;
-
 /**
  * Created by Sille Kamoen on 9-3-16.
  */
@@ -15,12 +13,12 @@ public class TeamInviteResponse {
     @Getter
     String token;
     @Getter
-    Date expiryDate;
+    String username;
 
-    public TeamInviteResponse(Long teamId, String teamName, String token, Date expiryDate) {
+    public TeamInviteResponse(Long teamId, String teamName, String token, String username) {
         this.teamId = teamId;
         this.teamName = teamName;
         this.token = token;
-        this.expiryDate = expiryDate;
+        this.username = username;
     }
 }

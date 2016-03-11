@@ -17,5 +17,7 @@ public interface TeamInviteTokenRepository extends JpaRepository<TeamInviteToken
 
     Collection<TeamInviteToken> findByUserUsername(String username);
 
+    Collection<TeamInviteToken> findByTeamId(Long teamId);
+
 
 }
