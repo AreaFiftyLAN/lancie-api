@@ -481,8 +481,8 @@ public class TeamRestIntegrationTest extends IntegrationTest {
             header(login.getCsrfHeader()).
         when().
             content(user.getUsername()).delete(location + "/members").
-        then().log().all()
-            .statusCode(HttpStatus.SC_FORBIDDEN);
+        then().
+            statusCode(HttpStatus.SC_OK);
         //@formatter:on
     }
 
