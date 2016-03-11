@@ -1,43 +1,124 @@
 package ch.wisv.areafiftylan.service;
 
+import ch.wisv.areafiftylan.dto.SeatGroupDTO;
+import ch.wisv.areafiftylan.dto.SeatmapResponse;
+import ch.wisv.areafiftylan.exception.SeatNotFoundException;
+import ch.wisv.areafiftylan.exception.TeamNotFoundException;
 import ch.wisv.areafiftylan.model.Seat;
+import ch.wisv.areafiftylan.model.Team;
+import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.User;
-import ch.wisv.areafiftylan.model.util.Coordinate;
-import ch.wisv.areafiftylan.service.repository.SeatRepository;
+import ch.wisv.areafiftylan.service.repository.SeatRespository;
+import ch.wisv.areafiftylan.service.repository.TicketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.*;
 
 @Service
 public class SeatServiceImpl implements SeatService {
 
-    SeatRepository seatRepository;
+    SeatRespository seatRespository;
+    TicketRepository ticketRepository;
+    TeamService teamService;
 
     @Autowired
-    public SeatServiceImpl(SeatRepository seatRepository) {
-        this.seatRepository = seatRepository;
+    public SeatServiceImpl(SeatRespository seatRespository, TicketRepository ticketRepository,
+                           TeamService teamService) {
+        this.seatRespository = seatRespository;
+        this.ticketRepository = ticketRepository;
+        this.teamService = teamService;
     }
 
     @Override
-    public Seat getSeatByUser(User user) {
-        return this.seatRepository.findByUser(user);
+    public Seat getSeatByUsername(String username) {
+        return seatRespository.findByTicketOwnerUsername(username)
+                .orElseThrow(() -> new SeatNotFoundException("User " + username + " doesn't have a seat"));
     }
 
     @Override
-    public List<Seat> getAllSeats() {
-        return seatRepository.findAll();
+    public SeatmapResponse getAllSeats() {
+        List<Seat> all = seatRespository.findAll();
+
+        Map<String, List<Seat>> seatMapResponse = new HashMap<>();
+
+        for (Seat seat : all) {
+            if (seatMapResponse.containsKey(seat.getSeatGroup())) {
+                seatMapResponse.get(seat.getSeatGroup()).add(seat);
+            } else {
+                List<Seat> seats = new ArrayList<>();
+                seats.add(seat);
+                seatMapResponse.put(seat.getSeatGroup(), seats);
+            }
+        }
+
+        return new SeatmapResponse(seatMapResponse);
     }
 
     @Override
-    public Seat getSeatByCoordinate(Coordinate coordinate) {
-        return seatRepository.findByCoordinate(coordinate);
+    public SeatmapResponse getSeatGroupByName(String groupname) {
+        List<Seat> seatGroup = seatRespository.findBySeatGroup(groupname);
+
+        Map<String, List<Seat>> seatMapResponse = new HashMap<>();
+        seatMapResponse.put(groupname, seatGroup);
+
+        return new SeatmapResponse(seatMapResponse);
     }
 
     @Override
-    public Seat reserveSeat(Coordinate coordinate, User user) {
-        Seat seat = seatRepository.findByCoordinate(coordinate);
-        seat.setUser(user);
-        return seatRepository.saveAndFlush(seat);
+    public boolean reserveSeatForTicket(String groupname, int seatnumber, Long ticketId) {
+        Ticket ticket = ticketRepository.findOne(ticketId);
+        Seat seat = seatRespository.findBySeatGroupAndSeatNumber(groupname, seatnumber);
+        if (!seat.isTaken()) {
+            seat.setTicket(ticket);
+            seatRespository.saveAndFlush(seat);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean reserveSeat(String groupname, int seatnumber) {
+        Seat seat = seatRespository.findBySeatGroupAndSeatNumber(groupname, seatnumber);
+
+        if (!seat.isTaken()) {
+            seat.setTaken(true);
+            seatRespository.saveAndFlush(seat);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public Seat getSeatBySeatGroupAndSeatNumber(String groupName, int seatNumber) {
+        return seatRespository.findBySeatGroupAndSeatNumber(groupName, seatNumber);
+    }
+
+    @Override
+    public void addSeats(SeatGroupDTO seatGroupDTO) {
+        List<Seat> seatList = new ArrayList<>(seatGroupDTO.getNumberOfSeats());
+
+        for (int i = 1; i <= seatGroupDTO.getNumberOfSeats(); i++) {
+            seatList.add(new Seat(seatGroupDTO.getSeatGroupName(), i));
+        }
+
+        seatRespository.save(seatList);
+    }
+
+    @Override
+    public Set<Seat> getSeatsByTeamName(String teamName) {
+        Set<Seat> seats = new HashSet<>();
+        Team team = teamService.getTeamByTeamname(teamName).orElseThrow(() -> new TeamNotFoundException(teamName));
+
+        for (User user : team.getMembers()) {
+            Optional<Seat> seat = seatRespository.findByTicketOwnerUsername(user.getUsername());
+            if (seat.isPresent()) {
+                seats.add(seat.get());
+            }
+        }
+
+        return seats;
     }
 }

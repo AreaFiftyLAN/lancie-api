@@ -11,7 +11,7 @@ public interface TeamService {
 
     Team save(Team team);
 
-    Optional<Team> getTeamById(Long id);
+    Team getTeamById(Long id);
 
     Optional<Team> getTeamByTeamname(String teamname);
 

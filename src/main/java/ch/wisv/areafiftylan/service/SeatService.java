@@ -1,18 +1,26 @@
 package ch.wisv.areafiftylan.service;
 
+import ch.wisv.areafiftylan.dto.SeatGroupDTO;
+import ch.wisv.areafiftylan.dto.SeatmapResponse;
 import ch.wisv.areafiftylan.model.Seat;
-import ch.wisv.areafiftylan.model.User;
-import ch.wisv.areafiftylan.model.util.Coordinate;
 
-import java.util.List;
+import java.util.Set;
 
 public interface SeatService {
 
-    Seat getSeatByUser(User user);
+    Seat getSeatByUsername(String username);
 
-    List<Seat> getAllSeats();
+    SeatmapResponse getAllSeats();
 
-    Seat getSeatByCoordinate(Coordinate coordinate);
+    SeatmapResponse getSeatGroupByName(String groupname);
 
-    Seat reserveSeat(Coordinate coordinate, User user);
+    boolean reserveSeatForTicket(String groupname, int seatnumber, Long ticketId);
+
+    boolean reserveSeat(String groupname, int seatnumber);
+
+    Seat getSeatBySeatGroupAndSeatNumber(String groupName, int seatNumber);
+
+    void addSeats(SeatGroupDTO seatGroupDTO);
+
+    Set<Seat> getSeatsByTeamName(String teamName);
 }
