@@ -14,7 +14,7 @@ public interface SeatService {
 
     SeatmapResponse getSeatGroupByName(String groupname);
 
-    boolean reserveSeatForUser(String groupname, int seatnumber, String username);
+    boolean reserveSeatForTicket(String groupname, int seatnumber, Long ticketId);
 
     boolean reserveSeat(String groupname, int seatnumber);
 

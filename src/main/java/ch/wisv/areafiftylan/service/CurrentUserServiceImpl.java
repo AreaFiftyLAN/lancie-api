@@ -1,8 +1,10 @@
 package ch.wisv.areafiftylan.service;
 
 import ch.wisv.areafiftylan.model.Team;
+import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.util.Role;
+import ch.wisv.areafiftylan.service.repository.TicketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,10 @@ public class CurrentUserServiceImpl implements CurrentUserService {
 
     @Autowired
     OrderService orderService;
+
+    // TODO: Move this to the future TicketService
+    @Autowired
+    TicketRepository ticketRepository;
 
     @Override
     public boolean canAccessUser(Object principal, Long userId) {
@@ -66,20 +72,21 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     }
 
     @Override
-    public boolean canReserveSeat(Object principal, String username) {
+    public boolean canReserveSeat(Object principal, Long ticketId) {
         if (principal instanceof UserDetails) {
             User user = (User) principal;
 
+            Ticket ticket = ticketRepository.findOne(ticketId);
+            if (ticket.getOwner().equals(user) || user.getAuthorities().contains(Role.ROLE_ADMIN)) {
+                return true;
+            }
+
             Collection<Team> userTeams = teamService.getTeamByCaptainId(user.getId());
 
-
-            // This really intense lambda experssion gets all members from the previously selected teams. It filters
-            // them on the given username. If the given username is present in one of the captain's team, the count
-            // is higher then 0, so the operation is allowed.
-            return userTeams.stream().map(Team::getMembers).filter(users -> user.getUsername().equals(username))
-                    .count() > 0 || user.getAuthorities().contains(Role.ROLE_ADMIN) ||
-                    user.getUsername().equals(username);
-
+            // For each set of members in a team, check if the owner of the ticket is one of them.
+            boolean r =
+                    userTeams.stream().map(Team::getMembers).anyMatch(members -> members.contains(ticket.getOwner()));
+            return r;
         } else {
             return false;
         }

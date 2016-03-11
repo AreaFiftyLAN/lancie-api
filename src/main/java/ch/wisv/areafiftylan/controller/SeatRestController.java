@@ -99,11 +99,11 @@ public class SeatRestController {
      *
      * @return Status message indicating the result.
      */
-    @PreAuthorize("@currentUserServiceImpl.canReserveSeat(principal, #username)")
+    @PreAuthorize("@currentUserServiceImpl.canReserveSeat(principal, #ticketId)")
     @RequestMapping(value = "seats/{group}/{number}", method = RequestMethod.POST)
     ResponseEntity<?> reserveSingleSeat(@PathVariable String group, @PathVariable int number,
-                                        @RequestParam String username) {
-        if (seatService.reserveSeatForUser(group, number, username)) {
+                                        @RequestParam Long ticketId) {
+        if (seatService.reserveSeatForTicket(group, number, ticketId)) {
             return createResponseEntity(HttpStatus.OK, "Seat successfully reserved");
         } else {
             return createResponseEntity(HttpStatus.CONFLICT, "Seat is already taken");

@@ -4,11 +4,12 @@ import ch.wisv.areafiftylan.dto.SeatGroupDTO;
 import ch.wisv.areafiftylan.dto.SeatmapResponse;
 import ch.wisv.areafiftylan.exception.SeatNotFoundException;
 import ch.wisv.areafiftylan.exception.TeamNotFoundException;
-import ch.wisv.areafiftylan.exception.UserNotFoundException;
 import ch.wisv.areafiftylan.model.Seat;
 import ch.wisv.areafiftylan.model.Team;
+import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.service.repository.SeatRespository;
+import ch.wisv.areafiftylan.service.repository.TicketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,19 +19,20 @@ import java.util.*;
 public class SeatServiceImpl implements SeatService {
 
     SeatRespository seatRespository;
-    UserService userService;
+    TicketRepository ticketRepository;
     TeamService teamService;
 
     @Autowired
-    public SeatServiceImpl(SeatRespository seatRespository, UserService userService, TeamService teamService) {
+    public SeatServiceImpl(SeatRespository seatRespository, TicketRepository ticketRepository,
+                           TeamService teamService) {
         this.seatRespository = seatRespository;
-        this.userService = userService;
+        this.ticketRepository = ticketRepository;
         this.teamService = teamService;
     }
 
     @Override
     public Seat getSeatByUsername(String username) {
-        return seatRespository.findByUserUsername(username)
+        return seatRespository.findByTicketOwnerUsername(username)
                 .orElseThrow(() -> new SeatNotFoundException("User " + username + " doesn't have a seat"));
     }
 
@@ -64,11 +66,11 @@ public class SeatServiceImpl implements SeatService {
     }
 
     @Override
-    public boolean reserveSeatForUser(String groupname, int seatnumber, String username) {
-        User user = userService.getUserByUsername(username).orElseThrow(() -> new UserNotFoundException(username));
+    public boolean reserveSeatForTicket(String groupname, int seatnumber, Long ticketId) {
+        Ticket ticket = ticketRepository.findOne(ticketId);
         Seat seat = seatRespository.findBySeatGroupAndSeatNumber(groupname, seatnumber);
         if (!seat.isTaken()) {
-            seat.setUser(user);
+            seat.setTicket(ticket);
             seatRespository.saveAndFlush(seat);
             return true;
         } else {
@@ -111,7 +113,7 @@ public class SeatServiceImpl implements SeatService {
         Team team = teamService.getTeamByTeamname(teamName).orElseThrow(() -> new TeamNotFoundException(teamName));
 
         for (User user : team.getMembers()) {
-            Optional<Seat> seat = seatRespository.findByUserUsername(user.getUsername());
+            Optional<Seat> seat = seatRespository.findByTicketOwnerUsername(user.getUsername());
             if (seat.isPresent()) {
                 seats.add(seat.get());
             }

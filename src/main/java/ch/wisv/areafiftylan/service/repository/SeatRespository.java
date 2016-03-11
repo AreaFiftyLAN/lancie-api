@@ -9,7 +9,7 @@ import java.util.Optional;
 
 @Repository
 public interface SeatRespository extends JpaRepository<Seat, Long> {
-    Optional<Seat> findByUserUsername(String username);
+    Optional<Seat> findByTicketOwnerUsername(String username);
 
     List<Seat> findBySeatGroup(String seatGroup);
 

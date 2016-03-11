@@ -1,6 +1,7 @@
 package ch.wisv.areafiftylan.model;
 
 import ch.wisv.areafiftylan.model.view.View;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import javax.persistence.*;
@@ -14,7 +15,7 @@ public class Seat {
 
     @OneToOne(cascade = CascadeType.MERGE)
     @JsonView(View.Public.class)
-    public User user;
+    public Ticket ticket;
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -44,14 +45,15 @@ public class Seat {
         this.taken = taken;
     }
 
+    @JsonIgnore
     public User getUser() {
-        return user;
+        return ticket.getOwner();
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setTicket(Ticket ticket) {
+        this.ticket = ticket;
 
-        this.taken = this.user != null;
+        this.taken = this.ticket != null;
     }
 
     public String getSeatGroup() {
