@@ -125,7 +125,7 @@ public class OrderServiceImpl implements OrderService {
 
             // Find a Ticket in the order, equal to the given DTO. Throw an exception when the ticket doesn't exist
             Ticket ticket = order.getTickets().stream().filter(isEqualToDTO(ticketDTO)).findFirst()
-                    .orElseThrow(() -> new TicketNotFoundException("No such ticket in this Order"));
+                    .orElseThrow(() -> new TicketNotFoundException());
 
             order.getTickets().remove(ticket);
             ticketRepository.delete(ticket);

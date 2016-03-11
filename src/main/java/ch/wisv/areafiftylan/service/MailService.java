@@ -22,5 +22,7 @@ public interface MailService {
 
     void sendPasswordResetMail(User user, String url) throws MessagingException;
 
+    void sendTicketTransferMail(User sender, User receiver, String url) throws MessagingException;
+
     void sendTeamInviteMail(User user, String teamName, User teamCaptain) throws MessagingException;
 }

@@ -16,14 +16,9 @@ public class Ticket {
     @JsonView(View.OrderOverview.class)
     Long id;
 
-    String key;
-
     @ManyToOne(cascade = CascadeType.MERGE)
     @JsonView(View.Public.class)
     User owner;
-
-    @ManyToOne(cascade = CascadeType.MERGE)
-    User transferGoalOwner;
 
     @Enumerated(EnumType.STRING)
     @JsonView(View.OrderOverview.class)
@@ -38,8 +33,6 @@ public class Ticket {
     @JsonView(View.OrderOverview.class)
     boolean chMember;
 
-    boolean transferrable;
-
     @JsonView(View.OrderOverview.class)
     boolean valid;
 
@@ -48,14 +41,11 @@ public class Ticket {
 
     public Ticket(User owner, TicketType type, Boolean pickupService, Boolean chMember) {
         this.owner = owner;
-        this.transferGoalOwner = null;
         this.type = type;
         this.text = type.getText();
         this.pickupService = pickupService;
         this.chMember = chMember;
-        transferrable = false;
         this.valid = false;
-        key = UUID.randomUUID().toString();
 
         price = getPrice();
     }
@@ -64,17 +54,7 @@ public class Ticket {
         //JPA Only
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public boolean isTransferrable() {
-        return transferrable;
-    }
-
-    public void setTransferrable(boolean transferrable) {
-        this.transferrable = transferrable;
-    }
+    public Long getId(){ return id; }
 
     public boolean isPickupService() {
         return pickupService;
@@ -87,14 +67,6 @@ public class Ticket {
 
     public boolean isChMember() {
         return chMember;
-    }
-
-    public User getTransferGoalOwner() {
-        return transferGoalOwner;
-    }
-
-    public void setTransferGoalOwner(User transferGoalOwner) {
-        this.transferGoalOwner = transferGoalOwner;
     }
 
     public User getOwner() {
@@ -129,13 +101,5 @@ public class Ticket {
 
     public void setValid(boolean valid) {
         this.valid = valid;
-    }
-
-    public void setNewKey(){
-        this.key = UUID.randomUUID().toString();
-    }
-
-    public String getKey(){
-        return this.key;
     }
 }

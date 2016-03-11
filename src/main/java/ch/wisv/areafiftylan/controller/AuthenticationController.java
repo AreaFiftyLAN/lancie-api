@@ -104,7 +104,7 @@ public class AuthenticationController {
         userService.resetPassword(user.getId(), password);
 
         // Disable the token for future use.
-        passwordResetToken.setUsed(true);
+        passwordResetToken.use();
         passwordResetTokenRepository.saveAndFlush(passwordResetToken);
 
         return createResponseEntity(HttpStatus.OK, "Password set!");
@@ -136,7 +136,7 @@ public class AuthenticationController {
         }
 
         userService.verify(user.getId());
-        verificationToken.setUsed(true);
+        verificationToken.use();
 
         //Disable the token for future use.
         verificationTokenRepository.saveAndFlush(verificationToken);

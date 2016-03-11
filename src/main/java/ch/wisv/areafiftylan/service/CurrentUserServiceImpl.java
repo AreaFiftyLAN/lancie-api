@@ -1,5 +1,6 @@
 package ch.wisv.areafiftylan.service;
 
+import ch.wisv.areafiftylan.exception.InvalidTokenException;
 import ch.wisv.areafiftylan.exception.TeamNotFoundException;
 import ch.wisv.areafiftylan.exception.TicketNotFoundException;
 import ch.wisv.areafiftylan.exception.TokenNotFoundException;
@@ -7,6 +8,8 @@ import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.util.Role;
+import ch.wisv.areafiftylan.security.TicketTransferToken;
+import ch.wisv.areafiftylan.service.repository.TicketTransferTokenRepository;
 import ch.wisv.areafiftylan.security.TeamInviteToken;
 import ch.wisv.areafiftylan.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.service.repository.token.TeamInviteTokenRepository;
@@ -35,6 +38,15 @@ public class CurrentUserServiceImpl implements CurrentUserService {
 
     @Autowired
     TicketService ticketService;
+    TicketTransferTokenRepository tttRepository;
+
+    @Autowired
+    public CurrentUserServiceImpl(TeamService teamService, OrderService orderService, TicketService ticketService, TicketTransferTokenRepository tttRepository) {
+        this.teamService = teamService;
+        this.orderService = orderService;
+        this.ticketService = ticketService;
+        this.tttRepository = tttRepository;
+    }
 
     @Override
     public boolean canAccessUser(Object principal, Long userId) {
@@ -105,10 +117,10 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     }
 
     @Override
-    public boolean isTicketOwner(Object principal, String key){
+    public boolean isTicketOwner(Object principal, Long ticketId){
         if (principal instanceof UserDetails) {
             User user = (User) principal;
-            return ticketService.getTicketByKey(key).getOwner().equals(user);
+            return ticketService.getTicketById(ticketId).getOwner().equals(user);
         } else {
             return false;
         }
@@ -182,10 +194,24 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     }
 
     @Override
-    public boolean isTicketReceiver(Object principal, String ticketKey){
+    public boolean isTicketSender(Object principal, String token){
+        TicketTransferToken ttt = tttRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
+
         if (principal instanceof UserDetails) {
             User user = (User) principal;
-            return ticketService.getTicketByKey(ticketKey).getTransferGoalOwner().equals(user);
+            return ttt.getUser().equals(user);
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean isTicketReceiver(Object principal, String token){
+        TicketTransferToken ttt = tttRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
+
+        if (principal instanceof UserDetails) {
+            User user = (User) principal;
+            return ttt.getGoalUser().equals(user);
         } else {
             return false;
         }

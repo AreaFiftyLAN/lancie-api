@@ -10,6 +10,7 @@ import java.util.Date;
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Token {
+    //Zero means not expirable
     private static final int EXPIRATION = 60 * 24;
 
     @Id
@@ -25,6 +26,7 @@ public abstract class Token {
     private Date expiryDate;
 
     private boolean used = false;
+    private boolean revoked = false;
 
     public Token() {
     }
@@ -69,13 +71,21 @@ public abstract class Token {
         this.expiryDate = expiryDate;
     }
 
-    public void setUsed(boolean used) {
-        this.used = used;
+    public boolean getIsExpireable(){
+        return EXPIRATION != 0;
+    }
+
+    public void use() {
+        this.used = true;
+    }
+
+    public void revoke(){
+        this.revoked = true;
     }
 
     public boolean isValid() {
         // returns true only if the token is not used and not expired
-        return !(this.used || isExpired());
+        return !(this.used || isExpired() || isRevoked());
     }
 
     private boolean isExpired() {
@@ -83,4 +93,7 @@ public abstract class Token {
         return (this.getExpiryDate().getTime() - cal.getTime().getTime()) <= 0;
     }
 
+    private boolean isRevoked() {
+        return revoked;
+    }
 }

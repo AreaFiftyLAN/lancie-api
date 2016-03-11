@@ -1,10 +1,13 @@
 package ch.wisv.areafiftylan;
 
+import ch.wisv.areafiftylan.exception.TokenNotFoundException;
 import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.util.Gender;
 import ch.wisv.areafiftylan.model.util.TicketType;
+import ch.wisv.areafiftylan.security.TicketTransferToken;
 import ch.wisv.areafiftylan.service.repository.TicketRepository;
+import ch.wisv.areafiftylan.service.repository.TicketTransferTokenRepository;
 import ch.wisv.areafiftylan.util.SessionData;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Response;
@@ -15,8 +18,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.keygen.StringKeyGenerator;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.jayway.restassured.RestAssured.given;
@@ -34,6 +39,10 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
     @Autowired
     private TicketRepository ticketRepository;
 
+    @Autowired
+    private TicketTransferTokenRepository tttRepository;
+
+
     @Before
     public void initTransferTest(){
         outsider = makeOutsider();
@@ -43,8 +52,8 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
 
     @After
     public void cleanTransferTest(){
+        tttRepository.deleteAll();
         ticketRepository.deleteAll();
-        userRepository.delete(ticketReceiver);
     }
 
     private User makeTicketReceiver(){
@@ -79,71 +88,68 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
 
         given().
         when().
-                content(transferRequest + "/" + ticket.getKey()).contentType(ContentType.JSON).
+                content(transferRequest + "/" + ticket.getId()).contentType(ContentType.JSON).
                 post(TRANSFER_ENDPOINT).
         then().
                 statusCode(HttpStatus.SC_FORBIDDEN);
 
-        ticket = ticketRepository.findByKey(ticket.getKey()).orElse(null);
-
-        Assert.assertTrue(!ticket.isTransferrable());
-        Assert.assertTrue(ticket.getOwner().equals(user));
-        Assert.assertTrue(ticket.getTransferGoalOwner() == null);
+        Assert.assertTrue(tttRepository.count() == 0);
     }
 
     @Test
     public void testAddTransfer_Owner(){
-        addTicketTransfer(user.getUsername(), "password").then().statusCode(HttpStatus.SC_OK);
+        String token = addTicketTransfer(user.getUsername(), "password")
+                .then()
+                    .statusCode(HttpStatus.SC_OK)
+                .extract().path("object.token");
 
-        ticket = ticketRepository.findByKey(ticket.getKey()).orElse(null);
+        TicketTransferToken ttt = tttRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
 
-        Assert.assertTrue(ticket.isTransferrable());
-        Assert.assertTrue(ticket.getOwner().equals(user));
-        Assert.assertTrue(ticket.getTransferGoalOwner().equals(ticketReceiver));
+        Assert.assertTrue(ttt.isValid());
+        Assert.assertTrue(ttt.getUser().equals(user));
+        Assert.assertTrue(ttt.getGoalUser().equals(ticketReceiver));
     }
 
     @Test
     public void testAddTransfer_Receiver(){
-        addTicketTransfer(ticketReceiver.getUsername(), "password").then().statusCode(HttpStatus.SC_FORBIDDEN);
+        addTicketTransfer(ticketReceiver.getUsername(), "password")
+                .then()
+                    .statusCode(HttpStatus.SC_FORBIDDEN);
 
-        ticket = ticketRepository.findByKey(ticket.getKey()).orElse(null);
-
-        Assert.assertTrue(!ticket.isTransferrable());
-        Assert.assertTrue(ticket.getOwner().equals(user));
-        Assert.assertTrue(ticket.getTransferGoalOwner() == null);
+        Assert.assertTrue(tttRepository.count() == 0);
     }
 
     @Test
     public void testAddTransfer_Outsider(){
-        addTicketTransfer(outsider.getUsername(), "password").then().statusCode(HttpStatus.SC_FORBIDDEN);
+        addTicketTransfer(outsider.getUsername(), "password")
+                .then()
+                .statusCode(HttpStatus.SC_FORBIDDEN);
 
-        ticket = ticketRepository.findByKey(ticket.getKey()).orElse(null);
-
-        Assert.assertTrue(!ticket.isTransferrable());
-        Assert.assertTrue(ticket.getOwner().equals(user));
-        Assert.assertTrue(ticket.getTransferGoalOwner() == null);
+        Assert.assertTrue(tttRepository.count() == 0);
     }
 
     @Test
     public void testDoTransfer_Anon(){
-        addTicketTransfer(user.getUsername(), "password");
+        TicketTransferToken ttt = addTicketTransferGetToken();
 
         given().
         when().
-                put(TRANSFER_ENDPOINT + "/" + ticket.getKey()).
+                content(ttt.getToken()).
+                put(TRANSFER_ENDPOINT).
         then().
                 statusCode(HttpStatus.SC_FORBIDDEN);
 
-        ticket = ticketRepository.findByKey(ticket.getKey()).orElse(null);
+        String token = ttt.getToken();
+        ticket = ticketRepository.findOne(ticket.getId());
+        ttt = tttRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
 
-        Assert.assertTrue(ticket.isTransferrable());
+        Assert.assertTrue(ttt.isValid());
         Assert.assertTrue(ticket.getOwner().equals(user));
-        Assert.assertTrue(ticket.getTransferGoalOwner().equals(ticketReceiver));
     }
 
     @Test
     public void testDoTransfer_Owner(){
-        addTicketTransfer(user.getUsername(), "password");
+        TicketTransferToken ttt = addTicketTransferGetToken();
 
         SessionData login = login(user.getUsername(), "password");
 
@@ -151,21 +157,23 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
                 filter(sessionFilter).
                 header(login.getCsrfHeader()).
         when().
-                put(TRANSFER_ENDPOINT + "/" + ticket.getKey()).
+                content(ttt.getToken()).
+                put(TRANSFER_ENDPOINT).
         then().
                 statusCode(HttpStatus.SC_FORBIDDEN);
 
-        ticket = ticketRepository.findByKey(ticket.getKey()).orElse(null);
+        String token = ttt.getToken();
+        ttt = tttRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
+        ticket = ticketRepository.findOne(ticket.getId());
 
-        Assert.assertTrue(ticket.isTransferrable());
+        Assert.assertTrue(ttt.isValid());
         Assert.assertTrue(ticket.getOwner().equals(user));
-        Assert.assertTrue(ticket.getTransferGoalOwner().equals(ticketReceiver));
     }
 
 
     @Test
     public void testDoTransfer_Receiver(){
-        addTicketTransfer(user.getUsername(), "password");
+        TicketTransferToken ttt = addTicketTransferGetToken();
 
         SessionData login = login(ticketReceiver.getUsername(), "password");
 
@@ -173,20 +181,22 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
                 filter(sessionFilter).
                 header(login.getCsrfHeader()).
         when().
-                put(TRANSFER_ENDPOINT + "/" + ticket.getKey()).
+                content(ttt.getToken()).
+                put(TRANSFER_ENDPOINT).
         then().
                 statusCode(HttpStatus.SC_OK);
 
-        ticket = ticketRepository.findByOwnerUsername(ticketReceiver.getUsername()).orElse(null);
+        String token = ttt.getToken();
+        ttt = tttRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
+        ticket = ticketRepository.findOne(ticket.getId());
 
-        Assert.assertTrue(!ticket.isTransferrable());
+        Assert.assertTrue(!ttt.isValid());
         Assert.assertTrue(ticket.getOwner().equals(ticketReceiver));
-        Assert.assertTrue(ticket.getTransferGoalOwner() == null);
     }
 
     @Test
     public void testDoTransfer_Outsider(){
-        addTicketTransfer(user.getUsername(), "password");
+        TicketTransferToken ttt = addTicketTransferGetToken();
 
         SessionData login = login(outsider.getUsername(), "password");
 
@@ -194,71 +204,41 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
                 filter(sessionFilter).
                 header(login.getCsrfHeader()).
         when().
-                put(TRANSFER_ENDPOINT + "/" + ticket.getKey()).
+                content(ttt.getToken()).
+                put(TRANSFER_ENDPOINT).
         then().
                 statusCode(HttpStatus.SC_FORBIDDEN);
 
-        ticket = ticketRepository.findByKey(ticket.getKey()).orElse(null);
+        String token = ttt.getToken();
+        ttt = tttRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
+        ticket = ticketRepository.findOne(ticket.getId());
 
-        Assert.assertTrue(ticket.isTransferrable());
+        Assert.assertTrue(ttt.isValid());
         Assert.assertTrue(ticket.getOwner().equals(user));
-        Assert.assertTrue(ticket.getTransferGoalOwner().equals(ticketReceiver));
-    }
-
-    @Test
-    public void testCancelTransferNotTransferrable_Anon(){
-        given().
-        when().
-                delete(TRANSFER_ENDPOINT + "/" + ticket.getKey()).
-        then().
-                statusCode(HttpStatus.SC_FORBIDDEN);
-
-        ticket = ticketRepository.findByKey(ticket.getKey()).orElse(null);
-
-        Assert.assertTrue(!ticket.isTransferrable());
-        Assert.assertTrue(ticket.getOwner().equals(user));
-        Assert.assertTrue(ticket.getTransferGoalOwner() == null);
     }
 
     @Test
     public void testCancelTransfer_Anon(){
-        addTicketTransfer(user.getUsername(), "password");
+        TicketTransferToken ttt = addTicketTransferGetToken();
 
         given().
         when().
-                delete(TRANSFER_ENDPOINT + "/" + ticket.getKey()).
+                content(ttt.getToken()).
+                delete(TRANSFER_ENDPOINT).
         then().
                 statusCode(HttpStatus.SC_FORBIDDEN);
 
-        ticket = ticketRepository.findByKey(ticket.getKey()).orElse(null);
+        String token = ttt.getToken();
+        ttt = tttRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
+        ticket = ticketRepository.findOne(ticket.getId());
 
-        Assert.assertTrue(ticket.isTransferrable());
+        Assert.assertTrue(ttt.isValid());
         Assert.assertTrue(ticket.getOwner().equals(user));
-        Assert.assertTrue(ticket.getTransferGoalOwner().equals(ticketReceiver));
-    }
-
-    @Test
-    public void testCancelTransferNotTransferrable_Owner(){
-        SessionData login = login(user.getUsername(), "password");
-
-        given().
-                filter(sessionFilter).
-                header(login.getCsrfHeader()).
-        when().
-                delete(TRANSFER_ENDPOINT + "/" + ticket.getKey()).
-        then().
-                statusCode(HttpStatus.SC_BAD_REQUEST);
-
-        ticket = ticketRepository.findByKey(ticket.getKey()).orElse(null);
-
-        Assert.assertTrue(!ticket.isTransferrable());
-        Assert.assertTrue(ticket.getOwner().equals(user));
-        Assert.assertTrue(ticket.getTransferGoalOwner() == null);
     }
 
     @Test
     public void testCancelTransfer_Owner(){
-        addTicketTransfer(user.getUsername(), "password");
+        TicketTransferToken ttt = addTicketTransferGetToken();
 
         SessionData login = login(user.getUsername(), "password");
 
@@ -266,40 +246,22 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
                 filter(sessionFilter).
                 header(login.getCsrfHeader()).
         when().
-                delete(TRANSFER_ENDPOINT + "/" + ticket.getKey()).
+                content(ttt.getToken()).
+                delete(TRANSFER_ENDPOINT).
         then().
                 statusCode(HttpStatus.SC_OK);
 
-        ticket = ticketRepository.findByKey(ticket.getKey()).orElse(null);
+        String token = ttt.getToken();
+        ttt = tttRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
+        ticket = ticketRepository.findOne(ticket.getId());
 
-        Assert.assertTrue(!ticket.isTransferrable());
+        Assert.assertTrue(!ttt.isValid());
         Assert.assertTrue(ticket.getOwner().equals(user));
-        Assert.assertTrue(ticket.getTransferGoalOwner() == null);
-
-    }
-
-    @Test
-    public void testCancelTransferNotTransferrable_Receiver(){
-        SessionData login = login(ticketReceiver.getUsername(), "password");
-
-        given().
-                filter(sessionFilter).
-                header(login.getCsrfHeader()).
-        when().
-                delete(TRANSFER_ENDPOINT + "/" + ticket.getKey()).
-        then().
-                statusCode(HttpStatus.SC_FORBIDDEN);
-
-        ticket = ticketRepository.findByKey(ticket.getKey()).orElse(null);
-
-        Assert.assertTrue(!ticket.isTransferrable());
-        Assert.assertTrue(ticket.getOwner().equals(user));
-        Assert.assertTrue(ticket.getTransferGoalOwner() == null);
     }
 
     @Test
     public void testCancelTransfer_Receiver(){
-        addTicketTransfer(user.getUsername(), "password");
+        TicketTransferToken ttt = addTicketTransferGetToken();
 
         SessionData login = login(ticketReceiver.getUsername(), "password");
 
@@ -307,39 +269,22 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
                 filter(sessionFilter).
                 header(login.getCsrfHeader()).
         when().
-                delete(TRANSFER_ENDPOINT + "/" + ticket.getKey()).
+                content(ttt.getToken()).
+                delete(TRANSFER_ENDPOINT).
         then().
                 statusCode(HttpStatus.SC_FORBIDDEN);
 
-        ticket = ticketRepository.findByKey(ticket.getKey()).orElse(null);
+        String token = ttt.getToken();
+        ttt = tttRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
+        ticket = ticketRepository.findOne(ticket.getId());
 
-        Assert.assertTrue(ticket.isTransferrable());
+        Assert.assertTrue(ttt.isValid());
         Assert.assertTrue(ticket.getOwner().equals(user));
-        Assert.assertTrue(ticket.getTransferGoalOwner().equals(ticketReceiver));
-    }
-
-    @Test
-    public void testCancelTransferNotTransferrable_OutsideUser(){
-        SessionData login = login(outsider.getUsername(), "password");
-
-        given().
-                filter(sessionFilter).
-                header(login.getCsrfHeader()).
-        when().
-                delete(TRANSFER_ENDPOINT + "/" + ticket.getKey()).
-        then().
-                statusCode(HttpStatus.SC_FORBIDDEN);
-
-        ticket = ticketRepository.findByKey(ticket.getKey()).orElse(null);
-
-        Assert.assertTrue(!ticket.isTransferrable());
-        Assert.assertTrue(ticket.getOwner().equals(user));
-        Assert.assertTrue(ticket.getTransferGoalOwner() == null);
     }
 
     @Test
     public void testCancelTransfer_OutsideUser(){
-        addTicketTransfer(user.getUsername(), "password");
+        TicketTransferToken ttt = addTicketTransferGetToken();
 
         SessionData login = login(outsider.getUsername(), "password");
 
@@ -347,16 +292,17 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
                 filter(sessionFilter).
                 header(login.getCsrfHeader()).
         when().
-                delete(TRANSFER_ENDPOINT + "/" + ticket.getKey()).
+                content(ttt.getToken()).
+                delete(TRANSFER_ENDPOINT).
         then().
                 statusCode(HttpStatus.SC_FORBIDDEN);
 
-        ticket = ticketRepository.findByKey(ticket.getKey()).orElse(null);
+        String token = ttt.getToken();
+        ttt = tttRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
+        ticket = ticketRepository.findOne(ticket.getId());
 
-        Assert.assertTrue(ticket.isTransferrable());
+        Assert.assertTrue(ttt.isValid());
         Assert.assertTrue(ticket.getOwner().equals(user));
-        Assert.assertTrue(ticket.getTransferGoalOwner().equals(ticketReceiver));
-
     }
 
     private Response addTicketTransfer(String uname, String pw){
@@ -370,7 +316,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
                 header(login.getCsrfHeader()).
         when().
                 content(transferRequest).contentType(ContentType.JSON).
-                post(TRANSFER_ENDPOINT + "/" + ticket.getKey()).
+                post(TRANSFER_ENDPOINT + "/" + ticket.getId()).
         then().
                 extract().response();
 
@@ -379,4 +325,11 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
         return r;
     }
 
+    private TicketTransferToken addTicketTransferGetToken(){
+        String token = addTicketTransfer(user.getUsername(), "password").
+            then().
+                extract().path("object.token");
+
+        return tttRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
+    }
 }
