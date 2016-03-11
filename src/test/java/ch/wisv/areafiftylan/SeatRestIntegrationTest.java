@@ -28,7 +28,7 @@ import static com.jayway.restassured.RestAssured.when;
 import static org.hamcrest.Matchers.*;
 
 /**
- * Created by sille on 17-11-15.
+ * Created by Sille Kamoen on 17-11-15.
  */
 public class SeatRestIntegrationTest extends IntegrationTest {
 
@@ -324,9 +324,25 @@ public class SeatRestIntegrationTest extends IntegrationTest {
         seatGroupDTO.put("numberOfSeats", "5");
 
         //@formatter:off
-        SessionData login = login("user", "password");
+        given().
+        when().
+            content(seatGroupDTO).
+            contentType(ContentType.JSON).
+            post("/seats").
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
+    }
+
+    @Test
+    public void addSeatGroupAsUser(){
+        Map<String, String> seatGroupDTO = new HashMap<>();
+        seatGroupDTO.put("seatGroupName", "testGroup");
+        seatGroupDTO.put("numberOfSeats", "5");
 
         //@formatter:off
+        SessionData login = login("user", "password");
+
         given().
             filter(sessionFilter).
             header(login.getCsrfHeader()).
@@ -334,19 +350,39 @@ public class SeatRestIntegrationTest extends IntegrationTest {
             content(seatGroupDTO).
             contentType(ContentType.JSON).
             post("/seats").
-        then().log().ifValidationFails()
-            .statusCode(HttpStatus.SC_FORBIDDEN);
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
     }
 
     @Test
-    public void addSeatGroupAsUser(){
-
-    }
-
-    @Test
     public void addSeatGroupAsAdmin(){
+        Map<String, String> seatGroupDTO = new HashMap<>();
+        seatGroupDTO.put("seatGroupName", "testGroup");
+        seatGroupDTO.put("numberOfSeats", "5");
 
+        //@formatter:off
+        SessionData login = login("admin", "password");
+
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            content(seatGroupDTO).
+            contentType(ContentType.JSON).
+            post("/seats").
+        then().
+            statusCode(HttpStatus.SC_OK);
+
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            get("/seats/" + "testGroup").
+        then().
+            statusCode(HttpStatus.SC_OK).
+            body("seatmap.testGroup", hasSize(5));
+        //@formatter:on
     }
     //endregion
 
@@ -358,7 +394,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
         when().
             param("username", "user").
             post("/seats/A/1").
-        then().log().all().
+        then().
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
     }
@@ -374,7 +410,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
         when().
             param("ticketId", userTicket.getId()).
             post("/seats/A/1").
-        then().log().all().
+        then().
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
     }
@@ -398,33 +434,158 @@ public class SeatRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void reserveSeatAsTeamCaptain(){
+    public void reserveSeatForUserAsTeamCaptain() {
+        createCaptainAndTeam();
 
+        SessionData login = login("captain");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            param("ticketId", userTicket.getId()).
+            post("/seats/A/1").
+        then().
+            statusCode(HttpStatus.SC_OK);
+        //@formatter:on
     }
 
     @Test
-    public void reserveSeatAsAdmin(){
+    public void reserveSeatForUserAsAdmin() {
+        createCaptainAndTeam();
 
+        SessionData login = login("admin");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            param("ticketId", userTicket.getId()).
+            post("/seats/A/1").
+        then().
+            statusCode(HttpStatus.SC_OK);
+        //@formatter:on
     }
 
     @Test
-    public void reserveTakenSeatAsUser(){
+    public void reserveTakenSeatAsUser() {
+        createCaptainAndTeam();
 
+        SessionData login = login("captain");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            param("ticketId", captainTicket.getId()).
+            post("/seats/A/1").
+        then().
+            statusCode(HttpStatus.SC_OK);
+
+        logout();
+
+        SessionData login2 = login("user");
+
+        given().
+            filter(sessionFilter).
+            header(login2.getCsrfHeader()).
+        when().
+            param("ticketId", userTicket.getId()).
+            post("/seats/A/1").
+        then().
+            statusCode(HttpStatus.SC_CONFLICT);
+        //@formatter:on
     }
 
     @Test
     public void changeSeatAsUser() {
+        SessionData login = login("user");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            param("ticketId", userTicket.getId()).
+            post("/seats/A/1").
+        then().
+            statusCode(HttpStatus.SC_OK);
+
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            param("ticketId", userTicket.getId()).
+            post("/seats/A/2").
+        then().
+            statusCode(HttpStatus.SC_OK);
+        //@formatter:on
 
     }
 
     @Test
     public void changeSeatAsAdmin() {
+        SessionData login = login("user");
 
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            param("ticketId", userTicket.getId()).
+            post("/seats/A/1").
+        then().
+            statusCode(HttpStatus.SC_OK);
+        //@formatter:on
+
+        logout();
+
+        login = login("admin");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            param("ticketId", userTicket.getId()).
+            post("/seats/A/2").
+        then().
+            statusCode(HttpStatus.SC_OK);
+        //@formatter:on
     }
 
     @Test
     public void changeSeatAsCaptain() {
+        createCaptainAndTeam();
 
+        SessionData login = login("user");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            param("ticketId", userTicket.getId()).
+            post("/seats/A/1").
+        then().
+            statusCode(HttpStatus.SC_OK);
+
+        logout();
+
+        login = login("captain");
+
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            param("ticketId", userTicket.getId()).
+            post("/seats/A/2").
+        then().
+            statusCode(HttpStatus.SC_OK);
+        //@formatter:on
     }
     //endregion
 

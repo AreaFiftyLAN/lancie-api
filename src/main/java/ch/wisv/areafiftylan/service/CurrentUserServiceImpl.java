@@ -84,9 +84,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
             Collection<Team> userTeams = teamService.getTeamByCaptainId(user.getId());
 
             // For each set of members in a team, check if the owner of the ticket is one of them.
-            boolean r =
-                    userTeams.stream().map(Team::getMembers).anyMatch(members -> members.contains(ticket.getOwner()));
-            return r;
+            return userTeams.stream().map(Team::getMembers).anyMatch(members -> members.contains(ticket.getOwner()));
         } else {
             return false;
         }
