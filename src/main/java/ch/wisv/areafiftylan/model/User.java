@@ -139,4 +139,33 @@ public class User implements Serializable, UserDetails {
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        User user = (User) o;
+
+        if (!username.equals(user.username)) {
+            return false;
+        }
+        if (!email.equals(user.email)) {
+            return false;
+        }
+        return id.equals(user.id);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = username.hashCode();
+        result = 31 * result + email.hashCode();
+        result = 31 * result + id.hashCode();
+        return result;
+    }
 }
