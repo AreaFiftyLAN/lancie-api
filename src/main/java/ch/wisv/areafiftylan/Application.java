@@ -1,9 +1,16 @@
 package ch.wisv.areafiftylan;
 
 
+import ch.wisv.areafiftylan.dto.SeatGroupDTO;
+import ch.wisv.areafiftylan.model.Seat;
+import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.util.Gender;
 import ch.wisv.areafiftylan.model.util.Role;
+import ch.wisv.areafiftylan.model.util.TicketType;
+import ch.wisv.areafiftylan.service.SeatService;
+import ch.wisv.areafiftylan.service.repository.SeatRespository;
+import ch.wisv.areafiftylan.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.service.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -21,7 +28,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 public class Application {
 
     @Bean
-    CommandLineRunner init(UserRepository accountRepository) {
+    CommandLineRunner init(UserRepository accountRepository,
+                           TicketRepository ticketRepository,
+                           SeatService seatService) {
 
         return (evt) -> {
             User testUser1 = new User("user", new BCryptPasswordEncoder().encode("password"), "user@mail.com");
@@ -52,6 +61,16 @@ public class Application {
             accountRepository.saveAndFlush(testUser4);
             accountRepository.saveAndFlush(testUser5);
 
+            Ticket ticket = new Ticket(testUser1, TicketType.EARLY_FULL, false, false);
+            ticketRepository.save(ticket);
+
+            for (char s = 'A'; s <= 'J'; s++) {
+                SeatGroupDTO seatGroup = new SeatGroupDTO();
+                seatGroup.setNumberOfSeats(16);
+                seatGroup.setSeatGroupName(String.valueOf(s));
+                seatService.addSeats(seatGroup);
+            }
+            seatService.reserveSeatForTicket("A", 2, ticket.getId());
         };
 
     }
