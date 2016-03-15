@@ -136,9 +136,9 @@ public class CurrentUserRestController {
      * @return The current open order, if any exist
      */
     @RequestMapping(value = "/orders/open", method = RequestMethod.GET)
-    public Order getOpenOrder(Authentication auth) {
+    public List<Order> getOpenOrder(Authentication auth) {
         UserDetails currentUser = (UserDetails) auth.getPrincipal();
-        return orderService.getOpenOrder(currentUser.getUsername());
+        return orderService.getOpenOrders(currentUser.getUsername());
     }
 
     @RequestMapping(value = "/seat", method = RequestMethod.GET)

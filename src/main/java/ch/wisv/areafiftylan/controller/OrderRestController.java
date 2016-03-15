@@ -9,7 +9,6 @@ import ch.wisv.areafiftylan.model.Order;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.view.View;
 import ch.wisv.areafiftylan.service.OrderService;
-import ch.wisv.areafiftylan.service.UserService;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -30,14 +29,11 @@ import static ch.wisv.areafiftylan.util.ResponseEntityBuilder.createResponseEnti
 @RestController
 public class OrderRestController {
 
-    OrderService orderService;
-
-    UserService userService;
+    private OrderService orderService;
 
     @Autowired
-    public OrderRestController(OrderService orderService, UserService userService) {
+    public OrderRestController(OrderService orderService) {
         this.orderService = orderService;
-        this.userService = userService;
     }
 
     @PreAuthorize("hasRole('ADMIN')")

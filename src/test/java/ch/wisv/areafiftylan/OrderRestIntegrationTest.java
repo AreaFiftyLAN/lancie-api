@@ -408,13 +408,13 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             get("/users/current/orders/open").
         then().
             statusCode(HttpStatus.SC_OK).
-            body("status", equalTo("CREATING")).
-            body("reference", is(nullValue())).
-            body("user.username", is("user")).
+            body("status", hasItem(equalTo("CREATING"))).
+            body("reference", hasItem(is(nullValue()))).
+            body("user.username", hasItem(is("user"))).
             body("tickets", hasSize(1)).
-            body("tickets.type", hasItem(is("EARLY_FULL"))).
-            body("tickets.pickupService", hasItem(is(false))).
-            body("amount",equalTo(37.50F));
+            body("tickets.type", hasItem(hasItem(is("EARLY_FULL")))).
+            body("tickets.pickupService", hasItem(hasItem(is(false)))).
+            body("amount",hasItem(equalTo(37.50F)));
         //@formatter:on
     }
 
@@ -429,8 +429,8 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         when().
             get("/users/current/orders/open").
         then().
-            statusCode(HttpStatus.SC_NOT_FOUND).
-            body("message", equalTo("User has no open order"));
+            statusCode(HttpStatus.SC_OK).
+            body("$", hasSize(0));
         //@formatter:on
     }
 

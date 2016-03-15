@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -60,10 +61,12 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Order getOpenOrder(String username) {
+    public List<Order> getOpenOrders(String username) {
         Collection<Order> ordersByUsername = findOrdersByUsername(username);
-        return ordersByUsername.stream().filter(o -> o.getStatus().equals(OrderStatus.CREATING)).findFirst()
-                .orElseThrow(() -> new OrderNotFoundException("User has no open order"));
+
+        return ordersByUsername.stream().
+                filter(o -> o.getStatus().equals(OrderStatus.CREATING)).
+                collect(Collectors.toList());
     }
 
     @Override
