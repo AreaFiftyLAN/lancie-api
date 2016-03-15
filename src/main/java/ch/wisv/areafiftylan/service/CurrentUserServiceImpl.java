@@ -1,10 +1,13 @@
 package ch.wisv.areafiftylan.service;
 
+import ch.wisv.areafiftylan.exception.TokenNotFoundException;
 import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.util.Role;
+import ch.wisv.areafiftylan.security.TeamInviteToken;
 import ch.wisv.areafiftylan.service.repository.TicketRepository;
+import ch.wisv.areafiftylan.service.repository.token.TeamInviteTokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -14,14 +17,19 @@ import java.util.Collection;
 @Service
 public class CurrentUserServiceImpl implements CurrentUserService {
 
-    @Autowired
     TeamService teamService;
-
-    @Autowired
     OrderService orderService;
+    TicketRepository ticketRepository;
+    TeamInviteTokenRepository teamInviteTokenRepository;
 
     @Autowired
-    TicketRepository ticketRepository;
+    public CurrentUserServiceImpl(TeamService teamService, OrderService orderService, TicketRepository ticketRepository,
+                                  TeamInviteTokenRepository teamInviteTokenRepository) {
+        this.teamService = teamService;
+        this.orderService = orderService;
+        this.ticketRepository = ticketRepository;
+        this.teamInviteTokenRepository = teamInviteTokenRepository;
+    }
 
     @Override
     public boolean canAccessUser(Object principal, Long userId) {
@@ -62,7 +70,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     public boolean canRemoveFromTeam(Object principal, Long teamId, String username) {
         if (principal instanceof UserDetails) {
             UserDetails currentUser = (UserDetails) principal;
-            Team team = teamService.getTeamById(teamId).orElseThrow(() -> new TeamNotFoundException(teamId));
+            Team team = teamService.getTeamById(teamId);
 
             // The Teamcaptain can't remove himself
             if (team.getCaptain().getUsername().equals(username)) {
@@ -123,5 +131,38 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     @Override
     public boolean hasTicket(String username) {
         return ticketRepository.findByOwnerUsername(username).isPresent();
+    }
+
+    @Override
+    public boolean canRevokeInvite(Object principal, String token) {
+        if (principal instanceof UserDetails) {
+            User user = (User) principal;
+
+            TeamInviteToken teamInviteToken =
+                    teamInviteTokenRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
+
+            // Tokens can be revoked by the target user, an Admin or the Captain
+            return teamInviteToken.getUser().equals(user) || user.getAuthorities().contains(Role.ROLE_ADMIN) ||
+                    teamInviteToken.getTeam().getCaptain().equals(user);
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean canAcceptInvite(Object principal, String token) {
+        if (principal instanceof UserDetails) {
+            User user = (User) principal;
+
+            TeamInviteToken teamInviteToken =
+                    teamInviteTokenRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
+
+            // Tokens can only be accepted by the target user
+            boolean r = teamInviteToken.getUser().equals(user);
+            return r;
+        } else {
+            return false;
+        }
+
     }
 }

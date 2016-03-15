@@ -3,6 +3,7 @@ package ch.wisv.areafiftylan.service;
 import ch.wisv.areafiftylan.dto.TeamDTO;
 import ch.wisv.areafiftylan.dto.TeamInviteResponse;
 import ch.wisv.areafiftylan.model.Team;
+import ch.wisv.areafiftylan.security.TeamInviteToken;
 
 import java.util.Collection;
 import java.util.List;
@@ -15,7 +16,7 @@ public interface TeamService {
 
     Team getTeamById(Long id);
 
-    Optional<Team> getTeamByTeamname(String teamname);
+    Team getTeamByTeamname(String teamname);
 
     Collection<Team> getTeamByCaptainId(Long userId);
 
@@ -27,7 +28,7 @@ public interface TeamService {
 
     Team delete(Long teamId);
 
-    void inviteMember(Long teamId, String username);
+    TeamInviteToken inviteMember(Long teamId, String username);
 
     void removeInvite(String token);
 

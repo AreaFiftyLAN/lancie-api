@@ -2,11 +2,11 @@ package ch.wisv.areafiftylan.controller;
 
 import ch.wisv.areafiftylan.dto.TeamDTO;
 import ch.wisv.areafiftylan.dto.TeamInviteResponse;
-import ch.wisv.areafiftylan.exception.TeamNotFoundException;
 import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.util.Role;
 import ch.wisv.areafiftylan.model.view.View;
+import ch.wisv.areafiftylan.security.TeamInviteToken;
 import ch.wisv.areafiftylan.service.TeamService;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -156,8 +156,9 @@ public class TeamRestController {
             "and @currentUserServiceImpl.hasTicket(#username)")
     @RequestMapping(method = RequestMethod.POST, value = "/{teamId}/invites")
     public ResponseEntity<?> inviteTeamMember(@PathVariable Long teamId, @RequestBody String username) {
-        teamService.inviteMember(teamId, username);
-        return createResponseEntity(HttpStatus.OK, "User " + username + " successfully invited to Team " + teamId);
+        TeamInviteToken teamInviteToken = teamService.inviteMember(teamId, username);
+        return createResponseEntity(HttpStatus.OK, "User " + username + " successfully invited to Team " + teamId,
+                teamInviteToken);
     }
 
     @PreAuthorize("@currentUserServiceImpl.canEditTeam(principal, #teamId)")
@@ -166,12 +167,14 @@ public class TeamRestController {
         return teamService.findTeamInvitesByTeamId(teamId);
     }
 
+    @PreAuthorize("@currentUserServiceImpl.canAcceptInvite(principal, #token)")
     @RequestMapping(method = RequestMethod.POST, value = "/invites")
     public ResponseEntity<?> acceptTeamInvite(@RequestBody String token) {
         teamService.addMemberByInvite(token);
         return createResponseEntity(HttpStatus.OK, "Invite successfully accepted");
     }
 
+    @PreAuthorize("@currentUserServiceImpl.canRevokeInvite(principal, #token)")
     @RequestMapping(method = RequestMethod.DELETE, value = "/invites")
     public ResponseEntity<?> declineTeamInvite(@RequestBody String token) {
         teamService.removeInvite(token);

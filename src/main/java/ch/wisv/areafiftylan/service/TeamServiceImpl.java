@@ -17,7 +17,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -52,12 +55,13 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public Team getTeamById(Long teamId) {
-        return teamRepository.getOne(teamId);
+        return teamRepository.findById(teamId).orElseThrow(() -> new TeamNotFoundException(teamId));
     }
 
     @Override
-    public Optional<Team> getTeamByTeamname(String teamname) {
-        return teamRepository.findByTeamName(teamname);
+    public Team getTeamByTeamname(String teamname) {
+        return teamRepository.findByTeamName(teamname)
+                .orElseThrow(() -> new TeamNotFoundException("Cant find team with  name " + teamname));
     }
 
     @Override
@@ -77,7 +81,7 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public Team update(Long teamId, TeamDTO input) {
-        Team current = this.getTeamById(teamId);
+        Team current = getTeamById(teamId);
 
         // If the Teamname is set, change the Teamname
         if (!Strings.isNullOrEmpty(input.getTeamName())) {
@@ -101,15 +105,13 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public void inviteMember(Long teamId, String username) {
+    public TeamInviteToken inviteMember(Long teamId, String username) {
         User user = userService.getUserByUsername(username).orElseThrow(() -> new UsernameNotFoundException(username));
-        Team team = getTeamById(teamId).orElseThrow(() -> new TeamNotFoundException(teamId));
-        String token = UUID.randomUUID().toString();
+        Team team = getTeamById(teamId);
 
         if (!team.getMembers().contains(user)) {
-
+            String token = UUID.randomUUID().toString();
             TeamInviteToken inviteToken = new TeamInviteToken(token, user, team);
-
             teamInviteTokenRepository.save(inviteToken);
 
             try {
@@ -118,6 +120,8 @@ public class TeamServiceImpl implements TeamService {
                 // TODO: Fix mailservice exception handling
                 e.printStackTrace();
             }
+            return inviteToken;
+
         } else {
             throw new IllegalArgumentException("User is already a member of this team");
         }
@@ -125,6 +129,7 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public void removeInvite(String token) {
+        // TODO: Revoke instead of delete once this is available
         TeamInviteToken teamInviteToken =
                 teamInviteTokenRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
         teamInviteTokenRepository.delete(teamInviteToken);
@@ -163,7 +168,6 @@ public class TeamServiceImpl implements TeamService {
         addMember(teamInviteToken.getTeam().getId(), teamInviteToken.getUser().getUsername());
         teamInviteToken.setUsed(true);
         teamInviteTokenRepository.save(teamInviteToken);
-
     }
 
     @Override
@@ -179,7 +183,7 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public boolean removeMember(Long teamId, String username) {
-        Team team = teamRepository.getOne(teamId);
+        Team team = getTeamById(teamId);
         User user = userService.getUserByUsername(username).orElseThrow(() -> new UserNotFoundException(username));
         if (team.getCaptain().equals(user)) {
             return false;

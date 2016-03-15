@@ -19,4 +19,8 @@ public interface CurrentUserService {
     boolean hasTicket(Object principal);
 
     boolean hasTicket(String username);
+
+    boolean canRevokeInvite(Object principal, String token);
+
+    boolean canAcceptInvite(Object principal, String token);
 }
