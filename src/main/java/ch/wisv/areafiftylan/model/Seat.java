@@ -1,49 +1,58 @@
 package ch.wisv.areafiftylan.model;
 
-import ch.wisv.areafiftylan.model.util.Coordinate;
+import ch.wisv.areafiftylan.model.view.View;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
+import lombok.Getter;
+import lombok.Setter;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
 
 @Entity
+@Table(uniqueConstraints = { @UniqueConstraint(name = "seatConstraint", columnNames = { "seatGroup","seatNumber" }) } )
 public class Seat {
 
-    boolean taken;
-    @OneToOne(cascade = CascadeType.MERGE)
-    User user;
-    @Id
-    private Coordinate coordinate;
+    @Getter
+    @Setter
+    @JsonView(View.Public.class)
+    public boolean taken;
 
-    public Seat(Coordinate coordinate) {
-        this.coordinate = coordinate;
+    @OneToOne(cascade = CascadeType.MERGE)
+    @JsonView(View.Public.class)
+    public Ticket ticket;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long Id;
+
+    @Getter
+    @Setter
+    @JsonView(View.Public.class)
+    public String seatGroup;
+
+    @Getter
+    @Setter
+    @JsonView(View.Public.class)
+    public int seatNumber;
+
+    public Seat(String seatGroup, int seatNumber) {
+        this.seatGroup = seatGroup;
+        this.seatNumber = seatNumber;
         this.taken = false;
     }
 
-    public Seat() {
-        //JPA only
+    public Seat(){
+        //JPA ONLY
     }
 
-    public boolean isTaken() {
-        return taken;
-    }
-
-    public void setTaken(boolean taken) {
-        this.taken = taken;
-    }
-
+    @JsonIgnore
     public User getUser() {
-        return user;
+        return ticket.getOwner();
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setTicket(Ticket ticket) {
+        this.ticket = ticket;
 
-        this.taken = this.user != null;
-    }
-
-    public Coordinate getCoordinate() {
-        return coordinate;
+        this.taken = this.ticket != null;
     }
 }

@@ -3,6 +3,8 @@ package ch.wisv.areafiftylan;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.util.Gender;
 import ch.wisv.areafiftylan.model.util.Role;
+import ch.wisv.areafiftylan.service.repository.SeatRepository;
+import ch.wisv.areafiftylan.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.service.repository.UserRepository;
 import ch.wisv.areafiftylan.util.SessionData;
 import com.jayway.restassured.RestAssured;
@@ -37,6 +39,13 @@ public abstract class IntegrationTest {
     @Autowired
     protected UserRepository userRepository;
 
+    //FIXME: This shouldn't be here. Can be fixed with proper dev/production/test profiles.
+    @Autowired
+    private SeatRepository seatRepository;
+    @Autowired
+    private TicketRepository ticketRepository;
+
+
     protected User user;
 
     protected User admin;
@@ -45,7 +54,10 @@ public abstract class IntegrationTest {
 
     @Before
     public void initIntegrationTest() {
+        seatRepository.deleteAll();
+        ticketRepository.deleteAll();
         userRepository.deleteAll();
+
 
         user = new User("user", new BCryptPasswordEncoder().encode("password"), "user@mail.com");
         user.getProfile()

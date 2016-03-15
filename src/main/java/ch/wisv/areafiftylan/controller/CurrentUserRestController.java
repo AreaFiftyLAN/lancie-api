@@ -3,10 +3,12 @@ package ch.wisv.areafiftylan.controller;
 
 import ch.wisv.areafiftylan.dto.PasswordChangeDTO;
 import ch.wisv.areafiftylan.model.Order;
+import ch.wisv.areafiftylan.model.Seat;
 import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.view.View;
 import ch.wisv.areafiftylan.service.OrderService;
+import ch.wisv.areafiftylan.service.SeatService;
 import ch.wisv.areafiftylan.service.TeamService;
 import ch.wisv.areafiftylan.service.UserService;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collection;
+import java.util.List;
 
 import static ch.wisv.areafiftylan.util.ResponseEntityBuilder.createResponseEntity;
 
@@ -31,13 +34,15 @@ import static ch.wisv.areafiftylan.util.ResponseEntityBuilder.createResponseEnti
 public class CurrentUserRestController {
 
     private UserService userService;
+    private SeatService seatService;
     private TeamService teamService;
 
     private OrderService orderService;
 
     @Autowired
-    CurrentUserRestController(UserService userService, OrderService orderService, TeamService teamService) {
+    CurrentUserRestController(UserService userService, OrderService orderService, TeamService teamService, SeatService seatService) {
         this.userService = userService;
+        this.seatService = seatService;
         this.orderService = orderService;
         this.teamService = teamService;
     }
@@ -125,5 +130,12 @@ public class CurrentUserRestController {
     public Order getOpenOrder(Authentication auth) {
         UserDetails currentUser = (UserDetails) auth.getPrincipal();
         return orderService.getOpenOrder(currentUser.getUsername());
+    }
+
+    @RequestMapping(value = "/seat", method = RequestMethod.GET)
+    public List<Seat> getCurrentUserSeat(Authentication auth) {
+        User user = (User) auth.getPrincipal();
+
+        return seatService.getSeatsByUsername(user.getUsername());
     }
 }

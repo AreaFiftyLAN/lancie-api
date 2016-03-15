@@ -1,11 +1,17 @@
 package ch.wisv.areafiftylan.service.repository;
 
 import ch.wisv.areafiftylan.model.Seat;
-import ch.wisv.areafiftylan.model.User;
-import ch.wisv.areafiftylan.model.util.Coordinate;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-public interface SeatRepository extends JpaRepository<Seat, Coordinate>{
-    Seat findByCoordinate(Coordinate coordinate);
-    Seat findByUser(User user);
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+public interface SeatRepository extends JpaRepository<Seat, Long> {
+    List<Seat> findByTicketOwnerUsername(String username);
+
+    List<Seat> findBySeatGroup(String seatGroup);
+
+    Seat findBySeatGroupAndSeatNumber(String seatGroup, int seatNumber);
 }

@@ -19,6 +19,7 @@ public class Ticket {
     String key;
 
     @ManyToOne(cascade = CascadeType.MERGE)
+    @JsonView(View.Public.class)
     User owner;
 
     @ManyToOne(cascade = CascadeType.MERGE)
@@ -61,6 +62,10 @@ public class Ticket {
 
     public Ticket() {
         //JPA Only
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public boolean isLockedForTransfer() {

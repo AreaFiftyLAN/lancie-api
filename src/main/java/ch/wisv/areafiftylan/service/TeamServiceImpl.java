@@ -1,7 +1,6 @@
 package ch.wisv.areafiftylan.service;
 
 import ch.wisv.areafiftylan.dto.TeamDTO;
-import ch.wisv.areafiftylan.exception.TeamNotFoundException;
 import ch.wisv.areafiftylan.exception.UserNotFoundException;
 import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.model.User;
@@ -40,8 +39,8 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public Optional<Team> getTeamById(Long teamId) {
-        return teamRepository.findById(teamId);
+    public Team getTeamById(Long teamId) {
+        return teamRepository.getOne(teamId);
     }
 
     @Override
@@ -66,7 +65,7 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public Team update(Long teamId, TeamDTO input) {
-        Team current = this.getTeamById(teamId).get();
+        Team current = this.getTeamById(teamId);
 
         // If the Teamname is set, change the Teamname
         if (!Strings.isNullOrEmpty(input.getTeamName())) {
@@ -91,7 +90,7 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public void addMember(Long teamId, String username) {
-        Team team = teamRepository.findById(teamId).orElseThrow(() -> new TeamNotFoundException(teamId));
+        Team team = teamRepository.getOne(teamId);
         User user = userService.getUserByUsername(username).orElseThrow(() -> new UserNotFoundException(username));
         if (team.addMember(user)) {
             teamRepository.saveAndFlush(team);
@@ -102,7 +101,7 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public boolean removeMember(Long teamId, String username) {
-        Team team = teamRepository.findById(teamId).orElseThrow(() -> new TeamNotFoundException(teamId));
+        Team team = teamRepository.getOne(teamId);
         User user = userService.getUserByUsername(username).orElseThrow(() -> new UserNotFoundException(username));
         if (team.getCaptain().equals(user)) {
             return false;
