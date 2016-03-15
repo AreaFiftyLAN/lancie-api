@@ -119,17 +119,17 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     }
 
     @Override
-    public boolean hasTicket(Object principal) {
+    public boolean hasAnyTicket(Object principal) {
         if (principal instanceof UserDetails) {
             User user = (User) principal;
-            return hasTicket(user.getUsername()) || user.getAuthorities().contains(Role.ROLE_ADMIN);
+            return hasAnyTicket(user.getUsername()) || user.getAuthorities().contains(Role.ROLE_ADMIN);
         } else {
             return false;
         }
     }
 
     @Override
-    public boolean hasTicket(String username) {
+    public boolean hasAnyTicket(String username) {
         return ticketRepository.findByOwnerUsername(username).isPresent();
     }
 

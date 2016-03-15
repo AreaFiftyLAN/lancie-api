@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -34,9 +33,9 @@ public class TeamServiceImpl implements TeamService {
     public TeamServiceImpl(TeamRepository teamRepository, UserService userService, MailService mailService,
                            TeamInviteTokenRepository teamInviteTokenRepository) {
         this.teamRepository = teamRepository;
-        this.teamInviteTokenRepository = teamInviteTokenRepository;
         this.userService = userService;
         this.mailService = mailService;
+        this.teamInviteTokenRepository = teamInviteTokenRepository;
     }
 
     @Override
@@ -115,7 +114,7 @@ public class TeamServiceImpl implements TeamService {
             teamInviteTokenRepository.save(inviteToken);
 
             try {
-                mailService.sendTeamInviteMail(user, team.getTeamName());
+                mailService.sendTeamInviteMail(user, team.getTeamName(), team.getCaptain());
             } catch (MessagingException e) {
                 // TODO: Fix mailservice exception handling
                 e.printStackTrace();
@@ -150,15 +149,13 @@ public class TeamServiceImpl implements TeamService {
     }
 
     private List<TeamInviteResponse> teamInviteTokensToReponses(Collection<TeamInviteToken> inviteTokens) {
-        if (!inviteTokens.isEmpty()) {
             // From all Tokens that exist in the database linked to the user, only display the valid ones. Change
             // them to TeamInviteResponses for display in the controller.
-            return inviteTokens.stream().filter(Token::isValid)
-                    .map(t -> new TeamInviteResponse(t.getTeam().getId(), t.getTeam().getTeamName(), t.getToken(),
-                            t.getUser().getUsername())).collect(Collectors.toList());
-        } else {
-            return Collections.emptyList();
-        }
+        return inviteTokens.stream().
+                filter(Token::isValid).
+                map(t -> new TeamInviteResponse(t.getTeam().getId(), t.getTeam().getTeamName(), t.getToken(),
+                        t.getUser().getUsername())).
+                collect(Collectors.toList());
     }
 
     @Override

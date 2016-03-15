@@ -94,9 +94,16 @@ public class MailServiceImpl implements MailService {
     }
 
     @Override
-    public void sendTeamInviteMail(User user, String teamName) throws MessagingException {
-        String message =
-                "You've been invited to join Team " + teamName + "! Please log in to My Area to accept the invitation.";
-        sendMail(user.getEmail(), user.getUsername(), null, "You've been invited to Team " + teamName, message);
+    public void sendTeamInviteMail(User user, String teamName, User teamCaptain) throws MessagingException {
+
+        String message = "You've been invited to join \"Team " + teamName +
+                "\" by " +
+                teamCaptain.getProfile().getFirstName() +
+                " " +
+                teamCaptain.getProfile().getLastName() +
+                "! Please log in to My Area to accept the invitation.";
+
+        sendMail(user.getEmail(), user.getUsername(), null, "You've been invited to \"Team " + teamName + "\"",
+                message);
     }
 }
