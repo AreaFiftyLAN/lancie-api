@@ -279,9 +279,9 @@ public class SeatRestIntegrationTest extends IntegrationTest {
             get("/users/current/seat").
         then().
             statusCode(HttpStatus.SC_OK).
-            body("ticket.owner.username", is(user.getUsername())).
-            body("ticket.owner.profile", hasKey("displayName")).
-            body("ticket.owner.profile", hasKey("firstName"));
+            body("[0].ticket.owner.username", is(user.getUsername())).
+            body("[0].ticket.owner.profile", hasKey("displayName")).
+            body("[0].ticket.owner.profile", hasKey("firstName"));
         //@formatter:on
     }
 
