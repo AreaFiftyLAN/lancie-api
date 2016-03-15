@@ -17,6 +17,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
+import java.util.List;
 
 import static ch.wisv.areafiftylan.util.ResponseEntityBuilder.createResponseEntity;
 
@@ -175,10 +176,10 @@ public class SeatRestController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @RequestMapping(value = "/users/{userId}/seat", method = RequestMethod.GET)
-    public Seat getSeatByUser(@PathVariable Long userId) {
+    public List<Seat> getSeatByUser(@PathVariable Long userId) {
         User user = userService.getUserById(userId);
 
-        return seatService.getSeatByUsername(user.getUsername());
+        return seatService.getSeatsByUsername(user.getUsername());
     }
 
     /**

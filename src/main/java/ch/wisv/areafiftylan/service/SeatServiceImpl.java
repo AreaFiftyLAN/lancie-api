@@ -2,62 +2,54 @@ package ch.wisv.areafiftylan.service;
 
 import ch.wisv.areafiftylan.dto.SeatGroupDTO;
 import ch.wisv.areafiftylan.dto.SeatmapResponse;
-import ch.wisv.areafiftylan.exception.SeatNotFoundException;
 import ch.wisv.areafiftylan.exception.TeamNotFoundException;
 import ch.wisv.areafiftylan.model.Seat;
 import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.User;
-import ch.wisv.areafiftylan.service.repository.SeatRespository;
+import ch.wisv.areafiftylan.service.repository.SeatRepository;
 import ch.wisv.areafiftylan.service.repository.TicketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class SeatServiceImpl implements SeatService {
 
-    SeatRespository seatRespository;
+    SeatRepository seatRepository;
     TicketRepository ticketRepository;
     TeamService teamService;
 
+    private static final Object seatReservationLock = new Object();
+
     @Autowired
-    public SeatServiceImpl(SeatRespository seatRespository, TicketRepository ticketRepository,
+    public SeatServiceImpl(SeatRepository seatRepository, TicketRepository ticketRepository,
                            TeamService teamService) {
-        this.seatRespository = seatRespository;
+        this.seatRepository = seatRepository;
         this.ticketRepository = ticketRepository;
         this.teamService = teamService;
     }
 
     @Override
-    public Seat getSeatByUsername(String username) {
-        return seatRespository.findByTicketOwnerUsername(username)
-                .orElseThrow(() -> new SeatNotFoundException("User " + username + " doesn't have a seat"));
+    public List<Seat> getSeatsByUsername(String username) {
+        return seatRepository.findByTicketOwnerUsername(username);
+
     }
 
     @Override
     public SeatmapResponse getAllSeats() {
-        List<Seat> all = seatRespository.findAll();
+        List<Seat> all = seatRepository.findAll();
 
-        Map<String, List<Seat>> seatMapResponse = new HashMap<>();
+        Map<String, List<Seat>> seatMapGroups = all.stream().collect(Collectors.groupingBy(Seat::getSeatGroup));
 
-        for (Seat seat : all) {
-            if (seatMapResponse.containsKey(seat.getSeatGroup())) {
-                seatMapResponse.get(seat.getSeatGroup()).add(seat);
-            } else {
-                List<Seat> seats = new ArrayList<>();
-                seats.add(seat);
-                seatMapResponse.put(seat.getSeatGroup(), seats);
-            }
-        }
-
-        return new SeatmapResponse(seatMapResponse);
+        return new SeatmapResponse(seatMapGroups);
     }
 
     @Override
     public SeatmapResponse getSeatGroupByName(String groupname) {
-        List<Seat> seatGroup = seatRespository.findBySeatGroup(groupname);
+        List<Seat> seatGroup = seatRepository.findBySeatGroup(groupname);
 
         Map<String, List<Seat>> seatMapResponse = new HashMap<>();
         seatMapResponse.put(groupname, seatGroup);
@@ -68,32 +60,39 @@ public class SeatServiceImpl implements SeatService {
     @Override
     public boolean reserveSeatForTicket(String groupname, int seatnumber, Long ticketId) {
         Ticket ticket = ticketRepository.findOne(ticketId);
-        Seat seat = seatRespository.findBySeatGroupAndSeatNumber(groupname, seatnumber);
-        if (!seat.isTaken()) {
-            seat.setTicket(ticket);
-            seatRespository.saveAndFlush(seat);
-            return true;
-        } else {
-            return false;
+
+        // We can only reserve one seat at a time, to prevent the extremely unlikely event of simultaneous requests
+        synchronized (seatReservationLock) {
+            Seat seat = seatRepository.findBySeatGroupAndSeatNumber(groupname, seatnumber);
+            if (!seat.isTaken()) {
+                seat.setTicket(ticket);
+                seatRepository.saveAndFlush(seat);
+                return true;
+            } else {
+                return false;
+            }
         }
     }
 
     @Override
     public boolean reserveSeat(String groupname, int seatnumber) {
-        Seat seat = seatRespository.findBySeatGroupAndSeatNumber(groupname, seatnumber);
+        // We can only reserve one seat at a time, to prevent the extremely unlikely event of simultaneous requests
+        synchronized (seatReservationLock) {
+            Seat seat = seatRepository.findBySeatGroupAndSeatNumber(groupname, seatnumber);
 
-        if (!seat.isTaken()) {
-            seat.setTaken(true);
-            seatRespository.saveAndFlush(seat);
-            return true;
-        } else {
-            return false;
+            if (!seat.isTaken()) {
+                seat.setTaken(true);
+                seatRepository.saveAndFlush(seat);
+                return true;
+            } else {
+                return false;
+            }
         }
     }
 
     @Override
     public Seat getSeatBySeatGroupAndSeatNumber(String groupName, int seatNumber) {
-        return seatRespository.findBySeatGroupAndSeatNumber(groupName, seatNumber);
+        return seatRepository.findBySeatGroupAndSeatNumber(groupName, seatNumber);
     }
 
     @Override
@@ -103,22 +102,17 @@ public class SeatServiceImpl implements SeatService {
         for (int i = 1; i <= seatGroupDTO.getNumberOfSeats(); i++) {
             seatList.add(new Seat(seatGroupDTO.getSeatGroupName(), i));
         }
-
-        seatRespository.save(seatList);
+        seatRepository.save(seatList);
     }
 
     @Override
-    public Set<Seat> getSeatsByTeamName(String teamName) {
-        Set<Seat> seats = new HashSet<>();
+    public List<Seat> getSeatsByTeamName(String teamName) {
         Team team = teamService.getTeamByTeamname(teamName).orElseThrow(() -> new TeamNotFoundException(teamName));
 
-        for (User user : team.getMembers()) {
-            Optional<Seat> seat = seatRespository.findByTicketOwnerUsername(user.getUsername());
-            if (seat.isPresent()) {
-                seats.add(seat.get());
-            }
-        }
-
-        return seats;
+        return team.getMembers().stream().
+                map(User::getUsername).
+                map(seatRepository::findByTicketOwnerUsername).
+                flatMap(Collection::stream).
+                collect(Collectors.toList());
     }
 }

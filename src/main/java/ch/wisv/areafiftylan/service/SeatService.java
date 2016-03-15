@@ -4,11 +4,11 @@ import ch.wisv.areafiftylan.dto.SeatGroupDTO;
 import ch.wisv.areafiftylan.dto.SeatmapResponse;
 import ch.wisv.areafiftylan.model.Seat;
 
-import java.util.Set;
+import java.util.List;
 
 public interface SeatService {
 
-    Seat getSeatByUsername(String username);
+    List<Seat> getSeatsByUsername(String username);
 
     SeatmapResponse getAllSeats();
 
@@ -22,5 +22,5 @@ public interface SeatService {
 
     void addSeats(SeatGroupDTO seatGroupDTO);
 
-    Set<Seat> getSeatsByTeamName(String teamName);
+    List<Seat> getSeatsByTeamName(String teamName);
 }

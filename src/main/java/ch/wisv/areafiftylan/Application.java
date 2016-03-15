@@ -2,14 +2,12 @@ package ch.wisv.areafiftylan;
 
 
 import ch.wisv.areafiftylan.dto.SeatGroupDTO;
-import ch.wisv.areafiftylan.model.Seat;
 import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.util.Gender;
 import ch.wisv.areafiftylan.model.util.Role;
 import ch.wisv.areafiftylan.model.util.TicketType;
 import ch.wisv.areafiftylan.service.SeatService;
-import ch.wisv.areafiftylan.service.repository.SeatRespository;
 import ch.wisv.areafiftylan.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.service.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;

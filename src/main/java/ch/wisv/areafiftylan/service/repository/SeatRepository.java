@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface SeatRespository extends JpaRepository<Seat, Long> {
-    Optional<Seat> findByTicketOwnerUsername(String username);
+public interface SeatRepository extends JpaRepository<Seat, Long> {
+    List<Seat> findByTicketOwnerUsername(String username);
 
     List<Seat> findBySeatGroup(String seatGroup);
 

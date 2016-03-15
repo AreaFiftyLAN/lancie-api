@@ -4,6 +4,7 @@ import ch.wisv.areafiftylan.model.util.Role;
 import ch.wisv.areafiftylan.model.view.View;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
+import lombok.EqualsAndHashCode;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -16,6 +17,7 @@ import java.util.HashSet;
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(name = "username", columnNames = { "username" }),
         @UniqueConstraint(name = "email", columnNames = { "email" }) })
+@EqualsAndHashCode
 public class User implements Serializable, UserDetails {
 
     @Column(nullable = false)
@@ -138,34 +140,5 @@ public class User implements Serializable, UserDetails {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        User user = (User) o;
-
-        if (!username.equals(user.username)) {
-            return false;
-        }
-        if (!email.equals(user.email)) {
-            return false;
-        }
-        return id.equals(user.id);
-
-    }
-
-    @Override
-    public int hashCode() {
-        int result = username.hashCode();
-        result = 31 * result + email.hashCode();
-        result = 31 * result + id.hashCode();
-        return result;
     }
 }

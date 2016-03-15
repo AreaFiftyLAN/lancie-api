@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collection;
+import java.util.List;
 
 import static ch.wisv.areafiftylan.util.ResponseEntityBuilder.createResponseEntity;
 
@@ -132,9 +133,9 @@ public class CurrentUserRestController {
     }
 
     @RequestMapping(value = "/seat", method = RequestMethod.GET)
-    public Seat getCurrentUserSeat(Authentication auth) {
+    public List<Seat> getCurrentUserSeat(Authentication auth) {
         User user = (User) auth.getPrincipal();
 
-        return seatService.getSeatByUsername(user.getUsername());
+        return seatService.getSeatsByUsername(user.getUsername());
     }
 }

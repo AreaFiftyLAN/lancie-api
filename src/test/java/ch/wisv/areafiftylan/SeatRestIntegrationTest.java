@@ -6,7 +6,7 @@ import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.util.Gender;
 import ch.wisv.areafiftylan.model.util.TicketType;
-import ch.wisv.areafiftylan.service.repository.SeatRespository;
+import ch.wisv.areafiftylan.service.repository.SeatRepository;
 import ch.wisv.areafiftylan.service.repository.TeamRepository;
 import ch.wisv.areafiftylan.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.util.SessionData;
@@ -33,7 +33,7 @@ import static org.hamcrest.Matchers.*;
 public class SeatRestIntegrationTest extends IntegrationTest {
 
     @Autowired
-    SeatRespository seatRespository;
+    SeatRepository seatRepository;
 
     @Autowired
     TeamRepository teamRepository;
@@ -57,7 +57,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
             seatList.add(new Seat("A", i));
         }
 
-        seatRespository.save(seatList);
+        seatRepository.save(seatList);
 
         userTicket = new Ticket(user, TicketType.EARLY_FULL, false, false);
         userTicket = ticketRepository.saveAndFlush(userTicket);
@@ -65,16 +65,16 @@ public class SeatRestIntegrationTest extends IntegrationTest {
 
     @After
     public void cleanupSeatIntegrationTest() {
-        seatRespository.deleteAll();
+        seatRepository.deleteAll();
         ticketRepository.deleteAll();
         teamRepository.deleteAll();
     }
 
     private void setTicketOnA1(Ticket ticket) {
-        Seat seat = seatRespository.findAll().get(0);
+        Seat seat = seatRepository.findAll().get(0);
         seat.setTicket(ticket);
 
-        seatRespository.save(seat);
+        seatRepository.save(seat);
     }
 
     private void createCaptainAndTeam() {
@@ -292,9 +292,9 @@ public class SeatRestIntegrationTest extends IntegrationTest {
         setTicketOnA1(captainTicket);
 
         // Seat User on seat A2
-        Seat seat = seatRespository.findAll().get(1);
+        Seat seat = seatRepository.findAll().get(1);
         seat.setTicket(userTicket);
-        seatRespository.save(seat);
+        seatRepository.save(seat);
 
         SessionData login = login("user");
 

@@ -3,6 +3,8 @@ package ch.wisv.areafiftylan.model;
 import ch.wisv.areafiftylan.model.view.View;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.*;
 
@@ -10,6 +12,8 @@ import javax.persistence.*;
 @Table(uniqueConstraints = { @UniqueConstraint(name = "seatConstraint", columnNames = { "seatGroup","seatNumber" }) } )
 public class Seat {
 
+    @Getter
+    @Setter
     @JsonView(View.Public.class)
     public boolean taken;
 
@@ -21,9 +25,13 @@ public class Seat {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long Id;
 
+    @Getter
+    @Setter
     @JsonView(View.Public.class)
     public String seatGroup;
 
+    @Getter
+    @Setter
     @JsonView(View.Public.class)
     public int seatNumber;
 
@@ -37,14 +45,6 @@ public class Seat {
         //JPA ONLY
     }
 
-    public boolean isTaken() {
-        return taken;
-    }
-
-    public void setTaken(boolean taken) {
-        this.taken = taken;
-    }
-
     @JsonIgnore
     public User getUser() {
         return ticket.getOwner();
@@ -54,21 +54,5 @@ public class Seat {
         this.ticket = ticket;
 
         this.taken = this.ticket != null;
-    }
-
-    public String getSeatGroup() {
-        return seatGroup;
-    }
-
-    public void setSeatGroup(String seatGroup) {
-        this.seatGroup = seatGroup;
-    }
-
-    public int getSeatNumber() {
-        return seatNumber;
-    }
-
-    public void setSeatNumber(int seatNumber) {
-        this.seatNumber = seatNumber;
     }
 }
