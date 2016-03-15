@@ -10,7 +10,8 @@ public class TeamNotFoundException extends RuntimeException {
         super("could not find team '" + teamname + "'.");
     }
 
-    public TeamNotFoundException(String m) {
-        super(m);
+    public TeamNotFoundException(Long teamId) {
+        super("Could not find team with id " + teamId);
     }
+
 }
