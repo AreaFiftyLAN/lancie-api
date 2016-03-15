@@ -1,10 +1,12 @@
 package ch.wisv.areafiftylan.controller;
 
 import ch.wisv.areafiftylan.dto.TeamDTO;
+import ch.wisv.areafiftylan.dto.TeamInviteResponse;
 import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.util.Role;
 import ch.wisv.areafiftylan.model.view.View;
+import ch.wisv.areafiftylan.security.TeamInviteToken;
 import ch.wisv.areafiftylan.service.TeamService;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 import static ch.wisv.areafiftylan.util.ResponseEntityBuilder.createResponseEntity;
@@ -43,7 +46,7 @@ public class TeamRestController {
      *
      * @return Return status message of the operation
      */
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated() and @currentUserServiceImpl.hasAnyTicket(principal)")
     @JsonView(View.Public.class)
     @RequestMapping(method = RequestMethod.POST)
     ResponseEntity<?> add(@Validated @RequestBody TeamDTO teamDTO, Authentication auth) {
@@ -125,6 +128,22 @@ public class TeamRestController {
     }
 
     /**
+     * Add members to the Team with the given Id. Expects only a username as Requestbody. People can only directly be
+     * added to a team by an Admin. Captains can only invite users.
+     *
+     * @param teamId   Id of the Team to which the User should be added.
+     * @param username Username of the User to be added to the Team
+     *
+     * @return Result message of the request
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @RequestMapping(method = RequestMethod.POST, value = "/{teamId}")
+    public ResponseEntity<?> addTeamMember(@PathVariable Long teamId, @RequestBody String username) {
+        teamService.addMember(teamId, username);
+        return createResponseEntity(HttpStatus.OK, "User " + username + " successfully added to Team " + teamId);
+    }
+
+    /**
      * Add members to the Team with the given Id. Expects only a username as Requestbody. Can only be done by the
      * Captain or an Admin
      *
@@ -133,11 +152,33 @@ public class TeamRestController {
      *
      * @return Result message of the request
      */
+    @PreAuthorize("@currentUserServiceImpl.canEditTeam(principal, #teamId) " +
+            "and @currentUserServiceImpl.hasAnyTicket(#username)")
+    @RequestMapping(method = RequestMethod.POST, value = "/{teamId}/invites")
+    public ResponseEntity<?> inviteTeamMember(@PathVariable Long teamId, @RequestBody String username) {
+        TeamInviteToken teamInviteToken = teamService.inviteMember(teamId, username);
+        return createResponseEntity(HttpStatus.OK, "User " + username + " successfully invited to Team " + teamId,
+                teamInviteToken);
+    }
+
     @PreAuthorize("@currentUserServiceImpl.canEditTeam(principal, #teamId)")
-    @RequestMapping(method = RequestMethod.POST, value = "/{teamId}")
-    public ResponseEntity<?> addTeamMember(@PathVariable Long teamId, @RequestBody String username) {
-        teamService.addMember(teamId, username);
-        return createResponseEntity(HttpStatus.OK, "User " + username + " successfully added to Team " + teamId);
+    @RequestMapping(method = RequestMethod.GET, value = "/{teamId}/invites")
+    public List<TeamInviteResponse> getTeamInvitesByTeam(@PathVariable Long teamId) {
+        return teamService.findTeamInvitesByTeamId(teamId);
+    }
+
+    @PreAuthorize("@currentUserServiceImpl.canAcceptInvite(principal, #token)")
+    @RequestMapping(method = RequestMethod.POST, value = "/invites")
+    public ResponseEntity<?> acceptTeamInvite(@RequestBody String token) {
+        teamService.addMemberByInvite(token);
+        return createResponseEntity(HttpStatus.OK, "Invite successfully accepted");
+    }
+
+    @PreAuthorize("@currentUserServiceImpl.canRevokeInvite(principal, #token)")
+    @RequestMapping(method = RequestMethod.DELETE, value = "/invites")
+    public ResponseEntity<?> declineTeamInvite(@RequestBody String token) {
+        teamService.removeInvite(token);
+        return createResponseEntity(HttpStatus.OK, "Invite successfully declined");
     }
 
     /**
@@ -165,7 +206,7 @@ public class TeamRestController {
      *
      * @return A status message of the operation
      */
-    @PreAuthorize("@currentUserServiceImpl.canEditTeam(principal, #teamId)")
+    @PreAuthorize("@currentUserServiceImpl.canRemoveFromTeam(principal, #teamId, #username)")
     @RequestMapping(method = RequestMethod.DELETE, value = "/{teamId}/members")
     public ResponseEntity<?> removeTeamMember(@PathVariable Long teamId, @RequestBody String username) {
         teamService.removeMember(teamId, username);
@@ -173,18 +214,23 @@ public class TeamRestController {
     }
 
     /**
-     * Delete an entire Team
+     * Delete an entire Team. Limit this for Admins for now
      *
      * @param teamId Id of the Team to be deleted
      *
      * @return The deleted Team
      */
-    @PreAuthorize("@currentUserServiceImpl.canEditTeam(principal, #teamId)")
+    @PreAuthorize("hasRole('ADMIN')")
     @JsonView(View.Public.class)
     @RequestMapping(method = RequestMethod.DELETE, value = "{teamId}")
     public ResponseEntity<?> delete(@PathVariable Long teamId) {
 
         Team deletedTeam = teamService.delete(teamId);
         return createResponseEntity(HttpStatus.OK, "Deleted team with " + teamId, deletedTeam);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<?> handleIllegalArgumentException(IllegalArgumentException e) {
+        return createResponseEntity(HttpStatus.CONFLICT, e.getMessage());
     }
 }

@@ -1,7 +1,7 @@
 package ch.wisv.areafiftylan;
 
 import ch.wisv.areafiftylan.model.User;
-import ch.wisv.areafiftylan.service.repository.VerificationTokenRepository;
+import ch.wisv.areafiftylan.service.repository.token.VerificationTokenRepository;
 import ch.wisv.areafiftylan.util.SessionData;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Header;

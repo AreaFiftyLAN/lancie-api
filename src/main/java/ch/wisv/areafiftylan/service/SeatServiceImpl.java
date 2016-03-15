@@ -2,7 +2,6 @@ package ch.wisv.areafiftylan.service;
 
 import ch.wisv.areafiftylan.dto.SeatGroupDTO;
 import ch.wisv.areafiftylan.dto.SeatmapResponse;
-import ch.wisv.areafiftylan.exception.TeamNotFoundException;
 import ch.wisv.areafiftylan.model.Seat;
 import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.model.Ticket;
@@ -107,7 +106,7 @@ public class SeatServiceImpl implements SeatService {
 
     @Override
     public List<Seat> getSeatsByTeamName(String teamName) {
-        Team team = teamService.getTeamByTeamname(teamName).orElseThrow(() -> new TeamNotFoundException(teamName));
+        Team team = teamService.getTeamByTeamname(teamName);
 
         return team.getMembers().stream().
                 map(User::getUsername).

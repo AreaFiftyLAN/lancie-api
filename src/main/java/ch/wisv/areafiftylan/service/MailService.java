@@ -21,4 +21,6 @@ public interface MailService {
     void sendVerificationmail(User user, String url) throws MessagingException;
 
     void sendPasswordResetMail(User user, String url) throws MessagingException;
+
+    void sendTeamInviteMail(User user, String teamName, User teamCaptain) throws MessagingException;
 }

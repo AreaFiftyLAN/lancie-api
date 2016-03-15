@@ -10,7 +10,17 @@ public interface CurrentUserService {
 
     boolean canEditTeam(Object principal, Long teamId);
 
+    boolean canRemoveFromTeam(Object principal, Long teamId, String username);
+
     boolean canAccessOrder(Object principal, Long orderId);
 
     boolean canReserveSeat(Object principal, Long ticketId);
+
+    boolean hasAnyTicket(Object principal);
+
+    boolean hasAnyTicket(String username);
+
+    boolean canRevokeInvite(Object principal, String token);
+
+    boolean canAcceptInvite(Object principal, String token);
 }
