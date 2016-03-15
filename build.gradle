@@ -50,7 +50,7 @@ dependencies {
     compile("com.zaxxer:HikariCP")
 
     compile("com.allanditzel:spring-security-csrf-token-filter:1.1")
-    compile("org.projectlombok:lombok:1.16.6")
+    compile("org.projectlombok:lombok:1.16.8")
     compile("com.google.guava:guava:19.0")
     compile("nl.stil4m:mollie-api:1.0.1")
 
