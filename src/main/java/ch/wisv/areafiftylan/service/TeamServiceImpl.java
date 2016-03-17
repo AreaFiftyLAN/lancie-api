@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import javax.mail.MessagingException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -109,11 +110,11 @@ public class TeamServiceImpl implements TeamService {
         Team team = getTeamById(teamId);
 
         // Check if the member isn't already invited
-        List<TeamInviteToken> currentTeamInvites = teamInviteTokenRepository.findByUserUsername(username).stream()
-                .filter(token -> token.getTeam().equals(team)).collect(Collectors.toList());
+        Optional<TeamInviteToken> optionalInvite = teamInviteTokenRepository.findByUserUsername(username).stream().
+                filter(token -> token.getTeam().equals(team)).findFirst();
 
         // Continue if the user isn't already a member, and there are no outstanding invites already
-        if (!team.getMembers().contains(user) && currentTeamInvites.isEmpty()) {
+        if (!team.getMembers().contains(user) && !optionalInvite.isPresent()) {
             String token = UUID.randomUUID().toString();
             TeamInviteToken inviteToken = new TeamInviteToken(token, user, team);
             teamInviteTokenRepository.save(inviteToken);

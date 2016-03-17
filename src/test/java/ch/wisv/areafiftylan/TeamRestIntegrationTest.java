@@ -419,7 +419,6 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
         SessionData sessionData = login("captain", "password");
 
-        //@formatter:off
         given().
             filter(sessionFilter).
             header(sessionData.getCsrfHeader()).
