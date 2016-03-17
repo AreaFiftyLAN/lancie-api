@@ -140,6 +140,11 @@ public class User implements Serializable, UserDetails {
         this.enabled = enabled;
     }
 
+    @JsonView(View.Public.class)
+    public int getReference() {
+        return username.hashCode();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
