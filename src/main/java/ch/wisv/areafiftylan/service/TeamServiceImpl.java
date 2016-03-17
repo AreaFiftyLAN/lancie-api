@@ -108,7 +108,12 @@ public class TeamServiceImpl implements TeamService {
         User user = userService.getUserByUsername(username).orElseThrow(() -> new UsernameNotFoundException(username));
         Team team = getTeamById(teamId);
 
-        if (!team.getMembers().contains(user)) {
+        // Check if the member isn't already invited
+        List<TeamInviteToken> currentTeamInvites = teamInviteTokenRepository.findByUserUsername(username).stream()
+                .filter(token -> token.getTeam().equals(team)).collect(Collectors.toList());
+
+        // Continue if the user isn't already a member, and there are no outstanding invites already
+        if (!team.getMembers().contains(user) && currentTeamInvites.isEmpty()) {
             String token = UUID.randomUUID().toString();
             TeamInviteToken inviteToken = new TeamInviteToken(token, user, team);
             teamInviteTokenRepository.save(inviteToken);
@@ -122,7 +127,7 @@ public class TeamServiceImpl implements TeamService {
             return inviteToken;
 
         } else {
-            throw new IllegalArgumentException("User is already a member of this team");
+            throw new IllegalArgumentException("User is already a member of this team or already invited");
         }
     }
 

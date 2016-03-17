@@ -411,6 +411,30 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
+    public void testInviteMemberTwiceAsCaptain() {
+        //@formatter:off
+        String location = createTeamWithCaptain();
+
+        inviteUserAsCaptain(location, user);
+
+        SessionData sessionData = login("captain", "password");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(sessionData.getCsrfHeader()).
+        when().
+            content(user.getUsername()).
+            post(location + "/invites").
+        then().
+            statusCode(HttpStatus.SC_CONFLICT);
+        //@formatter:on
+
+        Collection<TeamInviteToken> tokens = teamInviteTokenRepository.findByUserUsername(user.getUsername());
+        Assert.assertEquals(1, tokens.size());
+    }
+
+    @Test
     public void testAddMemberAsMember() {
         team1.put("captainUsername", teamCaptain.getUsername());
 
