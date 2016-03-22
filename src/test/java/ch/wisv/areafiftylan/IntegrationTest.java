@@ -39,13 +39,6 @@ public abstract class IntegrationTest {
     @Autowired
     protected UserRepository userRepository;
 
-    //FIXME: This shouldn't be here. Can be fixed with proper dev/production/test profiles.
-    @Autowired
-    private SeatRepository seatRepository;
-    @Autowired
-    private TicketRepository ticketRepository;
-
-
     protected User user;
 
     protected User admin;
@@ -54,11 +47,6 @@ public abstract class IntegrationTest {
 
     @Before
     public void initIntegrationTest() {
-        seatRepository.deleteAll();
-        ticketRepository.deleteAll();
-        userRepository.deleteAll();
-
-
         user = new User("user", new BCryptPasswordEncoder().encode("password"), "user@mail.com");
         user.getProfile()
                 .setAllFields("Jan", "de Groot", "MonsterKiller9001", Gender.MALE, "Mekelweg 4", "2826CD", "Delft",

@@ -16,6 +16,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
@@ -26,6 +27,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 public class Application {
 
     @Bean
+    @Profile("!test")
     CommandLineRunner init(UserRepository accountRepository,
                            TicketRepository ticketRepository,
                            SeatService seatService) {
@@ -36,7 +38,7 @@ public class Application {
             testUser1.getProfile()
                     .setAllFields("Jan", "de Groot", "MonsterKiller9001", Gender.MALE, "Mekelweg 4", "2826CD", "Delft",
                             "0906-0666", null);
-            User testUser2 = new User("user2", "passwordHash", "bert@mail.com");
+            User testUser2 = new User("user2", new BCryptPasswordEncoder().encode("password"), "bert@mail.com");
             testUser2.getProfile()
                     .setAllFields("Bert", "Kleijn", "ILoveZombies", Gender.OTHER, "Mekelweg 20", "2826CD", "Amsterdam",
                             "0611", null);
@@ -60,7 +62,11 @@ public class Application {
             accountRepository.saveAndFlush(testUser5);
 
             Ticket ticket = new Ticket(testUser1, TicketType.EARLY_FULL, false, false);
+            Ticket ticket2 = new Ticket(testUser2, TicketType.EARLY_FULL, false, false);
+            Ticket ticket3 = new Ticket(testUser3, TicketType.EARLY_FULL, false, false);
             ticketRepository.save(ticket);
+            ticketRepository.save(ticket2);
+            ticketRepository.save(ticket3);
 
             for (char s = 'A'; s <= 'J'; s++) {
                 SeatGroupDTO seatGroup = new SeatGroupDTO();
