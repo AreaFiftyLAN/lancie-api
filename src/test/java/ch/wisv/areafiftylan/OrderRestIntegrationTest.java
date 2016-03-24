@@ -856,8 +856,8 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             get(location + "/checkout").
         then().
             statusCode(HttpStatus.SC_OK).
-            header("Location", containsString("https://www.mollie")).
-            body("message", containsString("https://www.mollie"));
+            header("Location", containsString("http://paymentURL.com")).
+            body("message", containsString("http://paymentURL.com"));
         //@formatter:on
 
         Order order = orderRepository.findOne(orderId);
@@ -884,8 +884,8 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             get(location + "/checkout").
         then().
             statusCode(HttpStatus.SC_OK).
-            header("Location", containsString("https://www.mollie")).
-            body("message", containsString("https://www.mollie"));
+            header("Location", containsString("http://paymentURL.com")).
+            body("message", containsString("http://paymentURL.com"));
         //@formatter:on
 
         Order order = orderRepository.findOne(orderId);
