@@ -27,20 +27,18 @@ import java.util.Map;
 @Service
 public class MolliePaymentService implements PaymentService {
 
-    OrderRepository orderRepository;
+    private OrderRepository orderRepository;
 
-    Client mollie;
+    private Client mollie;
 
-    @Value("${a5l.molliekey}")
+    @Value("${a5l.molliekey:null}")
     String apiKey;
-
-    String method = "ideal";
 
     @Value("${a5l.paymentReturnUrl}")
     String returnUrl;
 
     @Autowired
-    public MolliePaymentService(OrderRepository orderRepository, @Value("${a5l.molliekey}") String apiKey) {
+    public MolliePaymentService(OrderRepository orderRepository, @Value("${a5l.molliekey:null}") String apiKey) {
         this.orderRepository = orderRepository;
         this.mollie = new ClientBuilder().withApiKey(apiKey).build();
     }
@@ -50,8 +48,10 @@ public class MolliePaymentService implements PaymentService {
         Map<String, Object> metadata = new HashMap<>();
         metadata.put("A5LId", order.getId());
 
+        String method = "ideal";
         CreatePayment payment =
-                new CreatePayment(method, (double) order.getAmount(), "Area FiftyLAN Ticket", returnUrl + "?order=" + order.getId(), metadata);
+                new CreatePayment(
+                        method, (double) order.getAmount(), "Area FiftyLAN Ticket", returnUrl + "?order=" + order.getId(), metadata);
 
         //First try is for IOExceptions coming from the Mollie Client.
         try {

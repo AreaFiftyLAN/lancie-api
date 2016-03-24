@@ -1,44 +1,52 @@
-# Basic auth
-security.user.password =
+############## Production properties #############################################################
+# This is the default property file which can be used as a template for default configuration.   #
+# Copy this file to `/config/application.properties`, with the runnable jar in the `/` directory #
+##################################################################################################
 
-# Retriever for sending e-mails. Used for verify created users
-#spring.mail.host=
-#spring.mail.port=
+## SPRING SETTINGS
+ Mail server information.
+spring.mail.host=
+spring.mail.port=
+#spring.mail.username=
+#spring.mail.password=
 
 # THYMELEAF (ThymeleafAutoConfiguration)
 spring.thymeleaf.check-template-location=true
 spring.thymeleaf.prefix=classpath:/templates/
 spring.thymeleaf.suffix=.html
-spring.thymeleaf.mode=HTML5
+spring.thymeleaf.mode=LEGACYHTML5
 spring.thymeleaf.encoding=UTF-8
 spring.thymeleaf.content-type=text/html
 
-## DATABASE PROPERTIES
+# DATABASE PROPERTIES
 spring.datasource.driverClassName=org.postgresql.Driver
 # Change <MyDB> with the name of your database name
-#spring.datasource.url=jdbc:postgresql://localhost:5432/<MyDB>
+spring.datasource.url=jdbc:postgresql://localhost:5432/<MyDB>
+
 # Username to log in to the database
-# It's recommended to create a dedicated AreaFiftyLAN Database user instead of using the default postgres user
-#spring.datasource.username=<dbUser>
+# It's recommended to create a dedicated Database user instead of using the default postgres user
+spring.datasource.username=<dbUser>
+
 # Password to log in with <dbUser> in database <MyDB>
-#spring.datasource.password=<dbUserPassword>
+spring.datasource.password=<dbUserPassword>
 spring.data.jpa.repositories.enabled=true
+
 # Set to false in production to prevent spamming of console
-spring.jpa.show-sql=true
+spring.jpa.show-sql=false
 spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
 spring.jpa.database=postgresql
 spring.jpa.generate-ddl=true
-# This setting should change to "update" for production.
-spring.jpa.hibernate.ddl-auto=create-drop
+
+# This setting defines the database creation/update behaviour. Change with caution.
+spring.jpa.hibernate.ddl-auto=update
 spring.jpa.properties.hibernate.default_schema=public
 
 # Default port used by frontend
 server.port=9000
 
-
 ## AREA FIFTYLAN SETTINGS
 # Key for sending a paymentrequest to the Mollie api
-#a5l.molliekey=
+a5l.molliekey=
 # The return url for the frontend that displays the success message
 a5l.paymentReturnUrl=https://areafiftylan.nl/#!/ordersuccess
 # The return url for the frontend that confirms a registration
