@@ -1,4 +1,4 @@
-package ch.wisv.areafiftylan.model;
+package ch.wisv.areafiftylan.dto;
 
 import lombok.Getter;
 import lombok.Setter;

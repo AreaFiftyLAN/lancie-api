@@ -1,7 +1,7 @@
 package ch.wisv.areafiftylan.controller;
 
+import ch.wisv.areafiftylan.dto.EventDTO;
 import ch.wisv.areafiftylan.model.Event;
-import ch.wisv.areafiftylan.model.EventDTO;
 import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.model.view.View;
 import ch.wisv.areafiftylan.service.EventService;

@@ -1,8 +1,8 @@
 package ch.wisv.areafiftylan.service;
 
+import ch.wisv.areafiftylan.dto.EventDTO;
 import ch.wisv.areafiftylan.exception.EventException;
 import ch.wisv.areafiftylan.model.Event;
-import ch.wisv.areafiftylan.model.EventDTO;
 import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.service.repository.EventRepository;
 import com.google.common.base.Strings;
