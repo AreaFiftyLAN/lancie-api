@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 @Service
-public class SponsorServiceImpl {
+public class WebSponsorServiceImpl {
 
     public Collection<Sponsor> getAllSponsors() {
         return getDummySponspors();
