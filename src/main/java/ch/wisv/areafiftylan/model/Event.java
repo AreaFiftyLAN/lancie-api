@@ -3,6 +3,7 @@ package ch.wisv.areafiftylan.model;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -32,6 +33,7 @@ public class Event {
     private int teamLimit;
 
     @Getter
+    @ElementCollection(targetClass = Team.class)
     private Set<Team> registeredTeams;
 
     @Getter @Setter
