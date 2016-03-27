@@ -40,6 +40,15 @@ public class EventServiceImpl implements EventService {
             throw new EventException("Event is not open for registration!");
         }
 
+        // Check if one of the Team members is already a member
+        boolean duplicateUser = event.getRegisteredTeams().stream().flatMap(t -> t.getMembers().stream())
+                .anyMatch(u -> team.getMembers().contains(u));
+
+        if(duplicateUser){
+            throw new EventException("A Member on your Team is already registered");
+        }
+
+        // We're registering the Team here
         if (!event.addTeam(team)) {
             throw new EventException("Something went wrong while registrating");
         }
