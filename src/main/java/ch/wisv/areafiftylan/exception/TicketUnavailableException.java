@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 /**
  * Created by sille on 22-12-15.
  */
-@ResponseStatus(HttpStatus.GONE)
+
 public class TicketUnavailableException extends RuntimeException {
 
     public TicketUnavailableException(TicketType type) {
