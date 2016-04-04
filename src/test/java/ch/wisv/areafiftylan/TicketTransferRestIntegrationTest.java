@@ -5,9 +5,9 @@ import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.util.Gender;
 import ch.wisv.areafiftylan.model.util.TicketType;
-import ch.wisv.areafiftylan.security.TicketTransferToken;
+import ch.wisv.areafiftylan.security.token.TicketTransferToken;
 import ch.wisv.areafiftylan.service.repository.TicketRepository;
-import ch.wisv.areafiftylan.service.repository.TicketTransferTokenRepository;
+import ch.wisv.areafiftylan.service.repository.token.TicketTransferTokenRepository;
 import ch.wisv.areafiftylan.util.SessionData;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Response;
@@ -18,11 +18,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.keygen.StringKeyGenerator;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import static com.jayway.restassured.RestAssured.given;
 

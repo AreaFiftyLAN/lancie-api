@@ -1,6 +1,6 @@
 package ch.wisv.areafiftylan.service.repository.token;
 
-import ch.wisv.areafiftylan.security.PasswordResetToken;
+import ch.wisv.areafiftylan.security.token.PasswordResetToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -3,7 +3,7 @@ package ch.wisv.areafiftylan.service;
 import ch.wisv.areafiftylan.dto.TeamDTO;
 import ch.wisv.areafiftylan.dto.TeamInviteResponse;
 import ch.wisv.areafiftylan.model.Team;
-import ch.wisv.areafiftylan.security.TeamInviteToken;
+import ch.wisv.areafiftylan.security.token.TeamInviteToken;
 
 import java.util.Collection;
 import java.util.List;

@@ -4,8 +4,8 @@ import ch.wisv.areafiftylan.dto.ProfileDTO;
 import ch.wisv.areafiftylan.dto.UserDTO;
 import ch.wisv.areafiftylan.model.Profile;
 import ch.wisv.areafiftylan.model.User;
-import ch.wisv.areafiftylan.security.PasswordResetToken;
-import ch.wisv.areafiftylan.security.VerificationToken;
+import ch.wisv.areafiftylan.security.token.PasswordResetToken;
+import ch.wisv.areafiftylan.security.token.VerificationToken;
 import ch.wisv.areafiftylan.service.repository.UserRepository;
 import ch.wisv.areafiftylan.service.repository.token.PasswordResetTokenRepository;
 import ch.wisv.areafiftylan.service.repository.token.VerificationTokenRepository;
@@ -24,7 +24,6 @@ import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class UserServiceImpl implements UserService, UserDetailsService {

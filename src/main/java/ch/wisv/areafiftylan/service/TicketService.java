@@ -4,7 +4,7 @@ import ch.wisv.areafiftylan.exception.TicketUnavailableException;
 import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.util.TicketType;
-import ch.wisv.areafiftylan.security.TicketTransferToken;
+import ch.wisv.areafiftylan.security.token.TicketTransferToken;
 
 import java.util.Collection;
 

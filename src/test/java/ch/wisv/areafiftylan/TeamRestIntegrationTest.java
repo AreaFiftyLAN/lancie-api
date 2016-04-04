@@ -5,7 +5,7 @@ import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.util.Gender;
 import ch.wisv.areafiftylan.model.util.TicketType;
-import ch.wisv.areafiftylan.security.TeamInviteToken;
+import ch.wisv.areafiftylan.security.token.TeamInviteToken;
 import ch.wisv.areafiftylan.service.repository.TeamRepository;
 import ch.wisv.areafiftylan.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.service.repository.token.TeamInviteTokenRepository;

@@ -1,6 +1,6 @@
 package ch.wisv.areafiftylan.controller;
 
-import ch.wisv.areafiftylan.security.TicketTransferToken;
+import ch.wisv.areafiftylan.security.token.TicketTransferToken;
 import ch.wisv.areafiftylan.service.TicketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

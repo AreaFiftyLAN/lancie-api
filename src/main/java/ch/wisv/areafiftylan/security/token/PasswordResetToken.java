@@ -1,4 +1,4 @@
-package ch.wisv.areafiftylan.security;
+package ch.wisv.areafiftylan.security.token;
 
 import ch.wisv.areafiftylan.model.User;
 

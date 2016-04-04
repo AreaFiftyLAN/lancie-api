@@ -1,6 +1,6 @@
 package ch.wisv.areafiftylan.service.repository.token;
 
-import ch.wisv.areafiftylan.security.TeamInviteToken;
+import ch.wisv.areafiftylan.security.token.TeamInviteToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
