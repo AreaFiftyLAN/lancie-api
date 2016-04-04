@@ -199,7 +199,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
 
         if (principal instanceof UserDetails) {
             User user = (User) principal;
-            return ttt.getUser().equals(user);
+            return ttt.getTicket().getOwner().equals(user);
         } else {
             return false;
         }
@@ -211,7 +211,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
 
         if (principal instanceof UserDetails) {
             User user = (User) principal;
-            return ttt.getGoalUser().equals(user);
+            return ttt.getUser().equals(user);
         } else {
             return false;
         }

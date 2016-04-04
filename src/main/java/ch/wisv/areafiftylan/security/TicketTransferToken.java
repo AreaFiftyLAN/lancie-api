@@ -19,22 +19,15 @@ public class TicketTransferToken extends Token {
     @JoinColumn(nullable = false)
     private Ticket ticket;
 
-    @OneToOne(targetEntity = User.class, fetch = FetchType.EAGER)
-    @JoinColumn(nullable = false)
-    private User goalUser;
-
     public TicketTransferToken(){
     }
 
-    public TicketTransferToken(String token, User user, Ticket ticket, User goalUser) {
+    public TicketTransferToken(String token, User user, Ticket ticket) {
         super(token, user, EXPIRATION);
         this.ticket = ticket;
-        this.goalUser = goalUser;
     }
 
     public Ticket getTicket(){
         return ticket;
     }
-
-    public User getGoalUser() { return goalUser; }
 }

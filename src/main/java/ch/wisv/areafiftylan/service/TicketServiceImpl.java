@@ -57,13 +57,13 @@ public class TicketServiceImpl implements TicketService {
         User u = userService.getUserByUsername(goalUserName).orElseThrow(() -> new UsernameNotFoundException("User " + goalUserName + " not found."));
         Ticket t = ticketRepository.findOne(ticketId);
 
-        TicketTransferToken ttt = new TicketTransferToken(UUID.randomUUID().toString(), t.getOwner(), t, u);
+        TicketTransferToken ttt = new TicketTransferToken(UUID.randomUUID().toString(), u, t);
 
         tttRepository.save(ttt);
 
         try{
             String acceptUrl = acceptTransferUrl + "/?token=" + ttt.getToken();
-            mailService.sendTicketTransferMail(ttt.getUser(), ttt.getGoalUser(), acceptUrl);
+            mailService.sendTicketTransferMail(ttt.getTicket().getOwner(), ttt.getUser(), acceptUrl);
         } catch (MessagingException e) {
             e.printStackTrace();
         }
@@ -76,7 +76,7 @@ public class TicketServiceImpl implements TicketService {
         TicketTransferToken ttt = getTicketTransferTokenIfValid(token);
         Ticket t = ttt.getTicket();
 
-        User newOwner = ttt.getGoalUser();
+        User newOwner = ttt.getUser();
         t.setOwner(newOwner);
 
         ticketRepository.save(t);

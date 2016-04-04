@@ -103,8 +103,8 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
         TicketTransferToken ttt = tttRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
 
         Assert.assertTrue(ttt.isValid());
-        Assert.assertTrue(ttt.getUser().equals(user));
-        Assert.assertTrue(ttt.getGoalUser().equals(ticketReceiver));
+        Assert.assertTrue(ttt.getTicket().getOwner().equals(user));
+        Assert.assertTrue(ttt.getUser().equals(ticketReceiver));
     }
 
     @Test
