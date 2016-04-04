@@ -14,6 +14,12 @@ public interface CurrentUserService {
 
     boolean canAccessOrder(Object principal, Long orderId);
 
+    boolean isTicketOwner(Object principal, Long ticketId);
+
+    boolean isTicketSender(Object principal, String token);
+
+    boolean isTicketReceiver(Object principal, String token);
+
     boolean canReserveSeat(Object principal, Long ticketId);
 
     boolean hasAnyTicket(Object principal);

@@ -6,7 +6,6 @@ import ch.wisv.areafiftylan.model.view.View;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import javax.persistence.*;
-import java.util.UUID;
 
 @Entity
 public class Ticket {
@@ -16,14 +15,9 @@ public class Ticket {
     @JsonView(View.OrderOverview.class)
     Long id;
 
-    String key;
-
     @ManyToOne(cascade = CascadeType.MERGE)
     @JsonView(View.Public.class)
     User owner;
-
-    @ManyToOne(cascade = CascadeType.MERGE)
-    User previousOwner;
 
     @Enumerated(EnumType.STRING)
     @JsonView(View.OrderOverview.class)
@@ -38,8 +32,6 @@ public class Ticket {
     @JsonView(View.OrderOverview.class)
     boolean chMember;
 
-    boolean lockedForTransfer;
-
     @JsonView(View.OrderOverview.class)
     boolean valid;
 
@@ -48,14 +40,11 @@ public class Ticket {
 
     public Ticket(User owner, TicketType type, Boolean pickupService, Boolean chMember) {
         this.owner = owner;
-        this.previousOwner = null;
         this.type = type;
         this.text = type.getText();
         this.pickupService = pickupService;
         this.chMember = chMember;
-        lockedForTransfer = true;
         this.valid = false;
-        key = UUID.randomUUID().toString();
 
         price = getPrice();
     }
@@ -64,17 +53,7 @@ public class Ticket {
         //JPA Only
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public boolean isLockedForTransfer() {
-        return lockedForTransfer;
-    }
-
-    public void setLockedForTransfer(boolean lockedForTransfer) {
-        this.lockedForTransfer = lockedForTransfer;
-    }
+    public Long getId(){ return id; }
 
     public boolean isPickupService() {
         return pickupService;
@@ -87,14 +66,6 @@ public class Ticket {
 
     public boolean isChMember() {
         return chMember;
-    }
-
-    public User getPreviousOwner() {
-        return previousOwner;
-    }
-
-    public void setPreviousOwner(User previousOwner) {
-        this.previousOwner = previousOwner;
     }
 
     public User getOwner() {

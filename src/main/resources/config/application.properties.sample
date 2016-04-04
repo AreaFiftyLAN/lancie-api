@@ -53,6 +53,8 @@ a5l.paymentReturnUrl=https://areafiftylan.nl/#!/ordersuccess
 a5l.mail.confirmUrl=https://areafiftylan.nl/#!/confirmRegistration
 # The url for the frontend to change the users password
 a5l.user.resetUrl=https://areafiftylan.nl/#!/resetPassword
+# The url for the frontend to accept a ticket transfer
+a5l.user.acceptTransferUrl=https://areafiftylan.nl/#!/acceptTransfer
 # E-mail address used for sending e-mails
 a5l.mail.sender=LANcie <lancie@ch.tudelft.nl>
 a5l.orderLimit=5

@@ -6,7 +6,9 @@ import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.util.Role;
 import ch.wisv.areafiftylan.security.TeamInviteToken;
+import ch.wisv.areafiftylan.security.TicketTransferToken;
 import ch.wisv.areafiftylan.service.repository.TicketRepository;
+import ch.wisv.areafiftylan.service.repository.TicketTransferTokenRepository;
 import ch.wisv.areafiftylan.service.repository.token.TeamInviteTokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,15 +22,19 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     TeamService teamService;
     OrderService orderService;
     TicketRepository ticketRepository;
+    TicketService ticketService;
     TeamInviteTokenRepository teamInviteTokenRepository;
+    TicketTransferTokenRepository tttRepository;
 
     @Autowired
     public CurrentUserServiceImpl(TeamService teamService, OrderService orderService, TicketRepository ticketRepository,
-                                  TeamInviteTokenRepository teamInviteTokenRepository) {
+                                  TicketService ticketService, TeamInviteTokenRepository teamInviteTokenRepository, TicketTransferTokenRepository tttRepository) {
         this.teamService = teamService;
         this.orderService = orderService;
         this.ticketRepository = ticketRepository;
+        this.ticketService = ticketService;
         this.teamInviteTokenRepository = teamInviteTokenRepository;
+        this.tttRepository = tttRepository;
     }
 
     @Override
@@ -100,6 +106,16 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     }
 
     @Override
+    public boolean isTicketOwner(Object principal, Long ticketId){
+        if (principal instanceof UserDetails) {
+            User user = (User) principal;
+            return ticketService.getTicketById(ticketId).getOwner().equals(user);
+        } else {
+            return false;
+        }
+    }
+
+    @Override
     public boolean canReserveSeat(Object principal, Long ticketId) {
         if (principal instanceof UserDetails) {
             User user = (User) principal;
@@ -164,5 +180,29 @@ public class CurrentUserServiceImpl implements CurrentUserService {
             return false;
         }
 
+    }
+
+    @Override
+    public boolean isTicketSender(Object principal, String token){
+        TicketTransferToken ttt = tttRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
+
+        if (principal instanceof UserDetails) {
+            User user = (User) principal;
+            return ttt.getTicket().getOwner().equals(user);
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean isTicketReceiver(Object principal, String token){
+        TicketTransferToken ttt = tttRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
+
+        if (principal instanceof UserDetails) {
+            User user = (User) principal;
+            return ttt.getUser().equals(user);
+        } else {
+            return false;
+        }
     }
 }

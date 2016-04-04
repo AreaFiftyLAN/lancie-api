@@ -169,7 +169,7 @@ public class TeamServiceImpl implements TeamService {
         TeamInviteToken teamInviteToken =
                 teamInviteTokenRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
         addMember(teamInviteToken.getTeam().getId(), teamInviteToken.getUser().getUsername());
-        teamInviteToken.setUsed(true);
+        teamInviteToken.use();
         teamInviteTokenRepository.save(teamInviteToken);
     }
 

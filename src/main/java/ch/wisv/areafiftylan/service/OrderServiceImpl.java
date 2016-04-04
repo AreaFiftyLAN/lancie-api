@@ -2,7 +2,9 @@ package ch.wisv.areafiftylan.service;
 
 import ch.wisv.areafiftylan.dto.TicketDTO;
 import ch.wisv.areafiftylan.dto.TicketInformationResponse;
-import ch.wisv.areafiftylan.exception.*;
+import ch.wisv.areafiftylan.exception.ImmutableOrderException;
+import ch.wisv.areafiftylan.exception.PaymentException;
+import ch.wisv.areafiftylan.exception.TicketNotFoundException;
 import ch.wisv.areafiftylan.model.ExpiredOrder;
 import ch.wisv.areafiftylan.model.Order;
 import ch.wisv.areafiftylan.model.Ticket;
@@ -11,7 +13,6 @@ import ch.wisv.areafiftylan.model.util.OrderStatus;
 import ch.wisv.areafiftylan.model.util.TicketType;
 import ch.wisv.areafiftylan.service.repository.ExpiredOrderRepository;
 import ch.wisv.areafiftylan.service.repository.OrderRepository;
-import ch.wisv.areafiftylan.service.repository.TicketRepository;
 import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,28 +27,28 @@ import java.util.stream.Collectors;
 @Service
 public class OrderServiceImpl implements OrderService {
 
-    OrderRepository orderRepository;
-    ExpiredOrderRepository expiredOrderRepository;
-    TicketRepository ticketRepository;
-    UserService userService;
-    PaymentService paymentService;
+    private OrderRepository orderRepository;
+    private ExpiredOrderRepository expiredOrderRepository;
+    private TicketService ticketService;
+    private UserService userService;
+    private PaymentService paymentService;
 
     @Value("${a5l.orderLimit}")
     private int ORDER_LIMIT;
 
     @Autowired
-    public OrderServiceImpl(OrderRepository orderRepository, UserService userService, TicketRepository ticketRepository,
+    public OrderServiceImpl(OrderRepository orderRepository, UserService userService, TicketService ticketService,
                             PaymentService paymentService, ExpiredOrderRepository expiredOrderRepository) {
         this.orderRepository = orderRepository;
-        this.ticketRepository = ticketRepository;
         this.userService = userService;
+        this.ticketService = ticketService;
         this.paymentService = paymentService;
         this.expiredOrderRepository = expiredOrderRepository;
     }
 
     @Override
     public Order getOrderById(Long id) {
-        return orderRepository.findById(id).orElseThrow(() -> new OrderNotFoundException("Order " + id + " not found"));
+        return orderRepository.findOne(id);
     }
 
     @Override
@@ -81,7 +82,7 @@ public class OrderServiceImpl implements OrderService {
 
         // Request a ticket to see if one is available. If a ticket is sold out, the method ends here due to the
         // exception thrown. Else, we'll get a new ticket to add to the order.
-        Ticket ticket = this.requestTicketOfType(ticketDTO.getType(), user, ticketDTO.hasPickupService(),
+        Ticket ticket = ticketService.requestTicketOfType(ticketDTO.getType(), user, ticketDTO.hasPickupService(),
                 ticketDTO.isCHMember());
 
         Order order = new Order(user);
@@ -109,7 +110,7 @@ public class OrderServiceImpl implements OrderService {
 
         // Request a ticket to see if one is available. If a ticket is sold out, the method ends here due to the
         // exception thrown. Else, we'll get a new ticket to add to the order.
-        Ticket ticket = this.requestTicketOfType(ticketDTO.getType(), user, ticketDTO.hasPickupService(),
+        Ticket ticket = ticketService.requestTicketOfType(ticketDTO.getType(), user, ticketDTO.hasPickupService(),
                 ticketDTO.isCHMember());
 
         order.addTicket(ticket);
@@ -123,10 +124,10 @@ public class OrderServiceImpl implements OrderService {
 
             // Find a Ticket in the order, equal to the given DTO. Throw an exception when the ticket doesn't exist
             Ticket ticket = order.getTickets().stream().filter(isEqualToDTO(ticketDTO)).findFirst()
-                    .orElseThrow(() -> new TicketNotFoundException("No such ticket in this Order"));
+                    .orElseThrow(TicketNotFoundException::new);
 
             order.getTickets().remove(ticket);
-            ticketRepository.delete(ticket);
+            ticketService.removeTicket(ticket.getId());
 
             return orderRepository.save(order);
 
@@ -138,34 +139,6 @@ public class OrderServiceImpl implements OrderService {
     private static Predicate<Ticket> isEqualToDTO(TicketDTO ticketDTO) {
         return t -> (t.getType() == ticketDTO.getType()) && (t.isChMember() == ticketDTO.isCHMember()) &&
                 (t.hasPickupService() == ticketDTO.hasPickupService());
-    }
-
-    @Override
-    public synchronized Ticket requestTicketOfType(TicketType type, User owner, boolean pickupService,
-                                                   boolean chMember) {
-        if (ticketRepository.countByType(type) >= type.getLimit()) {
-            throw new TicketUnavailableException(type);
-        } else {
-            Ticket ticket = new Ticket(owner, type, pickupService, chMember);
-            return ticketRepository.save(ticket);
-        }
-    }
-
-    @Override
-    public void transferTicket(User user, String ticketKey) {
-        Ticket ticket = ticketRepository.findByKey(ticketKey).orElseThrow(() -> new TokenNotFoundException(ticketKey));
-
-        if (ticket.isLockedForTransfer()) {
-            ticket.setPreviousOwner(ticket.getOwner());
-
-            ticket.setOwner(user);
-
-            ticket.setLockedForTransfer(true);
-
-            ticketRepository.save(ticket);
-        } else {
-            //TODO: Deal with invalid transfer attempt
-        }
     }
 
     @Override
@@ -182,8 +155,7 @@ public class OrderServiceImpl implements OrderService {
         // Set all tickets from this Order to valid
         if (order.getStatus().equals(OrderStatus.PAID)) {
             for (Ticket ticket : order.getTickets()) {
-                ticket.setValid(true);
-                ticketRepository.save(ticket);
+                ticketService.validateTicket(ticket.getId());
             }
         }
         return order;
@@ -204,7 +176,7 @@ public class OrderServiceImpl implements OrderService {
         orderRepository.delete(o);
         ExpiredOrder eo = new ExpiredOrder(o);
         expiredOrderRepository.save(eo);
-        o.getTickets().forEach(t -> ticketRepository.delete(t));
+        o.getTickets().forEach(t -> ticketService.removeTicket(t.getId()));
     }
 
     @Override
@@ -212,7 +184,7 @@ public class OrderServiceImpl implements OrderService {
         Collection<TicketInformationResponse> ticketInfo = new ArrayList<>();
 
         for (TicketType ticketType : TicketType.values()) {
-            Integer typeSold = ticketRepository.countByType(ticketType);
+            Integer typeSold = ticketService.getNumberSoldOfType(ticketType);
             ticketInfo.add(new TicketInformationResponse(ticketType, typeSold));
         }
 
