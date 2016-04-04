@@ -109,7 +109,7 @@ public class MailServiceImpl implements MailService {
 
     @Override
     public void sendTicketTransferMail(User sender, User receiver, String url) throws MessagingException {
-        String message = "The user \"" + sender.getUsername() + "\" has send you a ticket for AreaFiftyLAN! To accept this ticket please click on the following link: " + url;
-        sendMail(receiver.getEmail(), receiver.getUsername(), null, "A ticket for AreaFiftyLAN has been sent to you!", message);
+        String message = sender.getProfile().firstName + " has send you a ticket for AreaFiftyLAN! To accept this ticket please click on the following link: " + url;
+        sendMail(receiver.getEmail(), receiver.getProfile().getFirstName() + receiver.getProfile().getLastName(), null, "A ticket for AreaFiftyLAN has been sent to you!", message);
     }
 }

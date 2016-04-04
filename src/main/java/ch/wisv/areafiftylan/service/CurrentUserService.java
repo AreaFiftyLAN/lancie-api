@@ -1,7 +1,5 @@
 package ch.wisv.areafiftylan.service;
 
-import java.util.Objects;
-
 /**
  * The CurrentUserService is for permissions that require some logic to be determined.
  */
