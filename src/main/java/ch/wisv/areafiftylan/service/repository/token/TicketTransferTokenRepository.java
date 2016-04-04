@@ -7,6 +7,5 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface TicketTransferTokenRepository extends JpaRepository<TicketTransferToken, Long> {
-    Optional<TicketTransferToken> findByToken(String token);
+public interface TicketTransferTokenRepository extends TokenRepository<TicketTransferToken> {
 }

@@ -11,9 +11,7 @@ import java.util.Optional;
  * Created by Sille Kamoen on 9-3-16.
  */
 @Repository
-public interface TeamInviteTokenRepository extends JpaRepository<TeamInviteToken, Long> {
-
-    Optional<TeamInviteToken> findByToken(String token);
+public interface TeamInviteTokenRepository extends TokenRepository<TeamInviteToken> {
 
     Collection<TeamInviteToken> findByUserUsername(String username);
 
