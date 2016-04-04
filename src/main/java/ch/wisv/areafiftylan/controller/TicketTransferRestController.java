@@ -1,20 +1,11 @@
 package ch.wisv.areafiftylan.controller;
 
-import ch.wisv.areafiftylan.exception.TicketNotFoundException;
-import ch.wisv.areafiftylan.exception.TicketNotTransferrableException;
-import ch.wisv.areafiftylan.model.Ticket;
-import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.security.TicketTransferToken;
 import ch.wisv.areafiftylan.service.TicketService;
-import ch.wisv.areafiftylan.service.UserService;
-import ch.wisv.areafiftylan.service.repository.TicketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import static ch.wisv.areafiftylan.util.ResponseEntityBuilder.createResponseEntity;
