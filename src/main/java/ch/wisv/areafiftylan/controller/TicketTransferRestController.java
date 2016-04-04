@@ -1,6 +1,5 @@
 package ch.wisv.areafiftylan.controller;
 
-import ch.wisv.areafiftylan.dto.TransferDTO;
 import ch.wisv.areafiftylan.exception.TicketNotFoundException;
 import ch.wisv.areafiftylan.exception.TicketNotTransferrableException;
 import ch.wisv.areafiftylan.model.Ticket;
@@ -31,10 +30,8 @@ public class TicketTransferRestController {
 
     @PreAuthorize("@currentUserServiceImpl.isTicketOwner(principal, #ticketId)")
     @RequestMapping(value = "/tickets/transfer/{ticketId}", method = RequestMethod.POST)
-    public ResponseEntity<?> requestTicketTransfer(@PathVariable Long ticketId, @RequestBody @Validated TransferDTO transferDTO){
-        String username = transferDTO.getGoalUsername();
-
-        TicketTransferToken ttt = ticketService.setupForTransfer(ticketId, username);
+    public ResponseEntity<?> requestTicketTransfer(@PathVariable Long ticketId, @RequestBody String goalUsername){
+        TicketTransferToken ttt = ticketService.setupForTransfer(ticketId, goalUsername);
 
         return createResponseEntity(HttpStatus.OK, "Ticket successfully set up for transfer", ttt);
     }

@@ -83,13 +83,10 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
 
     @Test
     public void testAddTransfer_Anon(){
-        Map<String, String> transferRequest = new HashMap<>();
-        transferRequest.put("goalUsername", ticketReceiver.getUsername());
-
         given().
         when().
-                content(transferRequest + "/" + ticket.getId()).contentType(ContentType.JSON).
-                post(TRANSFER_ENDPOINT).
+                content(ticketReceiver.getUsername()).contentType(ContentType.TEXT).
+                post(TRANSFER_ENDPOINT + "/" + ticket.getId()).
         then().
                 statusCode(HttpStatus.SC_FORBIDDEN);
 
@@ -306,16 +303,13 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
     }
 
     private Response addTicketTransfer(String uname, String pw){
-        Map<String, String> transferRequest = new HashMap<>();
-        transferRequest.put("goalUsername", ticketReceiver.getUsername());
-
         SessionData login = login(uname, pw);
 
         Response r = given().
                 filter(sessionFilter).
                 header(login.getCsrfHeader()).
         when().
-                content(transferRequest).contentType(ContentType.JSON).
+                content(ticketReceiver.getUsername()).contentType(ContentType.TEXT).
                 post(TRANSFER_ENDPOINT + "/" + ticket.getId()).
         then().
                 extract().response();
