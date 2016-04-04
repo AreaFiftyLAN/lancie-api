@@ -9,7 +9,6 @@ import ch.wisv.areafiftylan.model.util.TicketType;
 import ch.wisv.areafiftylan.security.TicketTransferToken;
 import ch.wisv.areafiftylan.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.service.repository.TicketTransferTokenRepository;
-import org.eclipse.jetty.util.DateCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

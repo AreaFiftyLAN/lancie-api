@@ -936,12 +936,14 @@ public class OrderRestIntegrationTest extends IntegrationTest {
 
         //@formatter:off
         given().
-                filter(sessionFilter).
-                header(login.getCsrfHeader()).
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
         when().
             get("/users/current/tickets").
         then().
-            body("object", hasSize(1));
+            body("object", hasSize(1)).
+            body("[0].owner.username", is("user"));
+        //@formatter:on
     }
 
     @Test
@@ -951,12 +953,13 @@ public class OrderRestIntegrationTest extends IntegrationTest {
 
         //@formatter:off
         given().
-                filter(sessionFilter).
-                header(login.getCsrfHeader()).
-                when().
-                get("/users/current/tickets").
-                then().
-                body("object", hasSize(0));
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            get("/users/current/tickets").
+        then().
+            body("object", hasSize(0));
+        //@formatter:on
     }
 }
 
