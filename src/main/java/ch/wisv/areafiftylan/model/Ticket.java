@@ -6,7 +6,6 @@ import ch.wisv.areafiftylan.model.view.View;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import javax.persistence.*;
-import java.util.UUID;
 
 @Entity
 public class Ticket {

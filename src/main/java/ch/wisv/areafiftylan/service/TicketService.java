@@ -5,9 +5,6 @@ import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.util.TicketType;
 import ch.wisv.areafiftylan.security.TicketTransferToken;
-import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 public interface TicketService {
     Ticket getTicketById(Long ticketId);

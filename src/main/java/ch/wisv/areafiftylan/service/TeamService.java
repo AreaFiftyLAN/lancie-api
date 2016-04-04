@@ -7,7 +7,6 @@ import ch.wisv.areafiftylan.security.TeamInviteToken;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 public interface TeamService {
     Team create(String username, String teamname);

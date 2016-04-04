@@ -1,6 +1,8 @@
 package ch.wisv.areafiftylan.service;
 
-import ch.wisv.areafiftylan.exception.*;
+import ch.wisv.areafiftylan.exception.InvalidTokenException;
+import ch.wisv.areafiftylan.exception.TicketUnavailableException;
+import ch.wisv.areafiftylan.exception.TokenNotFoundException;
 import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.util.TicketType;
@@ -9,14 +11,11 @@ import ch.wisv.areafiftylan.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.service.repository.TicketTransferTokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
 import java.util.UUID;
-
-import static ch.wisv.areafiftylan.util.ResponseEntityBuilder.createResponseEntity;
 
 @Service
 public class TicketServiceImpl implements TicketService {

@@ -2,11 +2,7 @@ package ch.wisv.areafiftylan.service;
 
 import ch.wisv.areafiftylan.dto.TicketDTO;
 import ch.wisv.areafiftylan.dto.TicketInformationResponse;
-import ch.wisv.areafiftylan.exception.TicketUnavailableException;
 import ch.wisv.areafiftylan.model.Order;
-import ch.wisv.areafiftylan.model.Ticket;
-import ch.wisv.areafiftylan.model.User;
-import ch.wisv.areafiftylan.model.util.TicketType;
 
 import java.util.Collection;
 import java.util.List;
