@@ -18,4 +18,6 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     Collection<Ticket> findByPickupService_True();
 
     Integer countByType(TicketType type);
+
+    Collection<Ticket> findAllByOwnerUsername(String username);
 }

@@ -6,12 +6,16 @@ import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.util.TicketType;
 import ch.wisv.areafiftylan.security.TicketTransferToken;
 
+import java.util.Collection;
+
 public interface TicketService {
     Ticket getTicketById(Long ticketId);
 
     Ticket removeTicket(Long ticketId);
 
     Integer getNumberSoldOfType(TicketType type);
+
+    Collection<Ticket> findValidTicketsByOwnerUsername(String username);
 
     /**
      * Mark the ticket with the given Id as valid.

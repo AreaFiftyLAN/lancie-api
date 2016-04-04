@@ -60,6 +60,7 @@ public class TestDataRunner implements CommandLineRunner {
         Ticket ticket = new Ticket(testUser1, TicketType.EARLY_FULL, false, false);
         Ticket ticket2 = new Ticket(testUser2, TicketType.EARLY_FULL, false, false);
         Ticket ticket3 = new Ticket(testUser3, TicketType.EARLY_FULL, false, false);
+        ticket.setValid(true);
         ticketRepository.save(ticket);
         ticketRepository.save(ticket2);
         ticketRepository.save(ticket3);
