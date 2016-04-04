@@ -9,6 +9,17 @@ import ch.wisv.areafiftylan.security.TicketTransferToken;
 public interface TicketService {
     Ticket getTicketById(Long ticketId);
 
+    Ticket removeTicket(Long ticketId);
+
+    Integer getNumberSoldOfType(TicketType type);
+
+    /**
+     * Mark the ticket with the given Id as valid.
+     *
+     * @param ticketId The ID of the ticket to be marked as valid
+     */
+    void validateTicket(Long ticketId);
+
     /**
      * Check if a ticket is available, and return when it is. When a ticket is unavailable (sold out for instance) a
      * TicketUnavailableException is thrown

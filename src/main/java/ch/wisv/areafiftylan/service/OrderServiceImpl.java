@@ -13,7 +13,6 @@ import ch.wisv.areafiftylan.model.util.OrderStatus;
 import ch.wisv.areafiftylan.model.util.TicketType;
 import ch.wisv.areafiftylan.service.repository.ExpiredOrderRepository;
 import ch.wisv.areafiftylan.service.repository.OrderRepository;
-import ch.wisv.areafiftylan.service.repository.TicketRepository;
 import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,21 +27,19 @@ import java.util.stream.Collectors;
 @Service
 public class OrderServiceImpl implements OrderService {
 
-    OrderRepository orderRepository;
-    ExpiredOrderRepository expiredOrderRepository;
-    TicketRepository ticketRepository;
-    TicketService ticketService;
-    UserService userService;
-    PaymentService paymentService;
+    private OrderRepository orderRepository;
+    private ExpiredOrderRepository expiredOrderRepository;
+    private TicketService ticketService;
+    private UserService userService;
+    private PaymentService paymentService;
 
     @Value("${a5l.orderLimit}")
     private int ORDER_LIMIT;
 
     @Autowired
-    public OrderServiceImpl(OrderRepository orderRepository, UserService userService, TicketRepository ticketRepository,
-                            TicketService ticketService, PaymentService paymentService, ExpiredOrderRepository expiredOrderRepository) {
+    public OrderServiceImpl(OrderRepository orderRepository, UserService userService, TicketService ticketService,
+                            PaymentService paymentService, ExpiredOrderRepository expiredOrderRepository) {
         this.orderRepository = orderRepository;
-        this.ticketRepository = ticketRepository;
         this.userService = userService;
         this.ticketService = ticketService;
         this.paymentService = paymentService;
@@ -127,10 +124,10 @@ public class OrderServiceImpl implements OrderService {
 
             // Find a Ticket in the order, equal to the given DTO. Throw an exception when the ticket doesn't exist
             Ticket ticket = order.getTickets().stream().filter(isEqualToDTO(ticketDTO)).findFirst()
-                    .orElseThrow(() -> new TicketNotFoundException());
+                    .orElseThrow(TicketNotFoundException::new);
 
             order.getTickets().remove(ticket);
-            ticketRepository.delete(ticket);
+            ticketService.removeTicket(ticket.getId());
 
             return orderRepository.save(order);
 
@@ -158,8 +155,7 @@ public class OrderServiceImpl implements OrderService {
         // Set all tickets from this Order to valid
         if (order.getStatus().equals(OrderStatus.PAID)) {
             for (Ticket ticket : order.getTickets()) {
-                ticket.setValid(true);
-                ticketRepository.save(ticket);
+                ticketService.validateTicket(ticket.getId());
             }
         }
         return order;
@@ -180,7 +176,7 @@ public class OrderServiceImpl implements OrderService {
         orderRepository.delete(o);
         ExpiredOrder eo = new ExpiredOrder(o);
         expiredOrderRepository.save(eo);
-        o.getTickets().forEach(t -> ticketRepository.delete(t));
+        o.getTickets().forEach(t -> ticketService.removeTicket(t.getId()));
     }
 
     @Override
@@ -188,7 +184,7 @@ public class OrderServiceImpl implements OrderService {
         Collection<TicketInformationResponse> ticketInfo = new ArrayList<>();
 
         for (TicketType ticketType : TicketType.values()) {
-            Integer typeSold = ticketRepository.countByType(ticketType);
+            Integer typeSold = ticketService.getNumberSoldOfType(ticketType);
             ticketInfo.add(new TicketInformationResponse(ticketType, typeSold));
         }
 

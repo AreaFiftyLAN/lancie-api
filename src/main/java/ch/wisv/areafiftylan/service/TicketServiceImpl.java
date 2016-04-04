@@ -42,6 +42,25 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
+    public Ticket removeTicket(Long ticketId) {
+        Ticket ticket = getTicketById(ticketId);
+        ticketRepository.delete(ticket);
+        return ticket;
+    }
+
+    @Override
+    public Integer getNumberSoldOfType(TicketType type) {
+        return ticketRepository.countByType(type);
+    }
+
+    @Override
+    public void validateTicket(Long ticketId) {
+        Ticket ticket = getTicketById(ticketId);
+        ticket.setValid(true);
+        ticketRepository.save(ticket);
+    }
+
+    @Override
     public synchronized Ticket requestTicketOfType(TicketType type, User owner, boolean pickupService, boolean chMember) {
         if (ticketRepository.countByType(type) >= type.getLimit()) {
             throw new TicketUnavailableException(type);
