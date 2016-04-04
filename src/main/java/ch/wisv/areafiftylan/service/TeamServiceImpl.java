@@ -115,8 +115,7 @@ public class TeamServiceImpl implements TeamService {
 
         // Continue if the user isn't already a member, and there are no outstanding invites already
         if (!team.getMembers().contains(user) && !optionalInvite.isPresent()) {
-            String token = UUID.randomUUID().toString();
-            TeamInviteToken inviteToken = new TeamInviteToken(token, user, team);
+            TeamInviteToken inviteToken = new TeamInviteToken(user, team);
             teamInviteTokenRepository.save(inviteToken);
 
             try {

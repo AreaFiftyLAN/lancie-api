@@ -84,7 +84,7 @@ public class TicketServiceImpl implements TicketService {
         User u = userService.getUserByUsername(goalUserName).orElseThrow(() -> new UsernameNotFoundException("User " + goalUserName + " not found."));
         Ticket t = ticketRepository.findOne(ticketId);
 
-        TicketTransferToken ttt = new TicketTransferToken(UUID.randomUUID().toString(), u, t);
+        TicketTransferToken ttt = new TicketTransferToken(u, t);
 
         tttRepository.save(ttt);
 

@@ -22,8 +22,8 @@ public class TicketTransferToken extends Token {
     public TicketTransferToken(){
     }
 
-    public TicketTransferToken(String token, User user, Ticket ticket) {
-        super(token, user, EXPIRATION);
+    public TicketTransferToken(User user, Ticket ticket) {
+        super(user, EXPIRATION);
         this.ticket = ticket;
     }
 

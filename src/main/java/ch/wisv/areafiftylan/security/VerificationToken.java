@@ -10,7 +10,7 @@ public class VerificationToken extends Token {
     public VerificationToken() {
     }
 
-    public VerificationToken(String token, User user) {
-        super(token, user);
+    public VerificationToken(User user) {
+        super(user);
     }
 }
