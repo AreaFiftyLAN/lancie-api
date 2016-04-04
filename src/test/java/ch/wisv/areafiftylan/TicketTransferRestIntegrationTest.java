@@ -42,7 +42,6 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
     @Autowired
     private TicketTransferTokenRepository tttRepository;
 
-
     @Before
     public void initTransferTest(){
         outsider = makeOutsider();
