@@ -1,8 +1,6 @@
 package ch.wisv.areafiftylan.service;
 
-import ch.wisv.areafiftylan.exception.InvalidTokenException;
 import ch.wisv.areafiftylan.exception.TeamNotFoundException;
-import ch.wisv.areafiftylan.exception.TicketNotFoundException;
 import ch.wisv.areafiftylan.exception.TokenNotFoundException;
 import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.model.Ticket;
