@@ -23,26 +23,18 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     TeamService teamService;
     OrderService orderService;
     TicketRepository ticketRepository;
-    TeamInviteTokenRepository teamInviteTokenRepository;
-
-    @Autowired
-    public CurrentUserServiceImpl(TeamService teamService, OrderService orderService, TicketRepository ticketRepository,
-                                  TeamInviteTokenRepository teamInviteTokenRepository) {
-        this.teamService = teamService;
-        this.orderService = orderService;
-        this.ticketRepository = ticketRepository;
-        this.teamInviteTokenRepository = teamInviteTokenRepository;
-    }
-
-    @Autowired
     TicketService ticketService;
+    TeamInviteTokenRepository teamInviteTokenRepository;
     TicketTransferTokenRepository tttRepository;
 
     @Autowired
-    public CurrentUserServiceImpl(TeamService teamService, OrderService orderService, TicketService ticketService, TicketTransferTokenRepository tttRepository) {
+    public CurrentUserServiceImpl(TeamService teamService, OrderService orderService, TicketRepository ticketRepository,
+                                  TicketService ticketService, TeamInviteTokenRepository teamInviteTokenRepository, TicketTransferTokenRepository tttRepository) {
         this.teamService = teamService;
         this.orderService = orderService;
+        this.ticketRepository = ticketRepository;
         this.ticketService = ticketService;
+        this.teamInviteTokenRepository = teamInviteTokenRepository;
         this.tttRepository = tttRepository;
     }
 
