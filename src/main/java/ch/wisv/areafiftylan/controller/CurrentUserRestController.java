@@ -130,6 +130,7 @@ public class CurrentUserRestController {
      *
      * @return The current owned tickets, if any exist
      */
+    @PreAuthorize("isAuthenticated()")
     @RequestMapping(value = "/tickets", method = RequestMethod.GET)
     public Collection<Ticket> getAllTickets(Authentication auth) {
         UserDetails currentUser = (UserDetails) auth.getPrincipal();

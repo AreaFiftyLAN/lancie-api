@@ -926,6 +926,16 @@ public class OrderRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
+    public void testNotAuthorizedTickets() {
+        insertTestOrders();
+
+        when().
+            get("/users/current/tickets").
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+    }
+
+    @Test
     public void testGetOneValidTicket() {
         insertTestOrders();
         SessionData login = login("user");
