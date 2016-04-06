@@ -924,6 +924,53 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         then().
             body("ticketType", hasItems(equalTo("EARLY_FULL"), equalTo("REGULAR_FULL")));
     }
+
+    @Test
+    public void testNotAuthorizedTickets() {
+        insertTestOrders();
+
+        when().
+            get("/users/current/tickets").
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+    }
+
+    @Test
+    public void testGetOneValidTicket() {
+        insertTestOrders();
+        SessionData login = login("user");
+
+        Ticket ticket = new Ticket(user, TicketType.EARLY_FULL, false, false);
+        ticket.setValid(true);
+        ticketRepository.saveAndFlush(ticket);
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            get("/users/current/tickets").
+        then().
+            body("object", hasSize(1)).
+            body("[0].owner.username", is("user"));
+        //@formatter:on
+    }
+
+    @Test
+    public void testZeroValidTickets() {
+        insertTestOrders();
+        SessionData login = login("user");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            get("/users/current/tickets").
+        then().
+            body("object", hasSize(0));
+        //@formatter:on
+    }
 }
 
 

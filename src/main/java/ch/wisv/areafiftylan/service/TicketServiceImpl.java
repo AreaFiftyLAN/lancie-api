@@ -15,7 +15,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
+import java.util.Collection;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class TicketServiceImpl implements TicketService {
@@ -51,6 +53,13 @@ public class TicketServiceImpl implements TicketService {
     @Override
     public Integer getNumberSoldOfType(TicketType type) {
         return ticketRepository.countByType(type);
+    }
+
+    @Override
+    public Collection<Ticket> findValidTicketsByOwnerUsername(String username) {
+        return ticketRepository.findAllByOwnerUsername(username).stream()
+                .filter(Ticket::isValid)
+                .collect(Collectors.toList());
     }
 
     @Override

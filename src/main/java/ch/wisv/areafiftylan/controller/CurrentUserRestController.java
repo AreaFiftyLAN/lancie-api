@@ -3,15 +3,9 @@ package ch.wisv.areafiftylan.controller;
 
 import ch.wisv.areafiftylan.dto.PasswordChangeDTO;
 import ch.wisv.areafiftylan.dto.TeamInviteResponse;
-import ch.wisv.areafiftylan.model.Order;
-import ch.wisv.areafiftylan.model.Seat;
-import ch.wisv.areafiftylan.model.Team;
-import ch.wisv.areafiftylan.model.User;
+import ch.wisv.areafiftylan.model.*;
 import ch.wisv.areafiftylan.model.view.View;
-import ch.wisv.areafiftylan.service.OrderService;
-import ch.wisv.areafiftylan.service.SeatService;
-import ch.wisv.areafiftylan.service.TeamService;
-import ch.wisv.areafiftylan.service.UserService;
+import ch.wisv.areafiftylan.service.*;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -37,14 +31,15 @@ public class CurrentUserRestController {
     private UserService userService;
     private SeatService seatService;
     private TeamService teamService;
-
     private OrderService orderService;
+    private TicketService ticketService;
 
     @Autowired
-    CurrentUserRestController(UserService userService, OrderService orderService, TeamService teamService, SeatService seatService) {
+    CurrentUserRestController(UserService userService, OrderService orderService, TicketService ticketService, TeamService teamService, SeatService seatService) {
         this.userService = userService;
         this.seatService = seatService;
         this.orderService = orderService;
+        this.ticketService = ticketService;
         this.teamService = teamService;
     }
 
@@ -126,6 +121,20 @@ public class CurrentUserRestController {
     public Collection<Order> getAllOrders(Authentication auth) {
         UserDetails currentUser = (UserDetails) auth.getPrincipal();
         return orderService.findOrdersByUsername(currentUser.getUsername());
+    }
+
+    /**
+     * Get the tickets of the currently logged in user. All the tickets owned by this user will be returned.
+     *
+     * @param auth The current User, injected by spring
+     *
+     * @return The current owned tickets, if any exist
+     */
+    @PreAuthorize("isAuthenticated()")
+    @RequestMapping(value = "/tickets", method = RequestMethod.GET)
+    public Collection<Ticket> getAllTickets(Authentication auth) {
+        UserDetails currentUser = (UserDetails) auth.getPrincipal();
+        return ticketService.findValidTicketsByOwnerUsername(currentUser.getUsername());
     }
 
     /**
