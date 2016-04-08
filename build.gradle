@@ -15,6 +15,7 @@ buildscript {
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
+apply plugin: 'jacoco'
 apply plugin: 'org.springframework.boot'
 
 jar {
@@ -78,6 +79,15 @@ eclipse {
 task wrapper(type: Wrapper) {
     gradleVersion = '3.2.1'
 }
+
+jacocoTestReport {
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
+}
+
+check.dependsOn jacocoTestReport
 
 task bootRunDev(type: BootRunTask) {
     group = 'Application'
