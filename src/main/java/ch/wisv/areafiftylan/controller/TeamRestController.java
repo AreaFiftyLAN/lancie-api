@@ -90,7 +90,7 @@ public class TeamRestController {
      * @return A representation the Team with given Id.
      */
     @PreAuthorize("@currentUserServiceImpl.canAccessTeam(principal, #teamId)")
-    @JsonView(View.Public.class)
+    @JsonView(View.Team.class)
     @RequestMapping(method = RequestMethod.GET, value = "/{teamId}")
     public Team getTeamById(@PathVariable Long teamId) {
         return this.teamService.getTeamById(teamId);
@@ -104,7 +104,7 @@ public class TeamRestController {
      * @return A list of the members of the Team with the given Id. Public information only.
      */
     @PreAuthorize("@currentUserServiceImpl.canAccessTeam(principal, #teamId)")
-    @JsonView(View.Public.class)
+    @JsonView(View.Team.class)
     @RequestMapping(method = RequestMethod.GET, value = "/{teamId}/members")
     public Set<User> getTeamMembersById(@PathVariable Long teamId) {
         Team team = teamService.getTeamById(teamId);
@@ -156,9 +156,8 @@ public class TeamRestController {
             "and @currentUserServiceImpl.hasAnyTicket(#username)")
     @RequestMapping(method = RequestMethod.POST, value = "/{teamId}/invites")
     public ResponseEntity<?> inviteTeamMember(@PathVariable Long teamId, @RequestBody String username) {
-        TeamInviteToken teamInviteToken = teamService.inviteMember(teamId, username);
-        return createResponseEntity(HttpStatus.OK, "User " + username + " successfully invited to Team " + teamId,
-                teamInviteToken);
+        teamService.inviteMember(teamId, username);
+        return createResponseEntity(HttpStatus.OK, "User " + username + " successfully invited to Team " + teamId);
     }
 
     @PreAuthorize("@currentUserServiceImpl.canEditTeam(principal, #teamId)")
@@ -167,6 +166,13 @@ public class TeamRestController {
         return teamService.findTeamInvitesByTeamId(teamId);
     }
 
+    /**
+     * Accept an invite
+     *
+     * @param token Token of the Invite
+     *
+     * @return Statusmessage
+     */
     @PreAuthorize("@currentUserServiceImpl.canAcceptInvite(principal, #token)")
     @RequestMapping(method = RequestMethod.POST, value = "/invites")
     public ResponseEntity<?> acceptTeamInvite(@RequestBody String token) {
@@ -174,6 +180,13 @@ public class TeamRestController {
         return createResponseEntity(HttpStatus.OK, "Invite successfully accepted");
     }
 
+    /**
+     * Decline or revoke an invite
+     *
+     * @param token Token of the Invite
+     *
+     * @return Statusmessage
+     */
     @PreAuthorize("@currentUserServiceImpl.canRevokeInvite(principal, #token)")
     @RequestMapping(method = RequestMethod.DELETE, value = "/invites")
     public ResponseEntity<?> declineTeamInvite(@RequestBody String token) {
@@ -191,7 +204,7 @@ public class TeamRestController {
      * @return The updated Team
      */
     @PreAuthorize("@currentUserServiceImpl.canEditTeam(principal, #teamId)")
-    @JsonView(View.Public.class)
+    @JsonView(View.Team.class)
     @RequestMapping(method = RequestMethod.PUT, value = "/{teamId}")
     public Team update(@PathVariable Long teamId, @Validated @RequestBody TeamDTO input) {
         return this.teamService.update(teamId, input);
