@@ -38,15 +38,15 @@ public class TestDataRunner implements CommandLineRunner {
         testUser2.getProfile()
                 .setAllFields("Bert", "Kleijn", "ILoveZombies", Gender.OTHER, "Mekelweg 20", "2826CD", "Amsterdam",
                         "0611", null);
-        User testUser3 = new User("user3", "passwordHash", "katrien@ms.com");
+        User testUser3 = new User("user3", new BCryptPasswordEncoder().encode("password"), "katrien@ms.com");
         testUser3.getProfile()
                 .setAllFields("Katrien", "Zwanenburg", "Admiral Cheesecake", Gender.FEMALE, "Ganzenlaan 5",
                         "2826CD", "Duckstad", "0906-0666", null);
-        User testUser4 = new User("user4", "passwordHash", "user@yahoo.com");
+        User testUser4 = new User("noticket", new BCryptPasswordEncoder().encode("password"), "user@yahoo.com");
         testUser4.getProfile()
                 .setAllFields("Kees", "Jager", "l33tz0r", Gender.MALE, "Herenweg 2", "2826CD", "Delft",
                         "0902-30283", null);
-        User testUser5 = new User("user5", "passwordHash", "custom@myself.com");
+        User testUser5 = new User("user5", new BCryptPasswordEncoder().encode("password"), "custom@myself.com");
         testUser5.getProfile()
                 .setAllFields("Gert", "Gertson", "Whosyourdaddy", Gender.MALE, "Jansstraat", "8826CD", "Delft",
                         "0238-2309736", null);
@@ -61,6 +61,7 @@ public class TestDataRunner implements CommandLineRunner {
         Ticket ticket2 = new Ticket(testUser2, TicketType.EARLY_FULL, false, false);
         Ticket ticket3 = new Ticket(testUser3, TicketType.EARLY_FULL, false, false);
         ticket.setValid(true);
+        ticket2.setValid(true);
         ticketRepository.save(ticket);
         ticketRepository.save(ticket2);
         ticketRepository.save(ticket3);

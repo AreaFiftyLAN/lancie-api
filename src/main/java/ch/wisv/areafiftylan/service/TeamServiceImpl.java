@@ -124,9 +124,6 @@ public class TeamServiceImpl implements TeamService {
                 e.printStackTrace();
             }
             return inviteToken;
-
-        } else {
-            throw new IllegalArgumentException("User is already a member of this team or already invited");
         }
     }
 
@@ -153,8 +150,8 @@ public class TeamServiceImpl implements TeamService {
     }
 
     private List<TeamInviteResponse> teamInviteTokensToReponses(Collection<TeamInviteToken> inviteTokens) {
-            // From all Tokens that exist in the database linked to the user, only display the valid ones. Change
-            // them to TeamInviteResponses for display in the controller.
+        // From all Tokens that exist in the database linked to the user, only display the valid ones. Change
+        // them to TeamInviteResponses for display in the controller.
         return inviteTokens.stream().
                 filter(Token::isValid).
                 map(t -> new TeamInviteResponse(t.getTeam().getId(), t.getTeam().getTeamName(), t.getToken(),
