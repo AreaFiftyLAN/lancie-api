@@ -15,20 +15,22 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.Optional;
 
 @Service
 public class CurrentUserServiceImpl implements CurrentUserService {
 
-    TeamService teamService;
-    OrderService orderService;
-    TicketRepository ticketRepository;
-    TicketService ticketService;
-    TeamInviteTokenRepository teamInviteTokenRepository;
-    TicketTransferTokenRepository tttRepository;
+    private TeamService teamService;
+    private OrderService orderService;
+    private TicketRepository ticketRepository;
+    private TicketService ticketService;
+    private TeamInviteTokenRepository teamInviteTokenRepository;
+    private TicketTransferTokenRepository tttRepository;
 
     @Autowired
     public CurrentUserServiceImpl(TeamService teamService, OrderService orderService, TicketRepository ticketRepository,
-                                  TicketService ticketService, TeamInviteTokenRepository teamInviteTokenRepository, TicketTransferTokenRepository tttRepository) {
+                                  TicketService ticketService, TeamInviteTokenRepository teamInviteTokenRepository,
+                                  TicketTransferTokenRepository tttRepository) {
         this.teamService = teamService;
         this.orderService = orderService;
         this.ticketRepository = ticketRepository;
@@ -106,7 +108,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     }
 
     @Override
-    public boolean isTicketOwner(Object principal, Long ticketId){
+    public boolean isTicketOwner(Object principal, Long ticketId) {
         if (principal instanceof UserDetails) {
             User user = (User) principal;
             return ticketService.getTicketById(ticketId).getOwner().equals(user);
@@ -146,7 +148,8 @@ public class CurrentUserServiceImpl implements CurrentUserService {
 
     @Override
     public boolean hasAnyTicket(String username) {
-        return ticketRepository.findByOwnerUsername(username).isPresent();
+        Optional<Ticket> ticket = ticketRepository.findByOwnerUsername(username);
+        return ticket.isPresent() && ticket.get().isValid();
     }
 
     @Override
@@ -174,8 +177,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
                     teamInviteTokenRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
 
             // Tokens can only be accepted by the target user
-            boolean r = teamInviteToken.getUser().equals(user);
-            return r;
+            return teamInviteToken.getUser().equals(user);
         } else {
             return false;
         }
@@ -183,7 +185,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     }
 
     @Override
-    public boolean isTicketSender(Object principal, String token){
+    public boolean isTicketSender(Object principal, String token) {
         TicketTransferToken ttt = tttRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
 
         if (principal instanceof UserDetails) {
@@ -195,7 +197,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     }
 
     @Override
-    public boolean isTicketReceiver(Object principal, String token){
+    public boolean isTicketReceiver(Object principal, String token) {
         TicketTransferToken ttt = tttRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
 
         if (principal instanceof UserDetails) {

@@ -54,8 +54,14 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
         teamCaptain = userRepository.saveAndFlush(teamCaptain);
 
-        ticketRepository.save(new Ticket(teamCaptain, TicketType.EARLY_FULL, false, false));
-        ticketRepository.save(new Ticket(user, TicketType.EARLY_FULL, false, false));
+        Ticket captainTicket = new Ticket(teamCaptain, TicketType.EARLY_FULL, false, false);
+        captainTicket.setValid(true);
+
+        Ticket userTicket = new Ticket(user, TicketType.EARLY_FULL, false, false);
+        userTicket.setValid(true);
+
+        ticketRepository.save(captainTicket);
+        ticketRepository.save(userTicket);
 
         team1.put("teamName", "testteam1");
     }
@@ -669,7 +675,9 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
         addUserAsAdmin(location, user);
 
-        ticketRepository.save(new Ticket(admin, TicketType.EARLY_FULL, false, false));
+        Ticket adminTicket = new Ticket(admin, TicketType.EARLY_FULL, false, false);
+        adminTicket.setValid(true);
+        ticketRepository.save(adminTicket);
 
         inviteUserAsCaptain(location, admin);
 
