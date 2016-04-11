@@ -29,7 +29,7 @@ public interface TeamService {
 
     TeamInviteToken inviteMember(Long teamId, String username);
 
-    void removeInvite(String token);
+    void revokeInvite(String token);
 
     List<TeamInviteResponse> findTeamInvitesByUsername(String username);
 

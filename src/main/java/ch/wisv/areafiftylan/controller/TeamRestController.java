@@ -190,7 +190,7 @@ public class TeamRestController {
     @PreAuthorize("@currentUserServiceImpl.canRevokeInvite(principal, #token)")
     @RequestMapping(method = RequestMethod.DELETE, value = "/invites")
     public ResponseEntity<?> declineTeamInvite(@RequestBody String token) {
-        teamService.removeInvite(token);
+        teamService.revokeInvite(token);
         return createResponseEntity(HttpStatus.OK, "Invite successfully declined");
     }
 

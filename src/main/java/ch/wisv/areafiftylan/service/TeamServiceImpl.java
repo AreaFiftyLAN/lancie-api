@@ -88,8 +88,10 @@ public class TeamServiceImpl implements TeamService {
         }
 
         // If the Captain username is set, change the Captain
-        if (!Strings.isNullOrEmpty(input.getCaptainUsername())) {
-            User captain = userService.getUserByUsername(input.getCaptainUsername()).get();
+        String captainUsername = input.getCaptainUsername();
+        if (!Strings.isNullOrEmpty(captainUsername)) {
+            User captain = userService.getUserByUsername(captainUsername)
+                    .orElseThrow(() -> new UserNotFoundException(captainUsername));
             current.setCaptain(captain);
         }
 
@@ -128,11 +130,12 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public void removeInvite(String token) {
-        // TODO: Revoke instead of delete once this is available
+    public void revokeInvite(String token) {
         TeamInviteToken teamInviteToken =
                 teamInviteTokenRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
-        teamInviteTokenRepository.delete(teamInviteToken);
+        teamInviteToken.revoke();
+        teamInviteTokenRepository.save(teamInviteToken);
+
     }
 
     @Override
