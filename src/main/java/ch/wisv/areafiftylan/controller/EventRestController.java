@@ -25,13 +25,13 @@ import static ch.wisv.areafiftylan.util.ResponseEntityBuilder.createResponseEnti
  */
 @RestController
 @RequestMapping(value = "/events")
-public class EventController {
+public class EventRestController {
 
     private EventService eventService;
     private TeamService teamService;
 
     @Autowired
-    public EventController(EventService eventService, TeamService teamService) {
+    public EventRestController(EventService eventService, TeamService teamService) {
         this.eventService = eventService;
         this.teamService = teamService;
     }
