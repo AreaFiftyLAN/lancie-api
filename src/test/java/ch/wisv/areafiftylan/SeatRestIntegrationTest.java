@@ -79,7 +79,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
     }
 
     private void createCaptainAndTeam() {
-        teamCaptain = new User("captain", new BCryptPasswordEncoder().encode("password"), "captain@mail.com");
+        teamCaptain = new User("captain", new BCryptPasswordEncoder().encode(teamCaptainCleartextPassword), "captain@mail.com");
         teamCaptain.getProfile()
                 .setAllFields("Captain", "Hook", "PeterPanKiller", Gender.MALE, "High Road 3", "2826ZZ", "Neverland",
                         "0906-0777", null);
@@ -342,7 +342,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
         seatGroupDTO.put("numberOfSeats", "5");
 
         //@formatter:off
-        SessionData login = login("user", "password");
+        SessionData login = login("user", userCleartextPassword);
 
         given().
             filter(sessionFilter).
@@ -363,7 +363,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
         seatGroupDTO.put("numberOfSeats", "5");
 
         //@formatter:off
-        SessionData login = login("admin", "password");
+        SessionData login = login("admin", adminCleartextPassword);
 
         given().
             filter(sessionFilter).

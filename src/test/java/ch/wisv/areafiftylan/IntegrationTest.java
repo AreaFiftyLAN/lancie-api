@@ -46,29 +46,55 @@ public abstract class IntegrationTest {
     protected User admin;
     protected final String adminCleartextPassword = "password";
 
+    protected User outsider;
+    protected final String outsiderCleartextPassword = "password";
+
+
     SessionFilter sessionFilter = new SessionFilter();
 
     @Before
     public void initIntegrationTest() {
         userRepository.deleteAll();
 
-        user = new User("user", new BCryptPasswordEncoder().encode(userCleartextPassword), "user@mail.com");
+        user = makeUser();
+        admin = makeAdmin();
+        outsider = makeOutsider();
+
+        userRepository.saveAndFlush(user);
+        userRepository.saveAndFlush(admin);
+        userRepository.saveAndFlush(outsider);
+
+        RestAssured.port = port;
+        RestAssured.config = config().redirect(redirectConfig().followRedirects(false));
+        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+    }
+
+    private User makeUser(){
+        User user = new User("user", new BCryptPasswordEncoder().encode(userCleartextPassword), "user@mail.com");
         user.getProfile()
                 .setAllFields("Jan", "de Groot", "MonsterKiller9001", Gender.MALE, "Mekelweg 4", "2826CD", "Delft",
                         "0906-0666", null);
 
-        admin = new User("admin", new BCryptPasswordEncoder().encode(adminCleartextPassword), "bert@mail.com");
+        return user;
+    }
+
+    private User makeAdmin(){
+        User admin = new User("admin", new BCryptPasswordEncoder().encode(adminCleartextPassword), "bert@mail.com");
         admin.addRole(Role.ROLE_ADMIN);
         admin.getProfile()
                 .setAllFields("Bert", "Kleijn", "ILoveZombies", Gender.OTHER, "Mekelweg 20", "2826CD", "Amsterdam",
                         "0611", null);
 
-        userRepository.saveAndFlush(user);
-        userRepository.saveAndFlush(admin);
+        return admin;
+    }
 
-        RestAssured.port = port;
-        RestAssured.config = config().redirect(redirectConfig().followRedirects(false));
-        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+    private User makeOutsider(){
+        User outsider = new User("outsider", new BCryptPasswordEncoder().encode("password"), "outsider@gmail.com");
+        outsider.getProfile()
+                .setAllFields("Nottin", "Todoeo Witit", "Lookinin", Gender.FEMALE, "LoserStreet 1", "2826GJ", "China",
+                        "0906-3928", null);
+
+        return userRepository.saveAndFlush(outsider);
     }
 
     @After

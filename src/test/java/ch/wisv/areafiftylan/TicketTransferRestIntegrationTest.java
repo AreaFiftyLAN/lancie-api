@@ -27,8 +27,8 @@ import static com.jayway.restassured.RestAssured.given;
 public class TicketTransferRestIntegrationTest extends IntegrationTest{
     private final String TRANSFER_ENDPOINT = "/tickets/transfer";
 
-    private User outsider;
     private User ticketReceiver;
+    private final String ticketReceiverCleartextPassword = "password";
     private Ticket ticket;
 
     @Autowired
@@ -39,7 +39,6 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
 
     @Before
     public void initTransferTest(){
-        outsider = makeOutsider();
         ticketReceiver = makeTicketReceiver();
         ticket = makeTicket();
     }
@@ -51,21 +50,12 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
     }
 
     private User makeTicketReceiver(){
-        User receiver = new User("receiver", new BCryptPasswordEncoder().encode("password"), "receiver@gmail.com");
+        User receiver = new User("receiver", new BCryptPasswordEncoder().encode(ticketReceiverCleartextPassword), "receiver@gmail.com");
         receiver.getProfile()
                 .setAllFields("receiver", " of tickets", "GotYaTicket", Gender.MALE, "Money Owner 4", "2826GJ", "Tomorrowland",
                         "0906-1111", null);
 
         return userRepository.saveAndFlush(receiver);
-    }
-
-    private User makeOutsider(){
-        User outsider = new User("outsider", new BCryptPasswordEncoder().encode("password"), "outsider@gmail.com");
-        outsider.getProfile()
-                .setAllFields("Nottin", "Todoeo Witit", "Lookinin", Gender.FEMALE, "LoserStreet 1", "2826GJ", "China",
-                        "0906-3928", null);
-
-        return userRepository.saveAndFlush(outsider);
     }
 
     private Ticket makeTicket(){
@@ -89,7 +79,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
 
     @Test
     public void testAddTransfer_Owner(){
-        String token = addTicketTransfer(user.getUsername(), "password")
+        String token = addTicketTransfer(user.getUsername(), userCleartextPassword)
                 .then()
                     .statusCode(HttpStatus.SC_OK)
                 .extract().path("object.token");
@@ -103,7 +93,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
 
     @Test
     public void testAddTransfer_Receiver(){
-        addTicketTransfer(ticketReceiver.getUsername(), "password")
+        addTicketTransfer(ticketReceiver.getUsername(), ticketReceiverCleartextPassword)
                 .then()
                     .statusCode(HttpStatus.SC_FORBIDDEN);
 
@@ -112,7 +102,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
 
     @Test
     public void testAddTransfer_Outsider(){
-        addTicketTransfer(outsider.getUsername(), "password")
+        addTicketTransfer(outsider.getUsername(), outsiderCleartextPassword)
                 .then()
                 .statusCode(HttpStatus.SC_FORBIDDEN);
 
@@ -142,7 +132,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
     public void testDoTransfer_Owner(){
         TicketTransferToken ttt = addTicketTransferGetToken();
 
-        SessionData login = login(user.getUsername(), "password");
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         given().
                 filter(sessionFilter).
@@ -166,7 +156,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
     public void testDoTransfer_Receiver(){
         TicketTransferToken ttt = addTicketTransferGetToken();
 
-        SessionData login = login(ticketReceiver.getUsername(), "password");
+        SessionData login = login(ticketReceiver.getUsername(), ticketReceiverCleartextPassword);
 
         given().
                 filter(sessionFilter).
@@ -189,7 +179,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
     public void testDoTransfer_Outsider(){
         TicketTransferToken ttt = addTicketTransferGetToken();
 
-        SessionData login = login(outsider.getUsername(), "password");
+        SessionData login = login(outsider.getUsername(), outsiderCleartextPassword);
 
         given().
                 filter(sessionFilter).
@@ -231,7 +221,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
     public void testCancelTransfer_Owner(){
         TicketTransferToken ttt = addTicketTransferGetToken();
 
-        SessionData login = login(user.getUsername(), "password");
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         given().
                 filter(sessionFilter).
@@ -254,7 +244,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
     public void testCancelTransfer_Receiver(){
         TicketTransferToken ttt = addTicketTransferGetToken();
 
-        SessionData login = login(ticketReceiver.getUsername(), "password");
+        SessionData login = login(ticketReceiver.getUsername(), ticketReceiverCleartextPassword);
 
         given().
                 filter(sessionFilter).
@@ -277,7 +267,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
     public void testCancelTransfer_OutsideUser(){
         TicketTransferToken ttt = addTicketTransferGetToken();
 
-        SessionData login = login(outsider.getUsername(), "password");
+        SessionData login = login(outsider.getUsername(), outsiderCleartextPassword);
 
         given().
                 filter(sessionFilter).
@@ -314,7 +304,7 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
     }
 
     private TicketTransferToken addTicketTransferGetToken(){
-        String token = addTicketTransfer(user.getUsername(), "password").
+        String token = addTicketTransfer(user.getUsername(), userCleartextPassword).
             then().
                 extract().path("object.token");
 

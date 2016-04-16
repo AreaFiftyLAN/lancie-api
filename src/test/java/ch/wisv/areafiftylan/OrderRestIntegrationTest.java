@@ -436,13 +436,10 @@ public class OrderRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testGetOrder_OtherUser() {
-        User otherUser = new User("otherUser", new BCryptPasswordEncoder().encode("password"), "otheruser@mail.com");
-        userRepository.save(otherUser);
-
         String location = createOrderAndReturnLocation();
         logout();
 
-        SessionData login = login("otheruser", "password");
+        SessionData login = login(outsider.getUsername(), outsiderCleartextPassword);
 
         //@formatter:off
         given().
@@ -535,9 +532,6 @@ public class OrderRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testAddToOrder_OtherUser() {
-        User otherUser = new User("otherUser", new BCryptPasswordEncoder().encode("password"), "otheruser@mail.com");
-        userRepository.save(otherUser);
-
         Map<String, String> ticket = new HashMap<>(2);
         ticket.put("pickupService", "true");
         ticket.put("chMember", "false");
@@ -546,7 +540,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         String location = createOrderAndReturnLocation();
         logout();
 
-        SessionData login = login("otheruser", "password");
+        SessionData login = login(outsider.getUsername(), outsiderCleartextPassword);
 
         //@formatter:off
         given().
