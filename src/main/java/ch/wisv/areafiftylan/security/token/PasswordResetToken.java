@@ -1,4 +1,4 @@
-package ch.wisv.areafiftylan.security;
+package ch.wisv.areafiftylan.security.token;
 
 import ch.wisv.areafiftylan.model.User;
 
@@ -11,8 +11,8 @@ public class PasswordResetToken extends Token {
     public PasswordResetToken() {
     }
 
-    public PasswordResetToken(String token, User user) {
-        super(token, user);
+    public PasswordResetToken(User user) {
+        super(user);
     }
 
 }

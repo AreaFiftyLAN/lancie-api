@@ -22,8 +22,8 @@ class GlobalControllerExceptionHandler {
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<?> handleDataIntegrityViolation(DataIntegrityViolationException e) {
-        return createResponseEntity(HttpStatus.CONFLICT, e.getMessage());
+    public ResponseEntity<?> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        return createResponseEntity(HttpStatus.CONFLICT, ex.getMessage());
     }
 
     @ExceptionHandler(IllegalStateException.class)
@@ -34,5 +34,15 @@ class GlobalControllerExceptionHandler {
     @ExceptionHandler(OrderNotFoundException.class)
     public ResponseEntity<?> handleOrderNotFoundException(OrderNotFoundException ex) {
         return createResponseEntity(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(TokenNotFoundException.class)
+    public ResponseEntity<?> handleTokenNotFoundException(TokenNotFoundException ex) {
+        return createResponseEntity(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<?> handleInvalidTokenException(InvalidTokenException ex) {
+        return createResponseEntity(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 }

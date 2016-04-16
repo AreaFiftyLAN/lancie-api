@@ -1,4 +1,4 @@
-package ch.wisv.areafiftylan.security;
+package ch.wisv.areafiftylan.security.token;
 
 import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.model.User;
@@ -24,8 +24,8 @@ public class TeamInviteToken extends Token {
         //JPA Only
     }
 
-    public TeamInviteToken(String token, User user, Team team){
-        super(token, user, EXPIRATION);
+    public TeamInviteToken(User user, Team team){
+        super(user, EXPIRATION);
         this.team = team;
     }
 

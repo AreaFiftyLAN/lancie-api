@@ -7,8 +7,8 @@ import ch.wisv.areafiftylan.exception.TokenNotFoundException;
 import ch.wisv.areafiftylan.exception.UserNotFoundException;
 import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.model.User;
-import ch.wisv.areafiftylan.security.TeamInviteToken;
-import ch.wisv.areafiftylan.security.Token;
+import ch.wisv.areafiftylan.security.token.TeamInviteToken;
+import ch.wisv.areafiftylan.security.token.Token;
 import ch.wisv.areafiftylan.service.repository.TeamRepository;
 import ch.wisv.areafiftylan.service.repository.token.TeamInviteTokenRepository;
 import com.google.common.base.Strings;
@@ -20,7 +20,6 @@ import javax.mail.MessagingException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -115,8 +114,7 @@ public class TeamServiceImpl implements TeamService {
 
         // Continue if the user isn't already a member, and there are no outstanding invites already
         if (!team.getMembers().contains(user) && !optionalInvite.isPresent()) {
-            String token = UUID.randomUUID().toString();
-            TeamInviteToken inviteToken = new TeamInviteToken(token, user, team);
+            TeamInviteToken inviteToken = new TeamInviteToken(user, team);
             teamInviteTokenRepository.save(inviteToken);
 
             try {

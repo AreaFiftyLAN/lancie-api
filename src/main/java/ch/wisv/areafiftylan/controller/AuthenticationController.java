@@ -1,10 +1,11 @@
 package ch.wisv.areafiftylan.controller;
 
+import ch.wisv.areafiftylan.exception.InvalidTokenException;
 import ch.wisv.areafiftylan.exception.TokenNotFoundException;
 import ch.wisv.areafiftylan.exception.UserNotFoundException;
 import ch.wisv.areafiftylan.model.User;
-import ch.wisv.areafiftylan.security.PasswordResetToken;
-import ch.wisv.areafiftylan.security.VerificationToken;
+import ch.wisv.areafiftylan.security.token.PasswordResetToken;
+import ch.wisv.areafiftylan.security.token.VerificationToken;
 import ch.wisv.areafiftylan.service.MailService;
 import ch.wisv.areafiftylan.service.UserService;
 import ch.wisv.areafiftylan.service.repository.token.PasswordResetTokenRepository;
@@ -87,7 +88,7 @@ public class AuthenticationController {
      */
     @RequestMapping(value = "/resetPassword", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> body) {
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> body) throws InvalidTokenException {
         String token = body.get("token");
         String password = body.get("password");
 
@@ -96,7 +97,7 @@ public class AuthenticationController {
 
         //Check validity of the token
         if (!passwordResetToken.isValid()) {
-            return createResponseEntity(HttpStatus.UNAUTHORIZED, "Token is expired or has been already used.");
+            throw new InvalidTokenException();
         }
 
         // Get the user associated to the token
@@ -124,7 +125,7 @@ public class AuthenticationController {
      * @throws TokenNotFoundException if the token can't be found
      */
     @RequestMapping(value = "/confirmRegistration", method = RequestMethod.GET)
-    public ResponseEntity<?> confirmRegistration(@RequestParam("token") String token) throws TokenNotFoundException {
+    public ResponseEntity<?> confirmRegistration(@RequestParam("token") String token) throws TokenNotFoundException, InvalidTokenException {
 
         VerificationToken verificationToken =
                 verificationTokenRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
@@ -132,7 +133,7 @@ public class AuthenticationController {
         // Get the user associated with this token
         User user = verificationToken.getUser();
         if (!verificationToken.isValid()) {
-            return createResponseEntity(HttpStatus.UNAUTHORIZED, "Token is expired or has been already used.");
+            throw new InvalidTokenException();
         }
 
         userService.verify(user.getId());
@@ -143,10 +144,4 @@ public class AuthenticationController {
 
         return createResponseEntity(HttpStatus.OK, "Succesfully verified");
     }
-
-    @ExceptionHandler(TokenNotFoundException.class)
-    public ResponseEntity<?> handleAccessDeniedException(TokenNotFoundException ex) {
-        return createResponseEntity(HttpStatus.NOT_FOUND, ex.getMessage());
-    }
-
 }

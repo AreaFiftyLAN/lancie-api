@@ -1,4 +1,4 @@
-package ch.wisv.areafiftylan.security;
+package ch.wisv.areafiftylan.security.token;
 
 import ch.wisv.areafiftylan.model.User;
 
@@ -6,6 +6,7 @@ import javax.persistence.*;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.UUID;
 
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -32,12 +33,12 @@ public abstract class Token {
     public Token() {
     }
 
-    public Token(String token, User user) {
-        this(token, user, EXPIRATION);
+    public Token(User user) {
+        this(user, EXPIRATION);
     }
 
-    public Token(String token, User user, int expiration) {
-        this.token = token;
+    public Token(User user, int expiration) {
+        this.token = UUID.randomUUID().toString();
         this.user = user;
         this.expirable = expiration != 0;
         this.expiryDate = calculateExpiryDate(expiration);
@@ -52,10 +53,6 @@ public abstract class Token {
 
     public String getToken() {
         return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
     }
 
     public User getUser() {

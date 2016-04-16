@@ -6,9 +6,9 @@ import ch.wisv.areafiftylan.exception.TokenNotFoundException;
 import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.util.TicketType;
-import ch.wisv.areafiftylan.security.TicketTransferToken;
+import ch.wisv.areafiftylan.security.token.TicketTransferToken;
 import ch.wisv.areafiftylan.service.repository.TicketRepository;
-import ch.wisv.areafiftylan.service.repository.TicketTransferTokenRepository;
+import ch.wisv.areafiftylan.service.repository.token.TicketTransferTokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -84,7 +84,7 @@ public class TicketServiceImpl implements TicketService {
         User u = userService.getUserByUsername(goalUserName).orElseThrow(() -> new UsernameNotFoundException("User " + goalUserName + " not found."));
         Ticket t = ticketRepository.findOne(ticketId);
 
-        TicketTransferToken ttt = new TicketTransferToken(UUID.randomUUID().toString(), u, t);
+        TicketTransferToken ttt = new TicketTransferToken(u, t);
 
         tttRepository.save(ttt);
 

@@ -4,8 +4,8 @@ import ch.wisv.areafiftylan.dto.ProfileDTO;
 import ch.wisv.areafiftylan.dto.UserDTO;
 import ch.wisv.areafiftylan.model.Profile;
 import ch.wisv.areafiftylan.model.User;
-import ch.wisv.areafiftylan.security.PasswordResetToken;
-import ch.wisv.areafiftylan.security.VerificationToken;
+import ch.wisv.areafiftylan.security.token.PasswordResetToken;
+import ch.wisv.areafiftylan.security.token.VerificationToken;
 import ch.wisv.areafiftylan.service.repository.UserRepository;
 import ch.wisv.areafiftylan.service.repository.token.PasswordResetTokenRepository;
 import ch.wisv.areafiftylan.service.repository.token.VerificationTokenRepository;
@@ -24,7 +24,6 @@ import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class UserServiceImpl implements UserService, UserDetailsService {
@@ -86,15 +85,13 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     private void generateAndSendToken(HttpServletRequest request, User user) {
-        String token = UUID.randomUUID().toString();
-
         // Create a new Verificationcode with this UUID, and link it to the user
-        VerificationToken verificationToken = new VerificationToken(token, user);
+        VerificationToken verificationToken = new VerificationToken(user);
         verificationTokenRepository.saveAndFlush(verificationToken);
 
         try {
             // Build the URL and send this to the mailservice for sending.
-            String confirmUrl = requestUrl + "?token=" + token;
+            String confirmUrl = requestUrl + "?token=" + verificationToken.getToken();
             mailService.sendVerificationmail(user, confirmUrl);
         } catch (MessagingException e) {
             e.printStackTrace();
@@ -188,14 +185,13 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public void requestResetPassword(User user, HttpServletRequest request) {
-        String token = UUID.randomUUID().toString();
         // Use the generated ID to create a passwordToken and link it to the user
-        PasswordResetToken passwordResetToken = new PasswordResetToken(token, user);
+        PasswordResetToken passwordResetToken = new PasswordResetToken(user);
         passwordResetTokenRepository.saveAndFlush(passwordResetToken);
 
         try {
             // TODO: This is a bit weird. This needs to link to a form.
-            String passwordUrl = resetUrl + "?token=" + token;
+            String passwordUrl = resetUrl + "?token=" + passwordResetToken.getToken();
             // Send the token to the user
             mailService.sendPasswordResetMail(user, passwordUrl);
         } catch (MessagingException e) {
