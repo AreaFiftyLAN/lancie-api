@@ -6,6 +6,7 @@ import ch.wisv.areafiftylan.util.SessionData;
 import com.jayway.restassured.http.ContentType;
 import org.apache.http.HttpStatus;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,28 +102,136 @@ public class EventRestIntegrationTest extends IntegrationTest {
         //@formatter:on
     }
 
+    private void addEvent(String username, String name, String teamLimit, String teamSize) {
+        Map<String, String> eventDTO = new HashMap<>();
+        eventDTO.put("name", name);
+        eventDTO.put("teamLimit", teamLimit);
+        eventDTO.put("teamSize", teamSize);
+
+        SessionData login = login(username);
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            content(eventDTO).contentType(ContentType.JSON).
+            post(EVENTS_ENDPOINT).
+        then().
+            statusCode(HttpStatus.SC_CREATED).
+            header("location", containsString("/events/")).
+            body("object.name", is("event"));
+        //@formatter:on
+    }
+
     @Test
     public void testAddEventDuplicateNameAsAdmin() {
+        Map<String, String> eventDTO = new HashMap<>();
+        eventDTO.put("name", "event");
+        eventDTO.put("teamLimit", "10");
+        eventDTO.put("teamSize", "2");
 
+        addEvent("admin", eventDTO.get("name"), eventDTO.get("teamLimit"), eventDTO.get("teamSize"));
+
+        SessionData login = login("admin");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            content(eventDTO).contentType(ContentType.JSON).
+            post(EVENTS_ENDPOINT).
+        then().
+            statusCode(HttpStatus.SC_CONFLICT);
+        //@formatter:on
+
+        Assert.assertEquals(2, eventRepository.count());
     }
 
     @Test
     public void testAddEventMissingNameAsAdmin() {
+        Map<String, String> eventDTO = new HashMap<>();
+        eventDTO.put("teamLimit", "10");
+        eventDTO.put("teamSize", "2");
 
+        SessionData login = login("admin");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            content(eventDTO).contentType(ContentType.JSON).
+            post(EVENTS_ENDPOINT).
+        then().
+            statusCode(HttpStatus.SC_BAD_REQUEST);
+        //@formatter:on
+
+        Assert.assertEquals(1, eventRepository.count());
     }
 
     @Test
     public void testAddEventMissingTeamSizeAsAdmin() {
+        Map<String, String> eventDTO = new HashMap<>();
+        eventDTO.put("name", "event");
+        eventDTO.put("teamLimit", "10");
+
+        SessionData login = login("admin");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            content(eventDTO).contentType(ContentType.JSON).
+            post(EVENTS_ENDPOINT).
+        then().
+            statusCode(HttpStatus.SC_BAD_REQUEST);
+        //@formatter:on
+
+        Assert.assertEquals(1, eventRepository.count());
 
     }
 
     @Test
     public void testAddEventMissingTeamLimit() {
+        Map<String, String> eventDTO = new HashMap<>();
+        eventDTO.put("name", "event");
+        eventDTO.put("teamSize", "2");
+
+        SessionData login = login("admin");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            content(eventDTO).contentType(ContentType.JSON).
+            post(EVENTS_ENDPOINT).
+        then().
+            statusCode(HttpStatus.SC_BAD_REQUEST);
+        //@formatter:on
+
+        Assert.assertEquals(1, eventRepository.count());
 
     }
 
     @Test
     public void testAddEventEmptyBody() {
+        SessionData login = login("admin");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+                post(EVENTS_ENDPOINT).
+        then().
+            statusCode(HttpStatus.SC_BAD_REQUEST);
+        //@formatter:on
+
+        Assert.assertEquals(1, eventRepository.count());
 
     }
 
