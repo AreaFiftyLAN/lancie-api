@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import javax.mail.MessagingException;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -116,8 +115,7 @@ public class TeamServiceImpl implements TeamService {
         }
 
         if (isUserAlreadyInvited(username, team)) {
-            String token = UUID.randomUUID().toString();
-            TeamInviteToken inviteToken = new TeamInviteToken(token, user, team);
+            TeamInviteToken inviteToken = new TeamInviteToken(user, team);
             teamInviteTokenRepository.save(inviteToken);
 
             try {
