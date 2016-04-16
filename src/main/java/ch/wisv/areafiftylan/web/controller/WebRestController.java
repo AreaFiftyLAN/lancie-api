@@ -1,9 +1,9 @@
 package ch.wisv.areafiftylan.web.controller;
 
 import ch.wisv.areafiftylan.web.model.CommitteeMember;
-import ch.wisv.areafiftylan.web.model.Event;
 import ch.wisv.areafiftylan.web.model.Sponsor;
 import ch.wisv.areafiftylan.web.model.Tournament;
+import ch.wisv.areafiftylan.web.model.WebEvent;
 import ch.wisv.areafiftylan.web.service.WebEventsService;
 import ch.wisv.areafiftylan.web.service.WebSponsorServiceImpl;
 import ch.wisv.areafiftylan.web.service.WebTournamentServiceImpl;
@@ -36,7 +36,7 @@ public class WebRestController {
     }
 
     @RequestMapping("/events")
-    public Collection<Event> getAllEvents() {
+    public Collection<WebEvent> getAllEvents() {
         return eventService.getAllEvents();
     }
 

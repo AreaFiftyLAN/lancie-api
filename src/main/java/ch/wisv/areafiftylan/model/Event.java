@@ -1,12 +1,6 @@
 package ch.wisv.areafiftylan.model;
 
-import lombok.Getter;
-import lombok.Setter;
-
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.Set;
 
 /**
@@ -15,36 +9,28 @@ import java.util.Set;
 @Entity
 public class Event {
 
+    @Column(unique = true)
+    private String eventName;
+
     @Id
     @GeneratedValue
-    @Getter
     private Long id;
 
-    @Getter
-    @Setter
-    private String name;
-
-    @Getter
-    @Setter
     private int teamSize;
 
-    @Getter
-    @Setter
     private int teamLimit;
 
-    @Getter
     @ElementCollection(targetClass = Team.class)
     private Set<Team> registeredTeams;
 
-    @Getter @Setter
     private boolean openForRegistration = false;
 
     public Event() {
         //JPA ONLY
     }
 
-    public Event(String name, int teamSize, int teamLimit) {
-        this.name = name;
+    public Event(String eventName, int teamSize, int teamLimit) {
+        this.eventName = eventName;
         this.teamSize = teamSize;
         this.teamLimit = teamLimit;
     }
@@ -56,5 +42,45 @@ public class Event {
             }
         }
         return false;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getEventName() {
+        return eventName;
+    }
+
+    public void setEventName(String eventName) {
+        this.eventName = eventName;
+    }
+
+    public int getTeamSize() {
+        return teamSize;
+    }
+
+    public void setTeamSize(int teamSize) {
+        this.teamSize = teamSize;
+    }
+
+    public int getTeamLimit() {
+        return teamLimit;
+    }
+
+    public void setTeamLimit(int teamLimit) {
+        this.teamLimit = teamLimit;
+    }
+
+    public Set<Team> getRegisteredTeams() {
+        return registeredTeams;
+    }
+
+    public boolean isOpenForRegistration() {
+        return openForRegistration;
+    }
+
+    public void setOpenForRegistration(boolean openForRegistration) {
+        this.openForRegistration = openForRegistration;
     }
 }

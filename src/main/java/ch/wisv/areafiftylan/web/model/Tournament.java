@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 
-public class Tournament extends Event {
+public class Tournament extends WebEvent {
 
     Sponsor sponsor;
     LinkedList<String> prizes;

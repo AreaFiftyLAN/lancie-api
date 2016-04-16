@@ -1,6 +1,6 @@
 package ch.wisv.areafiftylan.web.model;
 
-public class Event {
+public class WebEvent {
 
     String title;
     String subtitle;
@@ -8,7 +8,7 @@ public class Event {
     String description;
     String backgroundImagePath;
 
-    public Event(String title, String subtitle, String headerTitle, String description, String backgroundImagePath) {
+    public WebEvent(String title, String subtitle, String headerTitle, String description, String backgroundImagePath) {
         this.title = title;
         this.subtitle = subtitle;
         this.headerTitle = headerTitle;

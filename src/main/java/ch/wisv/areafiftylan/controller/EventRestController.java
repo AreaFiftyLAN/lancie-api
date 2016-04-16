@@ -7,6 +7,7 @@ import ch.wisv.areafiftylan.model.view.View;
 import ch.wisv.areafiftylan.service.EventService;
 import ch.wisv.areafiftylan.service.TeamService;
 import com.fasterxml.jackson.annotation.JsonView;
+import org.hibernate.exception.GenericJDBCException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -37,11 +38,11 @@ public class EventRestController {
     }
 
     /**
-     * Add a new Event
+     * Add a new WebEvent
      *
-     * @param eventDTO EventDTO containing all info about the Event. Validated for null fields
+     * @param eventDTO EventDTO containing all info about the WebEvent. Validated for null fields
      *
-     * @return Message containing the location of the created Event
+     * @return Message containing the location of the created WebEvent
      */
     @RequestMapping(method = RequestMethod.POST)
     @PreAuthorize("hasRole('ADMIN')")
@@ -111,5 +112,10 @@ public class EventRestController {
     @RequestMapping(value = "/{eventId}/teams", method = RequestMethod.GET)
     public Collection<Team> getRegisteredTeamsForEvent(@PathVariable Long eventId) {
         return eventService.getTeamsForEvent(eventId);
+    }
+
+    @ExceptionHandler(GenericJDBCException.class)
+    public ResponseEntity<?> handleIllegalArgumentException(GenericJDBCException e) {
+        return createResponseEntity(HttpStatus.CONFLICT, e.getMessage());
     }
 }

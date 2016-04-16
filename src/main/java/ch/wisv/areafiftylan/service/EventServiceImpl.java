@@ -66,7 +66,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public Event addEvent(EventDTO eventDTO) {
         Event event = new Event(eventDTO.getName(), eventDTO.getTeamSize(), eventDTO.getTeamLimit());
-        return eventRepository.save(event);
+        return eventRepository.saveAndFlush(event);
     }
 
     @Override
@@ -74,7 +74,7 @@ public class EventServiceImpl implements EventService {
         Event event = getEventById(eventId);
 
         if (!Strings.isNullOrEmpty(eventDTO.getName())) {
-            event.setName(eventDTO.getName());
+            event.setEventName(eventDTO.getName());
         }
 
         if (eventDTO.getTeamLimit() != null) {

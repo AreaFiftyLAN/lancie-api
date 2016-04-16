@@ -131,9 +131,20 @@ public class EventRestIntegrationTest extends IntegrationTest {
         eventDTO.put("teamLimit", "10");
         eventDTO.put("teamSize", "2");
 
-        addEvent("admin", eventDTO.get("name"), eventDTO.get("teamLimit"), eventDTO.get("teamSize"));
+//        addEvent("admin", eventDTO.get("name"), eventDTO.get("teamLimit"), eventDTO.get("teamSize"));
 
         SessionData login = login("admin");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            content(eventDTO).contentType(ContentType.JSON).
+            post(EVENTS_ENDPOINT).
+        then().
+            statusCode(HttpStatus.SC_CREATED);
+        //@formatter:on
 
         //@formatter:off
         given().
@@ -226,9 +237,9 @@ public class EventRestIntegrationTest extends IntegrationTest {
             filter(sessionFilter).
             header(login.getCsrfHeader()).
         when().
-                post(EVENTS_ENDPOINT).
+            post(EVENTS_ENDPOINT).
         then().
-            statusCode(HttpStatus.SC_BAD_REQUEST);
+            statusCode(HttpStatus.SC_UNSUPPORTED_MEDIA_TYPE);
         //@formatter:on
 
         Assert.assertEquals(1, eventRepository.count());
