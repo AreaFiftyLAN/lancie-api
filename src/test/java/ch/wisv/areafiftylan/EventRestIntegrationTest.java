@@ -98,7 +98,7 @@ public class EventRestIntegrationTest extends IntegrationTest {
         then().
             statusCode(HttpStatus.SC_CREATED).
             header("location", containsString("/events/")).
-            body("object.name", is("event"));
+            body("object.eventName", is("event"));
         //@formatter:on
     }
 

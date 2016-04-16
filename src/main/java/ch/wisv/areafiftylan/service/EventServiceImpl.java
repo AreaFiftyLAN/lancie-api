@@ -65,6 +65,9 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public Event addEvent(EventDTO eventDTO) {
+        eventRepository.findByEventName(eventDTO.getName()).ifPresent(e -> {
+            throw new IllegalArgumentException("eventname " + e.getEventName() + " already exists");
+        });
         Event event = new Event(eventDTO.getName(), eventDTO.getTeamSize(), eventDTO.getTeamLimit());
         return eventRepository.saveAndFlush(event);
     }

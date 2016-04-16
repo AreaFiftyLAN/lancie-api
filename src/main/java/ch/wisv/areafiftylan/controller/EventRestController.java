@@ -7,7 +7,6 @@ import ch.wisv.areafiftylan.model.view.View;
 import ch.wisv.areafiftylan.service.EventService;
 import ch.wisv.areafiftylan.service.TeamService;
 import com.fasterxml.jackson.annotation.JsonView;
-import org.hibernate.exception.GenericJDBCException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -114,8 +113,8 @@ public class EventRestController {
         return eventService.getTeamsForEvent(eventId);
     }
 
-    @ExceptionHandler(GenericJDBCException.class)
-    public ResponseEntity<?> handleIllegalArgumentException(GenericJDBCException e) {
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<?> handleIllegalArgumentException(IllegalArgumentException e) {
         return createResponseEntity(HttpStatus.CONFLICT, e.getMessage());
     }
 }

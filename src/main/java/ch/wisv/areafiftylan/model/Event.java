@@ -1,6 +1,9 @@
 package ch.wisv.areafiftylan.model;
 
-import javax.persistence.*;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import java.util.Set;
 
 /**
@@ -9,7 +12,6 @@ import java.util.Set;
 @Entity
 public class Event {
 
-    @Column(unique = true)
     private String eventName;
 
     @Id
