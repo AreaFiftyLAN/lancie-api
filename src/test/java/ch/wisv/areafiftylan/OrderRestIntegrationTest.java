@@ -938,7 +938,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
     @Test
     public void testGetOneValidTicket() {
         insertTestOrders();
-        SessionData login = login("user");
+        SessionData login = login("user", userCleartextPassword);
 
         Ticket ticket = new Ticket(user, TicketType.EARLY_FULL, false, false);
         ticket.setValid(true);
@@ -959,7 +959,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
     @Test
     public void testZeroValidTickets() {
         insertTestOrders();
-        SessionData login = login("user");
+        SessionData login = login("user", userCleartextPassword);
 
         //@formatter:off
         given().

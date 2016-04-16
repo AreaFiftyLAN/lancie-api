@@ -42,6 +42,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
     TicketRepository ticketRepository;
 
     User teamCaptain;
+    String teamCaptainCleartextPassword = "password";
 
     Team team;
 
@@ -108,7 +109,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
     public void getAllSeatAsUser() {
         setTicketOnA1(userTicket);
 
-        SessionData login = login("user");
+        SessionData login = login("user", userCleartextPassword);
 
         //@formatter:off
         given().
@@ -138,7 +139,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
     public void getAllSeatsAdminViewAsUser(){
         setTicketOnA1(userTicket);
 
-        SessionData login = login("user");
+        SessionData login = login("user", userCleartextPassword);
 
         //@formatter:off
         given().
@@ -155,7 +156,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
     public void getAllSeatsAdminViewAsAdmin(){
         setTicketOnA1(userTicket);
 
-        SessionData login = login("admin");
+        SessionData login = login("admin", adminCleartextPassword);
 
         //@formatter:off
         given().
@@ -176,7 +177,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
     public void getSeatGroupAsUser(){
         setTicketOnA1(userTicket);
 
-        SessionData login = login("user");
+        SessionData login = login("user", userCleartextPassword);
 
         //@formatter:off
         given().
@@ -194,7 +195,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void getSeatGroupAdminViewAsUser(){
-        SessionData login = login("user");
+        SessionData login = login("user", userCleartextPassword);
 
         //@formatter:off
         given().
@@ -211,7 +212,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
     public void getSeatGroupAdminViewAsAdmin(){
         setTicketOnA1(userTicket);
 
-        SessionData login = login("admin");
+        SessionData login = login("admin", adminCleartextPassword);
 
         //@formatter:off
         given().
@@ -232,7 +233,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
     public void getSeatAsUser(){
         setTicketOnA1(userTicket);
 
-        SessionData login = login("user");
+        SessionData login = login("user", userCleartextPassword);
 
         //@formatter:off
         given().
@@ -252,7 +253,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
     public void getSeatAdminViewAsUser(){
         setTicketOnA1(userTicket);
 
-        SessionData login = login("user");
+        SessionData login = login("user", userCleartextPassword);
 
         //@formatter:off
         given().
@@ -269,7 +270,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
     public void getCurrentSeatAsUser(){
         setTicketOnA1(userTicket);
 
-        SessionData login = login("user");
+        SessionData login = login("user", userCleartextPassword);
 
         //@formatter:off
         given().
@@ -296,7 +297,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
         seat.setTicket(userTicket);
         seatRepository.save(seat);
 
-        SessionData login = login("user");
+        SessionData login = login("user", userCleartextPassword);
 
         //@formatter:off
         given().
@@ -401,7 +402,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void reserveSeatAsUser(){
-        SessionData login = login("user");
+        SessionData login = login("user", userCleartextPassword);
 
         //@formatter:off
         given().
@@ -417,7 +418,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void reserveSeatAsOtherUser(){
-        SessionData login = login("user");
+        SessionData login = login("user", userCleartextPassword);
 
         createCaptainAndTeam();
 
@@ -437,7 +438,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
     public void reserveSeatForUserAsTeamCaptain() {
         createCaptainAndTeam();
 
-        SessionData login = login("captain");
+        SessionData login = login("captain", teamCaptainCleartextPassword);
 
         //@formatter:off
         given().
@@ -455,7 +456,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
     public void reserveSeatForUserAsAdmin() {
         createCaptainAndTeam();
 
-        SessionData login = login("admin");
+        SessionData login = login("admin", adminCleartextPassword);
 
         //@formatter:off
         given().
@@ -473,7 +474,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
     public void reserveTakenSeatAsUser() {
         createCaptainAndTeam();
 
-        SessionData login = login("captain");
+        SessionData login = login("captain", teamCaptainCleartextPassword);
 
         //@formatter:off
         given().
@@ -487,7 +488,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
 
         logout();
 
-        SessionData login2 = login("user");
+        SessionData login2 = login("user", userCleartextPassword);
 
         given().
             filter(sessionFilter).
@@ -502,7 +503,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void changeSeatAsUser() {
-        SessionData login = login("user");
+        SessionData login = login("user", userCleartextPassword);
 
         //@formatter:off
         given().
@@ -528,7 +529,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void changeSeatAsAdmin() {
-        SessionData login = login("user");
+        SessionData login = login("user", userCleartextPassword);
 
         //@formatter:off
         given().
@@ -543,7 +544,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
 
         logout();
 
-        login = login("admin");
+        login = login("admin", adminCleartextPassword);
 
         //@formatter:off
         given().
@@ -561,7 +562,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
     public void changeSeatAsCaptain() {
         createCaptainAndTeam();
 
-        SessionData login = login("user");
+        SessionData login = login("user", userCleartextPassword);
 
         //@formatter:off
         given().
@@ -575,7 +576,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
 
         logout();
 
-        login = login("captain");
+        login = login("captain", teamCaptainCleartextPassword);
 
         given().
             filter(sessionFilter).
