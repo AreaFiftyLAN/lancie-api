@@ -55,10 +55,6 @@ public abstract class Token {
         return token;
     }
 
-    private void setToken(String token) {
-        this.token = token;
-    }
-
     public User getUser() {
         return user;
     }
