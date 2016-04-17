@@ -376,6 +376,23 @@ public class TicketRestIntegrationTest extends IntegrationTest{
                 body("owner.username", containsInAnyOrder(user.getUsername(), teamMate.getUsername()));
     }
 
+    @Test
+    public void testGetTicketInControlMemberOfTeam(){
+        User teamMate = createTeamReturnSingleMember();
+
+        SessionData login = login(teamMate.getUsername(), "password");
+
+        given().
+                filter(sessionFilter).
+                header(login.getCsrfHeader()).
+        when().
+                get(TICKETS_ENDPOINT + "/incontrol").
+        then().
+                statusCode(HttpStatus.SC_OK).
+                body("$", hasSize(1)).
+                body("owner.username", containsInAnyOrder(teamMate.getUsername()));
+    }
+
     private User createTeamReturnSingleMember(){
         User teamMate = new User("teamMate", new BCryptPasswordEncoder().encode("password"), "teammate@email.com");
         teamMate.getProfile()
