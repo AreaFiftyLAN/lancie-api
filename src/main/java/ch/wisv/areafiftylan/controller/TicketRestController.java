@@ -1,7 +1,10 @@
 package ch.wisv.areafiftylan.controller;
 
+import ch.wisv.areafiftylan.dto.TicketInformationResponse;
+import ch.wisv.areafiftylan.exception.TicketUnavailableException;
 import ch.wisv.areafiftylan.exception.DuplicateTicketTransferTokenException;
 import ch.wisv.areafiftylan.security.token.TicketTransferToken;
+import ch.wisv.areafiftylan.service.OrderService;
 import ch.wisv.areafiftylan.service.TicketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,12 +19,14 @@ import java.util.Collection;
 import static ch.wisv.areafiftylan.util.ResponseEntityBuilder.createResponseEntity;
 
 @RestController
-public class TicketTransferRestController {
+public class TicketRestController {
     private TicketService ticketService;
+    private OrderService orderService;
 
     @Autowired
-    public TicketTransferRestController(TicketService ticketService) {
+    public TicketRestController(TicketService ticketService, OrderService orderService) {
         this.ticketService = ticketService;
+        this.orderService = orderService;
     }
 
     @PreAuthorize("@currentUserServiceImpl.isTicketOwner(principal, #ticketId)")
@@ -60,5 +65,15 @@ public class TicketTransferRestController {
     @ExceptionHandler(DuplicateTicketTransferTokenException.class)
     public ResponseEntity<?> handleDuplicateTicketTransFerException(DuplicateTicketTransferTokenException ex) {
         return createResponseEntity(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    /**
+     * This method returns an overview of available tickets with some additional information
+     *
+     * @return A collection of all TicketTypes and their availability
+     */
+    @RequestMapping(value = "/tickets/available", method = RequestMethod.GET)
+    public Collection<TicketInformationResponse> getAvailableTickets() {
+        return orderService.getAvailableTickets();
     }
 }

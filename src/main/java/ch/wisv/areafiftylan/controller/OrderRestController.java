@@ -174,16 +174,6 @@ public class OrderRestController {
         return createResponseEntity(HttpStatus.OK, "Order status updated", order);
     }
 
-    /**
-     * This method returns an overview of available tickets with some additional information
-     *
-     * @return A collection of all TicketTypes and their availability
-     */
-    @RequestMapping(value = "/tickets/available", method = RequestMethod.GET)
-    public Collection<TicketInformationResponse> getAvailableTickets() {
-        return orderService.getAvailableTickets();
-    }
-
     @ExceptionHandler(TicketUnavailableException.class)
     public ResponseEntity<?> handleTicketUnavailableException(TicketUnavailableException e) {
         return createResponseEntity(HttpStatus.GONE, e.getMessage());
