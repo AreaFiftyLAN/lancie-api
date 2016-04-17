@@ -62,6 +62,7 @@ public class EventRestController {
      *
      * @return A collection of all current events
      */
+    @JsonView(View.Public.class)
     @RequestMapping(method = RequestMethod.GET)
     public Collection<Event> getAllEvents() {
         return eventService.getAllEvents();
@@ -104,8 +105,8 @@ public class EventRestController {
      *
      * @return Message containing the result of the registration
      */
-    @RequestMapping(value = "/{eventId}", method = RequestMethod.POST)
     @PreAuthorize("@currentUserServiceImpl.canEditTeam(principal, #teamId)")
+    @RequestMapping(value = "/{eventId}", method = RequestMethod.POST)
     public ResponseEntity<?> registerTeamForEvent(@RequestBody Long teamId, @PathVariable Long eventId) {
         Team team = teamService.getTeamById(teamId);
         eventService.registerTeam(eventId, team);

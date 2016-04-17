@@ -29,10 +29,10 @@ public class EventServiceImpl implements EventService {
     public void registerTeam(Long eventId, Team team) {
         Event event = getEventById(eventId);
         if (event.getTeamSize() != team.getSize()) {
-            throw new EventException("Message is not of the right size!");
+            throw new EventException("Team is not of the right size!");
         }
 
-        if (event.getTeamLimit() == event.getRegisteredTeams().size()) {
+        if (event.getRegisteredTeams().size() > event.getTeamLimit()) {
             throw new EventException("Event is full!");
         }
 

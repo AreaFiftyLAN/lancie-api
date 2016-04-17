@@ -1,6 +1,10 @@
 package ch.wisv.areafiftylan.model;
 
+import ch.wisv.areafiftylan.model.view.View;
+import com.fasterxml.jackson.annotation.JsonView;
+
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -9,19 +13,25 @@ import java.util.Set;
 @Entity
 public class Event {
 
+    @JsonView(View.Public.class)
     private String eventName;
 
+    @JsonView(View.Public.class)
     @Id
     @GeneratedValue
     private Long id;
 
+    @JsonView(View.Public.class)
     private int teamSize;
 
+    @JsonView(View.Public.class)
     private int teamLimit;
 
+    @JsonView(View.Public.class)
     @ElementCollection(targetClass = Team.class, fetch = FetchType.EAGER)
     private Set<Team> registeredTeams;
 
+    @JsonView(View.Public.class)
     private boolean openForRegistration = false;
 
     public Event() {
@@ -32,6 +42,7 @@ public class Event {
         this.eventName = eventName;
         this.teamSize = teamSize;
         this.teamLimit = teamLimit;
+        this.registeredTeams = new HashSet<>(teamLimit);
     }
 
     public boolean addTeam(Team team) {
