@@ -15,6 +15,7 @@ import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.WebIntegrationTest;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -40,30 +41,62 @@ public abstract class IntegrationTest {
     protected UserRepository userRepository;
 
     protected User user;
+    protected final String userCleartextPassword = "password";
 
     protected User admin;
+    protected final String adminCleartextPassword = "password";
+
+    protected User outsider;
+    protected final String outsiderCleartextPassword = "password";
+
 
     SessionFilter sessionFilter = new SessionFilter();
 
     @Before
     public void initIntegrationTest() {
-        user = new User("user", new BCryptPasswordEncoder().encode("password"), "user@mail.com");
+        userRepository.deleteAll();
+
+        user = makeUser();
+        admin = makeAdmin();
+        outsider = makeOutsider();
+
+        userRepository.saveAndFlush(user);
+        userRepository.saveAndFlush(admin);
+        userRepository.saveAndFlush(outsider);
+
+        // The test instance is started on a random port, so you can run and test at the same time.
+        // This binds the dynamic port to the test framework so that it works.
+        RestAssured.port = port;
+        RestAssured.config = config().redirect(redirectConfig().followRedirects(false));
+        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+    }
+
+    private User makeUser(){
+        User user = new User("user", new BCryptPasswordEncoder().encode(userCleartextPassword), "user@mail.com");
         user.getProfile()
                 .setAllFields("Jan", "de Groot", "MonsterKiller9001", Gender.MALE, "Mekelweg 4", "2826CD", "Delft",
                         "0906-0666", null);
 
-        admin = new User("admin", new BCryptPasswordEncoder().encode("password"), "bert@mail.com");
+        return user;
+    }
+
+    private User makeAdmin(){
+        User admin = new User("admin", new BCryptPasswordEncoder().encode(adminCleartextPassword), "bert@mail.com");
         admin.addRole(Role.ROLE_ADMIN);
         admin.getProfile()
                 .setAllFields("Bert", "Kleijn", "ILoveZombies", Gender.OTHER, "Mekelweg 20", "2826CD", "Amsterdam",
                         "0611", null);
 
-        userRepository.saveAndFlush(user);
-        userRepository.saveAndFlush(admin);
+        return admin;
+    }
 
-        RestAssured.port = port;
-        RestAssured.config = config().redirect(redirectConfig().followRedirects(false));
-        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+    private User makeOutsider(){
+        User outsider = new User("outsider", new BCryptPasswordEncoder().encode("password"), "outsider@gmail.com");
+        outsider.getProfile()
+                .setAllFields("Nottin", "Todoeo Witit", "Lookinin", Gender.FEMALE, "LoserStreet 1", "2826GJ", "China",
+                        "0906-3928", null);
+
+        return userRepository.saveAndFlush(outsider);
     }
 
     @After
@@ -72,11 +105,6 @@ public abstract class IntegrationTest {
         userRepository.deleteAll();
         RestAssured.reset();
     }
-
-    protected SessionData login(String username) {
-        return login(username, "password");
-    }
-
 
     protected SessionData login(String username, String password) {
         //@formatter:off
