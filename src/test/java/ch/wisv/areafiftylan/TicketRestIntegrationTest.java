@@ -24,7 +24,7 @@ import static com.jayway.restassured.RestAssured.given;
 /**
  * Created by beer on 5-1-16.
  */
-public class TicketTransferRestIntegrationTest extends IntegrationTest{
+public class TicketRestIntegrationTest extends IntegrationTest{
     private final String TRANSFER_ENDPOINT = "/tickets/transfer";
 
     private User ticketReceiver;
