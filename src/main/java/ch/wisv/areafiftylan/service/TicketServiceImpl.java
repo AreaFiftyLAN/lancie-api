@@ -175,12 +175,8 @@ public class TicketServiceImpl implements TicketService {
 
         return captainedTeams.stream()
                 .flatMap(t -> t.getMembers().stream())
+                .filter(m -> !m.equals(u))
                 .flatMap(m -> ticketRepository.findAllByOwnerUsername(m.getUsername()).stream())
                 .collect(Collectors.toList());
-    }
-
-    private BiPredicate<User, Ticket> isInControl(){
-
-        return (u, t) -> t.getOwner().equals(u);
     }
 }
