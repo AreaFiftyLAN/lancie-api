@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import javax.mail.MessagingException;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -87,9 +86,11 @@ public class TeamServiceImpl implements TeamService {
             current.setTeamName(input.getTeamName());
         }
 
-        // If the Captain username is set, change the Captain
-        if (!Strings.isNullOrEmpty(input.getCaptainUsername())) {
-            User captain = userService.getUserByUsername(input.getCaptainUsername()).get();
+        // If the Captain username is set and different from the current captain, change the Captain
+        String captainUsername = input.getCaptainUsername();
+        if (!Strings.isNullOrEmpty(captainUsername) && !captainUsername.equals(current.getCaptain().getUsername())) {
+            User captain = userService.getUserByUsername(captainUsername)
+                    .orElseThrow(() -> new UserNotFoundException(captainUsername));
             current.setCaptain(captain);
         }
 
@@ -108,12 +109,12 @@ public class TeamServiceImpl implements TeamService {
         User user = userService.getUserByUsername(username).orElseThrow(() -> new UsernameNotFoundException(username));
         Team team = getTeamById(teamId);
 
-        // Check if the member isn't already invited
-        Optional<TeamInviteToken> optionalInvite = teamInviteTokenRepository.findByUserUsername(username).stream().
-                filter(token -> token.getTeam().equals(team)).findFirst();
+        // Check if the member isn't already part of the team
+        if (team.getMembers().contains(user)) {
+            throw new IllegalArgumentException("User is already a member of this team");
+        }
 
-        // Continue if the user isn't already a member, and there are no outstanding invites already
-        if (!team.getMembers().contains(user) && !optionalInvite.isPresent()) {
+        if (isUserAlreadyInvited(username, team)) {
             TeamInviteToken inviteToken = new TeamInviteToken(user, team);
             teamInviteTokenRepository.save(inviteToken);
 
@@ -124,18 +125,25 @@ public class TeamServiceImpl implements TeamService {
                 e.printStackTrace();
             }
             return inviteToken;
-
         } else {
-            throw new IllegalArgumentException("User is already a member of this team or already invited");
+            throw new IllegalArgumentException("User already invited");
         }
     }
 
+    private boolean isUserAlreadyInvited(String username, Team team) {
+        // Check if the member isn't already invited
+        return teamInviteTokenRepository.findByUserUsername(username).stream().
+                filter(token -> token.getTeam().equals(team)).
+                noneMatch(TeamInviteToken::isValid);
+    }
+
     @Override
-    public void removeInvite(String token) {
-        // TODO: Revoke instead of delete once this is available
+    public void revokeInvite(String token) {
         TeamInviteToken teamInviteToken =
                 teamInviteTokenRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
-        teamInviteTokenRepository.delete(teamInviteToken);
+        teamInviteToken.revoke();
+        teamInviteTokenRepository.save(teamInviteToken);
+
     }
 
     @Override
@@ -153,8 +161,8 @@ public class TeamServiceImpl implements TeamService {
     }
 
     private List<TeamInviteResponse> teamInviteTokensToReponses(Collection<TeamInviteToken> inviteTokens) {
-            // From all Tokens that exist in the database linked to the user, only display the valid ones. Change
-            // them to TeamInviteResponses for display in the controller.
+        // From all Tokens that exist in the database linked to the user, only display the valid ones. Change
+        // them to TeamInviteResponses for display in the controller.
         return inviteTokens.stream().
                 filter(Token::isValid).
                 map(t -> new TeamInviteResponse(t.getTeam().getId(), t.getTeam().getTeamName(), t.getToken(),

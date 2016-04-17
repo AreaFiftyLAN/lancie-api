@@ -93,7 +93,7 @@ public class CurrentUserRestController {
      * @param auth Current Authentication object, automatically taken from the SecurityContext
      * @return A Collection of Teams of which the current User is a member
      */
-    @JsonView(View.Public.class)
+    @JsonView(View.Team.class)
     @PreAuthorize("isAuthenticated()")
     @RequestMapping(value = "/teams", method = RequestMethod.GET)
     public Collection<Team> getCurrentTeams(Authentication auth) {

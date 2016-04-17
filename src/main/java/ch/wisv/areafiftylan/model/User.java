@@ -35,7 +35,6 @@ public class User implements Serializable, UserDetails {
 
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Id
-    @JsonView(View.NoProfile.class)
     private Long id;
 
     @JsonIgnore
@@ -45,13 +44,13 @@ public class User implements Serializable, UserDetails {
     private Collection<Role> roles;
 
     @JsonIgnore
-    boolean accountNonExpired = true;
+    private boolean accountNonExpired = true;
     @JsonIgnore
-    boolean accountNonLocked = true;
+    private boolean accountNonLocked = true;
     @JsonIgnore
-    boolean credentialsNonExpired = true;
+    private boolean credentialsNonExpired = true;
     @JsonIgnore
-    boolean enabled = true;
+    private boolean enabled = true;
 
     public User(String username, String passwordHash, String email) {
         this.username = username;
@@ -156,13 +155,7 @@ public class User implements Serializable, UserDetails {
 
         User user = (User) o;
 
-        if (!username.equals(user.username)) {
-            return false;
-        }
-        if (!email.equals(user.email)) {
-            return false;
-        }
-        return id.equals(user.id);
+        return username.equals(user.username) && email.equals(user.email) && id.equals(user.id);
 
     }
 

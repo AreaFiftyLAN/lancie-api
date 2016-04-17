@@ -780,6 +780,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
         //@formatter:on
 
         Collection<TeamInviteToken> tokens = teamInviteTokenRepository.findByUserUsername(user.getUsername());
+        tokens.removeIf(t -> !t.isValid());
 
         Assert.assertTrue(tokens.isEmpty());
     }
