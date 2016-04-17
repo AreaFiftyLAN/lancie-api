@@ -59,5 +59,13 @@ public interface TicketService {
      */
     void cancelTicketTransfer(String token);
 
+    /**
+     * Get all tickets over which a user has control. His own, as well as his teammates their tickets if the user is captain.
+     *
+     * @param user The user whose tickets are requested
+     * @return All tickets over which a user has control.
+     */
+    Collection<Ticket> getTicketsInControl(User user);
+
     Collection<TicketTransferToken> getValidTicketTransferTokensByUser(String username);
 }
