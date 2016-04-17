@@ -1,9 +1,11 @@
 package ch.wisv.areafiftylan.security.token;
 
 import ch.wisv.areafiftylan.model.User;
+import org.springframework.cglib.core.Local;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
@@ -25,7 +27,7 @@ public abstract class Token {
     private User user;
 
     private boolean expirable = true;
-    private Date expiryDate;
+    private LocalDateTime expiryDate;
 
     private boolean used = false;
     private boolean revoked = false;
@@ -44,11 +46,9 @@ public abstract class Token {
         this.expiryDate = calculateExpiryDate(expiration);
     }
 
-    private Date calculateExpiryDate(int expiryTimeInMinutes) {
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(new Timestamp(cal.getTime().getTime()));
-        cal.add(Calendar.MINUTE, expiryTimeInMinutes);
-        return new Date(cal.getTime().getTime());
+    private LocalDateTime calculateExpiryDate(int expiryTimeInMinutes) {
+        LocalDateTime expiryDate = LocalDateTime.now();
+        return expiryDate.plusMinutes(expiryTimeInMinutes);
     }
 
     public String getToken() {
@@ -63,11 +63,11 @@ public abstract class Token {
         this.user = user;
     }
 
-    public Date getExpiryDate() {
+    public LocalDateTime getExpiryDate() {
         return expiryDate;
     }
 
-    public void setExpiryDate(Date expiryDate) {
+    public void setExpiryDate(LocalDateTime expiryDate) {
         this.expiryDate = expiryDate;
     }
 
@@ -92,8 +92,7 @@ public abstract class Token {
         if(!this.isExpirable())
             return false;
 
-        Calendar cal = Calendar.getInstance();
-        return (this.getExpiryDate().getTime() - cal.getTime().getTime()) <= 0;
+        return LocalDateTime.now().compareTo(expiryDate) > 0;
     }
 
     private boolean isRevoked() {

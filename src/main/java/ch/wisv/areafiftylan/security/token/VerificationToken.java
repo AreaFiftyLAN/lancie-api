@@ -6,11 +6,12 @@ import javax.persistence.Entity;
 
 @Entity
 public class VerificationToken extends Token {
+    private static final int EXPIRATION = 3 * 60 * 24; //Three days
 
     public VerificationToken() {
     }
 
     public VerificationToken(User user) {
-        super(user);
+        super(user, EXPIRATION);
     }
 }

@@ -1,18 +1,25 @@
 package ch.wisv.areafiftylan;
 
 import ch.wisv.areafiftylan.model.User;
+import ch.wisv.areafiftylan.model.util.Gender;
+import ch.wisv.areafiftylan.security.token.VerificationToken;
+import ch.wisv.areafiftylan.service.TaskScheduler;
 import ch.wisv.areafiftylan.service.repository.token.VerificationTokenRepository;
 import ch.wisv.areafiftylan.util.SessionData;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Header;
 import com.jayway.restassured.response.Response;
+import org.junit.Assert;
 import org.apache.http.HttpStatus;
 import org.junit.After;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.RestAssured.when;
@@ -26,6 +33,8 @@ public class UserRestIntegrationTest extends IntegrationTest {
     @Autowired
     VerificationTokenRepository verificationTokenRepository;
 
+    @Autowired
+    TaskScheduler taskScheduler;
 
     @After
     public void cleanupUserTest() {
@@ -787,7 +796,77 @@ public class UserRestIntegrationTest extends IntegrationTest {
         //@formatter:on
     }
 
+    private void makeTempUser(String appendix){
+        Map<String, String> userDTO = new HashMap<>();
+        userDTO.put("username", "tempUser" + appendix);
+        userDTO.put("password", "password");
+        userDTO.put("email", "tempuser" + appendix + "@mail.com");
 
+        //@formatter:off
+        given().
+                header(getCSRFHeader()).
+                filter(sessionFilter).
+        when().
+                content(userDTO).contentType(ContentType.JSON).
+                post("/users").
+        then().
+                statusCode(HttpStatus.SC_CREATED);
+    }
+
+    private User getTempUser(String appendix){
+        return userRepository.findOneByUsername("tempUser" + appendix).orElse(null);
+    }
+
+    private User makeAndGetTempUser(String appendix){
+        makeTempUser(appendix);
+        return getTempUser(appendix);
+    }
+
+    @Test
+    public void testExpiredUsersNoneExpired() {
+        User tempUser = makeAndGetTempUser("");
+
+        taskScheduler.CleanUpUsers();
+
+        Assert.assertTrue(verificationTokenRepository.findByUser(tempUser).isPresent());
+    }
+
+    @Test
+    public void testExpiredUsersSingleExpired() {
+        User tempUser = makeAndGetTempUser("");
+
+        VerificationToken token = verificationTokenRepository.findByUser(tempUser).get();
+        token.setExpiryDate(LocalDateTime.now().minusDays(1));
+        verificationTokenRepository.save(token);
+
+        int expiredCount = verificationTokenRepository.findAllByExpiryDateBefore(LocalDateTime.now()).size();
+        Assert.assertEquals(1, expiredCount);
+
+        taskScheduler.CleanUpUsers();
+
+        Assert.assertFalse(verificationTokenRepository.findByUser(tempUser).isPresent());
+    }
+
+    @Test
+    public void testExpiredUsersMultipleExpired() {
+        User tempUser1 = makeAndGetTempUser("1");
+        User tempUser2 = makeAndGetTempUser("2");
+
+        VerificationToken token1 = verificationTokenRepository.findByUser(tempUser1).get();
+        VerificationToken token2 = verificationTokenRepository.findByUser(tempUser2).get();
+        token1.setExpiryDate(LocalDateTime.now().minusDays(1));
+        token2.setExpiryDate(LocalDateTime.now().minusDays(1));
+        verificationTokenRepository.save(token1);
+        verificationTokenRepository.save(token2);
+
+        int expiredCount = verificationTokenRepository.findAllByExpiryDateBefore(LocalDateTime.now()).size();
+        Assert.assertEquals(2, expiredCount);
+
+        taskScheduler.CleanUpUsers();
+
+        Assert.assertFalse(verificationTokenRepository.findByUser(tempUser1).isPresent());
+        Assert.assertFalse(verificationTokenRepository.findByUser(tempUser2).isPresent());
+    }
 }
 
 
