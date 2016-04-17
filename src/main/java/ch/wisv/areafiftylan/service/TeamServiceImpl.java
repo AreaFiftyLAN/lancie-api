@@ -86,9 +86,9 @@ public class TeamServiceImpl implements TeamService {
             current.setTeamName(input.getTeamName());
         }
 
-        // If the Captain username is set, change the Captain
+        // If the Captain username is set and different from the current captain, change the Captain
         String captainUsername = input.getCaptainUsername();
-        if (!Strings.isNullOrEmpty(captainUsername)) {
+        if (!Strings.isNullOrEmpty(captainUsername) && !captainUsername.equals(current.getCaptain().getUsername())) {
             User captain = userService.getUserByUsername(captainUsername)
                     .orElseThrow(() -> new UserNotFoundException(captainUsername));
             current.setCaptain(captain);
