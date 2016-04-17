@@ -64,6 +64,8 @@ public abstract class IntegrationTest {
         userRepository.saveAndFlush(admin);
         userRepository.saveAndFlush(outsider);
 
+        // The test instance is started on a random port, so you can run and test at the same time.
+        // This binds the dynamic port to the test framework so that it works.
         RestAssured.port = port;
         RestAssured.config = config().redirect(redirectConfig().followRedirects(false));
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
