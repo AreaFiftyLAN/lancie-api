@@ -1,9 +1,6 @@
 package ch.wisv.areafiftylan.model;
 
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.Set;
 
 /**
@@ -22,7 +19,7 @@ public class Event {
 
     private int teamLimit;
 
-    @ElementCollection(targetClass = Team.class)
+    @ElementCollection(targetClass = Team.class, fetch = FetchType.EAGER)
     private Set<Team> registeredTeams;
 
     private boolean openForRegistration = false;

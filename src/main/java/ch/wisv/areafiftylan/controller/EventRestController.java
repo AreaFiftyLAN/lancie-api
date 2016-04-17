@@ -1,6 +1,7 @@
 package ch.wisv.areafiftylan.controller;
 
 import ch.wisv.areafiftylan.dto.EventDTO;
+import ch.wisv.areafiftylan.exception.EventException;
 import ch.wisv.areafiftylan.model.Event;
 import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.model.view.View;
@@ -82,6 +83,20 @@ public class EventRestController {
     }
 
     /**
+     * Delete the event with the given ID
+     *
+     * @param eventId ID of the event to be deleted
+     *
+     * @return The deleted event
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @RequestMapping(value = "/{eventId}", method = RequestMethod.DELETE)
+    public ResponseEntity<?> updateEvent(@PathVariable Long eventId) {
+        Event event = eventService.deleteEvent(eventId);
+        return createResponseEntity(HttpStatus.OK, "Event successfully deleted", event);
+    }
+
+    /**
      * Register a team for an event. Only for captains and admin
      *
      * @param teamId  Id of the Team to be registered
@@ -131,5 +146,10 @@ public class EventRestController {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<?> handleIllegalArgumentException(IllegalArgumentException e) {
         return createResponseEntity(HttpStatus.CONFLICT, e.getMessage());
+    }
+
+    @ExceptionHandler(EventException.class)
+    public ResponseEntity<?> handleEventException(EventException e) {
+        return createResponseEntity(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 }
