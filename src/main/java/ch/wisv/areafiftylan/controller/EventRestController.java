@@ -37,11 +37,11 @@ public class EventRestController {
     }
 
     /**
-     * Add a new WebEvent
+     * Add a new Event
      *
-     * @param eventDTO EventDTO containing all info about the WebEvent. Validated for null fields
+     * @param eventDTO EventDTO containing all info about the Event. Validated for null fields
      *
-     * @return Message containing the location of the created WebEvent
+     * @return Message containing the location of the created Event
      */
     @RequestMapping(method = RequestMethod.POST)
     @PreAuthorize("hasRole('ADMIN')")
@@ -64,6 +64,21 @@ public class EventRestController {
     @RequestMapping(method = RequestMethod.GET)
     public Collection<Event> getAllEvents() {
         return eventService.getAllEvents();
+    }
+
+    /**
+     * Update the event with the given eventId
+     *
+     * @param eventDTO DTO containing the fields that need to be updated. Can contain null fields
+     * @param eventId  Id of the event to be updated
+     *
+     * @return Message containing the updated event
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @RequestMapping(value = "/{eventId}", method = RequestMethod.PUT)
+    public ResponseEntity<?> updateEvent(@RequestBody EventDTO eventDTO, @PathVariable Long eventId) {
+        Event event = eventService.updateEvent(eventId, eventDTO);
+        return createResponseEntity(HttpStatus.OK, "Event successfully updated", event);
     }
 
     /**
