@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
 import java.util.Collection;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -84,18 +83,22 @@ public class TicketServiceImpl implements TicketService {
         User u = userService.getUserByUsername(goalUserName).orElseThrow(() -> new UsernameNotFoundException("User " + goalUserName + " not found."));
         Ticket t = ticketRepository.findOne(ticketId);
 
-        TicketTransferToken ttt = new TicketTransferToken(u, t);
+        if (tttRepository.findByTicketId(ticketId).isPresent()) {
+            throw new IllegalStateException("Ticket " + ticketId + " is already set up for transfer!");
+        } else {
+            TicketTransferToken ttt = new TicketTransferToken(u, t);
 
-        tttRepository.save(ttt);
+            tttRepository.save(ttt);
 
-        try{
-            String acceptUrl = acceptTransferUrl + "/?token=" + ttt.getToken();
-            mailService.sendTicketTransferMail(ttt.getTicket().getOwner(), ttt.getUser(), acceptUrl);
-        } catch (MessagingException e) {
-            e.printStackTrace();
+            try {
+                String acceptUrl = acceptTransferUrl + "/?token=" + ttt.getToken();
+                mailService.sendTicketTransferMail(ttt.getTicket().getOwner(), ttt.getUser(), acceptUrl);
+            } catch (MessagingException e) {
+                e.printStackTrace();
+            }
+
+            return ttt;
         }
-
-        return ttt;
     }
 
     @Override

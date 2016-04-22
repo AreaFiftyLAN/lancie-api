@@ -199,6 +199,31 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
     }
 
     @Test
+    public void testDuplicateSetupForTransfer() {
+        SessionData login = login(user.getUsername(), userCleartextPassword);
+
+        //@formatter:off
+        given().
+                filter(sessionFilter).
+                header(login.getCsrfHeader()).
+        when().
+                content(ticketReceiver.getUsername()).contentType(ContentType.TEXT).
+                post(TRANSFER_ENDPOINT + "/" + ticket.getId()).
+        then().
+                extract().response();
+
+        given()
+                .filter(sessionFilter)
+                .header(login.getCsrfHeader())
+        .when()
+                .content(ticketReceiver.getUsername()).contentType(ContentType.TEXT)
+                .post(TRANSFER_ENDPOINT + "/" + ticket.getId())
+        .then()
+                .statusCode(HttpStatus.SC_BAD_REQUEST);
+        //@formatter:on
+    }
+
+    @Test
     public void testCancelTransfer_Anon(){
         TicketTransferToken ttt = addTicketTransferGetToken();
 

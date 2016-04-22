@@ -8,4 +8,6 @@ import java.util.Optional;
 
 @Repository
 public interface TicketTransferTokenRepository extends TokenRepository<TicketTransferToken> {
+
+    Optional<TicketTransferToken> findByTicketId(Long ticketId);
 }
