@@ -7,6 +7,7 @@ import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.util.TicketType;
 import ch.wisv.areafiftylan.security.token.TicketTransferToken;
+import ch.wisv.areafiftylan.security.token.Token;
 import ch.wisv.areafiftylan.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.service.repository.token.TicketTransferTokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -83,7 +85,11 @@ public class TicketServiceImpl implements TicketService {
         User u = userService.getUserByUsername(goalUserName).orElseThrow(() -> new UsernameNotFoundException("User " + goalUserName + " not found."));
         Ticket t = ticketRepository.findOne(ticketId);
 
-        if (tttRepository.findByTicketId(ticketId).isPresent()) {
+        List<TicketTransferToken> ticketTransferTokens = tttRepository.findAllByTicketId(ticketId).stream()
+                .filter(Token::isValid)
+                .collect(Collectors.toList());
+
+        if (!ticketTransferTokens.isEmpty()) {
             throw new IllegalStateException("Ticket " + ticketId + " is already set up for transfer!");
         } else {
             TicketTransferToken ttt = new TicketTransferToken(u, t);
