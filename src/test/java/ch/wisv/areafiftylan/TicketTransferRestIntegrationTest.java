@@ -201,17 +201,10 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
     @Test
     public void testDuplicateSetupForTransfer() {
         addTicketTransfer(user.getUsername(), userCleartextPassword);
-
-        SessionData login = login(user.getUsername(), userCleartextPassword);
+        Response response = addTicketTransfer(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
-        given()
-                .filter(sessionFilter)
-                .header(login.getCsrfHeader())
-        .when()
-                .content(ticketReceiver.getUsername()).contentType(ContentType.TEXT)
-                .post(TRANSFER_ENDPOINT + "/" + ticket.getId())
-        .then()
+        response.then()
                 .statusCode(HttpStatus.SC_BAD_REQUEST);
         //@formatter:on
     }

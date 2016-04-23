@@ -1,5 +1,6 @@
 package ch.wisv.areafiftylan.service;
 
+import ch.wisv.areafiftylan.exception.DuplicateTicketTransferTokenException;
 import ch.wisv.areafiftylan.exception.InvalidTokenException;
 import ch.wisv.areafiftylan.exception.TicketUnavailableException;
 import ch.wisv.areafiftylan.exception.TokenNotFoundException;
@@ -90,7 +91,7 @@ public class TicketServiceImpl implements TicketService {
                 .collect(Collectors.toList());
 
         if (!ticketTransferTokens.isEmpty()) {
-            throw new IllegalStateException("Ticket " + ticketId + " is already set up for transfer!");
+            throw new DuplicateTicketTransferTokenException(ticketId);
         } else {
             TicketTransferToken ttt = new TicketTransferToken(u, t);
 
