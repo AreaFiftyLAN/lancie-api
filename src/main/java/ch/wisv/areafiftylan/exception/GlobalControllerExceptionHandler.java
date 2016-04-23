@@ -45,9 +45,4 @@ class GlobalControllerExceptionHandler {
     public ResponseEntity<?> handleInvalidTokenException(InvalidTokenException ex) {
         return createResponseEntity(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
-
-    @ExceptionHandler(DuplicateTicketTransferTokenException.class)
-    public ResponseEntity<?> handleDuplicateTicketTransFerException(DuplicateTicketTransferTokenException ex) {
-        return createResponseEntity(HttpStatus.BAD_REQUEST, ex.getMessage());
-    }
 }

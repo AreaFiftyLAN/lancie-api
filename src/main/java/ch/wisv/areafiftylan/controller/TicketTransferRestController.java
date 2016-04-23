@@ -1,5 +1,6 @@
 package ch.wisv.areafiftylan.controller;
 
+import ch.wisv.areafiftylan.exception.DuplicateTicketTransferTokenException;
 import ch.wisv.areafiftylan.security.token.TicketTransferToken;
 import ch.wisv.areafiftylan.service.TicketService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,5 +42,10 @@ public class TicketTransferRestController {
         ticketService.cancelTicketTransfer(token);
 
         return createResponseEntity(HttpStatus.OK, "Ticket transfer successfully cancelled");
+    }
+
+    @ExceptionHandler(DuplicateTicketTransferTokenException.class)
+    public ResponseEntity<?> handleDuplicateTicketTransFerException(DuplicateTicketTransferTokenException ex) {
+        return createResponseEntity(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 }
