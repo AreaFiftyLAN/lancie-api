@@ -1,13 +1,19 @@
 package ch.wisv.areafiftylan.controller;
 
 import ch.wisv.areafiftylan.exception.DuplicateTicketTransferTokenException;
+import ch.wisv.areafiftylan.model.view.View;
 import ch.wisv.areafiftylan.security.token.TicketTransferToken;
 import ch.wisv.areafiftylan.service.TicketService;
+import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Collection;
 
 import static ch.wisv.areafiftylan.util.ResponseEntityBuilder.createResponseEntity;
 
@@ -42,6 +48,15 @@ public class TicketTransferRestController {
         ticketService.cancelTicketTransfer(token);
 
         return createResponseEntity(HttpStatus.OK, "Ticket transfer successfully cancelled");
+    }
+
+    @PreAuthorize("isAuthenticated() and @currentUserServiceImpl.hasAnyTicket(principal)")
+    @RequestMapping(value = "/tickets/tokens", method = RequestMethod.GET)
+    public ResponseEntity<?> getTicketTokensOpenForTransfer(Authentication auth) {
+        UserDetails currentUser = (UserDetails) auth.getPrincipal();
+        Collection<TicketTransferToken> tokens = ticketService.getTicketTransferTokensByUser(currentUser.getUsername());
+
+        return createResponseEntity(HttpStatus.OK, "Ticket transfer tokens successfully retrieved", tokens);
     }
 
     @ExceptionHandler(DuplicateTicketTransferTokenException.class)

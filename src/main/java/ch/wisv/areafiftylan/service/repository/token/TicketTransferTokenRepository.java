@@ -10,4 +10,6 @@ import java.util.Collection;
 public interface TicketTransferTokenRepository extends TokenRepository<TicketTransferToken> {
 
     Collection<TicketTransferToken> findAllByTicketId(Long ticketId);
+
+    Collection<TicketTransferToken> findAllByTicketOwnerUsername(String username);
 }
