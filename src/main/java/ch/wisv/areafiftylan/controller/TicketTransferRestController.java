@@ -1,10 +1,8 @@
 package ch.wisv.areafiftylan.controller;
 
 import ch.wisv.areafiftylan.exception.DuplicateTicketTransferTokenException;
-import ch.wisv.areafiftylan.model.view.View;
 import ch.wisv.areafiftylan.security.token.TicketTransferToken;
 import ch.wisv.areafiftylan.service.TicketService;
-import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +29,7 @@ public class TicketTransferRestController {
     public ResponseEntity<?> requestTicketTransfer(@PathVariable Long ticketId, @RequestBody String goalUsername){
         TicketTransferToken ttt = ticketService.setupForTransfer(ticketId, goalUsername);
 
-        return createResponseEntity(HttpStatus.OK, "Ticket successfully set up for transfer", ttt);
+        return createResponseEntity(HttpStatus.OK, "Ticket successfully set up for transfer.", ttt);
     }
 
     @PreAuthorize("@currentUserServiceImpl.isTicketReceiver(principal, #token)")
@@ -39,7 +37,7 @@ public class TicketTransferRestController {
     public ResponseEntity<?> transferTicket(@RequestBody String token){
         ticketService.transferTicket(token);
 
-        return createResponseEntity(HttpStatus.OK, "Ticket successfully transferred");
+        return createResponseEntity(HttpStatus.OK, "Ticket successfully transferred.");
     }
 
     @PreAuthorize("@currentUserServiceImpl.isTicketSender(principal, #token)")
@@ -47,16 +45,16 @@ public class TicketTransferRestController {
     public ResponseEntity<?> cancelTicketTransfer(@RequestBody String token){
         ticketService.cancelTicketTransfer(token);
 
-        return createResponseEntity(HttpStatus.OK, "Ticket transfer successfully cancelled");
+        return createResponseEntity(HttpStatus.OK, "Ticket transfer successfully cancelled.");
     }
 
-    @PreAuthorize("isAuthenticated() and @currentUserServiceImpl.hasAnyTicket(principal)")
+    @PreAuthorize("isAuthenticated()")
     @RequestMapping(value = "/tickets/tokens", method = RequestMethod.GET)
     public ResponseEntity<?> getTicketTokensOpenForTransfer(Authentication auth) {
         UserDetails currentUser = (UserDetails) auth.getPrincipal();
-        Collection<TicketTransferToken> tokens = ticketService.getTicketTransferTokensByUser(currentUser.getUsername());
+        Collection<TicketTransferToken> tokens = ticketService.getValidTicketTransferTokensByUser(currentUser.getUsername());
 
-        return createResponseEntity(HttpStatus.OK, "Ticket transfer tokens successfully retrieved", tokens);
+        return createResponseEntity(HttpStatus.OK, "Ticket transfer tokens successfully retrieved.", tokens);
     }
 
     @ExceptionHandler(DuplicateTicketTransferTokenException.class)

@@ -133,7 +133,7 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public Collection<TicketTransferToken> getTicketTransferTokensByUser(String username) {
+    public Collection<TicketTransferToken> getValidTicketTransferTokensByUser(String username) {
         return tttRepository.findAllByTicketOwnerUsername(username).stream()
                 .filter(TicketTransferToken::isValid)
                 .collect(Collectors.toList());

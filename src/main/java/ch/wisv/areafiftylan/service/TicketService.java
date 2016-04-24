@@ -59,5 +59,5 @@ public interface TicketService {
      */
     void cancelTicketTransfer(String token);
 
-    Collection<TicketTransferToken> getTicketTransferTokensByUser(String username);
+    Collection<TicketTransferToken> getValidTicketTransferTokensByUser(String username);
 }
