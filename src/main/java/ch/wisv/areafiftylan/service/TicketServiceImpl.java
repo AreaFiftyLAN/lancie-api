@@ -98,7 +98,7 @@ public class TicketServiceImpl implements TicketService {
             tttRepository.save(ttt);
 
             try {
-                String acceptUrl = acceptTransferUrl + "/?token=" + ttt.getToken();
+                String acceptUrl = acceptTransferUrl + "?token=" + ttt.getToken();
                 mailService.sendTicketTransferMail(ttt.getTicket().getOwner(), ttt.getUser(), acceptUrl);
             } catch (MessagingException e) {
                 e.printStackTrace();
