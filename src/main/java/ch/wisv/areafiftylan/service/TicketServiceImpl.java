@@ -1,5 +1,6 @@
 package ch.wisv.areafiftylan.service;
 
+import ch.wisv.areafiftylan.exception.DuplicateTicketTransferTokenException;
 import ch.wisv.areafiftylan.exception.InvalidTokenException;
 import ch.wisv.areafiftylan.exception.TicketUnavailableException;
 import ch.wisv.areafiftylan.exception.TokenNotFoundException;
@@ -7,6 +8,7 @@ import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.util.TicketType;
 import ch.wisv.areafiftylan.security.token.TicketTransferToken;
+import ch.wisv.areafiftylan.security.token.Token;
 import ch.wisv.areafiftylan.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.service.repository.token.TicketTransferTokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +18,7 @@ import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
 import java.util.Collection;
-import java.util.UUID;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -84,18 +86,26 @@ public class TicketServiceImpl implements TicketService {
         User u = userService.getUserByUsername(goalUserName).orElseThrow(() -> new UsernameNotFoundException("User " + goalUserName + " not found."));
         Ticket t = ticketRepository.findOne(ticketId);
 
-        TicketTransferToken ttt = new TicketTransferToken(u, t);
+        List<TicketTransferToken> ticketTransferTokens = tttRepository.findAllByTicketId(ticketId).stream()
+                .filter(Token::isValid)
+                .collect(Collectors.toList());
 
-        tttRepository.save(ttt);
+        if (!ticketTransferTokens.isEmpty()) {
+            throw new DuplicateTicketTransferTokenException(ticketId);
+        } else {
+            TicketTransferToken ttt = new TicketTransferToken(u, t);
 
-        try{
-            String acceptUrl = acceptTransferUrl + "/?token=" + ttt.getToken();
-            mailService.sendTicketTransferMail(ttt.getTicket().getOwner(), ttt.getUser(), acceptUrl);
-        } catch (MessagingException e) {
-            e.printStackTrace();
+            tttRepository.save(ttt);
+
+            try {
+                String acceptUrl = acceptTransferUrl + "/?token=" + ttt.getToken();
+                mailService.sendTicketTransferMail(ttt.getTicket().getOwner(), ttt.getUser(), acceptUrl);
+            } catch (MessagingException e) {
+                e.printStackTrace();
+            }
+
+            return ttt;
         }
-
-        return ttt;
     }
 
     @Override
@@ -120,6 +130,13 @@ public class TicketServiceImpl implements TicketService {
         ttt.revoke();
 
         tttRepository.save(ttt);
+    }
+
+    @Override
+    public Collection<TicketTransferToken> getValidTicketTransferTokensByUser(String username) {
+        return tttRepository.findAllByTicketOwnerUsername(username).stream()
+                .filter(TicketTransferToken::isValid)
+                .collect(Collectors.toList());
     }
 
     private TicketTransferToken getTicketTransferTokenIfValid(String token){

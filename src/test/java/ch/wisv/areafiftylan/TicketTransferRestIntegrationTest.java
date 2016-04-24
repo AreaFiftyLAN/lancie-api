@@ -199,6 +199,17 @@ public class TicketTransferRestIntegrationTest extends IntegrationTest{
     }
 
     @Test
+    public void testDuplicateSetupForTransfer() {
+        addTicketTransfer(user.getUsername(), userCleartextPassword);
+        Response response = addTicketTransfer(user.getUsername(), userCleartextPassword);
+
+        //@formatter:off
+        response.then()
+                .statusCode(HttpStatus.SC_BAD_REQUEST);
+        //@formatter:on
+    }
+
+    @Test
     public void testCancelTransfer_Anon(){
         TicketTransferToken ttt = addTicketTransferGetToken();
 

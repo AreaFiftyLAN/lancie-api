@@ -58,4 +58,6 @@ public interface TicketService {
      * @param token The token that refers to the TicketTransferToken
      */
     void cancelTicketTransfer(String token);
+
+    Collection<TicketTransferToken> getValidTicketTransferTokensByUser(String username);
 }
