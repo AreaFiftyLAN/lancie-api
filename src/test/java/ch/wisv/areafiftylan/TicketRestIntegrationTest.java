@@ -338,7 +338,7 @@ public class TicketRestIntegrationTest extends IntegrationTest{
                 filter(sessionFilter).
                 header(login.getCsrfHeader()).
         when().
-                get(TICKETS_ENDPOINT + "/incontrol").
+                get(TICKETS_ENDPOINT + "/teammembers").
         then().
                 statusCode(HttpStatus.SC_OK).
                 body("$", hasSize(0));
@@ -352,7 +352,7 @@ public class TicketRestIntegrationTest extends IntegrationTest{
                 filter(sessionFilter).
                 header(login.getCsrfHeader()).
         when().
-                get(TICKETS_ENDPOINT + "/incontrol").
+                get(TICKETS_ENDPOINT + "/teammembers").
         then().
                 statusCode(HttpStatus.SC_OK).
                 body("$", hasSize(1)).
@@ -369,7 +369,7 @@ public class TicketRestIntegrationTest extends IntegrationTest{
                 filter(sessionFilter).
                 header(login.getCsrfHeader()).
         when().
-                get(TICKETS_ENDPOINT + "/incontrol").
+                get(TICKETS_ENDPOINT + "/teammembers").
         then().
                 statusCode(HttpStatus.SC_OK).
                 body("$", hasSize(2)).
@@ -386,7 +386,7 @@ public class TicketRestIntegrationTest extends IntegrationTest{
                 filter(sessionFilter).
                 header(login.getCsrfHeader()).
         when().
-                get(TICKETS_ENDPOINT + "/incontrol").
+                get(TICKETS_ENDPOINT + "/teammembers").
         then().
                 statusCode(HttpStatus.SC_OK).
                 body("$", hasSize(1)).
