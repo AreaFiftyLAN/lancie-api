@@ -159,7 +159,7 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public Collection<Ticket> getTicketsInControl(User u){
+    public Collection<Ticket> getTicketsFromTeamMembers(User u){
         Collection<Ticket> ownedTickets = ticketRepository.findAllByOwnerUsername(u.getUsername());
         Collection<Ticket> captainedTickets = getCaptainedTickets(u);
 

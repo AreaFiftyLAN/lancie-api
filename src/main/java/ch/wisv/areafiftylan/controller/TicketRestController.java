@@ -81,10 +81,10 @@ public class TicketRestController {
     }
 
     @PreAuthorize("isAuthenticated()")
-    @RequestMapping(value = "/tickets/incontrol", method = RequestMethod.GET)
-    public Collection<Ticket> getTicketsInControl(Authentication auth) {
+    @RequestMapping(value = "/tickets/teammembers", method = RequestMethod.GET)
+    public Collection<Ticket> getTicketsFromTeamMembers(Authentication auth) {
         User u = (User)auth.getPrincipal();
 
-        return ticketService.getTicketsInControl(u);
+        return ticketService.getTicketsFromTeamMembers(u);
     }
 }

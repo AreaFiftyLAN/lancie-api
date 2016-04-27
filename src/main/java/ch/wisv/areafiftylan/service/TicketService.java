@@ -65,7 +65,7 @@ public interface TicketService {
      * @param user The user whose tickets are requested
      * @return All tickets over which a user has control.
      */
-    Collection<Ticket> getTicketsInControl(User user);
+    Collection<Ticket>getTicketsFromTeamMembers(User user);
 
     Collection<TicketTransferToken> getValidTicketTransferTokensByUser(String username);
 }
