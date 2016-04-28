@@ -47,11 +47,6 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public Team save(Team team) {
-        return teamRepository.saveAndFlush(team);
-    }
-
-    @Override
     public Team getTeamById(Long teamId) {
         return teamRepository.findById(teamId).orElseThrow(() -> new TeamNotFoundException(teamId));
     }

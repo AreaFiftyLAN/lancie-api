@@ -11,8 +11,6 @@ import java.util.List;
 public interface TeamService {
     Team create(String username, String teamname);
 
-    Team save(Team team);
-
     Team getTeamById(Long id);
 
     Team getTeamByTeamname(String teamname);

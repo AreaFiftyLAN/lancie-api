@@ -4,6 +4,7 @@ import ch.wisv.areafiftylan.exception.DuplicateTicketTransferTokenException;
 import ch.wisv.areafiftylan.exception.InvalidTokenException;
 import ch.wisv.areafiftylan.exception.TicketUnavailableException;
 import ch.wisv.areafiftylan.exception.TokenNotFoundException;
+import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.util.TicketType;
@@ -17,7 +18,12 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
+import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,17 +33,19 @@ public class TicketServiceImpl implements TicketService {
     private UserService userService;
     private TicketTransferTokenRepository tttRepository;
     private MailService mailService;
+    private TeamService teamService;
 
     @Value("${a5l.user.acceptTransferUrl}")
     private String acceptTransferUrl;
 
     @Autowired
     public TicketServiceImpl(TicketRepository ticketRepository, UserService userService, TicketTransferTokenRepository tttRepository,
-                             MailService mailService) {
+                             MailService mailService, TeamService teamService) {
         this.ticketRepository = ticketRepository;
         this.userService = userService;
         this.tttRepository = tttRepository;
         this.mailService = mailService;
+        this.teamService = teamService;
     }
 
     @Override
@@ -148,5 +156,27 @@ public class TicketServiceImpl implements TicketService {
         }
 
         return ttt;
+    }
+
+    @Override
+    public Collection<Ticket> getTicketsFromTeamMembers(User u){
+        Collection<Ticket> ownedTickets = ticketRepository.findAllByOwnerUsername(u.getUsername());
+        Collection<Ticket> captainedTickets = getCaptainedTickets(u);
+
+        Collection<Ticket> ticketsInControl = new ArrayList<>();
+        ticketsInControl.addAll(ownedTickets);
+        ticketsInControl.addAll(captainedTickets);
+
+        return ticketsInControl;
+    }
+
+    private Collection<Ticket> getCaptainedTickets(User u){
+        Collection<Team> captainedTeams = teamService.getTeamByCaptainId(u.getId());
+
+        return captainedTeams.stream()
+                .flatMap(t -> t.getMembers().stream())
+                .filter(m -> !m.equals(u))
+                .flatMap(m -> ticketRepository.findAllByOwnerUsername(m.getUsername()).stream())
+                .collect(Collectors.toList());
     }
 }
