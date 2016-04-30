@@ -37,7 +37,7 @@ public class TicketRestController {
     public ResponseEntity<?> requestTicketTransfer(@PathVariable Long ticketId, @RequestBody String goalUsername){
         TicketTransferToken ttt = ticketService.setupForTransfer(ticketId, goalUsername);
 
-        return createResponseEntity(HttpStatus.OK, "Ticket successfully set up for transfer.", ttt);
+        return createResponseEntity(HttpStatus.OK, "Ticket successfully set up for transfer.", ttt.getToken());
     }
 
     @PreAuthorize("@currentUserServiceImpl.isTicketReceiver(principal, #token)")

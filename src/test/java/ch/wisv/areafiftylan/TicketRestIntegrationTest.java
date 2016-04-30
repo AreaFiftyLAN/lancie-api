@@ -88,7 +88,7 @@ public class TicketRestIntegrationTest extends IntegrationTest{
         String token = addTicketTransfer(user.getUsername(), userCleartextPassword)
                 .then()
                     .statusCode(HttpStatus.SC_OK)
-                .extract().path("object.token");
+                .extract().path("object");
 
         TicketTransferToken ttt = tttRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
 
@@ -323,7 +323,7 @@ public class TicketRestIntegrationTest extends IntegrationTest{
     private TicketTransferToken addTicketTransferGetToken(){
         String token = addTicketTransfer(user.getUsername(), userCleartextPassword).
             then().
-                extract().path("object.token");
+                extract().path("object");
 
         return tttRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
     }
