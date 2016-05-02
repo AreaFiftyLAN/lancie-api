@@ -14,8 +14,6 @@ import javax.persistence.OneToOne;
 @Entity
 public class TeamInviteToken extends Token {
 
-    private static final int EXPIRATION = 60 * 24 * 7;
-
     @OneToOne(targetEntity = Team.class, fetch = FetchType.EAGER)
     @JoinColumn(nullable = false)
     private Team team;
@@ -25,7 +23,7 @@ public class TeamInviteToken extends Token {
     }
 
     public TeamInviteToken(User user, Team team){
-        super(user, EXPIRATION);
+        super(user, 0);
         this.team = team;
     }
 
