@@ -9,7 +9,7 @@ import lombok.Setter;
 import javax.persistence.*;
 
 @Entity
-@Table(uniqueConstraints = { @UniqueConstraint(name = "seatConstraint", columnNames = { "seatGroup","seatNumber" }) } )
+@Table(uniqueConstraints = { @UniqueConstraint(name = "seatConstraint", columnNames = { "seatGroup", "seatNumber" }) })
 public class Seat {
 
     @Getter
@@ -17,6 +17,7 @@ public class Seat {
     @JsonView(View.Public.class)
     public boolean taken;
 
+    @Getter
     @OneToOne(cascade = CascadeType.MERGE)
     @JsonView(View.Public.class)
     public Ticket ticket;
@@ -41,7 +42,7 @@ public class Seat {
         this.taken = false;
     }
 
-    public Seat(){
+    public Seat() {
         //JPA ONLY
     }
 

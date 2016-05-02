@@ -17,15 +17,14 @@ import java.util.stream.Collectors;
 @Service
 public class SeatServiceImpl implements SeatService {
 
-    SeatRepository seatRepository;
-    TicketRepository ticketRepository;
-    TeamService teamService;
+    private SeatRepository seatRepository;
+    private TicketRepository ticketRepository;
+    private TeamService teamService;
 
     private static final Object seatReservationLock = new Object();
 
     @Autowired
-    public SeatServiceImpl(SeatRepository seatRepository, TicketRepository ticketRepository,
-                           TeamService teamService) {
+    public SeatServiceImpl(SeatRepository seatRepository, TicketRepository ticketRepository, TeamService teamService) {
         this.seatRepository = seatRepository;
         this.ticketRepository = ticketRepository;
         this.teamService = teamService;
@@ -60,9 +59,12 @@ public class SeatServiceImpl implements SeatService {
     public boolean reserveSeatForTicket(String groupname, int seatnumber, Long ticketId) {
         Ticket ticket = ticketRepository.findOne(ticketId);
 
+        Optional<Seat> previousSeat = seatRepository.findByTicketId(ticketId);
+
         // We can only reserve one seat at a time, to prevent the extremely unlikely event of simultaneous requests
         synchronized (seatReservationLock) {
             Seat seat = seatRepository.findBySeatGroupAndSeatNumber(groupname, seatnumber);
+            previousSeat.ifPresent(s -> s.setTicket(null));
             if (!seat.isTaken()) {
                 seat.setTicket(ticket);
                 seatRepository.saveAndFlush(seat);
@@ -113,5 +115,11 @@ public class SeatServiceImpl implements SeatService {
                 map(seatRepository::findByTicketOwnerUsername).
                 flatMap(Collection::stream).
                 collect(Collectors.toList());
+    }
+
+    @Override
+    public void clearSeat(String groupName, int seatNumber) {
+        Seat seat = seatRepository.findBySeatGroupAndSeatNumber(groupName, seatNumber);
+        seat.setTicket(null);
     }
 }
