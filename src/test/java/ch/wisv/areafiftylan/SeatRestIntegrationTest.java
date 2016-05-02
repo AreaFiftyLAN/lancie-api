@@ -13,6 +13,7 @@ import ch.wisv.areafiftylan.util.SessionData;
 import com.jayway.restassured.http.ContentType;
 import org.apache.http.HttpStatus;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,14 +42,14 @@ public class SeatRestIntegrationTest extends IntegrationTest {
     @Autowired
     TicketRepository ticketRepository;
 
-    User teamCaptain;
-    String teamCaptainCleartextPassword = "password";
+    private User teamCaptain;
+    private String teamCaptainCleartextPassword = "password";
 
-    Team team;
+    private Team team;
 
-    Ticket userTicket;
+    private Ticket userTicket;
 
-    Ticket captainTicket;
+    private Ticket captainTicket;
 
     @Before
     public void setupSeatIntegrationTests() {
@@ -79,7 +80,8 @@ public class SeatRestIntegrationTest extends IntegrationTest {
     }
 
     private void createCaptainAndTeam() {
-        teamCaptain = new User("captain", new BCryptPasswordEncoder().encode(teamCaptainCleartextPassword), "captain@mail.com");
+        teamCaptain = new User("captain", new BCryptPasswordEncoder().encode(teamCaptainCleartextPassword),
+                "captain@mail.com");
         teamCaptain.getProfile()
                 .setAllFields("Captain", "Hook", "PeterPanKiller", Gender.MALE, "High Road 3", "2826ZZ", "Neverland",
                         "0906-0777", null);
@@ -117,7 +119,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
             header(login.getCsrfHeader()).
         when().
             get("/seats").
-        then().log().all().
+        then().
             statusCode(HttpStatus.SC_OK).
             body("seatmap.A.ticket.owner", not(contains(hasKey("username")))).
             body("seatmap.A.ticket.owner.profile", contains(hasKey("displayName"))).
@@ -126,7 +128,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void getAllSeatsAdminViewAsAnon(){
+    public void getAllSeatsAdminViewAsAnon() {
         //@formatter:off
         when().
             get("/seats?admin").
@@ -136,7 +138,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void getAllSeatsAdminViewAsUser(){
+    public void getAllSeatsAdminViewAsUser() {
         setTicketOnA1(userTicket);
 
         SessionData login = login("user", userCleartextPassword);
@@ -147,13 +149,13 @@ public class SeatRestIntegrationTest extends IntegrationTest {
             header(login.getCsrfHeader()).
         when().
             get("/seats?admin").
-        then().log().all().
+        then().
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
     }
 
     @Test
-    public void getAllSeatsAdminViewAsAdmin(){
+    public void getAllSeatsAdminViewAsAdmin() {
         setTicketOnA1(userTicket);
 
         SessionData login = login("admin", adminCleartextPassword);
@@ -174,7 +176,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void getSeatGroupAsUser(){
+    public void getSeatGroupAsUser() {
         setTicketOnA1(userTicket);
 
         SessionData login = login("user", userCleartextPassword);
@@ -185,7 +187,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
             header(login.getCsrfHeader()).
         when().
             get("/seats/A").
-        then().log().all().
+        then().
             statusCode(HttpStatus.SC_OK).
             body("seatmap.A.ticket.owner", not(contains(hasKey("username")))).
             body("seatmap.A.ticket.owner.profile", contains(hasKey("displayName"))).
@@ -194,7 +196,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void getSeatGroupAdminViewAsUser(){
+    public void getSeatGroupAdminViewAsUser() {
         SessionData login = login("user", userCleartextPassword);
 
         //@formatter:off
@@ -203,13 +205,13 @@ public class SeatRestIntegrationTest extends IntegrationTest {
             header(login.getCsrfHeader()).
         when().
             get("/seats/A?admin").
-        then().log().all().
+        then().
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
     }
 
     @Test
-    public void getSeatGroupAdminViewAsAdmin(){
+    public void getSeatGroupAdminViewAsAdmin() {
         setTicketOnA1(userTicket);
 
         SessionData login = login("admin", adminCleartextPassword);
@@ -230,7 +232,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void getSeatAsUser(){
+    public void getSeatAsUser() {
         setTicketOnA1(userTicket);
 
         SessionData login = login("user", userCleartextPassword);
@@ -250,7 +252,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void getSeatAdminViewAsUser(){
+    public void getSeatAdminViewAsUser() {
         setTicketOnA1(userTicket);
 
         SessionData login = login("user", userCleartextPassword);
@@ -267,7 +269,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void getCurrentSeatAsUser(){
+    public void getCurrentSeatAsUser() {
         setTicketOnA1(userTicket);
 
         SessionData login = login("user", userCleartextPassword);
@@ -287,7 +289,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void getSeatsForTeam(){
+    public void getSeatsForTeam() {
         createCaptainAndTeam();
 
         setTicketOnA1(captainTicket);
@@ -319,7 +321,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
 
     //region Test Add Seat
     @Test
-    public void addSeatGroupAsAnon(){
+    public void addSeatGroupAsAnon() {
         Map<String, String> seatGroupDTO = new HashMap<>();
         seatGroupDTO.put("seatGroupName", "testGroup");
         seatGroupDTO.put("numberOfSeats", "5");
@@ -336,7 +338,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void addSeatGroupAsUser(){
+    public void addSeatGroupAsUser() {
         Map<String, String> seatGroupDTO = new HashMap<>();
         seatGroupDTO.put("seatGroupName", "testGroup");
         seatGroupDTO.put("numberOfSeats", "5");
@@ -357,7 +359,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void addSeatGroupAsAdmin(){
+    public void addSeatGroupAsAdmin() {
         Map<String, String> seatGroupDTO = new HashMap<>();
         seatGroupDTO.put("seatGroupName", "testGroup");
         seatGroupDTO.put("numberOfSeats", "5");
@@ -389,7 +391,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
 
     //region Test Reserve Seat
     @Test
-    public void reserveSeatAsAnon(){
+    public void reserveSeatAsAnon() {
         //@formatter:off
         given().
         when().
@@ -401,7 +403,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void reserveSeatAsUser(){
+    public void reserveSeatAsUser() {
         SessionData login = login("user", userCleartextPassword);
 
         //@formatter:off
@@ -417,7 +419,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void reserveSeatAsOtherUser(){
+    public void reserveSeatAsOtherUser() {
         SessionData login = login("user", userCleartextPassword);
 
         createCaptainAndTeam();
@@ -429,7 +431,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
         when().
             param("ticketId", captainTicket.getId()).
             post("/seats/A/1").
-        then().log().all().
+        then().
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
     }
@@ -525,6 +527,13 @@ public class SeatRestIntegrationTest extends IntegrationTest {
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
 
+        Seat previousSeat = seatRepository.findBySeatGroupAndSeatNumber("A", 1);
+        Seat currentSeat = seatRepository.findBySeatGroupAndSeatNumber("A", 2);
+
+        Assert.assertNull(previousSeat.getTicket());
+        Assert.assertFalse(previousSeat.isTaken());
+        Assert.assertEquals(currentSeat.getTicket().getId(), userTicket.getId());
+        Assert.assertTrue(currentSeat.isTaken());
     }
 
     @Test
@@ -592,16 +601,16 @@ public class SeatRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void clearSeatAsAnon() {
-
+        // No Controller support yet
     }
 
     @Test
     public void clearSeatAsUser() {
-
+        // No Controller support yet
     }
 
     @Test
     public void clearSeatAsAdmin() {
-
+        // No Controller support yet
     }
 }

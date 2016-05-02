@@ -23,4 +23,6 @@ public interface SeatService {
     void addSeats(SeatGroupDTO seatGroupDTO);
 
     List<Seat> getSeatsByTeamName(String teamName);
+
+    void clearSeat(String groupName, int seatNumber);
 }
