@@ -8,14 +8,13 @@ import ch.wisv.areafiftylan.model.util.Role;
 import ch.wisv.areafiftylan.security.token.TeamInviteToken;
 import ch.wisv.areafiftylan.security.token.TicketTransferToken;
 import ch.wisv.areafiftylan.service.repository.TicketRepository;
-import ch.wisv.areafiftylan.service.repository.token.TicketTransferTokenRepository;
 import ch.wisv.areafiftylan.service.repository.token.TeamInviteTokenRepository;
+import ch.wisv.areafiftylan.service.repository.token.TicketTransferTokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
-import java.util.Optional;
 
 @Service
 public class CurrentUserServiceImpl implements CurrentUserService {
@@ -148,8 +147,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
 
     @Override
     public boolean hasAnyTicket(String username) {
-        Optional<Ticket> ticket = ticketRepository.findByOwnerUsername(username);
-        return ticket.isPresent() && ticket.get().isValid();
+        return ticketRepository.findAllByOwnerUsername(username).stream().anyMatch(Ticket::isValid);
     }
 
     @Override
