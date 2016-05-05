@@ -286,6 +286,44 @@ public class TeamRestIntegrationTest extends IntegrationTest {
             statusCode(HttpStatus.SC_CONFLICT);
         //@formatter:on
     }
+
+    @Test
+    public void testCreateTeamAsUserDuplicateTeamNameDifferentCasing() {
+        team1.put("captainUsername", teamCaptain.getUsername());
+
+        SessionData login = login("captain", teamCaptainCleartextPassword);
+
+        //@formatter:off
+        given().
+                filter(sessionFilter).
+                header(login.getCsrfHeader()).
+                when().
+                content(team1).contentType(ContentType.JSON).
+                post("/teams").
+                then().
+                statusCode(HttpStatus.SC_CREATED).
+                header("Location", containsString("/teams/")).
+                body("object.teamName", equalTo(team1.get("teamName"))).
+                body("object.captain.profile.displayName", equalTo(teamCaptain.getProfile().getDisplayName())).
+                body("object.members.profile.displayName", hasItem(teamCaptain.getProfile().getDisplayName()));
+
+        logout();
+
+        team1.put("captainUsername", user.getUsername());
+        team1.put("teamName", "Testteam1");
+
+        SessionData login2 = login("user", userCleartextPassword);
+
+        given().
+                filter(sessionFilter).
+                header(login2.getCsrfHeader()).
+                when().
+                content(team1).contentType(ContentType.JSON).
+                post("/teams").
+                then().
+                statusCode(HttpStatus.SC_CONFLICT);
+        //@formatter:on
+    }
     //endregion
 
     //region Test Get Team

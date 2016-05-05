@@ -53,8 +53,13 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public Team getTeamByTeamname(String teamname) {
-        return teamRepository.findByTeamName(teamname)
+        return teamRepository.findByTeamNameIgnoreCase(teamname)
                 .orElseThrow(() -> new TeamNotFoundException("Cant find team with  name " + teamname));
+    }
+
+    @Override
+    public boolean teamnameUsed(String teamname) {
+        return teamRepository.findByTeamNameIgnoreCase(teamname).isPresent();
     }
 
     @Override
