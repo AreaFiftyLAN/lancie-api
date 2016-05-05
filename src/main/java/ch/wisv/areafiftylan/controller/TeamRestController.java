@@ -50,6 +50,10 @@ public class TeamRestController {
     @JsonView(View.Public.class)
     @RequestMapping(method = RequestMethod.POST)
     ResponseEntity<?> add(@Validated @RequestBody TeamDTO teamDTO, Authentication auth) {
+        if(teamService.teamnameUsed(teamDTO.getTeamName())){
+            return createResponseEntity(HttpStatus.CONFLICT, "Team with name \"" + teamDTO.getTeamName() + "\" already exists");
+        }
+
         Team team;
         // Users can only create teams with themselves as Captain
         if (auth.getAuthorities().contains(Role.ROLE_ADMIN)) {

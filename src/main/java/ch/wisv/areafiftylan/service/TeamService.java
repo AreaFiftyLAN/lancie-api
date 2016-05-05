@@ -15,6 +15,8 @@ public interface TeamService {
 
     Team getTeamByTeamname(String teamname);
 
+    boolean teamnameUsed(String teamname);
+
     Collection<Team> getTeamByCaptainId(Long userId);
 
     Collection<Team> getAllTeams();
