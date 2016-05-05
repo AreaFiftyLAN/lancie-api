@@ -51,7 +51,7 @@ public class TeamRestController {
     @RequestMapping(method = RequestMethod.POST)
     ResponseEntity<?> add(@Validated @RequestBody TeamDTO teamDTO, Authentication auth) {
         if(teamService.teamnameUsed(teamDTO.getTeamName())){
-            return createResponseEntity(HttpStatus.CONFLICT, "Team with name \"" + teamDTO.getTeamName() + "\" already exists");
+            return createResponseEntity(HttpStatus.CONFLICT, "Team with name \"" + teamDTO.getTeamName() + "\" already exists.");
         }
 
         Team team;
