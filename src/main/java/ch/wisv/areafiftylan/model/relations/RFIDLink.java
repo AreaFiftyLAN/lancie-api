@@ -3,9 +3,12 @@ package ch.wisv.areafiftylan.model.relations;
 import ch.wisv.areafiftylan.exception.InvalidRFIDException;
 import ch.wisv.areafiftylan.model.Ticket;
 
+import javax.persistence.Entity;
+
 /**
  * Created by beer on 5-5-16.
  */
+@Entity
 public class RFIDLink {
     public static final int RFID_CHAR_COUNT = 10;
 

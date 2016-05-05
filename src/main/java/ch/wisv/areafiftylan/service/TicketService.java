@@ -3,6 +3,7 @@ package ch.wisv.areafiftylan.service;
 import ch.wisv.areafiftylan.exception.TicketUnavailableException;
 import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.User;
+import ch.wisv.areafiftylan.model.relations.RFIDLink;
 import ch.wisv.areafiftylan.model.util.TicketType;
 import ch.wisv.areafiftylan.security.token.TicketTransferToken;
 
