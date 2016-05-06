@@ -1,11 +1,13 @@
 package ch.wisv.areafiftylan.controller;
 
+import ch.wisv.areafiftylan.dto.UserDTO;
 import ch.wisv.areafiftylan.exception.InvalidTokenException;
 import ch.wisv.areafiftylan.exception.TokenNotFoundException;
 import ch.wisv.areafiftylan.exception.UserNotFoundException;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.security.token.PasswordResetToken;
 import ch.wisv.areafiftylan.security.token.VerificationToken;
+import ch.wisv.areafiftylan.service.AuthenticationService;
 import ch.wisv.areafiftylan.service.MailService;
 import ch.wisv.areafiftylan.service.UserService;
 import ch.wisv.areafiftylan.service.repository.token.PasswordResetTokenRepository;
@@ -31,17 +33,25 @@ import static ch.wisv.areafiftylan.util.ResponseEntityBuilder.createResponseEnti
 @Controller
 public class AuthenticationController {
 
-    @Autowired
-    MailService mailService;
+    private MailService mailService;
+    private UserService userService;
+    private AuthenticationService authenticationService;
+
+    private VerificationTokenRepository verificationTokenRepository;
+    private PasswordResetTokenRepository passwordResetTokenRepository;
 
     @Autowired
-    UserService userService;
+    public AuthenticationController(MailService mailService, UserService userService,
+                                    AuthenticationService authenticationService,
+                                    VerificationTokenRepository verificationTokenRepository,
+                                    PasswordResetTokenRepository passwordResetTokenRepository) {
+        this.mailService = mailService;
+        this.userService = userService;
+        this.authenticationService = authenticationService;
 
-    @Autowired
-    VerificationTokenRepository verificationTokenRepository;
-
-    @Autowired
-    PasswordResetTokenRepository passwordResetTokenRepository;
+        this.verificationTokenRepository = verificationTokenRepository;
+        this.passwordResetTokenRepository = passwordResetTokenRepository;
+    }
 
     /**
      * This basic GET method for the /login endpoint returns a simple login form.
@@ -56,6 +66,13 @@ public class AuthenticationController {
     @RequestMapping(value = "/token", method = RequestMethod.GET)
     public ResponseEntity<?> checkSession() {
         return createResponseEntity(HttpStatus.OK, "Here's your token!");
+    }
+
+    @RequestMapping(value = "/token", method = RequestMethod.POST)
+    public ResponseEntity<?> createAuthenticationToken(@RequestBody UserDTO userDTO) {
+        String authToken = authenticationService.createNewAuthToken(userDTO.getUsername(), userDTO.getPassword());
+
+        return createResponseEntity(HttpStatus.OK, "Token successfully created", authToken);
     }
 
     /**
