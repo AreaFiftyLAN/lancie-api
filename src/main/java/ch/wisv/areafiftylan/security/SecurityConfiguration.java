@@ -1,5 +1,6 @@
 package ch.wisv.areafiftylan.security;
 
+import ch.wisv.areafiftylan.service.repository.token.AuthenticationTokenRepository;
 import com.allanditzel.springframework.security.web.csrf.CsrfTokenResponseHeaderBindingFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
@@ -11,6 +12,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
 import org.springframework.security.web.csrf.CsrfFilter;
 
 @Configuration
@@ -20,6 +22,12 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private UserDetailsService userDetailsService;
+
+    @Autowired
+    private TokenAuthenticationProvider tokenAuthenticationProvider;
+
+    @Autowired
+    private AuthenticationTokenRepository authenticationTokenRepository;
 
     @Autowired
     private RESTAuthenticationEntryPoint authenticationEntryPoint;
@@ -70,6 +78,10 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         // This is the filter that adds the CSRF Token to the header. CSRF is enabled by default in Spring, this just
         // copies the content to the X-CSRF-TOKEN header field.
         http.addFilterAfter(new CsrfTokenResponseHeaderBindingFilter(), CsrfFilter.class);
+
+        http.addFilterBefore(new TokenAuthenticationFilter(authenticationTokenRepository),
+                FilterSecurityInterceptor.class).authenticationProvider(tokenAuthenticationProvider);
+
     }
 
     @Override
