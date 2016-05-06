@@ -20,6 +20,6 @@ public class AuthenticationToken extends Token {
     }
 
     public PreAuthenticatedAuthenticationToken getAuthenticationToken() {
-        return new PreAuthenticatedAuthenticationToken(this.getUser(), null);
+        return new PreAuthenticatedAuthenticationToken(this.getUser(), "N/A");
     }
 }

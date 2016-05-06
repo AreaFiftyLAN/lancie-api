@@ -12,7 +12,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CsrfFilter;
 
 @Configuration
@@ -24,7 +24,7 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     private UserDetailsService userDetailsService;
 
     @Autowired
-    private TokenAuthenticationProvider tokenAuthenticationProvider;
+    TokenAuthenticationProvider tokenAuthenticationProvider;
 
     @Autowired
     private AuthenticationTokenRepository authenticationTokenRepository;
@@ -71,21 +71,23 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             .and().authorizeRequests()
                 .antMatchers("/mail").hasAuthority("ADMIN")
                 .anyRequest().permitAll();
-        //@formatter:on
 
         http.csrf().
-                // This is used for the Mollie webhook, so it shouldn't be protected by CSRF
-                        ignoringAntMatchers("/orders/status").
-                // We also ignore this for Token requests
-                        ignoringAntMatchers("/token");
+            // This is used for the Mollie webhook, so it shouldn't be protected by CSRF
+            ignoringAntMatchers("/orders/status").
+            // We also ignore this for Token requests
+            ignoringAntMatchers("/token");
+        //@formatter:on
+
 
         // This is the filter that adds the CSRF Token to the header. CSRF is enabled by default in Spring, this just
         // copies the content to the X-CSRF-TOKEN header field.
         http.addFilterAfter(new CsrfTokenResponseHeaderBindingFilter(), CsrfFilter.class);
 
-        http.addFilterBefore(new TokenAuthenticationFilter(authenticationTokenRepository),
-                FilterSecurityInterceptor.class).authenticationProvider(tokenAuthenticationProvider);
-
+        // Add support for Token-base authentication
+        http.authenticationProvider(tokenAuthenticationProvider);
+        http.addFilterAfter(new TokenAuthenticationFilter(authenticationTokenRepository),
+                UsernamePasswordAuthenticationFilter.class);
     }
 
     @Override

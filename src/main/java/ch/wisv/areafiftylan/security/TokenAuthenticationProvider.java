@@ -1,10 +1,13 @@
 package ch.wisv.areafiftylan.security;
 
 import ch.wisv.areafiftylan.model.User;
-import ch.wisv.areafiftylan.security.token.AuthenticationToken;
+import ch.wisv.areafiftylan.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.stereotype.Component;
 
 /**
@@ -13,21 +16,22 @@ import org.springframework.stereotype.Component;
 @Component
 public class TokenAuthenticationProvider implements AuthenticationProvider {
 
+    @Autowired
+    UserService userService;
+
     public TokenAuthenticationProvider() {
     }
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-
-        AuthenticationToken tokenAuthentication = (AuthenticationToken) authentication;
-        User user = tokenAuthentication.getUser();
-
-        return (Authentication) tokenAuthentication;
+        User user = userService.getUserByUsername(authentication.getName())
+                .orElseThrow(() -> new UsernameNotFoundException(authentication.getName()));
+        return new PreAuthenticatedAuthenticationToken(user, "N/A");
     }
 
     @Override
     public boolean supports(Class<?> authentication) {
-        return AuthenticationToken.class.isAssignableFrom(authentication);
+        return PreAuthenticatedAuthenticationToken.class.isAssignableFrom(authentication);
     }
 
 }
