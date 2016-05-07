@@ -1,8 +1,8 @@
 package ch.wisv.areafiftylan.security;
 
-import ch.wisv.areafiftylan.security.token.Token;
 import ch.wisv.areafiftylan.service.repository.token.AuthenticationTokenRepository;
 import com.allanditzel.springframework.security.web.csrf.CsrfTokenResponseHeaderBindingFilter;
+import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.context.annotation.Configuration;
@@ -105,10 +105,8 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         public boolean matches(HttpServletRequest request) {
             String requestHeader = request.getHeader("X-Auth-Token");
             boolean methodAllowed = !(allowedMethods.matcher(request.getMethod()).matches());
-            boolean validAuthToken =
-                    !authenticationTokenRepository.findByToken(requestHeader).filter(Token::isValid).isPresent();
 
-            return validAuthToken && methodAllowed;
+            return Strings.isNullOrEmpty(requestHeader) && methodAllowed;
         }
     };
 }

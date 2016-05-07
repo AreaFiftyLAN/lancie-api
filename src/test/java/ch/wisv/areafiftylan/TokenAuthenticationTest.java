@@ -2,6 +2,7 @@ package ch.wisv.areafiftylan;
 
 import ch.wisv.areafiftylan.security.token.AuthenticationToken;
 import ch.wisv.areafiftylan.service.repository.token.AuthenticationTokenRepository;
+import ch.wisv.areafiftylan.util.SessionData;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Header;
 import org.apache.http.HttpStatus;
@@ -158,5 +159,25 @@ public class TokenAuthenticationTest extends IntegrationTest {
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
+    }
+
+    @Test
+    public void testEvadeCSRFWithTokenHeader() {
+        SessionData login = login(user.getUsername(), userCleartextPassword);
+
+        Header header = new Header("X-Auth-Token", "hack");
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(header).
+        when().
+            content(UserRestIntegrationTest.getProfileDTO()).
+            contentType(ContentType.JSON).
+            post("/users/current/profile").
+        then().
+            statusCode(HttpStatus.SC_UNAUTHORIZED);
+        //@formatter:on
+
     }
 }
