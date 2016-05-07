@@ -12,7 +12,7 @@ import java.util.Optional;
  */
 @Repository
 public interface RFIDLinkRepository extends JpaRepository<RFIDLink, Long> {
-    Optional<RFIDLink> findByRFID(String rfid);
+    Optional<RFIDLink> findByRfid(String rfid);
 
     Optional<RFIDLink> findByTicket(Ticket ticket);
 }

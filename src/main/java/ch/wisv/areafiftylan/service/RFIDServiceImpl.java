@@ -24,7 +24,7 @@ public class RFIDServiceImpl implements RFIDService{
 
     @Override
     public RFIDLink getLinkByRFID(String rfid) {
-        return rfidLinkRepository.findByRFID(rfid)
+        return rfidLinkRepository.findByRfid(rfid)
                 .orElseThrow(() -> new RFIDNotFoundException());
     }
 
@@ -42,7 +42,7 @@ public class RFIDServiceImpl implements RFIDService{
 
     @Override
     public boolean isRFIDUsed(String rfid) {
-        return rfidLinkRepository.findByRFID(rfid).isPresent();
+        return rfidLinkRepository.findByRfid(rfid).isPresent();
     }
 
     @Override
