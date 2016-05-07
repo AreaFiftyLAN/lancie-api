@@ -7,6 +7,7 @@ import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.exception.DuplicateTicketTransferTokenException;
 import ch.wisv.areafiftylan.security.token.TicketTransferToken;
 import ch.wisv.areafiftylan.service.OrderService;
+import ch.wisv.areafiftylan.service.RFIDService;
 import ch.wisv.areafiftylan.service.TicketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,11 +26,13 @@ import static ch.wisv.areafiftylan.util.ResponseEntityBuilder.createResponseEnti
 public class TicketRestController {
     private TicketService ticketService;
     private OrderService orderService;
+    private RFIDService rfidService;
 
     @Autowired
-    public TicketRestController(TicketService ticketService, OrderService orderService) {
+    public TicketRestController(TicketService ticketService, OrderService orderService, RFIDService rfidService) {
         this.ticketService = ticketService;
         this.orderService = orderService;
+        this.rfidService = rfidService;
     }
 
     @PreAuthorize("@currentUserServiceImpl.isTicketOwner(principal, #ticketId)")
@@ -86,5 +89,10 @@ public class TicketRestController {
         User u = (User)auth.getPrincipal();
 
         return ticketService.getTicketsFromTeamMembers(u);
+    }
+
+    @RequestMapping(value = "/tickets/{ticketId}/rfid", method = RequestMethod.GET)
+    public String getRFIDByTicketId(Long ticketId){
+        return rfidService.getRFIDByTicketId(ticketId);
     }
 }

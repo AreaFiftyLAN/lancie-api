@@ -35,9 +35,9 @@ public class RFIDController {
         return rfidService.getAllRFIDLinks();
     }
 
-    @RequestMapping(value = "/{rfid}/ticket", method = RequestMethod.GET)
-    public Ticket getRFIDLink(@PathVariable String rfid){
-        return rfidService.getTicketByRFID(rfid);
+    @RequestMapping(value = "/{rfid}/ticketId", method = RequestMethod.GET)
+    public Long getTicketId(@PathVariable String rfid){
+        return rfidService.getTicketIdByRFID(rfid);
     }
 
     @RequestMapping(method = RequestMethod.POST)

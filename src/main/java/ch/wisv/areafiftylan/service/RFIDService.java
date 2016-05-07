@@ -11,11 +11,9 @@ import java.util.Collection;
 public interface RFIDService {
     Collection<RFIDLink> getAllRFIDLinks();
 
-    RFIDLink getLinkByRFID(String rfid);
+    Long getTicketIdByRFID(String rfid);
 
-    Ticket getTicketByRFID(String rfid);
-
-    String getRFIDByTicket(Ticket ticket);
+    String getRFIDByTicketId(Long ticketId);
 
     boolean isRFIDUsed(String rfid);
 

@@ -14,5 +14,5 @@ import java.util.Optional;
 public interface RFIDLinkRepository extends JpaRepository<RFIDLink, Long> {
     Optional<RFIDLink> findByRfid(String rfid);
 
-    Optional<RFIDLink> findByTicket(Ticket ticket);
+    Optional<RFIDLink> findByTicketId(Long ticketId);
 }

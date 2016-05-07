@@ -23,21 +23,13 @@ public class RFIDServiceImpl implements RFIDService{
     }
 
     @Override
-    public RFIDLink getLinkByRFID(String rfid) {
-        return rfidLinkRepository.findByRfid(rfid)
-                .orElseThrow(() -> new RFIDNotFoundException());
+    public Long getTicketIdByRFID(String rfid) {
+        return getLinkByRFID(rfid).getTicket().getId();
     }
 
     @Override
-    public Ticket getTicketByRFID(String rfid) {
-        return getLinkByRFID(rfid).getTicket();
-    }
-
-    @Override
-    public String getRFIDByTicket(Ticket ticket) {
-        return rfidLinkRepository.findByTicket(ticket)
-                .orElseThrow(() -> new RFIDNotFoundException())
-                .getRFID();
+    public String getRFIDByTicketId(Long ticketId) {
+        return getLinkByTicketId(ticketId).getRFID();
     }
 
     @Override
@@ -48,5 +40,15 @@ public class RFIDServiceImpl implements RFIDService{
     @Override
     public void addRFIDLink(RFIDLink link) {
         rfidLinkRepository.saveAndFlush(link);
+    }
+
+    public RFIDLink getLinkByRFID(String rfid) {
+        return rfidLinkRepository.findByRfid(rfid)
+                .orElseThrow(() -> new RFIDNotFoundException());
+    }
+
+    public RFIDLink getLinkByTicketId(Long ticketId) {
+        return rfidLinkRepository.findByTicketId(ticketId)
+                .orElseThrow(() -> new RFIDNotFoundException());
     }
 }
