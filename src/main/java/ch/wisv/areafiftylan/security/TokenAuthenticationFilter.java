@@ -1,11 +1,12 @@
 package ch.wisv.areafiftylan.security;
 
 import ch.wisv.areafiftylan.exception.TokenNotFoundException;
+import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.security.token.AuthenticationToken;
 import ch.wisv.areafiftylan.service.repository.token.AuthenticationTokenRepository;
 import com.google.common.base.Strings;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.security.web.authentication.www.NonceExpiredException;
 import org.springframework.web.filter.GenericFilterBean;
 
@@ -35,13 +36,13 @@ class TokenAuthenticationFilter extends GenericFilterBean {
                     .orElseThrow(() -> new TokenNotFoundException(xAuth));
 
             if (authenticationToken.isValid()) {
-                Authentication auth = authenticationToken.getAuthenticationToken();
-                SecurityContextHolder.getContext().setAuthentication(auth);
+                User user = authenticationToken.getUser();
+                SecurityContextHolder.getContext()
+                        .setAuthentication(new PreAuthenticatedAuthenticationToken(user, "N/A", user.getAuthorities()));
             } else {
                 throw new NonceExpiredException("Token expired!");
             }
         }
-
         chain.doFilter(request, response);
     }
 }
