@@ -40,6 +40,7 @@ spring.jpa.generate-ddl=true
 # This setting defines the database creation/update behaviour. Change with caution.
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.properties.hibernate.default_schema=public
+flyway.baseline-on-migrate=true
 
 # Default port used by frontend
 server.port=9000
