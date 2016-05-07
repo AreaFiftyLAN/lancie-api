@@ -5,6 +5,7 @@ import ch.wisv.areafiftylan.service.repository.token.AuthenticationTokenReposito
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Header;
 import org.apache.http.HttpStatus;
+import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
@@ -15,6 +16,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static com.jayway.restassured.RestAssured.given;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 
 /**
@@ -41,11 +43,11 @@ public class TokenAuthenticationTest extends IntegrationTest {
             when().
                 content(userDTO).contentType(ContentType.JSON).
                 post("/token").
-            then().extract().path("object");
+            then().
+                extract().path("object");
         //@formatter:on
 
         return new Header("X-Auth-Token", token);
-
     }
 
     @Test
@@ -59,7 +61,40 @@ public class TokenAuthenticationTest extends IntegrationTest {
         when().
             content(userDTO).contentType(ContentType.JSON).
             post("/token").
-        then().log().all().
+        then().
+            statusCode(HttpStatus.SC_OK);
+        //@formatter:on
+
+        AuthenticationToken authenticationToken1 =
+                authenticationTokenRepository.findByUserUsername(user.getUsername()).orElse(null);
+
+        //@formatter:off
+        given().
+        when().
+            content(userDTO).contentType(ContentType.JSON).
+            post("/token").
+        then().
+            statusCode(HttpStatus.SC_OK);
+        //@formatter:on
+
+        AuthenticationToken authenticationToken2 =
+                authenticationTokenRepository.findByUserUsername(user.getUsername()).orElse(null);
+
+        Assert.assertFalse(authenticationToken1.equals(authenticationToken2));
+    }
+
+    @Test
+    public void testRequestTokenRenew() {
+        Map<String, String> userDTO = new HashMap<>();
+        userDTO.put("username", user.getUsername());
+        userDTO.put("password", userCleartextPassword);
+
+        //@formatter:off
+        given().
+        when().
+            content(userDTO).contentType(ContentType.JSON).
+            post("/token").
+        then().
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
 
@@ -67,25 +102,61 @@ public class TokenAuthenticationTest extends IntegrationTest {
                 authenticationTokenRepository.findByUserUsername(user.getUsername());
 
         Assert.assertTrue(authenticationToken.isPresent());
-    }
-
-    @Test
-    public void testRequestTokenRenew() {
 
     }
 
     @Test
-    public void testRequestWithToken() {
+    public void testGetCurrentUserWithToken() {
         Header header = getTokenHeader(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
-        given().log().all().
+        given().
             header(header).
         when().
             get("/users/current").
         then().
             statusCode(HttpStatus.SC_OK).
-            body("username", equalTo(user.getUsername()));
+            body("username", equalTo(user.getUsername())).
+            body("email", equalTo(user.getEmail()));
+        //@formatter:on
+    }
+
+    @Test
+    public void testPostRequestWithToken() {
+        Header header = getTokenHeader(user.getUsername(), userCleartextPassword);
+
+        //@formatter:off
+        given().
+            header(header).
+        when().
+            content(UserRestIntegrationTest.getProfileDTO()).
+            contentType(ContentType.JSON).
+            post("/users/current/profile").
+        then().
+            statusCode(HttpStatus.SC_OK).
+            body("object.gender", is("MALE")).
+            body("object.address", Matchers.equalTo("Testaddress")).
+            body("object.zipcode", Matchers.equalTo("Testzipcode")).
+            body("object.city", Matchers.equalTo("Testcity")).
+            body("object.phoneNumber", Matchers.equalTo("TestphoneNumber")).
+            body("object.notes", Matchers.equalTo("Testnotes")).
+            body("object.firstName", Matchers.equalTo("TestfirstName")).
+            body("object.lastName", Matchers.equalTo("TestlastName")).
+            body("object.displayName", Matchers.equalTo("TestdisplayName"));
+        //@formatter:on
+    }
+
+    @Test
+    public void testForbiddenRequestWithToken() {
+        Header header = getTokenHeader(user.getUsername(), userCleartextPassword);
+
+        //@formatter:off
+        given().
+            header(header).
+        when().
+            get("/users/").
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
     }
 }

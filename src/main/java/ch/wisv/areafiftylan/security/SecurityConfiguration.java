@@ -1,5 +1,6 @@
 package ch.wisv.areafiftylan.security;
 
+import ch.wisv.areafiftylan.security.token.Token;
 import ch.wisv.areafiftylan.service.repository.token.AuthenticationTokenRepository;
 import com.allanditzel.springframework.security.web.csrf.CsrfTokenResponseHeaderBindingFilter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,10 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CsrfFilter;
+import org.springframework.security.web.util.matcher.RequestMatcher;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.regex.Pattern;
 
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
@@ -22,9 +27,6 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private UserDetailsService userDetailsService;
-
-    @Autowired
-    TokenAuthenticationProvider tokenAuthenticationProvider;
 
     @Autowired
     private AuthenticationTokenRepository authenticationTokenRepository;
@@ -69,22 +71,22 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .logoutUrl("/logout");
         //@formatter:on
 
-        http.csrf()
-        // This is used for the Mollie webhook, so it shouldn't be protected by CSRF
-                .ignoringAntMatchers("/orders/status")
-        // Ignore the route to request a password reset, no CSRF protection is needed
-                .ignoringAntMatchers("/requestResetPassword")
-        // We also ignore this for Token requests
-                .ignoringAntMatchers("/token");
+        http.csrf().
+            // This is used for the Mollie webhook, so it shouldn't be protected by CSRF
+            ignoringAntMatchers("/orders/status").
+            // Don't require CSRF on requests with valid Tokens
+            requireCsrfProtectionMatcher(csrfRequestMatcher).
+            // We also ignore this for Token requests
+            ignoringAntMatchers("/token").
+            // Ignore the route to request a password reset, no CSRF protection is needed
+            ignoringAntMatchers("/requestResetPassword")
         //@formatter:on
-
 
         // This is the filter that adds the CSRF Token to the header. CSRF is enabled by default in Spring, this just
         // copies the content to the X-CSRF-TOKEN header field.
         http.addFilterAfter(new CsrfTokenResponseHeaderBindingFilter(), CsrfFilter.class);
 
         // Add support for Token-base authentication
-        http.authenticationProvider(tokenAuthenticationProvider);
         http.addFilterAfter(new TokenAuthenticationFilter(authenticationTokenRepository),
                 UsernamePasswordAuthenticationFilter.class);
     }
@@ -93,5 +95,20 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetailsService).passwordEncoder(new BCryptPasswordEncoder());
     }
+
+    // We want to enable CSRF for State Changing methods. We don't want CSRF for requests with valid tokens.
+    private RequestMatcher csrfRequestMatcher = new RequestMatcher() {
+        private Pattern allowedMethods = Pattern.compile("^(GET|HEAD|TRACE|OPTIONS)$");
+
+        @Override
+        public boolean matches(HttpServletRequest request) {
+            String requestHeader = request.getHeader("X-Auth-Token");
+            boolean methodAllowed = !(allowedMethods.matcher(request.getMethod()).matches());
+            boolean validAuthToken =
+                    !authenticationTokenRepository.findByToken(requestHeader).filter(Token::isValid).isPresent();
+
+            return validAuthToken && methodAllowed;
+        }
+    };
 }
 
