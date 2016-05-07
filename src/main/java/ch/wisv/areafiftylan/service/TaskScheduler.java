@@ -1,7 +1,6 @@
 package ch.wisv.areafiftylan.service;
 
 import ch.wisv.areafiftylan.model.Order;
-import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.util.OrderStatus;
 import ch.wisv.areafiftylan.security.token.VerificationToken;
 import ch.wisv.areafiftylan.service.repository.OrderRepository;
@@ -11,8 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.sql.Date;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -62,10 +59,10 @@ public class TaskScheduler {
     public void CleanUpUsers() {
         LocalDateTime now = LocalDateTime.now();
         List<VerificationToken> allExpiredVerificationTokens = verificationTokenRepository.findAllByExpiryDateBefore(now);
-        allExpiredVerificationTokens.forEach(t -> handleExpiredVerificationToken(t));
+        allExpiredVerificationTokens.forEach(this::handleExpiredVerificationToken);
     }
 
-    public static Predicate<Order> isExpired() {
+    private static Predicate<Order> isExpired() {
         return o -> o.getStatus().equals(OrderStatus.CREATING) || o.getStatus().equals(OrderStatus.EXPIRED) ||
                 o.getStatus().equals(OrderStatus.CANCELLED);
     }
