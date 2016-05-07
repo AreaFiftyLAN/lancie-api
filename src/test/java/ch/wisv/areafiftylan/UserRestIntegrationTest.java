@@ -1,7 +1,6 @@
 package ch.wisv.areafiftylan;
 
 import ch.wisv.areafiftylan.model.User;
-import ch.wisv.areafiftylan.model.util.Gender;
 import ch.wisv.areafiftylan.security.token.VerificationToken;
 import ch.wisv.areafiftylan.service.TaskScheduler;
 import ch.wisv.areafiftylan.service.repository.token.VerificationTokenRepository;
@@ -9,17 +8,15 @@ import ch.wisv.areafiftylan.util.SessionData;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Header;
 import com.jayway.restassured.response.Response;
-import org.junit.Assert;
 import org.apache.http.HttpStatus;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.RestAssured.when;
@@ -65,14 +62,15 @@ public class UserRestIntegrationTest extends IntegrationTest {
         userDTO.put("email", "testuser@mail.com");
 
         //@formatter:off
-        Response response = given().log().all().
-            header(getCSRFHeader()).
-            filter(sessionFilter).
-        when().
-            content(userDTO).contentType(ContentType.JSON).
-            post("/users").
-        then().log().all().
-            extract().response();
+        Response response =
+            given().
+                header(getCSRFHeader()).
+                filter(sessionFilter).
+            when().
+                content(userDTO).contentType(ContentType.JSON).
+                post("/users").
+            then().
+                extract().response();
         //@formatter:on
 
         testuser = userRepository.findOneByUsername("testuser").get();
@@ -82,7 +80,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
         return response.getHeader("Location");
     }
 
-    private Map<String, String> getProfileDTO() {
+    static Map<String, String> getProfileDTO() {
         Map<String, String> profileDTO = new HashMap<>();
         profileDTO.put("gender", "MALE");
         profileDTO.put("address", "Testaddress");
@@ -799,7 +797,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
         //@formatter:on
     }
 
-    private void makeTempUser(String appendix){
+    private void makeTempUser(String appendix) {
         Map<String, String> userDTO = new HashMap<>();
         userDTO.put("username", "tempUser" + appendix);
         userDTO.put("password", "password");
