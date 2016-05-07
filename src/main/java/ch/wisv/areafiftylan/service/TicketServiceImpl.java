@@ -103,7 +103,7 @@ public class TicketServiceImpl implements TicketService {
     public TicketTransferToken setupForTransfer(Long ticketId, String goalUserName) {
         User u = userService.getUserByUsername(goalUserName)
                 .orElseThrow(() -> new UsernameNotFoundException("User " + goalUserName + " not found."));
-        Ticket t = ticketRepository.findOne(ticketId);
+        Ticket t = getTicketById(ticketId);
 
         List<TicketTransferToken> ticketTransferTokens =
                 tttRepository.findAllByTicketId(ticketId).stream().filter(Token::isValid).collect(Collectors.toList());
