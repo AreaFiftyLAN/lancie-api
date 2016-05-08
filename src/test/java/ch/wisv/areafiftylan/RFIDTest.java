@@ -1,5 +1,7 @@
 package ch.wisv.areafiftylan;
 
+import ch.wisv.areafiftylan.exception.InvalidRFIDException;
+import ch.wisv.areafiftylan.exception.RFIDNotFoundException;
 import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.relations.RFIDLink;
 import ch.wisv.areafiftylan.model.util.TicketType;
@@ -141,40 +143,46 @@ public class RFIDTest extends IntegrationTest {
         given()
                 .filter(sessionFilter)
                 .header(session.getCsrfHeader())
-                .when()
+        .when()
                 .get(RFID_ENDPOINT + "/" + LINK_RFID + "/ticketId")
-                .then()
+        .then()
                 .statusCode(HttpStatus.SC_OK)
                 .body(containsString(link.getTicket().getId().toString()));
     }
-
-
 
     @Test
     public void testGetRFIDLink_InvalidRFID_Admin(){
         SessionData session = login(admin.getUsername(), adminCleartextPassword);
 
+        String invalidRFID = "607";
+
+        InvalidRFIDException e = new InvalidRFIDException(invalidRFID);
+
         given()
                 .filter(sessionFilter)
                 .header(session.getCsrfHeader())
         .when()
-                .get(RFID_ENDPOINT + "/" + "607")
+                .get(RFID_ENDPOINT + "/" + invalidRFID + "/ticketId")
         .then()
-                .statusCode(HttpStatus.SC_BAD_REQUEST);
+                .statusCode(HttpStatus.SC_BAD_REQUEST)
+                .body(containsString(e.getMessage()));
     }
-
-
 
     @Test
     public void testGetRFIDLink_UnusedRFID_Admin(){
         SessionData session = login(admin.getUsername(), adminCleartextPassword);
 
+        String unusedRFID = "1212121212";
+
+        RFIDNotFoundException e = new RFIDNotFoundException();
+
         given()
                 .filter(sessionFilter)
                 .header(session.getCsrfHeader())
         .when()
-                .get(RFID_ENDPOINT + "/" + "1212121212" + "/ticketId")
+                .get(RFID_ENDPOINT + "/" + unusedRFID + "/ticketId")
         .then()
-                .statusCode(HttpStatus.SC_NOT_FOUND);
+                .statusCode(HttpStatus.SC_NOT_FOUND)
+                .body(containsString(e.getMessage()));
     }
 }

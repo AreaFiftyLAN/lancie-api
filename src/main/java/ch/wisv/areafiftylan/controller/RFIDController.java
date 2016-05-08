@@ -1,6 +1,9 @@
 package ch.wisv.areafiftylan.controller;
 
 import ch.wisv.areafiftylan.dto.RFIDLinkDTO;
+import ch.wisv.areafiftylan.exception.InvalidRFIDException;
+import ch.wisv.areafiftylan.exception.RFIDNotFoundException;
+import ch.wisv.areafiftylan.exception.RFIDTakenException;
 import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.relations.RFIDLink;
 import ch.wisv.areafiftylan.service.RFIDService;
@@ -42,15 +45,27 @@ public class RFIDController {
 
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<?> addRFIDLink(@RequestBody RFIDLinkDTO rfidLinkDTO){
-        if(rfidService.isRFIDUsed(rfidLinkDTO.getRfid())){
-            return createResponseEntity(HttpStatus.CONFLICT, "RFID " + rfidLinkDTO.getRfid() + " is already in use");
-        }
-
-        Ticket t = ticketService.getTicketById(rfidLinkDTO.getTicketId());
-
-        RFIDLink newLink = new RFIDLink(rfidLinkDTO.getRfid(), t);
-        rfidService.addRFIDLink(newLink);
+        rfidService.addRFIDLink(rfidLinkDTO.getRfid(), rfidLinkDTO.getTicketId());
 
         return createResponseEntity(HttpStatus.OK, "Succesfully linked RFID with Ticket");
     }
+
+    //Exceptions
+
+    @ExceptionHandler(RFIDTakenException.class)
+    public ResponseEntity<?> handleRFIDTakenException(RFIDTakenException e){
+        return createResponseEntity(HttpStatus.CONFLICT, e.getMessage());
+    }
+
+    @ExceptionHandler(RFIDNotFoundException.class)
+    public ResponseEntity<?> handleRFIDNotFoundException(RFIDNotFoundException e){
+        return createResponseEntity(HttpStatus.NOT_FOUND, e.getMessage());
+    }
+
+    @ExceptionHandler(InvalidRFIDException.class)
+    public ResponseEntity<?> handleInvalidRFIDException(InvalidRFIDException e){
+        return createResponseEntity(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+
+
 }

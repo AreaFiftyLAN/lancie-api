@@ -10,8 +10,6 @@ import javax.persistence.*;
  */
 @Entity
 public class RFIDLink {
-    public static final int RFID_CHAR_COUNT = 10;
-
     @Id
     @GeneratedValue
     private Long id;
@@ -26,7 +24,7 @@ public class RFIDLink {
     }
 
     public RFIDLink(String rfid, Ticket ticket) {
-        if(rfid.length() != RFID_CHAR_COUNT){
+        if(!isValidRFID(rfid)){
             throw new InvalidRFIDException(rfid);
         }
 
@@ -40,5 +38,12 @@ public class RFIDLink {
 
     public Ticket getTicket(){
         return ticket;
+    }
+
+    //Static Content
+    public static final int RFID_CHAR_COUNT = 10;
+
+    public static boolean isValidRFID(String rfid){
+        return rfid.length() == RFID_CHAR_COUNT;
     }
 }
