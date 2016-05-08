@@ -1,13 +1,10 @@
 package ch.wisv.areafiftylan.security.token;
 
 import ch.wisv.areafiftylan.model.User;
-import org.springframework.cglib.core.Local;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.UUID;
 
 @Entity
@@ -26,10 +23,18 @@ public abstract class Token {
     @JoinColumn(nullable = false)
     private User user;
 
+
+    @Column(nullable=false, columnDefinition = "BOOLEAN DEFAULT TRUE")
     private boolean expirable = true;
+
+    @Type(type = "ch.wisv.areafiftylan.util.LocalDateTimeUserType")
     private LocalDateTime expiryDate;
 
+
+    @Column(nullable=false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private boolean used = false;
+
+    @Column(nullable=false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private boolean revoked = false;
 
     public Token() {
@@ -75,11 +80,11 @@ public abstract class Token {
         this.used = true;
     }
 
-    public void revoke(){
+    public void revoke() {
         this.revoked = true;
     }
 
-    public boolean isExpirable(){
+    public boolean isExpirable() {
         return expirable;
     }
 
@@ -89,13 +94,18 @@ public abstract class Token {
     }
 
     private boolean isExpired() {
-        if(!this.isExpirable())
+        if (!this.isExpirable()) {
             return false;
+        }
 
         return LocalDateTime.now().compareTo(expiryDate) > 0;
     }
 
     private boolean isRevoked() {
         return revoked;
+    }
+
+    public boolean isUnused() {
+        return !used;
     }
 }
