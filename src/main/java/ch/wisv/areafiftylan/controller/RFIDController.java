@@ -4,6 +4,7 @@ import ch.wisv.areafiftylan.dto.RFIDLinkDTO;
 import ch.wisv.areafiftylan.exception.InvalidRFIDException;
 import ch.wisv.areafiftylan.exception.RFIDNotFoundException;
 import ch.wisv.areafiftylan.exception.RFIDTakenException;
+import ch.wisv.areafiftylan.exception.TicketAlreadyLinkedException;
 import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.relations.RFIDLink;
 import ch.wisv.areafiftylan.service.RFIDService;
@@ -57,6 +58,11 @@ public class RFIDController {
         return createResponseEntity(HttpStatus.CONFLICT, e.getMessage());
     }
 
+    @ExceptionHandler(TicketAlreadyLinkedException.class)
+    public ResponseEntity<?> handleInvalidRFIDException(TicketAlreadyLinkedException e){
+        return createResponseEntity(HttpStatus.CONFLICT, e.getMessage());
+    }
+
     @ExceptionHandler(RFIDNotFoundException.class)
     public ResponseEntity<?> handleRFIDNotFoundException(RFIDNotFoundException e){
         return createResponseEntity(HttpStatus.NOT_FOUND, e.getMessage());
@@ -66,6 +72,4 @@ public class RFIDController {
     public ResponseEntity<?> handleInvalidRFIDException(InvalidRFIDException e){
         return createResponseEntity(HttpStatus.BAD_REQUEST, e.getMessage());
     }
-
-
 }

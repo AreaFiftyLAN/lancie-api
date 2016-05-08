@@ -3,6 +3,7 @@ package ch.wisv.areafiftylan.service;
 import ch.wisv.areafiftylan.exception.InvalidRFIDException;
 import ch.wisv.areafiftylan.exception.RFIDNotFoundException;
 import ch.wisv.areafiftylan.exception.RFIDTakenException;
+import ch.wisv.areafiftylan.exception.TicketAlreadyLinkedException;
 import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.relations.RFIDLink;
 import ch.wisv.areafiftylan.service.repository.RFIDLinkRepository;
@@ -51,9 +52,16 @@ public class RFIDServiceImpl implements RFIDService{
     }
 
     @Override
+    public boolean isTicketLinked(Long ticketId) {return rfidLinkRepository.findByTicketId(ticketId).isPresent(); }
+
+    @Override
     public void addRFIDLink(String rfid, Long ticketId) {
         if(isRFIDUsed(rfid)){
             throw new RFIDTakenException(rfid);
+        }
+
+        if(isTicketLinked(ticketId)){
+            throw new TicketAlreadyLinkedException();
         }
 
         Ticket t = ticketService.getTicketById(ticketId);
