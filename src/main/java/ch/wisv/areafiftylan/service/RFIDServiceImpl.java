@@ -47,7 +47,9 @@ public class RFIDServiceImpl implements RFIDService{
     }
 
     @Override
-    public boolean isTicketLinked(Long ticketId) {return rfidLinkRepository.findByTicketId(ticketId).isPresent(); }
+    public boolean isTicketLinked(Long ticketId) {
+        return rfidLinkRepository.findByTicketId(ticketId).isPresent();
+    }
 
     @Override
     public void addRFIDLink(String rfid, Long ticketId) {
