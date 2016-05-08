@@ -23,9 +23,6 @@ public class RFIDServiceImpl implements RFIDService{
     @Autowired
     private TicketService ticketService;
 
-    @Autowired
-    private TicketRepository ticketRepository;
-
     @Override
     public Collection<RFIDLink> getAllRFIDLinks() {
         return rfidLinkRepository.findAll();
@@ -91,10 +88,6 @@ public class RFIDServiceImpl implements RFIDService{
     }
 
     public RFIDLink getLinkByTicketId(Long ticketId) {
-        if(ticketRepository.findOne(ticketId) == null){
-            throw new TicketNotFoundException();
-        }
-
         return rfidLinkRepository.findByTicketId(ticketId)
                 .orElseThrow(() -> new RFIDNotFoundException());
     }
