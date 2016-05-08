@@ -23,12 +23,18 @@ public abstract class Token {
     @JoinColumn(nullable = false)
     private User user;
 
+
+    @Column(nullable=false, columnDefinition = "BOOLEAN DEFAULT TRUE")
     private boolean expirable = true;
 
     @Type(type = "ch.wisv.areafiftylan.util.LocalDateTimeUserType")
     private LocalDateTime expiryDate;
 
+
+    @Column(nullable=false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private boolean used = false;
+
+    @Column(nullable=false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private boolean revoked = false;
 
     public Token() {
@@ -97,5 +103,9 @@ public abstract class Token {
 
     private boolean isRevoked() {
         return revoked;
+    }
+
+    public boolean isUnused() {
+        return !used;
     }
 }

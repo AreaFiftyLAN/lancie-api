@@ -2,6 +2,7 @@ package ch.wisv.areafiftylan.service;
 
 import ch.wisv.areafiftylan.model.Order;
 import ch.wisv.areafiftylan.model.util.OrderStatus;
+import ch.wisv.areafiftylan.security.token.Token;
 import ch.wisv.areafiftylan.security.token.VerificationToken;
 import ch.wisv.areafiftylan.service.repository.OrderRepository;
 import ch.wisv.areafiftylan.service.repository.UserRepository;
@@ -35,8 +36,8 @@ public class TaskScheduler {
     private VerificationTokenRepository verificationTokenRepository;
 
     @Autowired
-    public TaskScheduler(OrderRepository orderRepository, OrderService orderService, VerificationTokenRepository verificationTokenRepository,
-                            UserRepository userRepository) {
+    public TaskScheduler(OrderRepository orderRepository, OrderService orderService,
+                         VerificationTokenRepository verificationTokenRepository, UserRepository userRepository) {
         this.orderRepository = orderRepository;
         this.orderService = orderService;
         this.userRepository = userRepository;
@@ -58,8 +59,9 @@ public class TaskScheduler {
     @Scheduled(fixedRate = USER_CLEANUP_CHECK_INTERVAL_MINUTES * 60 * 1000)
     public void CleanUpUsers() {
         LocalDateTime now = LocalDateTime.now();
-        List<VerificationToken> allExpiredVerificationTokens = verificationTokenRepository.findAllByExpiryDateBefore(now);
-        allExpiredVerificationTokens.forEach(this::handleExpiredVerificationToken);
+        List<VerificationToken> allExpiredVerificationTokens =
+                verificationTokenRepository.findAllByExpiryDateBefore(now);
+        allExpiredVerificationTokens.stream().filter(Token::isUnused).forEach(this::handleExpiredVerificationToken);
     }
 
     private static Predicate<Order> isExpired() {
