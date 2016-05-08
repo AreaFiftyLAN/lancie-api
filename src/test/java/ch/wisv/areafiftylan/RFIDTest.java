@@ -30,6 +30,7 @@ import static org.hamcrest.Matchers.*;
  */
 public class RFIDTest extends IntegrationTest {
     private final String RFID_ENDPOINT = "/rfid";
+    private final String RFID_TICKET_ENDPOINT = RFID_ENDPOINT + "/tickets";
 
     @Autowired
     private RFIDLinkRepository rfidLinkRepository;
@@ -164,7 +165,7 @@ public class RFIDTest extends IntegrationTest {
                 .filter(sessionFilter)
                 .header(session.getCsrfHeader())
         .when()
-                .get("/tickets/" + ticket.getId() + "/rfid")
+                .get(RFID_TICKET_ENDPOINT + "/" + ticket.getId())
         .then()
                 .statusCode(HttpStatus.SC_OK)
                 .body(equalTo(LINK_RFID.toString()));
@@ -182,7 +183,7 @@ public class RFIDTest extends IntegrationTest {
                 .filter(sessionFilter)
                 .header(session.getCsrfHeader())
         .when()
-                .get("/tickets/" + unusedTicketId + "/rfid")
+                .get(RFID_TICKET_ENDPOINT + "/" + unusedTicketId)
         .then()
                 .statusCode(HttpStatus.SC_NOT_FOUND)
                 .body(containsString(e.getMessage()));
@@ -198,7 +199,7 @@ public class RFIDTest extends IntegrationTest {
                 .filter(sessionFilter)
                 .header(session.getCsrfHeader())
         .when()
-                .get("/tickets/" + otherTicket.getId() + "/rfid")
+                .get(RFID_TICKET_ENDPOINT + "/" + otherTicket.getId())
         .then()
                 .statusCode(HttpStatus.SC_NOT_FOUND)
                 .body(containsString(e.getMessage()));
@@ -363,7 +364,7 @@ public class RFIDTest extends IntegrationTest {
                 .filter(sessionFilter)
                 .header(session.getCsrfHeader())
         .when()
-                .delete("/tickets/" + ticket.getId() + "/rfid")
+                .delete(RFID_TICKET_ENDPOINT + "/" + ticket.getId())
         .then()
                 .statusCode(HttpStatus.SC_OK)
                 .body("ticket.id", equalTo(ticket.getId().intValue()));

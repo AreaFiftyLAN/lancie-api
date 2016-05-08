@@ -56,6 +56,16 @@ public class RFIDController {
         return rfidService.removeRFIDLink(rfid);
     }
 
+    @RequestMapping(value = "/tickets/{ticketId}", method = RequestMethod.GET)
+    public String getRFIDByTicketId(@PathVariable Long ticketId){
+        return rfidService.getRFIDByTicketId(ticketId);
+    }
+
+    @RequestMapping(value = "/tickets/{ticketId}", method = RequestMethod.DELETE)
+    public RFIDLink deleteRFIDByTicketId(@PathVariable Long ticketId){
+        return rfidService.removeRFIDLink(ticketId);
+    }
+
     //Exceptions
 
     @ExceptionHandler(RFIDTakenException.class)
@@ -71,5 +81,10 @@ public class RFIDController {
     @ExceptionHandler(InvalidRFIDException.class)
     public ResponseEntity<?> handleInvalidRFIDException(InvalidRFIDException e){
         return createResponseEntity(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+
+    @ExceptionHandler(RFIDNotFoundException.class)
+    public ResponseEntity<?> handleRFIDNotFoundException(RFIDNotFoundException e){
+        return createResponseEntity(HttpStatus.NOT_FOUND, e.getMessage());
     }
 }

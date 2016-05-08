@@ -27,13 +27,11 @@ import static ch.wisv.areafiftylan.util.ResponseEntityBuilder.createResponseEnti
 public class TicketRestController {
     private TicketService ticketService;
     private OrderService orderService;
-    private RFIDService rfidService;
 
     @Autowired
-    public TicketRestController(TicketService ticketService, OrderService orderService, RFIDService rfidService) {
+    public TicketRestController(TicketService ticketService, OrderService orderService) {
         this.ticketService = ticketService;
         this.orderService = orderService;
-        this.rfidService = rfidService;
     }
 
     @PreAuthorize("@currentUserServiceImpl.isTicketOwner(principal, #ticketId)")
@@ -90,15 +88,5 @@ public class TicketRestController {
         User u = (User)auth.getPrincipal();
 
         return ticketService.getTicketsFromTeamMembers(u);
-    }
-
-    @RequestMapping(value = "/tickets/{ticketId}/rfid", method = RequestMethod.GET)
-    public String getRFIDByTicketId(@PathVariable Long ticketId){
-        return rfidService.getRFIDByTicketId(ticketId);
-    }
-
-    @RequestMapping(value = "/tickets/{ticketId}/rfid", method = RequestMethod.DELETE)
-    public RFIDLink deleteRFIDByTicketId(@PathVariable Long ticketId){
-        return rfidService.removeRFIDLink(ticketId);
     }
 }

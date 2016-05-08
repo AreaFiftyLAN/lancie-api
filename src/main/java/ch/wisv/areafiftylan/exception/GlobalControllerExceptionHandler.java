@@ -50,9 +50,4 @@ class GlobalControllerExceptionHandler {
     public ResponseEntity<?> handleTicketNotFoundException(TicketNotFoundException ex) {
         return createResponseEntity(HttpStatus.NOT_FOUND, ex.getMessage());
     }
-
-    @ExceptionHandler(RFIDNotFoundException.class)
-    public ResponseEntity<?> handleRFIDNotFoundException(RFIDNotFoundException e){
-        return createResponseEntity(HttpStatus.NOT_FOUND, e.getMessage());
-    }
 }
