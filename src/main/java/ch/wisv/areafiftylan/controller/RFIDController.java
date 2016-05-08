@@ -56,11 +56,6 @@ public class RFIDController {
         return rfidService.removeRFIDLink(rfid);
     }
 
-    @RequestMapping(value = "/tickets/{ticketId}", method = RequestMethod.GET)
-    public String getRFIDByTicketId(@PathVariable Long ticketId){
-        return rfidService.getRFIDByTicketId(ticketId);
-    }
-
     @RequestMapping(value = "/tickets/{ticketId}", method = RequestMethod.DELETE)
     public RFIDLink deleteRFIDByTicketId(@PathVariable Long ticketId){
         return rfidService.removeRFIDLink(ticketId);

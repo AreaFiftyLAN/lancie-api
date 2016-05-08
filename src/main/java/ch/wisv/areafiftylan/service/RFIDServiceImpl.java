@@ -37,11 +37,6 @@ public class RFIDServiceImpl implements RFIDService{
     }
 
     @Override
-    public String getRFIDByTicketId(Long ticketId) {
-        return getLinkByTicketId(ticketId).getRFID();
-    }
-
-    @Override
     public boolean isRFIDUsed(String rfid) {
         return rfidLinkRepository.findByRfid(rfid).isPresent();
     }

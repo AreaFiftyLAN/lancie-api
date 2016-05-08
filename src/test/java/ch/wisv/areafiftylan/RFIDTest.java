@@ -158,54 +158,6 @@ public class RFIDTest extends IntegrationTest {
     }
 
     @Test
-    public void testGetRFIDByTicketId_Admin(){
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
-
-        given()
-                .filter(sessionFilter)
-                .header(session.getCsrfHeader())
-        .when()
-                .get(RFID_TICKET_ENDPOINT + "/" + ticket.getId())
-        .then()
-                .statusCode(HttpStatus.SC_OK)
-                .body(equalTo(LINK_RFID.toString()));
-    }
-
-    @Test
-    public void testGetRFIDByTicketId_UnusedTicketId_Admin(){
-        Long unusedTicketId = getUnusedTicketId();
-
-        TicketNotFoundException e = new TicketNotFoundException();
-
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
-
-        given()
-                .filter(sessionFilter)
-                .header(session.getCsrfHeader())
-        .when()
-                .get(RFID_TICKET_ENDPOINT + "/" + unusedTicketId)
-        .then()
-                .statusCode(HttpStatus.SC_NOT_FOUND)
-                .body(containsString(e.getMessage()));
-    }
-
-    @Test
-    public void testGetRFIDByTicketId_NoLink_Admin(){
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
-
-        RFIDNotFoundException e = new RFIDNotFoundException();
-
-        given()
-                .filter(sessionFilter)
-                .header(session.getCsrfHeader())
-        .when()
-                .get(RFID_TICKET_ENDPOINT + "/" + otherTicket.getId())
-        .then()
-                .statusCode(HttpStatus.SC_NOT_FOUND)
-                .body(containsString(e.getMessage()));
-    }
-
-    @Test
     public void testGetTicketId_InvalidRFID_Admin(){
         SessionData session = login(admin.getUsername(), adminCleartextPassword);
 
