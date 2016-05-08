@@ -51,6 +51,11 @@ public class RFIDController {
         return createResponseEntity(HttpStatus.OK, "Succesfully linked RFID with Ticket");
     }
 
+    @RequestMapping(value = "/{rfid}", method = RequestMethod.DELETE)
+    public RFIDLink removeRFIDLinkByRFID(@PathVariable String rfid){
+        return rfidService.removeRFIDLink(rfid);
+    }
+
     //Exceptions
 
     @ExceptionHandler(RFIDTakenException.class)
@@ -61,11 +66,6 @@ public class RFIDController {
     @ExceptionHandler(TicketAlreadyLinkedException.class)
     public ResponseEntity<?> handleInvalidRFIDException(TicketAlreadyLinkedException e){
         return createResponseEntity(HttpStatus.CONFLICT, e.getMessage());
-    }
-
-    @ExceptionHandler(RFIDNotFoundException.class)
-    public ResponseEntity<?> handleRFIDNotFoundException(RFIDNotFoundException e){
-        return createResponseEntity(HttpStatus.NOT_FOUND, e.getMessage());
     }
 
     @ExceptionHandler(InvalidRFIDException.class)

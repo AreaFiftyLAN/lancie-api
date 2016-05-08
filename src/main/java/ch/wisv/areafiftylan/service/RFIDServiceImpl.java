@@ -7,9 +7,7 @@ import ch.wisv.areafiftylan.exception.TicketAlreadyLinkedException;
 import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.relations.RFIDLink;
 import ch.wisv.areafiftylan.service.repository.RFIDLinkRepository;
-import ch.wisv.areafiftylan.service.repository.TicketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -34,10 +32,6 @@ public class RFIDServiceImpl implements RFIDService{
 
     @Override
     public Long getTicketIdByRFID(String rfid) {
-        if(!RFIDLink.isValidRFID(rfid)){
-            throw new InvalidRFIDException(rfid);
-        }
-
         return getLinkByRFID(rfid).getTicket().getId();
     }
 
@@ -71,7 +65,29 @@ public class RFIDServiceImpl implements RFIDService{
         rfidLinkRepository.saveAndFlush(newLink);
     }
 
+    @Override
+    public RFIDLink removeRFIDLink(String rfid){
+        RFIDLink link = getLinkByRFID(rfid);
+
+        rfidLinkRepository.delete(link);
+
+        return link;
+    }
+
+    @Override
+    public RFIDLink removeRFIDLink(Long ticketId){
+        RFIDLink link = getLinkByTicketId(ticketId);
+
+        rfidLinkRepository.delete(link);
+
+        return link;
+    }
+
     public RFIDLink getLinkByRFID(String rfid) {
+        if(!RFIDLink.isValidRFID(rfid)){
+            throw new InvalidRFIDException(rfid);
+        }
+
         return rfidLinkRepository.findByRfid(rfid)
                 .orElseThrow(() -> new RFIDNotFoundException());
     }

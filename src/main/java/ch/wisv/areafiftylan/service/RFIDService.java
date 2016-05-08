@@ -21,7 +21,7 @@ public interface RFIDService {
 
     void addRFIDLink(String rfid, Long ticketId);
 
-    void removeRFIDLink(String rfid);
+    RFIDLink removeRFIDLink(String rfid);
 
-    void removeRFIDLink(Long ticketId);
+    RFIDLink removeRFIDLink(Long ticketId);
 }

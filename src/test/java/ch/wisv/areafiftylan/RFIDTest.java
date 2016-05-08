@@ -15,8 +15,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.RestAssured.when;
@@ -141,7 +143,7 @@ public class RFIDTest extends IntegrationTest {
     }
 
     @Test
-    public void testGetRFIDLink_Admin(){
+    public void testGetTicketIdByRFID_Admin(){
         SessionData session = login(admin.getUsername(), adminCleartextPassword);
 
         given()
@@ -151,11 +153,27 @@ public class RFIDTest extends IntegrationTest {
                 .get(RFID_ENDPOINT + "/" + LINK_RFID + "/ticketId")
         .then()
                 .statusCode(HttpStatus.SC_OK)
-                .body(containsString(link.getTicket().getId().toString()));
+                .body(equalTo(ticket.getId().toString()));
     }
 
     @Test
-    public void testGetRFIDLink_InvalidRFID_Admin(){
+    public void testGetRFIDByTicketId_Admin(){
+        SessionData session = login(admin.getUsername(), adminCleartextPassword);
+
+        Collection<RFIDLink> lol = rfidLinkRepository.findAll();
+
+        given()
+                .filter(sessionFilter)
+                .header(session.getCsrfHeader())
+        .when()
+                .get("/tickets/" + ticket.getId() + "/rfid")
+        .then()
+                .statusCode(HttpStatus.SC_OK)
+                .body(equalTo(LINK_RFID.toString()));
+    }
+
+    @Test
+    public void testGetTicketId_InvalidRFID_Admin(){
         SessionData session = login(admin.getUsername(), adminCleartextPassword);
 
         InvalidRFIDException e = new InvalidRFIDException(INVALID_RFID);
@@ -171,7 +189,7 @@ public class RFIDTest extends IntegrationTest {
     }
 
     @Test
-    public void testGetRFIDLink_UnusedRFID_Admin(){
+    public void testGetTicketId_UnusedRFID_Admin(){
         SessionData session = login(admin.getUsername(), adminCleartextPassword);
 
         RFIDNotFoundException e = new RFIDNotFoundException();
@@ -200,9 +218,9 @@ public class RFIDTest extends IntegrationTest {
         .then()
                 .statusCode(HttpStatus.SC_OK);
 
-        RFIDLink madeLink = rfidLinkRepository.findByRfid(UNUSED_RFID).orElse(null);
-        Assert.assertNotNull(madeLink);
-        Assert.assertEquals(madeLink.getTicket().getId(), otherTicket.getId());
+        Optional<RFIDLink> queryResult = rfidLinkRepository.findByRfid(UNUSED_RFID);
+        Assert.assertTrue(queryResult.isPresent());
+        Assert.assertEquals(queryResult.get().getTicket().getId(), otherTicket.getId());
     }
 
     @Test
@@ -222,8 +240,7 @@ public class RFIDTest extends IntegrationTest {
                 .statusCode(HttpStatus.SC_BAD_REQUEST)
                 .body(containsString(e.getMessage()));
 
-        RFIDLink madeLink = rfidLinkRepository.findByRfid(INVALID_RFID).orElse(null);
-        Assert.assertNull(madeLink);
+        Assert.assertFalse(rfidLinkRepository.findByRfid(INVALID_RFID).isPresent());
     }
 
     @Test
@@ -243,9 +260,9 @@ public class RFIDTest extends IntegrationTest {
                 .statusCode(HttpStatus.SC_CONFLICT)
                 .body(containsString(e.getMessage()));
 
-        RFIDLink madeLink = rfidLinkRepository.findByRfid(LINK_RFID).orElse(null);
-        Assert.assertNotNull(madeLink);
-        Assert.assertEquals(madeLink.getTicket().getId(), ticket.getId());
+        Optional<RFIDLink> queryResult = rfidLinkRepository.findByRfid(LINK_RFID);
+        Assert.assertTrue(queryResult.isPresent());
+        Assert.assertEquals(queryResult.get().getTicket().getId(), ticket.getId());
     }
 
     @Test
@@ -265,8 +282,7 @@ public class RFIDTest extends IntegrationTest {
                 .statusCode(HttpStatus.SC_CONFLICT)
                 .body(containsString(e.getMessage()));
 
-        RFIDLink madeLink = rfidLinkRepository.findByRfid(UNUSED_RFID).orElse(null);
-        Assert.assertNull(madeLink);
+        Assert.assertFalse(rfidLinkRepository.findByRfid(UNUSED_RFID).isPresent());
     }
 
     @Test
@@ -293,8 +309,70 @@ public class RFIDTest extends IntegrationTest {
                 .statusCode(HttpStatus.SC_NOT_FOUND)
                 .body(containsString(e.getMessage()));
 
-        RFIDLink madeLink = rfidLinkRepository.findByRfid(UNUSED_RFID).orElse(null);
-        Assert.assertNull(madeLink);
+        Assert.assertFalse(rfidLinkRepository.findByRfid(UNUSED_RFID).isPresent());
+    }
+
+    @Test
+    public void testRemoveRFIDLinkByRFID_Admin(){
+        SessionData session = login(admin.getUsername(), adminCleartextPassword);
+
+        given()
+                .filter(sessionFilter)
+                .header(session.getCsrfHeader())
+        .when()
+                .delete(RFID_ENDPOINT + "/" + LINK_RFID)
+        .then()
+                .statusCode(HttpStatus.SC_OK)
+                .body("ticket.id", equalTo(ticket.getId().intValue()));
+
+        Assert.assertFalse(rfidLinkRepository.findByRfid(LINK_RFID).isPresent());
+    }
+
+    @Test
+    public void testRemoveRFIDLinkByTicketId_Admin(){
+        SessionData session = login(admin.getUsername(), adminCleartextPassword);
+
+        given()
+                .filter(sessionFilter)
+                .header(session.getCsrfHeader())
+        .when()
+                .delete("/tickets/" + ticket.getId() + "/rfid")
+        .then()
+                .statusCode(HttpStatus.SC_OK)
+                .body("ticket.id", equalTo(ticket.getId().intValue()));
+
+        Assert.assertFalse(rfidLinkRepository.findByRfid(LINK_RFID).isPresent());
+    }
+
+    @Test
+    public void testRemoveRFIDLink_LinkNotFound_Admin(){
+        SessionData session = login(admin.getUsername(), adminCleartextPassword);
+
+        given()
+                .filter(sessionFilter)
+                .header(session.getCsrfHeader())
+        .when()
+                .delete(RFID_ENDPOINT + "/" + UNUSED_RFID)
+        .then()
+                .statusCode(HttpStatus.SC_NOT_FOUND);
+
+        Assert.assertTrue(rfidLinkRepository.findByRfid(LINK_RFID).isPresent());
+    }
+
+    @Test
+    public void testRemoveRFIDLink_InvalidRFID_Admin(){
+        SessionData session = login(admin.getUsername(), adminCleartextPassword);
+
+        InvalidRFIDException e = new InvalidRFIDException(INVALID_RFID);
+
+        given()
+                .filter(sessionFilter)
+                .header(session.getCsrfHeader())
+        .when()
+                .delete(RFID_ENDPOINT + "/" + INVALID_RFID)
+        .then()
+                .statusCode(HttpStatus.SC_BAD_REQUEST)
+                .body(containsString(e.getMessage()));
     }
 
     private HashMap<String, String> makeRFIDLinkDTO(String rfid, Long ticketId){
@@ -304,6 +382,4 @@ public class RFIDTest extends IntegrationTest {
 
         return rfidLinkDTO;
     }
-
-    //TODO: Write tests for the /tickets/{ticketId}/rfid endpoint
 }

@@ -5,6 +5,7 @@ import ch.wisv.areafiftylan.exception.TicketUnavailableException;
 import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.exception.DuplicateTicketTransferTokenException;
+import ch.wisv.areafiftylan.model.relations.RFIDLink;
 import ch.wisv.areafiftylan.security.token.TicketTransferToken;
 import ch.wisv.areafiftylan.service.OrderService;
 import ch.wisv.areafiftylan.service.RFIDService;
@@ -92,7 +93,12 @@ public class TicketRestController {
     }
 
     @RequestMapping(value = "/tickets/{ticketId}/rfid", method = RequestMethod.GET)
-    public String getRFIDByTicketId(Long ticketId){
+    public String getRFIDByTicketId(@PathVariable Long ticketId){
         return rfidService.getRFIDByTicketId(ticketId);
+    }
+
+    @RequestMapping(value = "/tickets/{ticketId}/rfid", method = RequestMethod.DELETE)
+    public RFIDLink deleteRFIDByTicketId(@PathVariable Long ticketId){
+        return rfidService.removeRFIDLink(ticketId);
     }
 }
