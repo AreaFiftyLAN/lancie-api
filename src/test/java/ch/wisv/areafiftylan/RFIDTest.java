@@ -160,8 +160,6 @@ public class RFIDTest extends IntegrationTest {
     public void testGetRFIDByTicketId_Admin(){
         SessionData session = login(admin.getUsername(), adminCleartextPassword);
 
-        Collection<RFIDLink> lol = rfidLinkRepository.findAll();
-
         given()
                 .filter(sessionFilter)
                 .header(session.getCsrfHeader())
@@ -170,6 +168,40 @@ public class RFIDTest extends IntegrationTest {
         .then()
                 .statusCode(HttpStatus.SC_OK)
                 .body(equalTo(LINK_RFID.toString()));
+    }
+
+    @Test
+    public void testGetRFIDByTicketId_UnusedTicketId_Admin(){
+        Long unusedTicketId = getUnusedTicketId();
+
+        TicketNotFoundException e = new TicketNotFoundException();
+
+        SessionData session = login(admin.getUsername(), adminCleartextPassword);
+
+        given()
+                .filter(sessionFilter)
+                .header(session.getCsrfHeader())
+        .when()
+                .get("/tickets/" + unusedTicketId + "/rfid")
+        .then()
+                .statusCode(HttpStatus.SC_NOT_FOUND)
+                .body(containsString(e.getMessage()));
+    }
+
+    @Test
+    public void testGetRFIDByTicketId_NoLink_Admin(){
+        SessionData session = login(admin.getUsername(), adminCleartextPassword);
+
+        RFIDNotFoundException e = new RFIDNotFoundException();
+
+        given()
+                .filter(sessionFilter)
+                .header(session.getCsrfHeader())
+        .when()
+                .get("/tickets/" + otherTicket.getId() + "/rfid")
+        .then()
+                .statusCode(HttpStatus.SC_NOT_FOUND)
+                .body(containsString(e.getMessage()));
     }
 
     @Test
@@ -287,12 +319,7 @@ public class RFIDTest extends IntegrationTest {
 
     @Test
     public void testAddRFIDLink_TicketDoesntExist_Admin(){
-        Long unusedTicketId = 1260L;
-
-        //Just to make sure the id is truly unused
-        while(unusedTicketId == ticket.getId() || unusedTicketId == otherTicket.getId()){
-            unusedTicketId += 1;
-        }
+        Long unusedTicketId = getUnusedTicketId();
 
         TicketNotFoundException e = new TicketNotFoundException();
 
@@ -381,5 +408,16 @@ public class RFIDTest extends IntegrationTest {
         rfidLinkDTO.put("ticketId", ticketId.toString());
 
         return rfidLinkDTO;
+    }
+
+    private Long getUnusedTicketId(){
+        Long unusedTicketId = 1260L;
+
+        //Just to make sure the id is truly unused
+        while(unusedTicketId == ticket.getId() || unusedTicketId == otherTicket.getId()){
+            unusedTicketId += 1;
+        }
+
+        return unusedTicketId;
     }
 }

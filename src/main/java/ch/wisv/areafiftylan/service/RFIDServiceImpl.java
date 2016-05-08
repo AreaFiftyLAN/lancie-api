@@ -1,12 +1,10 @@
 package ch.wisv.areafiftylan.service;
 
-import ch.wisv.areafiftylan.exception.InvalidRFIDException;
-import ch.wisv.areafiftylan.exception.RFIDNotFoundException;
-import ch.wisv.areafiftylan.exception.RFIDTakenException;
-import ch.wisv.areafiftylan.exception.TicketAlreadyLinkedException;
+import ch.wisv.areafiftylan.exception.*;
 import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.relations.RFIDLink;
 import ch.wisv.areafiftylan.service.repository.RFIDLinkRepository;
+import ch.wisv.areafiftylan.service.repository.TicketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +22,9 @@ public class RFIDServiceImpl implements RFIDService{
 
     @Autowired
     private TicketService ticketService;
+
+    @Autowired
+    private TicketRepository ticketRepository;
 
     @Override
     public Collection<RFIDLink> getAllRFIDLinks() {
@@ -93,6 +94,10 @@ public class RFIDServiceImpl implements RFIDService{
     }
 
     public RFIDLink getLinkByTicketId(Long ticketId) {
+        if(ticketRepository.findOne(ticketId) == null){
+            throw new TicketNotFoundException();
+        }
+
         return rfidLinkRepository.findByTicketId(ticketId)
                 .orElseThrow(() -> new RFIDNotFoundException());
     }
