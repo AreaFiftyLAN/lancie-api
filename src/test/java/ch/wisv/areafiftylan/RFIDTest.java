@@ -133,4 +133,48 @@ public class RFIDTest extends IntegrationTest {
                 .body("$", hasSize(2))
                 .body("ticket.id", hasItems(link.getTicket().getId().intValue(), link2.getTicket().getId().intValue()));
     }
+
+    @Test
+    public void testGetRFIDLink_Admin(){
+        SessionData session = login(admin.getUsername(), adminCleartextPassword);
+
+        given()
+                .filter(sessionFilter)
+                .header(session.getCsrfHeader())
+                .when()
+                .get(RFID_ENDPOINT + "/" + LINK_RFID + "/ticketId")
+                .then()
+                .statusCode(HttpStatus.SC_OK)
+                .body(containsString(link.getTicket().getId().toString()));
+    }
+
+
+
+    @Test
+    public void testGetRFIDLink_InvalidRFID_Admin(){
+        SessionData session = login(admin.getUsername(), adminCleartextPassword);
+
+        given()
+                .filter(sessionFilter)
+                .header(session.getCsrfHeader())
+        .when()
+                .get(RFID_ENDPOINT + "/" + "607")
+        .then()
+                .statusCode(HttpStatus.SC_BAD_REQUEST);
+    }
+
+
+
+    @Test
+    public void testGetRFIDLink_UnusedRFID_Admin(){
+        SessionData session = login(admin.getUsername(), adminCleartextPassword);
+
+        given()
+                .filter(sessionFilter)
+                .header(session.getCsrfHeader())
+        .when()
+                .get(RFID_ENDPOINT + "/" + "1212121212" + "/ticketId")
+        .then()
+                .statusCode(HttpStatus.SC_NOT_FOUND);
+    }
 }
