@@ -420,11 +420,49 @@ public class UserRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
+    public void createUserTakenUsernameDifferentCase() {
+        Map<String, String> userDTO = new HashMap<>();
+        userDTO.put("username", "uSeR");
+        userDTO.put("password", userCleartextPassword);
+        userDTO.put("email", "test@mail.com");
+
+        //@formatter:off
+        given().
+            header(getCSRFHeader()).
+            filter(sessionFilter).
+        when().
+            content(userDTO).contentType(ContentType.JSON).
+            post("/users").
+        then().
+            statusCode(HttpStatus.SC_CONFLICT);
+        //@formatter:on
+    }
+
+    @Test
     public void createUserTakenEmail() {
         Map<String, String> userDTO = new HashMap<>();
         userDTO.put("username", "testuser");
         userDTO.put("password", testuserCleartextPassword);
         userDTO.put("email", "user@mail.com");
+
+        //@formatter:off
+        given().
+            header(getCSRFHeader()).
+            filter(sessionFilter).
+        when().
+            content(userDTO).contentType(ContentType.JSON).
+            post("/users").
+        then().
+            statusCode(HttpStatus.SC_CONFLICT);
+        //@formatter:on
+    }
+
+    @Test
+    public void createUserTakenEmailDifferentCase() {
+        Map<String, String> userDTO = new HashMap<>();
+        userDTO.put("username", "testuser");
+        userDTO.put("password", testuserCleartextPassword);
+        userDTO.put("email", "usER@maiL.com");
 
         //@formatter:off
         given().

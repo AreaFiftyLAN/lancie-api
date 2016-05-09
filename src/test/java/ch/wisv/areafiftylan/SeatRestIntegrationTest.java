@@ -196,6 +196,26 @@ public class SeatRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
+    public void getSeatGroupAsUserDifferentCase() {
+        setTicketOnA1(userTicket);
+
+        SessionData login = login("user", userCleartextPassword);
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            get("/seats/a").
+        then().
+            statusCode(HttpStatus.SC_OK).
+            body("seatmap.A.ticket.owner", not(contains(hasKey("username")))).
+            body("seatmap.A.ticket.owner.profile", contains(hasKey("displayName"))).
+            body("seatmap.A", hasSize(5));
+        //@formatter:on
+    }
+
+    @Test
     public void getSeatGroupAdminViewAsUser() {
         SessionData login = login("user", userCleartextPassword);
 
@@ -413,6 +433,22 @@ public class SeatRestIntegrationTest extends IntegrationTest {
         when().
             param("ticketId", userTicket.getId()).
             post("/seats/A/1").
+        then().
+            statusCode(HttpStatus.SC_OK);
+        //@formatter:on
+    }
+
+    @Test
+    public void reserveSeatAsUserDifferentCase() {
+        SessionData login = login("user", userCleartextPassword);
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            param("ticketId", userTicket.getId()).
+            post("/seats/a/1").
         then().
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
