@@ -1,7 +1,6 @@
 package ch.wisv.areafiftylan.service.repository.token;
 
 import ch.wisv.areafiftylan.security.token.TicketTransferToken;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
@@ -11,5 +10,5 @@ public interface TicketTransferTokenRepository extends TokenRepository<TicketTra
 
     Collection<TicketTransferToken> findAllByTicketId(Long ticketId);
 
-    Collection<TicketTransferToken> findAllByTicketOwnerUsername(String username);
+    Collection<TicketTransferToken> findAllByTicketOwnerUsernameIgnoreCase(String username);
 }

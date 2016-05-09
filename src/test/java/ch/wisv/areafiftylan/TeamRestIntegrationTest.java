@@ -398,7 +398,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
 
-        Collection<TeamInviteToken> tokens = teamInviteTokenRepository.findByUserUsername(user.getUsername());
+        Collection<TeamInviteToken> tokens = teamInviteTokenRepository.findByUserUsernameIgnoreCase(user.getUsername());
         Assert.assertFalse(tokens.isEmpty());
     }
 
@@ -451,7 +451,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
 
-        Collection<TeamInviteToken> tokens = teamInviteTokenRepository.findByUserUsername(user.getUsername());
+        Collection<TeamInviteToken> tokens = teamInviteTokenRepository.findByUserUsernameIgnoreCase(user.getUsername());
         Assert.assertFalse(tokens.isEmpty());
     }
 
@@ -474,7 +474,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
             statusCode(HttpStatus.SC_CONFLICT);
         //@formatter:on
 
-        Collection<TeamInviteToken> tokens = teamInviteTokenRepository.findByUserUsername(user.getUsername());
+        Collection<TeamInviteToken> tokens = teamInviteTokenRepository.findByUserUsernameIgnoreCase(user.getUsername());
         Assert.assertEquals(1, tokens.size());
     }
 
@@ -777,7 +777,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
         inviteUserAsCaptain(location, user);
 
         TeamInviteToken token =
-                teamInviteTokenRepository.findByUserUsername(user.getUsername()).stream().findFirst().get();
+                teamInviteTokenRepository.findByUserUsernameIgnoreCase(user.getUsername()).stream().findFirst().get();
 
         SessionData login = login("user", userCleartextPassword);
 
@@ -792,7 +792,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
 
-        Collection<Team> allByMembersUsername = teamRepository.findAllByMembersUsername(user.getUsername());
+        Collection<Team> allByMembersUsername = teamRepository.findAllByMembersUsernameIgnoreCase(user.getUsername());
         Assert.assertFalse(allByMembersUsername.isEmpty());
     }
 
@@ -803,7 +803,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
         inviteUserAsCaptain(location, user);
 
         TeamInviteToken token =
-                teamInviteTokenRepository.findByUserUsername(user.getUsername()).stream().findFirst().get();
+                teamInviteTokenRepository.findByUserUsernameIgnoreCase(user.getUsername()).stream().findFirst().get();
 
         SessionData login = login("user", userCleartextPassword);
 
@@ -818,7 +818,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
 
-        Collection<TeamInviteToken> tokens = teamInviteTokenRepository.findByUserUsername(user.getUsername());
+        Collection<TeamInviteToken> tokens = teamInviteTokenRepository.findByUserUsernameIgnoreCase(user.getUsername());
         tokens.removeIf(t -> !t.isValid());
 
         Assert.assertTrue(tokens.isEmpty());

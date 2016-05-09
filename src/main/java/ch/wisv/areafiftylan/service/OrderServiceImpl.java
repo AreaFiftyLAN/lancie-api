@@ -58,7 +58,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Collection<Order> findOrdersByUsername(String username) {
-        return orderRepository.findAllByUserUsername(username);
+        return orderRepository.findAllByUserUsernameIgnoreCase(username);
     }
 
     @Override
@@ -74,7 +74,7 @@ public class OrderServiceImpl implements OrderService {
     public Order create(Long userId, TicketDTO ticketDTO) {
         User user = userService.getUserById(userId);
 
-        for (Order order : orderRepository.findAllByUserUsername(user.getUsername())) {
+        for (Order order : orderRepository.findAllByUserUsernameIgnoreCase(user.getUsername())) {
             if (order.getStatus().equals(OrderStatus.CREATING)) {
                 throw new IllegalStateException("User already created a new Order: " + order.getId());
             }

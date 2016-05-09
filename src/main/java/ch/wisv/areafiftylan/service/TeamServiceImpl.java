@@ -74,7 +74,7 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public Collection<Team> getTeamsByUsername(String username) {
-        return teamRepository.findAllByMembersUsername(username);
+        return teamRepository.findAllByMembersUsernameIgnoreCase(username);
     }
 
     @Override
@@ -132,7 +132,7 @@ public class TeamServiceImpl implements TeamService {
 
     private boolean isUserAlreadyInvited(String username, Team team) {
         // Check if the member isn't already invited
-        return teamInviteTokenRepository.findByUserUsername(username).stream().
+        return teamInviteTokenRepository.findByUserUsernameIgnoreCase(username).stream().
                 filter(token -> token.getTeam().equals(team)).
                 noneMatch(TeamInviteToken::isValid);
     }
@@ -148,7 +148,7 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public List<TeamInviteResponse> findTeamInvitesByUsername(String username) {
-        Collection<TeamInviteToken> inviteTokens = teamInviteTokenRepository.findByUserUsername(username);
+        Collection<TeamInviteToken> inviteTokens = teamInviteTokenRepository.findByUserUsernameIgnoreCase(username);
 
         return teamInviteTokensToReponses(inviteTokens);
     }

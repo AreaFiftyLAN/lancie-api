@@ -9,11 +9,11 @@ import java.util.Optional;
 
 @Repository
 public interface TeamRepository extends JpaRepository<Team, Long> {
-    Collection<Team> findAllByMembersUsername(String username);
+    Collection<Team> findAllByMembersUsernameIgnoreCase(String username);
 
     Collection<Team> findByCaptainId(Long userId);
 
-    Collection<Team> findAllByCaptainUsername(String username);
+    Collection<Team> findAllByCaptainUsernameIgnoreCase(String username);
 
     Optional<Team> findByTeamNameIgnoreCase(String teamName);
 

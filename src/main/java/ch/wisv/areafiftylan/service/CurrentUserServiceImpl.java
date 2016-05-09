@@ -147,7 +147,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
 
     @Override
     public boolean hasAnyTicket(String username) {
-        return ticketRepository.findAllByOwnerUsername(username).stream().anyMatch(Ticket::isValid);
+        return ticketRepository.findAllByOwnerUsernameIgnoreCase(username).stream().anyMatch(Ticket::isValid);
     }
 
     @Override

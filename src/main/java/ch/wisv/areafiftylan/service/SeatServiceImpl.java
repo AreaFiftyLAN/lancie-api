@@ -32,7 +32,7 @@ public class SeatServiceImpl implements SeatService {
 
     @Override
     public List<Seat> getSeatsByUsername(String username) {
-        return seatRepository.findByTicketOwnerUsername(username);
+        return seatRepository.findByTicketOwnerUsernameIgnoreCase(username);
 
     }
 
@@ -47,7 +47,7 @@ public class SeatServiceImpl implements SeatService {
 
     @Override
     public SeatmapResponse getSeatGroupByName(String groupname) {
-        List<Seat> seatGroup = seatRepository.findBySeatGroup(groupname);
+        List<Seat> seatGroup = seatRepository.findBySeatGroupIgnoreCase(groupname);
 
         Map<String, List<Seat>> seatMapResponse = new HashMap<>();
         seatMapResponse.put(groupname, seatGroup);
@@ -63,7 +63,7 @@ public class SeatServiceImpl implements SeatService {
 
         // We can only reserve one seat at a time, to prevent the extremely unlikely event of simultaneous requests
         synchronized (seatReservationLock) {
-            Seat seat = seatRepository.findBySeatGroupAndSeatNumber(groupname, seatnumber);
+            Seat seat = seatRepository.findBySeatGroupIgnoreCaseAndSeatNumber(groupname, seatnumber);
             previousSeat.ifPresent(s -> s.setTicket(null));
             if (!seat.isTaken()) {
                 seat.setTicket(ticket);
@@ -79,7 +79,7 @@ public class SeatServiceImpl implements SeatService {
     public boolean reserveSeat(String groupname, int seatnumber) {
         // We can only reserve one seat at a time, to prevent the extremely unlikely event of simultaneous requests
         synchronized (seatReservationLock) {
-            Seat seat = seatRepository.findBySeatGroupAndSeatNumber(groupname, seatnumber);
+            Seat seat = seatRepository.findBySeatGroupIgnoreCaseAndSeatNumber(groupname, seatnumber);
 
             if (!seat.isTaken()) {
                 seat.setTaken(true);
@@ -93,7 +93,7 @@ public class SeatServiceImpl implements SeatService {
 
     @Override
     public Seat getSeatBySeatGroupAndSeatNumber(String groupName, int seatNumber) {
-        return seatRepository.findBySeatGroupAndSeatNumber(groupName, seatNumber);
+        return seatRepository.findBySeatGroupIgnoreCaseAndSeatNumber(groupName, seatNumber);
     }
 
     @Override
@@ -112,14 +112,14 @@ public class SeatServiceImpl implements SeatService {
 
         return team.getMembers().stream().
                 map(User::getUsername).
-                map(seatRepository::findByTicketOwnerUsername).
+                map(seatRepository::findByTicketOwnerUsernameIgnoreCase).
                 flatMap(Collection::stream).
                 collect(Collectors.toList());
     }
 
     @Override
     public void clearSeat(String groupName, int seatNumber) {
-        Seat seat = seatRepository.findBySeatGroupAndSeatNumber(groupName, seatNumber);
+        Seat seat = seatRepository.findBySeatGroupIgnoreCaseAndSeatNumber(groupName, seatNumber);
         seat.setTicket(null);
     }
 }

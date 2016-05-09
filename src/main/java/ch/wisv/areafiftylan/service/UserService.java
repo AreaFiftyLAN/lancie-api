@@ -5,6 +5,7 @@ import ch.wisv.areafiftylan.dto.ProfileDTO;
 import ch.wisv.areafiftylan.dto.UserDTO;
 import ch.wisv.areafiftylan.model.Profile;
 import ch.wisv.areafiftylan.model.User;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
@@ -19,15 +20,13 @@ public interface UserService {
 
     Collection<User> getAllUsers();
 
-    User create(UserDTO userDTO, HttpServletRequest request);
+    User create(UserDTO userDTO, HttpServletRequest request) throws DataIntegrityViolationException;
 
     User replace(Long userId, UserDTO userDTO);
 
     void delete(Long userId);
 
     User edit(Long userId, UserDTO userDTO);
-
-    User save(User user);
 
     User addProfile(Long userId, ProfileDTO profileDTO);
 

@@ -527,8 +527,8 @@ public class SeatRestIntegrationTest extends IntegrationTest {
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
 
-        Seat previousSeat = seatRepository.findBySeatGroupAndSeatNumber("A", 1);
-        Seat currentSeat = seatRepository.findBySeatGroupAndSeatNumber("A", 2);
+        Seat previousSeat = seatRepository.findBySeatGroupIgnoreCaseAndSeatNumber("A", 1);
+        Seat currentSeat = seatRepository.findBySeatGroupIgnoreCaseAndSeatNumber("A", 2);
 
         Assert.assertNull(previousSeat.getTicket());
         Assert.assertFalse(previousSeat.isTaken());

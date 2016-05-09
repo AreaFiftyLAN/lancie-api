@@ -21,10 +21,6 @@ import javax.mail.MessagingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
-import java.util.function.BiPredicate;
-import java.util.function.Predicate;
-import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -67,7 +63,7 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public Collection<Ticket> findValidTicketsByOwnerUsername(String username) {
-        return ticketRepository.findAllByOwnerUsername(username).stream()
+        return ticketRepository.findAllByOwnerUsernameIgnoreCase(username).stream()
                 .filter(Ticket::isValid)
                 .collect(Collectors.toList());
     }
@@ -142,7 +138,7 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public Collection<TicketTransferToken> getValidTicketTransferTokensByUser(String username) {
-        return tttRepository.findAllByTicketOwnerUsername(username).stream()
+        return tttRepository.findAllByTicketOwnerUsernameIgnoreCase(username).stream()
                 .filter(TicketTransferToken::isValid)
                 .collect(Collectors.toList());
     }
@@ -160,7 +156,7 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public Collection<Ticket> getTicketsFromTeamMembers(User u){
-        Collection<Ticket> ownedTickets = ticketRepository.findAllByOwnerUsername(u.getUsername());
+        Collection<Ticket> ownedTickets = ticketRepository.findAllByOwnerUsernameIgnoreCase(u.getUsername());
         Collection<Ticket> captainedTickets = getCaptainedTickets(u);
 
         Collection<Ticket> ticketsInControl = new ArrayList<>();
@@ -176,7 +172,7 @@ public class TicketServiceImpl implements TicketService {
         return captainedTeams.stream()
                 .flatMap(t -> t.getMembers().stream())
                 .filter(m -> !m.equals(u))
-                .flatMap(m -> ticketRepository.findAllByOwnerUsername(m.getUsername()).stream())
+                .flatMap(m -> ticketRepository.findAllByOwnerUsernameIgnoreCase(m.getUsername()).stream())
                 .collect(Collectors.toList());
     }
 }

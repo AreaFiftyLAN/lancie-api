@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
-import java.util.Optional;
 
 /**
  * Created by sille on 22-12-15.
@@ -18,5 +17,5 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
     Integer countByType(TicketType type);
 
-    Collection<Ticket> findAllByOwnerUsername(String username);
+    Collection<Ticket> findAllByOwnerUsernameIgnoreCase(String username);
 }
