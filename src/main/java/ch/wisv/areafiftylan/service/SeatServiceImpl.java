@@ -50,7 +50,7 @@ public class SeatServiceImpl implements SeatService {
         List<Seat> seatGroup = seatRepository.findBySeatGroupIgnoreCase(groupname);
 
         Map<String, List<Seat>> seatMapResponse = new HashMap<>();
-        seatMapResponse.put(groupname, seatGroup);
+        seatMapResponse.put(seatGroup.get(0).getSeatGroup(), seatGroup);
 
         return new SeatmapResponse(seatMapResponse);
     }
