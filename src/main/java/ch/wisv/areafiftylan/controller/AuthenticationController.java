@@ -10,6 +10,7 @@ import ch.wisv.areafiftylan.service.MailService;
 import ch.wisv.areafiftylan.service.UserService;
 import ch.wisv.areafiftylan.service.repository.token.PasswordResetTokenRepository;
 import ch.wisv.areafiftylan.service.repository.token.VerificationTokenRepository;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +30,7 @@ import static ch.wisv.areafiftylan.util.ResponseEntityBuilder.createResponseEnti
  * respective repositories.
  */
 @Controller
+@Log4j2
 public class AuthenticationController {
 
     @Autowired
@@ -72,9 +74,14 @@ public class AuthenticationController {
     public ResponseEntity<?> requestResetPassword(HttpServletRequest request, @RequestBody Map<String, String> body) {
         String email = body.get("email");
 
+        log.debug("Requesting password reset on email {}.", email);
+
         User user = userService.getUserByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
 
         userService.requestResetPassword(user, request);
+
+        log.debug("Successfully requested password reset on email {}.", email);
+
         return createResponseEntity(HttpStatus.OK, "Password reset link sent to " + email);
     }
 

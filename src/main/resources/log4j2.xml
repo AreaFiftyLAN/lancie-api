@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Properties>
+        <Property name="PATTERN">%d{HH:mm:ss.SSS} [%t] %-5level %class.%method - %msg%n</Property>
+    </Properties>
+    <Appenders>
+        <Console name="STDOUT" target="SYSTEM_OUT">
+            <PatternLayout pattern="${PATTERN}"/>
+        </Console>
+        <RollingFile name="errorlogs" fileName="logs/error.1" filePattern="logs/error_%d{yyyy-MM-dd-hh-mm}.1">
+            <PatternLayout pattern="${PATTERN}"/>
+            <SizeBasedTriggeringPolicy/>
+        </RollingFile>
+        <RollingFile name="logs" fileName="logs/log.1" filePattern="logs/log_%d{yyyy-MM-dd-hh-mm}.1">
+            <PatternLayout pattern="${PATTERN}"/>
+            <SizeBasedTriggeringPolicy/>
+        </RollingFile>
+        <RollingFile name="debug" fileName="logs/debug.1" filePattern="logs/debug_%d{yyyy-MM-dd-hh-mm}.1">
+            <PatternLayout pattern="${PATTERN}"/>
+            <SizeBasedTriggeringPolicy/>
+        </RollingFile>
+    </Appenders>
+    <Loggers>
+        <Root level="TRACE">
+            <AppenderRef ref="debug" level="DEBUG"/>
+            <AppenderRef ref="logs" level="INFO"/>
+            <AppenderRef ref="errorlogs" level="ERROR"/>
+            <AppenderRef ref="STDOUT" level="ERROR"/>
+        </Root>
+    </Loggers>
+</Configuration>
