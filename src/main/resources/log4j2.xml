@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN">
-    <CustomLevels>
-        <CustomLevel name="A5L" intLevel="350" />
-    </CustomLevels>
-
     <Properties>
         <Property name="PATTERN">%d{HH:mm:ss.SSS} [%t] %-5level %class.%method - %msg%n</Property>
     </Properties>
+    <CustomLevels>
+        <CustomLevel name="A5L" intLevel="350" />
+    </CustomLevels>
     <Appenders>
         <Console name="STDOUT" target="SYSTEM_OUT">
             <PatternLayout pattern="${PATTERN}"/>
@@ -15,7 +14,7 @@
             <PatternLayout pattern="${PATTERN}"/>
             <SizeBasedTriggeringPolicy/>
         </RollingFile>
-        <RollingFile name="info" fileName="logs/info.1" filePattern="logs/log_%d{yyyy-MM-dd-hh-mm}.1">
+        <RollingFile name="info" fileName="logs/info.1" filePattern="logs/info_%d{yyyy-MM-dd-hh-mm}.1">
             <PatternLayout pattern="${PATTERN}"/>
             <SizeBasedTriggeringPolicy/>
         </RollingFile>
