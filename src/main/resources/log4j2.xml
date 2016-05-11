@@ -2,7 +2,6 @@
 <Configuration status="WARN">
     <Properties>
         <Property name="PATTERN">%clr{%d{yyyy-MM-dd HH:mm:ss.SSS}}{faint} %clr{%5p} %clr{[%15.15t]}{faint} %clr{%-40.40c{1.}}{yellow} %clr{:}{faint} %m%n%wEx</Property>
-        <!--<Property name="PATTERN">%d{HH:mm:ss.SSS} [%t] %-5level %class.%method - %msg%n</Property>-->
     </Properties>
     <CustomLevels>
         <CustomLevel name="A5L" intLevel="350" />
