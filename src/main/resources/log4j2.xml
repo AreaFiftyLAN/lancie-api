@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN">
+    <CustomLevels>
+        <CustomLevel name="A5L" intLevel="350" />
+    </CustomLevels>
+
     <Properties>
         <Property name="PATTERN">%d{HH:mm:ss.SSS} [%t] %-5level %class.%method - %msg%n</Property>
     </Properties>
@@ -11,7 +15,11 @@
             <PatternLayout pattern="${PATTERN}"/>
             <SizeBasedTriggeringPolicy/>
         </RollingFile>
-        <RollingFile name="logs" fileName="logs/log.1" filePattern="logs/log_%d{yyyy-MM-dd-hh-mm}.1">
+        <RollingFile name="info" fileName="logs/info.1" filePattern="logs/log_%d{yyyy-MM-dd-hh-mm}.1">
+            <PatternLayout pattern="${PATTERN}"/>
+            <SizeBasedTriggeringPolicy/>
+        </RollingFile>
+        <RollingFile name="a5l" fileName="logs/log.1" filePattern="logs/log_%d{yyyy-MM-dd-hh-mm}.1">
             <PatternLayout pattern="${PATTERN}"/>
             <SizeBasedTriggeringPolicy/>
         </RollingFile>
@@ -23,9 +31,10 @@
     <Loggers>
         <Root level="TRACE">
             <AppenderRef ref="debug" level="DEBUG"/>
-            <AppenderRef ref="logs" level="INFO"/>
+            <AppenderRef ref="info" level="INFO"/>
+            <AppenderRef ref="a5l" level="A5L"/>
             <AppenderRef ref="errorlogs" level="ERROR"/>
-            <AppenderRef ref="STDOUT" level="ERROR"/>
+            <AppenderRef ref="STDOUT" level="A5L"/>
         </Root>
     </Loggers>
 </Configuration>
