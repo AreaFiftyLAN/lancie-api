@@ -4,25 +4,23 @@ import ch.wisv.areafiftylan.dto.MailDTO;
 import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.model.User;
 
-import javax.mail.MessagingException;
 import java.util.Collection;
 
 public interface MailService {
 
-    void sendMail(String recipientEmail, String recipientName, String senderEmail, String subject, String message)
-            throws MessagingException;
+    void sendMail(String recipientEmail, String recipientName, String subject, String message);
 
-    void sendTemplateMailToTeam(Team team, MailDTO mailDTO) throws MessagingException;
+    void sendTemplateMailToTeam(Team team, MailDTO mailDTO);
 
-    void sendTemplateMailToAll(Collection<User> users, MailDTO mailDTO) throws MessagingException;
+    void sendTemplateMailToAll(Collection<User> users, MailDTO mailDTO);
 
-    void sendTemplateMailToUser(User user, MailDTO mailDTO) throws MessagingException;
+    void sendTemplateMailToUser(User user, MailDTO mailDTO);
 
-    void sendVerificationmail(User user, String url) throws MessagingException;
+    void sendVerificationmail(User user, String url);
 
-    void sendPasswordResetMail(User user, String url) throws MessagingException;
+    void sendPasswordResetMail(User user, String url);
 
-    void sendTicketTransferMail(User sender, User receiver, String url) throws MessagingException;
+    void sendTicketTransferMail(User sender, User receiver, String url);
 
-    void sendTeamInviteMail(User user, String teamName, User teamCaptain) throws MessagingException;
+    void sendTeamInviteMail(User user, String teamName, User teamCaptain);
 }

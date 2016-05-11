@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import javax.mail.MessagingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -35,8 +34,9 @@ public class TicketServiceImpl implements TicketService {
     private String acceptTransferUrl;
 
     @Autowired
-    public TicketServiceImpl(TicketRepository ticketRepository, UserService userService, TicketTransferTokenRepository tttRepository,
-                             MailService mailService, TeamService teamService) {
+    public TicketServiceImpl(TicketRepository ticketRepository, UserService userService,
+                             TicketTransferTokenRepository tttRepository, MailService mailService,
+                             TeamService teamService) {
         this.ticketRepository = ticketRepository;
         this.userService = userService;
         this.tttRepository = tttRepository;
@@ -45,7 +45,7 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public Ticket getTicketById(Long ticketId){
+    public Ticket getTicketById(Long ticketId) {
         return ticketRepository.findOne(ticketId);
     }
 
@@ -63,8 +63,7 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public Collection<Ticket> findValidTicketsByOwnerUsername(String username) {
-        return ticketRepository.findAllByOwnerUsernameIgnoreCase(username).stream()
-                .filter(Ticket::isValid)
+        return ticketRepository.findAllByOwnerUsernameIgnoreCase(username).stream().filter(Ticket::isValid)
                 .collect(Collectors.toList());
     }
 
@@ -76,7 +75,8 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public synchronized Ticket requestTicketOfType(TicketType type, User owner, boolean pickupService, boolean chMember) {
+    public synchronized Ticket requestTicketOfType(TicketType type, User owner, boolean pickupService,
+                                                   boolean chMember) {
         if (ticketRepository.countByType(type) >= type.getLimit()) {
             throw new TicketUnavailableException(type);
         } else {
@@ -86,27 +86,23 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public TicketTransferToken setupForTransfer(Long ticketId, String goalUserName){
-        User u = userService.getUserByUsername(goalUserName).orElseThrow(() -> new UsernameNotFoundException("User " + goalUserName + " not found."));
+    public TicketTransferToken setupForTransfer(Long ticketId, String goalUserName) {
+        User u = userService.getUserByUsername(goalUserName)
+                .orElseThrow(() -> new UsernameNotFoundException("User " + goalUserName + " not found."));
         Ticket t = ticketRepository.findOne(ticketId);
 
-        List<TicketTransferToken> ticketTransferTokens = tttRepository.findAllByTicketId(ticketId).stream()
-                .filter(Token::isValid)
-                .collect(Collectors.toList());
+        List<TicketTransferToken> ticketTransferTokens =
+                tttRepository.findAllByTicketId(ticketId).stream().filter(Token::isValid).collect(Collectors.toList());
 
         if (!ticketTransferTokens.isEmpty()) {
             throw new DuplicateTicketTransferTokenException(ticketId);
         } else {
             TicketTransferToken ttt = new TicketTransferToken(u, t);
 
-            tttRepository.save(ttt);
+            ttt = tttRepository.save(ttt);
 
-            try {
-                String acceptUrl = acceptTransferUrl + "?token=" + ttt.getToken();
-                mailService.sendTicketTransferMail(ttt.getTicket().getOwner(), ttt.getUser(), acceptUrl);
-            } catch (MessagingException e) {
-                e.printStackTrace();
-            }
+            String acceptUrl = acceptTransferUrl + "?token=" + ttt.getToken();
+            mailService.sendTicketTransferMail(ttt.getTicket().getOwner(), ttt.getUser(), acceptUrl);
 
             return ttt;
         }
@@ -128,7 +124,7 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public void cancelTicketTransfer(String token){
+    public void cancelTicketTransfer(String token) {
         TicketTransferToken ttt = getTicketTransferTokenIfValid(token);
 
         ttt.revoke();
@@ -139,11 +135,10 @@ public class TicketServiceImpl implements TicketService {
     @Override
     public Collection<TicketTransferToken> getValidTicketTransferTokensByUser(String username) {
         return tttRepository.findAllByTicketOwnerUsernameIgnoreCase(username).stream()
-                .filter(TicketTransferToken::isValid)
-                .collect(Collectors.toList());
+                .filter(TicketTransferToken::isValid).collect(Collectors.toList());
     }
 
-    private TicketTransferToken getTicketTransferTokenIfValid(String token){
+    private TicketTransferToken getTicketTransferTokenIfValid(String token) {
         TicketTransferToken ttt = tttRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
 
         //Check validity of the token
@@ -155,7 +150,7 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public Collection<Ticket> getTicketsFromTeamMembers(User u){
+    public Collection<Ticket> getTicketsFromTeamMembers(User u) {
         Collection<Ticket> ownedTickets = ticketRepository.findAllByOwnerUsernameIgnoreCase(u.getUsername());
         Collection<Ticket> captainedTickets = getCaptainedTickets(u);
 
@@ -166,12 +161,10 @@ public class TicketServiceImpl implements TicketService {
         return ticketsInControl;
     }
 
-    private Collection<Ticket> getCaptainedTickets(User u){
+    private Collection<Ticket> getCaptainedTickets(User u) {
         Collection<Team> captainedTeams = teamService.getTeamByCaptainId(u.getId());
 
-        return captainedTeams.stream()
-                .flatMap(t -> t.getMembers().stream())
-                .filter(m -> !m.equals(u))
+        return captainedTeams.stream().flatMap(t -> t.getMembers().stream()).filter(m -> !m.equals(u))
                 .flatMap(m -> ticketRepository.findAllByOwnerUsernameIgnoreCase(m.getUsername()).stream())
                 .collect(Collectors.toList());
     }

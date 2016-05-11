@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import javax.mail.MessagingException;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -118,12 +117,7 @@ public class TeamServiceImpl implements TeamService {
             TeamInviteToken inviteToken = new TeamInviteToken(user, team);
             teamInviteTokenRepository.save(inviteToken);
 
-            try {
-                mailService.sendTeamInviteMail(user, team.getTeamName(), team.getCaptain());
-            } catch (MessagingException e) {
-                // TODO: Fix mailservice exception handling
-                e.printStackTrace();
-            }
+            mailService.sendTeamInviteMail(user, team.getTeamName(), team.getCaptain());
             return inviteToken;
         } else {
             throw new IllegalArgumentException("User already invited");

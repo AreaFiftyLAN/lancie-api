@@ -1,43 +1,45 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head lang="en">
     <title>Area FiftyLAN Mail</title>
 </head>
 <body style="margin: 0; padding: 0">
-<table cellpadding="0" cellspacing="0" width="100%">
-    <tr>
-        <td>
-            <table align="center" cellpadding="0" cellspacing="0" width="600" style="border-collapse: collapse">
-                <tr>
-                    <td align="center" bgcolor="#1a2a43" style="padding: 20px 0 20px 0;">
-                        <img src="https://areafiftylan.nl/images/logos/lancie/logo_without_date.png" width="400"
-                             alt="Creating Email Magic" style="display: block;"/>
-                    </td>
-                </tr>
-                <tr>
-                    <td align="center" bgcolor="#EEECED" style="padding: 30px 30px 30px 30px">
-                        <table cellpadding="0" cellspacing="0" width="100%">
-                            <tr>
-                                <td>
-                                    Dear <span th:text="${name}">User</span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 20px 0 20px 0;">
-                                    <p th:text="${message}">Message</p>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    Best Regards, <br/> LANcie 2015-2016
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
-            </table>
-        </td>
-    </tr>
-</table>
+    <table cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+            <td>
+                <table align="center" cellpadding="0" cellspacing="0" width="600" style="border-collapse: collapse">
+                    <tr>
+                        <td align="center" bgcolor="#1a2a43" style="padding: 20px 0 20px 0;">
+                            <img src="https://areafiftylan.nl/images/logos/lancie/logo_without_date.png" width="400"
+                                 style="display: block;" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="center" bgcolor="#EEECED" style="padding: 30px 30px 30px 30px">
+                            <table cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                    <td>
+                                        Dear <span th:text="${name}">User</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 20px 0 20px 0;">
+                                        <p th:utext="${message}">Message</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        Best Regards,
+                                        <br />
+                                        LANcie 2015-2016
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
 </body>
 </html>
