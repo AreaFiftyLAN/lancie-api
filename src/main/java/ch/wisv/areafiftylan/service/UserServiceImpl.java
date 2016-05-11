@@ -12,6 +12,7 @@ import ch.wisv.areafiftylan.service.repository.token.VerificationTokenRepository
 import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -54,12 +55,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public Optional<User> getUserByEmail(String email) {
-        return userRepository.findOneByEmail(email);
+        return userRepository.findOneByEmailIgnoreCase(email);
     }
 
     @Override
     public Optional<User> getUserByUsername(String username) {
-        return userRepository.findOneByUsername(username);
+        return userRepository.findOneByUsernameIgnoreCase(username);
     }
 
     @Override
@@ -68,7 +69,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public User create(UserDTO userDTO, HttpServletRequest request) {
+    public User create(UserDTO userDTO, HttpServletRequest request) throws DataIntegrityViolationException {
+        handleDuplicateUserFields(userDTO);
+
         // Hash the plain password coming from the DTO
         String passwordHash = getPasswordHash(userDTO.getPassword());
         User user = new User(userDTO.getUsername(), passwordHash, userDTO.getEmail());
@@ -82,6 +85,18 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         generateAndSendToken(request, user);
 
         return user;
+    }
+
+    private void handleDuplicateUserFields(UserDTO userDTO) throws DataIntegrityViolationException {
+        // Check if the username already exists
+        userRepository.findOneByUsernameIgnoreCase(userDTO.getUsername()).ifPresent(u -> {
+            throw new DataIntegrityViolationException("username already in use");
+        });
+
+        // Check if the email is already in use
+        userRepository.findOneByEmailIgnoreCase(userDTO.getEmail()).ifPresent(u -> {
+            throw new DataIntegrityViolationException("email already in use");
+        });
     }
 
     private void generateAndSendToken(HttpServletRequest request, User user) {
@@ -130,12 +145,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         }
         return userRepository.saveAndFlush(user);
 
-    }
-
-    @Override
-    public User save(User user) {
-        // Save the user and write it to the DB immediately
-        return userRepository.saveAndFlush(user);
     }
 
     @Override
@@ -211,7 +220,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public void changePassword(Long userId, String oldPassword, String newPassword) {
         User user = userRepository.findOne(userId);
 
-        if(new BCryptPasswordEncoder().matches(oldPassword, user.getPassword())){
+        if (new BCryptPasswordEncoder().matches(oldPassword, user.getPassword())) {
             user.setPasswordHash(getPasswordHash(newPassword));
             userRepository.save(user);
         } else {
@@ -221,12 +230,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public Boolean checkEmailAvailable(String email) {
-        return !userRepository.findOneByEmail(email).isPresent();
+        return !userRepository.findOneByEmailIgnoreCase(email).isPresent();
     }
 
     @Override
     public Boolean checkUsernameAvailable(String username) {
-        return !userRepository.findOneByUsername(username).isPresent();
+        return !userRepository.findOneByUsernameIgnoreCase(username).isPresent();
 
     }
 
@@ -243,18 +252,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findOneByUsername(username).orElseThrow(() -> new UsernameNotFoundException(username));
-    }
-
-    /**
-     * Turns the request into a url to which the request is made. For example https://localhost:8080 TODO: This makes a
-     * call directly to the API, this should be handled by the front-end instead
-     *
-     * @param request The HttpServletRequest of the call that is made
-     *
-     * @return Formatted string of the base URL
-     */
-    public String getAppUrl(HttpServletRequest request) {
-        return request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
+        return userRepository.findOneByUsernameIgnoreCase(username)
+                .orElseThrow(() -> new UsernameNotFoundException(username));
     }
 }

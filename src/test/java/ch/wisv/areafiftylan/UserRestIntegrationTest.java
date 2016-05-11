@@ -1,7 +1,6 @@
 package ch.wisv.areafiftylan;
 
 import ch.wisv.areafiftylan.model.User;
-import ch.wisv.areafiftylan.model.util.Gender;
 import ch.wisv.areafiftylan.security.token.VerificationToken;
 import ch.wisv.areafiftylan.service.TaskScheduler;
 import ch.wisv.areafiftylan.service.repository.token.VerificationTokenRepository;
@@ -9,17 +8,15 @@ import ch.wisv.areafiftylan.util.SessionData;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Header;
 import com.jayway.restassured.response.Response;
-import org.junit.Assert;
 import org.apache.http.HttpStatus;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.RestAssured.when;
@@ -75,7 +72,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
             extract().response();
         //@formatter:on
 
-        testuser = userRepository.findOneByUsername("testuser").get();
+        testuser = userRepository.findOneByUsernameIgnoreCase("testuser").get();
         testuser.setEnabled(true);
         userRepository.saveAndFlush(testuser);
 
@@ -423,11 +420,49 @@ public class UserRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
+    public void createUserTakenUsernameDifferentCase() {
+        Map<String, String> userDTO = new HashMap<>();
+        userDTO.put("username", "uSeR");
+        userDTO.put("password", userCleartextPassword);
+        userDTO.put("email", "test@mail.com");
+
+        //@formatter:off
+        given().
+            header(getCSRFHeader()).
+            filter(sessionFilter).
+        when().
+            content(userDTO).contentType(ContentType.JSON).
+            post("/users").
+        then().
+            statusCode(HttpStatus.SC_CONFLICT);
+        //@formatter:on
+    }
+
+    @Test
     public void createUserTakenEmail() {
         Map<String, String> userDTO = new HashMap<>();
         userDTO.put("username", "testuser");
         userDTO.put("password", testuserCleartextPassword);
         userDTO.put("email", "user@mail.com");
+
+        //@formatter:off
+        given().
+            header(getCSRFHeader()).
+            filter(sessionFilter).
+        when().
+            content(userDTO).contentType(ContentType.JSON).
+            post("/users").
+        then().
+            statusCode(HttpStatus.SC_CONFLICT);
+        //@formatter:on
+    }
+
+    @Test
+    public void createUserTakenEmailDifferentCase() {
+        Map<String, String> userDTO = new HashMap<>();
+        userDTO.put("username", "testuser");
+        userDTO.put("password", testuserCleartextPassword);
+        userDTO.put("email", "usER@maiL.com");
 
         //@formatter:off
         given().
@@ -662,7 +697,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
     public void deleteUserAsAdmin() {
         createEnabledTestUser();
 
-        User testuser = userRepository.findOneByUsername(this.testuser.getUsername()).get();
+        User testuser = userRepository.findOneByUsernameIgnoreCase(this.testuser.getUsername()).get();
         long userId = testuser.getId();
 
         SessionData login = login(admin.getUsername(), adminCleartextPassword);
@@ -678,7 +713,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
             body("message", equalTo("User disabled"));
         //@formatter:on
 
-        testuser = userRepository.findOneByUsername(testuser.getUsername()).get();
+        testuser = userRepository.findOneByUsernameIgnoreCase(testuser.getUsername()).get();
         assert (!testuser.isAccountNonLocked());
     }
 
@@ -686,7 +721,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
     public void deleteUserAsUser() {
         createEnabledTestUser();
 
-        User testuser = userRepository.findOneByUsername(this.testuser.getUsername()).get();
+        User testuser = userRepository.findOneByUsernameIgnoreCase(this.testuser.getUsername()).get();
         long userId = testuser.getId();
 
         SessionData login = login(testuser.getUsername(), testuserCleartextPassword);
@@ -707,7 +742,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
     public void deleteUserAsAnon() {
         createEnabledTestUser();
 
-        User testuser = userRepository.findOneByUsername(this.testuser.getUsername()).get();
+        User testuser = userRepository.findOneByUsernameIgnoreCase(this.testuser.getUsername()).get();
         long userId = testuser.getId();
 
         //@formatter:off
@@ -817,7 +852,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
     }
 
     private User getTempUser(String appendix){
-        return userRepository.findOneByUsername("tempUser" + appendix).orElse(null);
+        return userRepository.findOneByUsernameIgnoreCase("tempUser" + appendix).orElse(null);
     }
 
     private User makeAndGetTempUser(String appendix){
@@ -869,6 +904,23 @@ public class UserRestIntegrationTest extends IntegrationTest {
 
         Assert.assertFalse(verificationTokenRepository.findByUser(tempUser1).isPresent());
         Assert.assertFalse(verificationTokenRepository.findByUser(tempUser2).isPresent());
+    }
+
+    @Test
+    public void testWrongCaseLogin(){
+        SessionData login = login(user.getUsername().toUpperCase(), userCleartextPassword);
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            get("/users/current").
+        then().statusCode(HttpStatus.SC_OK).
+            body("username", equalTo(user.getUsername())).
+            body("email", equalTo(user.getEmail())).
+            body("authorities", hasItem("ROLE_USER"));
+        //@formatter:on
     }
 }
 

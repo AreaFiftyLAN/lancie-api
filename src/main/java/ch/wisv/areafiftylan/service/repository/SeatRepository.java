@@ -9,7 +9,7 @@ import java.util.Optional;
 
 @Repository
 public interface SeatRepository extends JpaRepository<Seat, Long> {
-    List<Seat> findByTicketOwnerUsername(String username);
+    List<Seat> findByTicketOwnerUsernameIgnoreCase(String username);
 
     List<Seat> findBySeatGroup(String seatGroup);
 

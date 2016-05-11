@@ -32,7 +32,7 @@ public class SeatServiceImpl implements SeatService {
 
     @Override
     public List<Seat> getSeatsByUsername(String username) {
-        return seatRepository.findByTicketOwnerUsername(username);
+        return seatRepository.findByTicketOwnerUsernameIgnoreCase(username);
 
     }
 
@@ -112,7 +112,7 @@ public class SeatServiceImpl implements SeatService {
 
         return team.getMembers().stream().
                 map(User::getUsername).
-                map(seatRepository::findByTicketOwnerUsername).
+                map(seatRepository::findByTicketOwnerUsernameIgnoreCase).
                 flatMap(Collection::stream).
                 collect(Collectors.toList());
     }

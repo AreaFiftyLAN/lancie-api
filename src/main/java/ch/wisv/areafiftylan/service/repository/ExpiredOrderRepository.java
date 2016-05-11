@@ -12,6 +12,6 @@ import java.util.Collection;
 
 @Repository
 public interface ExpiredOrderRepository extends JpaRepository<ExpiredOrder, Long> {
-    Collection<ExpiredOrder> findAllBycreatedBy(String username);
+    Collection<ExpiredOrder> findAllBycreatedByIgnoreCase(String username);
 
 }

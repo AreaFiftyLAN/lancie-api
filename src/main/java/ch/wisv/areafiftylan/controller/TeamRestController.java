@@ -6,7 +6,6 @@ import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.util.Role;
 import ch.wisv.areafiftylan.model.view.View;
-import ch.wisv.areafiftylan.security.token.TeamInviteToken;
 import ch.wisv.areafiftylan.service.TeamService;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +59,7 @@ public class TeamRestController {
             team = teamService.create(teamDTO.getCaptainUsername(), teamDTO.getTeamName());
         } else {
             // If the DTO contains another username as the the current user, return an error.
-            if (!auth.getName().equals(teamDTO.getCaptainUsername())) {
+            if (!auth.getName().equalsIgnoreCase(teamDTO.getCaptainUsername())) {
                 return createResponseEntity(HttpStatus.BAD_REQUEST, "Can not create team with another user as Captain");
             }
             team = teamService.create(auth.getName(), teamDTO.getTeamName());
