@@ -70,7 +70,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public User create(UserDTO userDTO, HttpServletRequest request) throws DataIntegrityViolationException {
-        checkIfFieldsInUse(userDTO);
+        handleDuplicateUserFields(userDTO);
 
         // Hash the plain password coming from the DTO
         String passwordHash = getPasswordHash(userDTO.getPassword());
@@ -87,7 +87,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return user;
     }
 
-    private void checkIfFieldsInUse(UserDTO userDTO) {
+    private void handleDuplicateUserFields(UserDTO userDTO) throws DataIntegrityViolationException {
         // Check if the username already exists
         userRepository.findOneByUsernameIgnoreCase(userDTO.getUsername()).ifPresent(u -> {
             throw new DataIntegrityViolationException("username already in use");
