@@ -3,7 +3,6 @@ package ch.wisv.areafiftylan.controller;
 import ch.wisv.areafiftylan.dto.UserDTO;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.service.UserService;
-import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
@@ -132,26 +131,8 @@ public class UserRestController {
         return userService.checkUsernameAvailable(username);
     }
 
-    //////////// EXCEPTION HANDLING //////////////////
-
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<?> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
-        HttpStatus status;
-        String message = "Database constraint violated!";
-
-        try {
-            throw ex.getCause();
-        } catch (ConstraintViolationException constraintException) {
-            String constraintName = constraintException.getConstraintName();
-            if ("USERNAME".equals(constraintName)) {
-                message = "Username is not unique!";
-            } else if ("EMAIL".equals(constraintName)) {
-                message = "Email is not unique!";
-            }
-        } catch (Throwable throwable) {
-            message = throwable.toString();
-        }
-
-        return createResponseEntity(HttpStatus.CONFLICT, message);
+        return createResponseEntity(HttpStatus.CONFLICT, "Username or Email already taken!");
     }
 }
