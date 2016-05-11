@@ -10,30 +10,10 @@
         <Console name="STDOUT" target="SYSTEM_OUT">
             <PatternLayout pattern="${PATTERN}"/>
         </Console>
-        <RollingFile name="errorlogs" fileName="logs/error.1" filePattern="logs/error_%d{yyyy-MM-dd-hh-mm}.1">
-            <PatternLayout pattern="${PATTERN}"/>
-            <SizeBasedTriggeringPolicy/>
-        </RollingFile>
-        <RollingFile name="info" fileName="logs/info.1" filePattern="logs/info_%d{yyyy-MM-dd-hh-mm}.1">
-            <PatternLayout pattern="${PATTERN}"/>
-            <SizeBasedTriggeringPolicy/>
-        </RollingFile>
-        <RollingFile name="a5l" fileName="logs/log.1" filePattern="logs/log_%d{yyyy-MM-dd-hh-mm}.1">
-            <PatternLayout pattern="${PATTERN}"/>
-            <SizeBasedTriggeringPolicy/>
-        </RollingFile>
-        <RollingFile name="debug" fileName="logs/debug.1" filePattern="logs/debug_%d{yyyy-MM-dd-hh-mm}.1">
-            <PatternLayout pattern="${PATTERN}"/>
-            <SizeBasedTriggeringPolicy/>
-        </RollingFile>
     </Appenders>
     <Loggers>
         <Root level="TRACE">
-            <AppenderRef ref="debug" level="DEBUG"/>
-            <AppenderRef ref="info" level="INFO"/>
-            <AppenderRef ref="a5l" level="A5L"/>
-            <AppenderRef ref="errorlogs" level="ERROR"/>
-            <AppenderRef ref="STDOUT" level="A5L"/>
+            <AppenderRef ref="STDOUT" level="INFO"/>
         </Root>
     </Loggers>
 </Configuration>
