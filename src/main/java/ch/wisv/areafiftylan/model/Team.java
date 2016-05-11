@@ -14,22 +14,22 @@ public class Team {
     @JsonView(View.Public.class)
     @Id
     @GeneratedValue
-    Long id;
+    private Long id;
 
     @JsonView(View.Public.class)
     @Column(nullable = false)
-    String teamName;
+    private String teamName;
 
     @JsonView(View.Public.class)
-    @ManyToMany
-    Set<User> members;
+    @ManyToMany(fetch = FetchType.EAGER)
+    private Set<User> members;
 
     @JsonView(View.Public.class)
     @ManyToOne(optional = false, cascade = CascadeType.MERGE)
-    User captain;
+    private User captain;
 
     @JsonView(View.Public.class)
-    int size;
+    private int size;
 
     public Team(String teamName, User captain) {
         this.teamName = teamName;
