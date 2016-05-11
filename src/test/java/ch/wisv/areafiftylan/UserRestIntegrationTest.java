@@ -62,14 +62,15 @@ public class UserRestIntegrationTest extends IntegrationTest {
         userDTO.put("email", "testuser@mail.com");
 
         //@formatter:off
-        Response response = given().log().all().
-            header(getCSRFHeader()).
-            filter(sessionFilter).
-        when().
-            content(userDTO).contentType(ContentType.JSON).
-            post("/users").
-        then().log().all().
-            extract().response();
+        Response response =
+            given().
+                header(getCSRFHeader()).
+                filter(sessionFilter).
+            when().
+                content(userDTO).contentType(ContentType.JSON).
+                post("/users").
+            then().
+                extract().response();
         //@formatter:on
 
         testuser = userRepository.findOneByUsernameIgnoreCase("testuser").get();
@@ -79,7 +80,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
         return response.getHeader("Location");
     }
 
-    private Map<String, String> getProfileDTO() {
+    static Map<String, String> getProfileDTO() {
         Map<String, String> profileDTO = new HashMap<>();
         profileDTO.put("gender", "MALE");
         profileDTO.put("address", "Testaddress");
@@ -834,7 +835,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
         //@formatter:on
     }
 
-    private void makeTempUser(String appendix){
+    private void makeTempUser(String appendix) {
         Map<String, String> userDTO = new HashMap<>();
         userDTO.put("username", "tempUser" + appendix);
         userDTO.put("password", "password");

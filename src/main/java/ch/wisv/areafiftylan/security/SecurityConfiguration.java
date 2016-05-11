@@ -1,6 +1,8 @@
 package ch.wisv.areafiftylan.security;
 
+import ch.wisv.areafiftylan.service.repository.token.AuthenticationTokenRepository;
 import com.allanditzel.springframework.security.web.csrf.CsrfTokenResponseHeaderBindingFilter;
+import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.context.annotation.Configuration;
@@ -11,7 +13,12 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CsrfFilter;
+import org.springframework.security.web.util.matcher.RequestMatcher;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.regex.Pattern;
 
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
@@ -20,6 +27,9 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private UserDetailsService userDetailsService;
+
+    @Autowired
+    private AuthenticationTokenRepository authenticationTokenRepository;
 
     @Autowired
     private RESTAuthenticationEntryPoint authenticationEntryPoint;
@@ -63,19 +73,41 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             .and().authorizeRequests()
                 .antMatchers("/mail").hasAuthority("ADMIN")
                 .anyRequest().permitAll();
-        //@formatter:on
 
-        // This is used for the Mollie webhook, so it shouldn't be protected by CSRF
-        http.csrf().ignoringAntMatchers("/orders/status");
+        http.csrf().
+            // This is used for the Mollie webhook, so it shouldn't be protected by CSRF
+            ignoringAntMatchers("/orders/status").
+            // Don't require CSRF on requests with valid Tokens
+            requireCsrfProtectionMatcher(csrfRequestMatcher).
+            // We also ignore this for Token requests
+            ignoringAntMatchers("/token");
+        //@formatter:on
 
         // This is the filter that adds the CSRF Token to the header. CSRF is enabled by default in Spring, this just
         // copies the content to the X-CSRF-TOKEN header field.
         http.addFilterAfter(new CsrfTokenResponseHeaderBindingFilter(), CsrfFilter.class);
+
+        // Add support for Token-base authentication
+        http.addFilterAfter(new TokenAuthenticationFilter(authenticationTokenRepository),
+                UsernamePasswordAuthenticationFilter.class);
     }
 
     @Override
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetailsService).passwordEncoder(new BCryptPasswordEncoder());
     }
+
+    // We want to enable CSRF for State Changing methods. We don't want CSRF for requests with valid tokens.
+    private RequestMatcher csrfRequestMatcher = new RequestMatcher() {
+        private Pattern allowedMethods = Pattern.compile("^(GET|HEAD|TRACE|OPTIONS)$");
+
+        @Override
+        public boolean matches(HttpServletRequest request) {
+            String requestHeader = request.getHeader("X-Auth-Token");
+            boolean methodAllowed = !(allowedMethods.matcher(request.getMethod()).matches());
+
+            return Strings.isNullOrEmpty(requestHeader) && methodAllowed;
+        }
+    };
 }
 
