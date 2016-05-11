@@ -93,14 +93,14 @@ public class MailServiceImpl implements MailService {
     @Override
     public void sendVerificationmail(User user, String url) {
         String message = "Please click on the following link to complete your registration: <a href=\"" +
-                url + "\">" + url;
+                url + "\">" + url + "</a>";
         sendMail(user.getEmail(), user.getUsername(), "Confirm your registration", message);
     }
 
     @Override
     public void sendPasswordResetMail(User user, String url) {
         String message = "Please click on the following link to reset your password: <a href=\"" +
-                url + "\">" + url;
+                url + "\">" + url + "</a>";
         sendMail(user.getEmail(), user.getUsername(), "Password reset requested", message);
     }
 
@@ -121,8 +121,7 @@ public class MailServiceImpl implements MailService {
     public void sendTicketTransferMail(User sender, User receiver, String url) {
         String message = sender.getProfile().firstName +
                 " has sent you a ticket for AreaFiftyLAN! To accept this ticket please click on the following link: " +
-                "<a href=\"" +
-                url + "\">" + url;
+                "<a href=\"" + url + "\">" + url + "</a>";
         sendMail(receiver.getEmail(), receiver.getProfile().getFirstName() + " " + receiver.getProfile().getLastName(),
                 "A ticket for AreaFiftyLAN has been sent to you!", message);
     }
