@@ -196,26 +196,6 @@ public class SeatRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void getSeatGroupAsUserDifferentCase() {
-        setTicketOnA1(userTicket);
-
-        SessionData login = login("user", userCleartextPassword);
-
-        //@formatter:off
-        given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
-        when().
-            get("/seats/a").
-        then().
-            statusCode(HttpStatus.SC_OK).
-            body("seatmap.A.ticket.owner", not(contains(hasKey("username")))).
-            body("seatmap.A.ticket.owner.profile", contains(hasKey("displayName"))).
-            body("seatmap.A", hasSize(5));
-        //@formatter:on
-    }
-
-    @Test
     public void getSeatGroupAdminViewAsUser() {
         SessionData login = login("user", userCleartextPassword);
 
@@ -439,22 +419,6 @@ public class SeatRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void reserveSeatAsUserDifferentCase() {
-        SessionData login = login("user", userCleartextPassword);
-
-        //@formatter:off
-        given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
-        when().
-            param("ticketId", userTicket.getId()).
-            post("/seats/a/1").
-        then().
-            statusCode(HttpStatus.SC_OK);
-        //@formatter:on
-    }
-
-    @Test
     public void reserveSeatAsOtherUser() {
         SessionData login = login("user", userCleartextPassword);
 
@@ -563,8 +527,8 @@ public class SeatRestIntegrationTest extends IntegrationTest {
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
 
-        Seat previousSeat = seatRepository.findBySeatGroupIgnoreCaseAndSeatNumber("A", 1);
-        Seat currentSeat = seatRepository.findBySeatGroupIgnoreCaseAndSeatNumber("A", 2);
+        Seat previousSeat = seatRepository.findBySeatGroupAndSeatNumber("A", 1);
+        Seat currentSeat = seatRepository.findBySeatGroupAndSeatNumber("A", 2);
 
         Assert.assertNull(previousSeat.getTicket());
         Assert.assertFalse(previousSeat.isTaken());

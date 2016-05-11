@@ -11,9 +11,9 @@ import java.util.Optional;
 public interface SeatRepository extends JpaRepository<Seat, Long> {
     List<Seat> findByTicketOwnerUsernameIgnoreCase(String username);
 
-    List<Seat> findBySeatGroupIgnoreCase(String seatGroup);
+    List<Seat> findBySeatGroup(String seatGroup);
 
-    Seat findBySeatGroupIgnoreCaseAndSeatNumber(String seatGroup, int seatNumber);
+    Seat findBySeatGroupAndSeatNumber(String seatGroup, int seatNumber);
 
     Optional<Seat> findByTicketId(Long ticketId);
 }
