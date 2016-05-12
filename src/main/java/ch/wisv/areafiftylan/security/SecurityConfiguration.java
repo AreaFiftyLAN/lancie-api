@@ -64,6 +64,9 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         // This is used for the Mollie webhook, so it shouldn't be protected by CSRF
         http.csrf().ignoringAntMatchers("/orders/status");
 
+        // Ignore the route to request a password reset, no CSRF protection is needed
+        http.csrf().ignoringAntMatchers("/requestResetPassword");
+
         // This is the filter that adds the CSRF Token to the header. CSRF is enabled by default in Spring, this just
         // copies the content to the X-CSRF-TOKEN header field.
         http.addFilterAfter(new CsrfTokenResponseHeaderBindingFilter(), CsrfFilter.class);
