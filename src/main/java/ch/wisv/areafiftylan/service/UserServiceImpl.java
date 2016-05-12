@@ -21,7 +21,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
 import java.util.Optional;
@@ -104,13 +103,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         VerificationToken verificationToken = new VerificationToken(user);
         verificationTokenRepository.saveAndFlush(verificationToken);
 
-        try {
-            // Build the URL and send this to the mailservice for sending.
-            String confirmUrl = requestUrl + "?token=" + verificationToken.getToken();
-            mailService.sendVerificationmail(user, confirmUrl);
-        } catch (MessagingException e) {
-            e.printStackTrace();
-        }
+        // Build the URL and send this to the mailservice for sending.
+        String confirmUrl = requestUrl + "?token=" + verificationToken.getToken();
+        mailService.sendVerificationmail(user, confirmUrl);
     }
 
     @Override
@@ -198,14 +193,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         PasswordResetToken passwordResetToken = new PasswordResetToken(user);
         passwordResetTokenRepository.saveAndFlush(passwordResetToken);
 
-        try {
-            // TODO: This is a bit weird. This needs to link to a form.
-            String passwordUrl = resetUrl + "?token=" + passwordResetToken.getToken();
-            // Send the token to the user
-            mailService.sendPasswordResetMail(user, passwordUrl);
-        } catch (MessagingException e) {
-            e.printStackTrace();
-        }
+        String passwordUrl = resetUrl + "?token=" + passwordResetToken.getToken();
+        mailService.sendPasswordResetMail(user, passwordUrl);
     }
 
     @Override

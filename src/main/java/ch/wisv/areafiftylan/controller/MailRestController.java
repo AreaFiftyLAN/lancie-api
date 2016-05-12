@@ -7,15 +7,16 @@ import ch.wisv.areafiftylan.service.MailService;
 import ch.wisv.areafiftylan.service.TeamService;
 import ch.wisv.areafiftylan.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.mail.MessagingException;
+import static ch.wisv.areafiftylan.util.ResponseEntityBuilder.createResponseEntity;
 
 @RestController
+@PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("/mail")
 public class MailRestController {
 
@@ -26,43 +27,31 @@ public class MailRestController {
         this.teamService = teamService;
     }
 
-    MailService mailService;
-    UserService userService;
-    TeamService teamService;
+    private MailService mailService;
+    private UserService userService;
+    private TeamService teamService;
 
     @RequestMapping(value = "/user/{userId}", method = RequestMethod.POST)
     ResponseEntity<?> sendMailToUser(@PathVariable Long userId, @Validated @RequestBody MailDTO mailDTO) {
         User user = userService.getUserById(userId);
 
-        try {
-            mailService.sendTemplateMailToUser(user, mailDTO);
-        } catch (MessagingException e) {
-            e.printStackTrace();
-        }
+        mailService.sendTemplateMailToUser(user, mailDTO);
 
-        return new ResponseEntity<>(null, new HttpHeaders(), HttpStatus.OK);
+        return createResponseEntity(HttpStatus.OK, "Mail successfully sent");
 
     }
 
     @RequestMapping(value = "/team/{teamId}", method = RequestMethod.POST)
     ResponseEntity<?> sendMailToTeam(@PathVariable Long teamId, @Validated @RequestBody MailDTO mailDTO) {
         Team team = teamService.getTeamById(teamId);
-        try {
-            mailService.sendTemplateMailToTeam(team, mailDTO);
-        } catch (MessagingException e) {
-            e.printStackTrace();
-        }
+        mailService.sendTemplateMailToTeam(team, mailDTO);
 
-        return new ResponseEntity<>(null, new HttpHeaders(), HttpStatus.OK);
+        return createResponseEntity(HttpStatus.OK, "Mail successfully sent");
     }
 
     @RequestMapping(value = "/users/all/YESREALLY", method = RequestMethod.POST)
     ResponseEntity<?> sendMailToAll(@Validated @RequestBody MailDTO mailDTO) {
-        try {
-            mailService.sendTemplateMailToAll(userService.getAllUsers(), mailDTO);
-        } catch (MessagingException e) {
-            e.printStackTrace();
-        }
-        return new ResponseEntity<>(null, new HttpHeaders(), HttpStatus.OK);
+        mailService.sendTemplateMailToAll(userService.getAllUsers(), mailDTO);
+        return createResponseEntity(HttpStatus.OK, "Mail successfully sent");
     }
 }

@@ -5,6 +5,9 @@ import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailException;
+import org.springframework.mail.MailPreparationException;
+import org.springframework.mail.MailSendException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -33,23 +36,30 @@ public class MailServiceImpl implements MailService {
     }
 
     @Override
-    public void sendMail(String recipientEmail, String recipientName, String senderEmail, String subject,
-                         String messageString) throws MessagingException {
+    public void sendMail(String recipientEmail, String recipientName, String subject, String messageString) {
 
         // Prepare message using a Spring helper
         final MimeMessage mimeMessage = this.mailSender.createMimeMessage();
-        final MimeMessageHelper message = new MimeMessageHelper(mimeMessage, true, "UTF-8"); // true = multipart
+        final MimeMessageHelper message;
 
-        message.setSubject("[Area FiftyLAN] " + subject);
-        message.setFrom(sender);
-        message.setTo(recipientEmail);
+        try {
+            message = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+            message.setSubject("[Area FiftyLAN] " + subject);
+            message.setFrom(sender);
+            message.setTo(recipientEmail);
 
-        // Create the HTML body using Thymeleaf
-        String htmlContent = prepareHtmlContent(recipientName, messageString);
-        message.setText(htmlContent, true); // true = isHtml
+            // Create the HTML body using Thymeleaf
+            String htmlContent = prepareHtmlContent(recipientName, messageString);
+            message.setText(htmlContent, true); // true = isHtml
 
-        // Send mail
-        this.mailSender.send(mimeMessage);
+            // Send mail
+            this.mailSender.send(mimeMessage);
+        } catch (MessagingException e) {
+            throw new MailPreparationException("Unable to prepare email", e.getCause());
+        } catch (MailException m) {
+            throw new MailSendException("Unable to send email", m.getCause());
+        }
+
     }
 
     private String prepareHtmlContent(String name, String message) {
@@ -62,39 +72,40 @@ public class MailServiceImpl implements MailService {
     }
 
     @Override
-    public void sendTemplateMailToTeam(Team team, MailDTO mailDTO) throws MessagingException {
+    public void sendTemplateMailToTeam(Team team, MailDTO mailDTO) {
         for (User user : team.getMembers()) {
             sendTemplateMailToUser(user, mailDTO);
         }
     }
 
     @Override
-    public void sendTemplateMailToAll(Collection<User> users, MailDTO mailDTO) throws MessagingException {
+    public void sendTemplateMailToAll(Collection<User> users, MailDTO mailDTO) {
         for (User user : users) {
             sendTemplateMailToUser(user, mailDTO);
         }
     }
 
     @Override
-    public void sendTemplateMailToUser(User user, MailDTO mailDTO) throws MessagingException {
-        sendMail(user.getEmail(), user.getProfile().getFirstName(), "lancie@ch.tudelft.nl", mailDTO.getSubject(),
-                mailDTO.getMessage());
+    public void sendTemplateMailToUser(User user, MailDTO mailDTO) {
+        sendMail(user.getEmail(), user.getProfile().getFirstName(), mailDTO.getSubject(), mailDTO.getMessage());
     }
 
     @Override
-    public void sendVerificationmail(User user, String url) throws MessagingException {
-        String message = "Please click on the following link to complete your registration: " + url;
-        sendMail(user.getEmail(), user.getUsername(), null, "Confirm your registration", message);
+    public void sendVerificationmail(User user, String url) {
+        String message = "Please click on the following link to complete your registration: <a href=\"" +
+                url + "\">" + url + "</a>";
+        sendMail(user.getEmail(), user.getUsername(), "Confirm your registration", message);
     }
 
     @Override
-    public void sendPasswordResetMail(User user, String url) throws MessagingException {
-        String message = "Please click on the following link to reset your password: " + url;
-        sendMail(user.getEmail(), user.getUsername(), null, "Password reset requested", message);
+    public void sendPasswordResetMail(User user, String url) {
+        String message = "Please click on the following link to reset your password: <a href=\"" +
+                url + "\">" + url + "</a>";
+        sendMail(user.getEmail(), user.getUsername(), "Password reset requested", message);
     }
 
     @Override
-    public void sendTeamInviteMail(User user, String teamName, User teamCaptain) throws MessagingException {
+    public void sendTeamInviteMail(User user, String teamName, User teamCaptain) {
 
         String message = "You've been invited to join \"Team " + teamName +
                 "\" by " +
@@ -103,13 +114,15 @@ public class MailServiceImpl implements MailService {
                 teamCaptain.getProfile().getLastName() +
                 "! Please log in to My Area to accept the invitation.";
 
-        sendMail(user.getEmail(), user.getUsername(), null, "You've been invited to \"Team " + teamName + "\"",
-                message);
+        sendMail(user.getEmail(), user.getUsername(), "You've been invited to \"Team " + teamName + "\"", message);
     }
 
     @Override
-    public void sendTicketTransferMail(User sender, User receiver, String url) throws MessagingException {
-        String message = sender.getProfile().firstName + " has sent you a ticket for AreaFiftyLAN! To accept this ticket please click on the following link: " + url;
-        sendMail(receiver.getEmail(), receiver.getProfile().getFirstName() + " " + receiver.getProfile().getLastName(), null, "A ticket for AreaFiftyLAN has been sent to you!", message);
+    public void sendTicketTransferMail(User sender, User receiver, String url) {
+        String message = sender.getProfile().firstName +
+                " has sent you a ticket for AreaFiftyLAN! To accept this ticket please click on the following link: " +
+                "<a href=\"" + url + "\">" + url + "</a>";
+        sendMail(receiver.getEmail(), receiver.getProfile().getFirstName() + " " + receiver.getProfile().getLastName(),
+                "A ticket for AreaFiftyLAN has been sent to you!", message);
     }
 }

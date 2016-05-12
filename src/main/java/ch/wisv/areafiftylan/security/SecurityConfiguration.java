@@ -58,11 +58,7 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .failureHandler(authenticationFailureHandler)
             .and()
                 .logout()
-                .logoutUrl("/logout")
-                .permitAll()
-            .and().authorizeRequests()
-                .antMatchers("/mail").hasAuthority("ADMIN")
-                .anyRequest().permitAll();
+                .logoutUrl("/logout");
         //@formatter:on
 
         // This is used for the Mollie webhook, so it shouldn't be protected by CSRF
