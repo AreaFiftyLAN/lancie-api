@@ -61,6 +61,10 @@ public class ConsumptionMap {
         }
     }
 
+    public Collection<String> getConsumptionsMade(){
+        return consumptionsMade;
+    }
+
     private void checkIfConsumptionAllowedAndThrowIfNot(String consumption){
         if(!PossibleConsumptions.contains(consumption)) {
             throw new ConsumptionNotSupportedException(consumption);
