@@ -18,7 +18,7 @@ import java.util.List;
  */
 @Entity
 public class ConsumptionMap {
-    public static Collection<String> PossibleConsumptions;
+    public static Collection<String> PossibleConsumptions;//TODO: Initializing and storing of this field
 
     @NonNull
     private Collection<String> consumptionsMade;
