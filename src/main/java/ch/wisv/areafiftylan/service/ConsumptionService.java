@@ -15,4 +15,6 @@ public interface ConsumptionService {
     void consume(Long ticketId, String consumption);
 
     void reset(Long ticketId, String consumption);
+
+    //TODO: Make logic for setting the master consumption list
 }
