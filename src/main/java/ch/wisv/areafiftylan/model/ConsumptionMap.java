@@ -7,7 +7,7 @@ import java.util.HashMap;
 /**
  * Created by beer on 8-5-16.
  */
-public class ConsumptionMap{
+public class ConsumptionMap {
     public static HashMap<String, Boolean> MasterMap;
 
     private HashMap<String, Boolean> consumptionMap;
@@ -17,11 +17,11 @@ public class ConsumptionMap{
     }
 
     public void consume(String consumption){
-        setConsumption(consumption, true);
+        setConsumption(consumption, !MasterMap.get(consumption));
     }
 
     public void reset(String consumption){
-        setConsumption(consumption, false);
+        setConsumption(consumption, MasterMap.get(consumption));
     }
 
     private void setConsumption(String consumption, boolean value){
