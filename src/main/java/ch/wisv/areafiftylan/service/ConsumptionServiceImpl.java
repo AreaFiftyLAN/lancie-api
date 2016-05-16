@@ -1,10 +1,13 @@
 package ch.wisv.areafiftylan.service;
 
+import ch.wisv.areafiftylan.exception.ConsumptionNotSupportedException;
 import ch.wisv.areafiftylan.model.ConsumptionMap;
 import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.service.repository.ConsumptionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 
+import java.util.Collection;
 import java.util.Optional;
 
 /**
@@ -39,5 +42,28 @@ public class ConsumptionServiceImpl implements ConsumptionService {
         ConsumptionMap consumptions = getByTicketId(ticketId);
         consumptions.reset(consumption);
         consumptionRepository.saveAndFlush(consumptions);
+    }
+
+    @Override
+    public Collection<String> getPossibleConsumptions() {
+        return ConsumptionMap.PossibleConsumptions;
+    }
+
+    @Override
+    public void removePossibleConsumption(String consumption) {
+        if(!ConsumptionMap.PossibleConsumptions.contains(consumption)){
+            throw new ConsumptionNotSupportedException(consumption);
+        }
+
+        ConsumptionMap.PossibleConsumptions.remove(consumption);
+    }
+
+    @Override
+    public void addPossibleConsumption(String consumption) {
+        if(ConsumptionMap.PossibleConsumptions.contains(consumption)){
+            throw new DuplicateKeyException("Consumption " + consumption + " is already supported");
+        }
+
+        ConsumptionMap.PossibleConsumptions.add(consumption);
     }
 }

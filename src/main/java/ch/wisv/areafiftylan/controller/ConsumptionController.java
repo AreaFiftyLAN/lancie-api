@@ -39,7 +39,21 @@ public class ConsumptionController {
 
     @RequestMapping(value = "/available", method = RequestMethod.GET)
     public Collection<String> getAllPossibleConsumptions(){
-        return ConsumptionMap.PossibleConsumptions;
+        return consumptionService.getPossibleConsumptions();
+    }
+
+    @RequestMapping(value = "/available/{consumption}", method = RequestMethod.POST)
+    public ResponseEntity<?> addAvailableConsumption(@PathVariable String consumption){
+        consumptionService.addPossibleConsumption(consumption);
+
+        return createResponseEntity(HttpStatus.OK, "Succesfully added " + consumption + " as a supported consumption.");
+    }
+
+    @RequestMapping(value = "/available/{consumption}", method = RequestMethod.DELETE)
+    public ResponseEntity<?> removeAvailableConsumption(@PathVariable String consumption){
+        consumptionService.removePossibleConsumption(consumption);
+
+        return createResponseEntity(HttpStatus.OK, "Succesfully removed " + consumption + " as a supported consumption.");
     }
 
     @RequestMapping(value = "/consume", method = RequestMethod.POST)
@@ -61,6 +75,6 @@ public class ConsumptionController {
 
     @ExceptionHandler(value = ConsumptionNotSupportedException.class)
     public ResponseEntity<?> handleConsumptionNotSupported(ConsumptionNotSupportedException e){
-        return createResponseEntity(HttpStatus.BAD_REQUEST, e.getMessage());
+        return createResponseEntity(HttpStatus.NOT_FOUND, e.getMessage());
     }
 }
