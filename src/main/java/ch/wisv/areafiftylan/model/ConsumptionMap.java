@@ -29,7 +29,12 @@ public class ConsumptionMap {
     private Ticket ticket;
 
     public ConsumptionMap() {
+        // JPA Only
+    }
+
+    public ConsumptionMap(Ticket t) {
         this.consumptionsMade = new ArrayList<>();
+        this.ticket = t;
     }
 
     public boolean isConsumed(String consumption){
