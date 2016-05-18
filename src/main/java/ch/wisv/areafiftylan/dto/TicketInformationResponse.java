@@ -29,6 +29,9 @@ public class TicketInformationResponse {
     @Getter
     private double pickupServicePrice;
 
+    @Getter
+    private String deadline;
+
     public TicketInformationResponse(TicketType type, int numberSold) {
         this.ticketType = type.name();
         this.limit = type.getLimit();
@@ -37,5 +40,6 @@ public class TicketInformationResponse {
         this.text = type.getText();
         this.chMemberDiscountPrice = TicketOptions.CHMEMBER.getPrice();
         this.pickupServicePrice = TicketOptions.PICKUPSERVICE.getPrice();
+        this.deadline = type.getDeadline().toString();
     }
 }
