@@ -92,7 +92,7 @@ public class TicketServiceImpl implements TicketService {
 
     private boolean isTicketAvailable(TicketType type) {
         boolean typeLimitReached = type.getLimit() != 0 && ticketRepository.countByType(type) >= type.getLimit();
-        boolean eventLimitReached = ticketRepository.count() <= TICKET_LIMIT;
+        boolean eventLimitReached = ticketRepository.count() >= TICKET_LIMIT;
         boolean deadlineExceeded = type.getDeadline().isBefore(LocalDateTime.now());
 
         return !typeLimitReached && !deadlineExceeded && !eventLimitReached;
