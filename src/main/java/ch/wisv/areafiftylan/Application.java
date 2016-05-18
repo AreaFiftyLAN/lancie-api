@@ -2,6 +2,7 @@ package ch.wisv.areafiftylan;
 
 
 import ch.wisv.areafiftylan.service.SeatService;
+import ch.wisv.areafiftylan.service.repository.TeamRepository;
 import ch.wisv.areafiftylan.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.service.repository.UserRepository;
 import ch.wisv.areafiftylan.util.TestDataRunner;
@@ -29,11 +30,10 @@ public class Application {
      */
     @Bean
     @Profile("dev")
-    CommandLineRunner init(UserRepository accountRepository,
-                           TicketRepository ticketRepository,
-                           SeatService seatService) {
+    CommandLineRunner init(UserRepository accountRepository, TicketRepository ticketRepository, SeatService seatService,
+                           TeamRepository teamRepository) {
 
-        return new TestDataRunner(accountRepository, ticketRepository, seatService);
+        return new TestDataRunner(accountRepository, ticketRepository, teamRepository, seatService);
 
     }
 
