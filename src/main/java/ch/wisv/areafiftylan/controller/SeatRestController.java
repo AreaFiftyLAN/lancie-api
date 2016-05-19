@@ -129,6 +129,22 @@ public class SeatRestController {
     }
 
     /**
+     * Remove a User from a specific Seat
+     *
+     * @param group  Groupname of the seat
+     * @param number Number of the seat
+     *
+     * @return Status message of the result
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @RequestMapping(value = "seats/{group}/{number}", method = RequestMethod.DELETE)
+    ResponseEntity<?> clearSeat(@PathVariable String group, @PathVariable int number) {
+
+        seatService.clearSeat(group, number);
+        return createResponseEntity(HttpStatus.OK, "Seat successfully cleared");
+    }
+
+    /**
      * Get all seats in the Seatmap
      *
      * @return A list of all Seats in the seatmap.
