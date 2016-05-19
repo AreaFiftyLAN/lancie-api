@@ -601,16 +601,49 @@ public class SeatRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void clearSeatAsAnon() {
-        // No Controller support yet
+        setTicketOnA1(userTicket);
+
+        //@formatter:off
+        given().
+        when().
+            delete("/seats/A/1").
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
     }
 
     @Test
     public void clearSeatAsUser() {
-        // No Controller support yet
+        setTicketOnA1(userTicket);
+        SessionData login = login("user", userCleartextPassword);
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            delete("/seats/A/1").
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
     }
 
     @Test
     public void clearSeatAsAdmin() {
-        // No Controller support yet
+        setTicketOnA1(userTicket);
+        SessionData login = login(admin.getUsername(), adminCleartextPassword);
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            delete("/seats/A/1").
+        then().log().all().
+            statusCode(HttpStatus.SC_OK);
+        //@formatter:on
+
+        Seat seat = seatRepository.findBySeatGroupAndSeatNumber("A", 1);
+        Assert.assertNull(seat.getTicket());
     }
 }

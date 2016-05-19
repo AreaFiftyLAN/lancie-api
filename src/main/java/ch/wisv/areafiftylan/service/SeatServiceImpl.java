@@ -121,5 +121,6 @@ public class SeatServiceImpl implements SeatService {
     public void clearSeat(String groupName, int seatNumber) {
         Seat seat = seatRepository.findBySeatGroupAndSeatNumber(groupName, seatNumber);
         seat.setTicket(null);
+        seatRepository.save(seat);
     }
 }
