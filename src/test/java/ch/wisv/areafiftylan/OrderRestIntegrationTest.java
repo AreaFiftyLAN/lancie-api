@@ -2,7 +2,6 @@ package ch.wisv.areafiftylan;
 
 import ch.wisv.areafiftylan.model.Order;
 import ch.wisv.areafiftylan.model.Ticket;
-import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.util.OrderStatus;
 import ch.wisv.areafiftylan.model.util.TicketType;
 import ch.wisv.areafiftylan.service.repository.OrderRepository;
@@ -14,7 +13,7 @@ import org.apache.http.HttpStatus;
 import org.junit.After;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,6 +33,9 @@ public class OrderRestIntegrationTest extends IntegrationTest {
 
     @Autowired
     private TicketRepository ticketRepository;
+
+    @Value("${a5l.ticketLimit}")
+    private int TICKET_LIMIT;
 
     private final String ORDER_ENDPOINT = "/orders";
 
@@ -304,6 +306,54 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             content(order).contentType(ContentType.JSON).
             post(ORDER_ENDPOINT)
         .then().statusCode(HttpStatus.SC_BAD_REQUEST);
+        //@formatter:on
+    }
+
+    @Test
+    public void testCreateSingleOrderSoldOutType() {
+        for (int i = 0; i < TicketType.EARLY_FULL.getLimit(); i++) {
+            ticketRepository.save(new Ticket(user, TicketType.EARLY_FULL, false, false));
+        }
+
+        Map<String, String> order = new HashMap<>();
+        order.put("pickupService", "true");
+        order.put("type", TicketType.EARLY_FULL.toString());
+        order.put("chMember", "false");
+        SessionData login = login(user.getUsername(), userCleartextPassword);
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            content(order).contentType(ContentType.JSON).
+            post(ORDER_ENDPOINT)
+        .then().
+            statusCode(HttpStatus.SC_GONE);
+        //@formatter:on
+    }
+
+    @Test
+    public void testCreateSingleOrderGlobalLimit() {
+        for (int i = 0; i < TICKET_LIMIT; i++) {
+            ticketRepository.save(new Ticket(user, TicketType.REGULAR_FULL, false, false));
+        }
+
+        Map<String, String> order = new HashMap<>();
+        order.put("pickupService", "true");
+        order.put("type", TicketType.LAST_MINUTE.toString());
+        order.put("chMember", "false");
+        SessionData login = login(user.getUsername(), userCleartextPassword);
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            content(order).contentType(ContentType.JSON).
+            post(ORDER_ENDPOINT)
+        .then().
+            statusCode(HttpStatus.SC_GONE);
         //@formatter:on
     }
 
@@ -597,7 +647,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
 
         Order order1 = new Order(user);
 
-        Collection<Ticket> ticketList=  new ArrayList<>(5);
+        Collection<Ticket> ticketList = new ArrayList<>(5);
 
         ticketList.add(ticketRepository.save(new Ticket(user, TicketType.EARLY_FULL, true, false)));
         ticketList.add(ticketRepository.save(new Ticket(user, TicketType.EARLY_FULL, true, false)));
@@ -909,7 +959,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void testGetTicketAvailability(){
+    public void testGetTicketAvailability() {
         insertTestOrders();
 
         //@formatter:off

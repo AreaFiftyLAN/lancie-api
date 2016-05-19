@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -32,6 +33,9 @@ public class TicketServiceImpl implements TicketService {
 
     @Value("${a5l.user.acceptTransferUrl}")
     private String acceptTransferUrl;
+
+    @Value("${a5l.ticketLimit}")
+    private int TICKET_LIMIT;
 
     @Autowired
     public TicketServiceImpl(TicketRepository ticketRepository, UserService userService,
@@ -77,13 +81,23 @@ public class TicketServiceImpl implements TicketService {
     @Override
     public synchronized Ticket requestTicketOfType(TicketType type, User owner, boolean pickupService,
                                                    boolean chMember) {
-        if (ticketRepository.countByType(type) >= type.getLimit()) {
+        // Check if the TicketType has a limit and if the limit is reached
+        if (!isTicketAvailable(type)) {
             throw new TicketUnavailableException(type);
         } else {
             Ticket ticket = new Ticket(owner, type, pickupService, chMember);
             return ticketRepository.save(ticket);
         }
     }
+
+    private boolean isTicketAvailable(TicketType type) {
+        boolean typeLimitReached = type.getLimit() != 0 && ticketRepository.countByType(type) >= type.getLimit();
+        boolean eventLimitReached = ticketRepository.count() >= TICKET_LIMIT;
+        boolean deadlineExceeded = type.getDeadline().isBefore(LocalDateTime.now());
+
+        return !typeLimitReached && !deadlineExceeded && !eventLimitReached;
+    }
+
 
     @Override
     public TicketTransferToken setupForTransfer(Long ticketId, String goalUserName) {
