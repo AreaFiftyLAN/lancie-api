@@ -7,6 +7,7 @@ import lombok.NonNull;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,6 +20,9 @@ import java.util.List;
 @Entity
 public class ConsumptionMap {
     public static Collection<String> PossibleConsumptions;//TODO: Initializing and storing of this field
+
+    @Id
+    Long id;
 
     @NonNull
     private Collection<String> consumptionsMade;
