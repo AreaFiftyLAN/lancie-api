@@ -2,6 +2,7 @@ package ch.wisv.areafiftylan.model;
 
 import ch.wisv.areafiftylan.exception.AlreadyConsumedException;
 import ch.wisv.areafiftylan.exception.ConsumptionNotSupportedException;
+import ch.wisv.areafiftylan.model.util.Consumption;
 import lombok.Getter;
 import lombok.NonNull;
 
@@ -16,14 +17,14 @@ import java.util.List;
  */
 @Entity
 public class ConsumptionMap {
-    public static Collection<String> PossibleConsumptions;//TODO: Initializing and storing of this field
+    public static Collection<Consumption> PossibleConsumptions;//TODO: Initializing and storing of this field
 
     @Id
     Long id;
 
     @NonNull
     @ElementCollection
-    private Collection<String> consumptionsMade;
+    private Collection<Consumption> consumptionsMade;
 
     @OneToOne(targetEntity = Ticket.class, cascade = CascadeType.MERGE)
     @NonNull
@@ -39,13 +40,13 @@ public class ConsumptionMap {
         this.ticket = t;
     }
 
-    public boolean isConsumed(String consumption){
+    public boolean isConsumed(Consumption consumption){
         checkIfConsumptionAllowedAndThrowIfNot(consumption);
 
         return consumptionsMade.contains(consumption);
     }
 
-    public void consume(String consumption){
+    public void consume(Consumption consumption){
         checkIfConsumptionAllowedAndThrowIfNot(consumption);
 
         if(isConsumed(consumption)){
@@ -55,7 +56,7 @@ public class ConsumptionMap {
         consumptionsMade.add(consumption);
     }
 
-    public void reset(String consumption){
+    public void reset(Consumption consumption){
         checkIfConsumptionAllowedAndThrowIfNot(consumption);
 
         if(isConsumed(consumption)){
@@ -63,11 +64,11 @@ public class ConsumptionMap {
         }
     }
 
-    public Collection<String> getConsumptionsMade(){
+    public Collection<Consumption> getConsumptionsMade(){
         return consumptionsMade;
     }
 
-    private void checkIfConsumptionAllowedAndThrowIfNot(String consumption){
+    private void checkIfConsumptionAllowedAndThrowIfNot(Consumption consumption){
         if(!PossibleConsumptions.contains(consumption)) {
             throw new ConsumptionNotSupportedException(consumption);
         }
