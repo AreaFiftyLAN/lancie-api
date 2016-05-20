@@ -14,6 +14,10 @@ public class Consumption {
     @Id
     String name;
 
+    public Consumption() {
+        // JPA Only
+    }
+
     public Consumption(String name) {
         this.name = name;
     }
