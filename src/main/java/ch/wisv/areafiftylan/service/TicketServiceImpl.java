@@ -1,9 +1,6 @@
 package ch.wisv.areafiftylan.service;
 
-import ch.wisv.areafiftylan.exception.DuplicateTicketTransferTokenException;
-import ch.wisv.areafiftylan.exception.InvalidTokenException;
-import ch.wisv.areafiftylan.exception.TicketUnavailableException;
-import ch.wisv.areafiftylan.exception.TokenNotFoundException;
+import ch.wisv.areafiftylan.exception.*;
 import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.User;
@@ -49,8 +46,14 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public Ticket getTicketById(Long ticketId) {
-        return ticketRepository.findOne(ticketId);
+    public Ticket getTicketById(Long ticketId){
+        Ticket t = ticketRepository.findOne(ticketId);
+
+        if(t == null){
+            throw new TicketNotFoundException();
+        }
+
+        return t;
     }
 
     @Override
@@ -103,7 +106,7 @@ public class TicketServiceImpl implements TicketService {
     public TicketTransferToken setupForTransfer(Long ticketId, String goalUserName) {
         User u = userService.getUserByUsername(goalUserName)
                 .orElseThrow(() -> new UsernameNotFoundException("User " + goalUserName + " not found."));
-        Ticket t = ticketRepository.findOne(ticketId);
+        Ticket t = getTicketById(ticketId);
 
         List<TicketTransferToken> ticketTransferTokens =
                 tttRepository.findAllByTicketId(ticketId).stream().filter(Token::isValid).collect(Collectors.toList());

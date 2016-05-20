@@ -45,4 +45,9 @@ class GlobalControllerExceptionHandler {
     public ResponseEntity<?> handleInvalidTokenException(InvalidTokenException ex) {
         return createResponseEntity(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
+
+    @ExceptionHandler(TicketNotFoundException.class)
+    public ResponseEntity<?> handleTicketNotFoundException(TicketNotFoundException ex) {
+        return createResponseEntity(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
 }
