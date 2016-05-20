@@ -79,7 +79,7 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             // We also ignore this for Token requests
             ignoringAntMatchers("/token").
             // Ignore the route to request a password reset, no CSRF protection is needed
-            ignoringAntMatchers("/requestResetPassword")
+            ignoringAntMatchers("/requestResetPassword");
         //@formatter:on
 
         // This is the filter that adds the CSRF Token to the header. CSRF is enabled by default in Spring, this just
