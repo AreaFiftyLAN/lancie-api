@@ -22,8 +22,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import static com.jayway.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasSize;
+import static com.jayway.restassured.RestAssured.when;
+import static org.hamcrest.Matchers.*;
 
 /**
  * Created by beer on 5-1-16.
@@ -71,6 +71,48 @@ public class TicketRestIntegrationTest extends IntegrationTest {
         t = ticketRepository.saveAndFlush(t);
 
         return t;
+    }
+
+    @Test
+    public void testGetAllTickets_Anon() {
+        //@formatter:off
+        when()
+            .get("/tickets")
+        .then()
+            .statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
+    }
+
+    @Test
+    public void testGetAllTickets_User() {
+        SessionData login = login("user", userCleartextPassword);
+
+
+        //@formatter:off
+        given()
+                .filter(sessionFilter)
+                .header(login.getCsrfHeader())
+        .when()
+                .get("/tickets")
+                .then()
+                .statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
+    }
+
+    @Test
+    public void testGetAllTickets_Admin() {
+        SessionData login = login("admin", adminCleartextPassword);
+
+        //@formatter:off
+        given()
+                .filter(sessionFilter)
+                .header(login.getCsrfHeader())
+        .when()
+                .get("/tickets")
+        .then()
+                .statusCode(HttpStatus.SC_OK)
+                .body("", hasSize(1));
+        //@formatter:on
     }
 
     @Test
