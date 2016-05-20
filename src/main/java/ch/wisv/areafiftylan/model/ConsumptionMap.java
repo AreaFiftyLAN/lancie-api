@@ -5,10 +5,7 @@ import ch.wisv.areafiftylan.exception.ConsumptionNotSupportedException;
 import lombok.Getter;
 import lombok.NonNull;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -25,6 +22,7 @@ public class ConsumptionMap {
     Long id;
 
     @NonNull
+    @ElementCollection
     private Collection<String> consumptionsMade;
 
     @OneToOne(targetEntity = Ticket.class, cascade = CascadeType.MERGE)
