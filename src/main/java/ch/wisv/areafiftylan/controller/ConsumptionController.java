@@ -37,16 +37,18 @@ public class ConsumptionController {
 
     @RequestMapping(value = "/{ticketId}", method = RequestMethod.GET)
     public Collection<String> consumptionsMade(@PathVariable Long ticketId){
-        return consumptionService.getByTicketId(ticketId).getConsumptionsMade().stream()
+        List<String> consumptions = consumptionService.getByTicketId(ticketId).getConsumptionsMade().stream()
                 .map(c -> c.getName())
                 .collect(Collectors.toList());
+        return consumptions;
     }
 
     @RequestMapping(value = "/available", method = RequestMethod.GET)
     public Collection<String> getAllPossibleConsumptions(){
-        return consumptionService.getPossibleConsumptions().stream()
+        List<String> consumptions = consumptionService.getPossibleConsumptions().stream()
                 .map(c -> c.getName())
                 .collect(Collectors.toList());
+        return consumptions;
     }
 
     @RequestMapping(value = "/available/{consumptionName}", method = RequestMethod.POST)
