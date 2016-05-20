@@ -91,4 +91,10 @@ public class TicketRestController {
     public Collection<Ticket> getAllTickets() {
         return ticketService.getAllTickets();
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @RequestMapping(value = "/tickets/transport", method = RequestMethod.GET)
+    public Collection<Ticket> getAllTicketsWithTransport() {
+        return ticketService.getAllTicketsWithTransport();
+    }
 }

@@ -70,4 +70,6 @@ public interface TicketService {
     Collection<Ticket>getTicketsFromTeamMembers(User user);
 
     Collection<TicketTransferToken> getValidTicketTransferTokensByUser(String username);
+
+    Collection<Ticket> getAllTicketsWithTransport();
 }
