@@ -10,7 +10,6 @@ import java.util.Collection;
 /**
  * Created by beer on 16-5-16.
  */
-@Service
 public interface ConsumptionService {
     ConsumptionMap getByTicketId(Long ticketId);
 

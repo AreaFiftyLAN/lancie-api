@@ -6,6 +6,7 @@ import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.service.repository.ConsumptionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -13,6 +14,7 @@ import java.util.Optional;
 /**
  * Created by beer on 16-5-16.
  */
+@Service
 public class ConsumptionServiceImpl implements ConsumptionService {
     @Autowired
     ConsumptionRepository consumptionRepository;
