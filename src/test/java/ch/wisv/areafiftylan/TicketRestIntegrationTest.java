@@ -23,6 +23,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.RestAssured.when;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 
@@ -112,7 +113,7 @@ public class TicketRestIntegrationTest extends IntegrationTest {
                 .get("/tickets")
         .then()
                 .statusCode(HttpStatus.SC_OK)
-                .body("", hasSize(1));
+                .body("$", hasSize(1));
         //@formatter:on
     }
 
@@ -487,7 +488,6 @@ public class TicketRestIntegrationTest extends IntegrationTest {
     public void testGetAllTicketsForTransport_User() {
         SessionData login = login(user.getUsername(), userCleartextPassword);
 
-
         //@formatter:off
         given()
             .filter(sessionFilter)
@@ -514,7 +514,8 @@ public class TicketRestIntegrationTest extends IntegrationTest {
             .get("/tickets/transport")
         .then()
             .statusCode(HttpStatus.SC_OK)
-            .body("", hasSize(1));
+            .body("$", hasSize(1))
+            .body("pickupService", contains(true));
         //@formatter:on
     }
 }
