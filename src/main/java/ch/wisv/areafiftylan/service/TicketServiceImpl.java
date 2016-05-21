@@ -46,10 +46,10 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public Ticket getTicketById(Long ticketId){
+    public Ticket getTicketById(Long ticketId) {
         Ticket t = ticketRepository.findOne(ticketId);
 
-        if(t == null){
+        if (t == null) {
             throw new TicketNotFoundException();
         }
 
@@ -177,8 +177,10 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public Collection<Ticket> getTicketsFromTeamMembers(User u) {
-        Collection<Ticket> ownedTickets = ticketRepository.findAllByOwnerUsernameIgnoreCase(u.getUsername());
+    public Collection<Ticket> getOwnedTicketsAndFromTeamMembers(User u) {
+        Collection<Ticket> ownedTickets =
+                ticketRepository.findAllByOwnerUsernameIgnoreCase(u.getUsername()).stream().filter(Ticket::isValid)
+                        .collect(Collectors.toList());
         Collection<Ticket> captainedTickets = getCaptainedTickets(u);
 
         Collection<Ticket> ticketsInControl = new ArrayList<>();
@@ -191,8 +193,10 @@ public class TicketServiceImpl implements TicketService {
     private Collection<Ticket> getCaptainedTickets(User u) {
         Collection<Team> captainedTeams = teamService.getTeamByCaptainId(u.getId());
 
-        return captainedTeams.stream().flatMap(t -> t.getMembers().stream()).filter(m -> !m.equals(u))
-                .flatMap(m -> ticketRepository.findAllByOwnerUsernameIgnoreCase(m.getUsername()).stream())
+        return captainedTeams.stream()
+                .flatMap(t -> t.getMembers().stream()).filter(m -> !m.equals(u))
+                .flatMap(m -> ticketRepository.findAllByOwnerUsernameIgnoreCase(m.getUsername()).stream()
+                        .filter(Ticket::isValid))
                 .collect(Collectors.toList());
     }
 }
