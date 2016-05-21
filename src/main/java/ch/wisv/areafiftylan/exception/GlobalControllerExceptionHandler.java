@@ -50,4 +50,9 @@ class GlobalControllerExceptionHandler {
     public ResponseEntity<?> handleTicketNotFoundException(TicketNotFoundException ex) {
         return createResponseEntity(HttpStatus.NOT_FOUND, ex.getMessage());
     }
+
+    @ExceptionHandler(InvalidTicketException.class)
+    public ResponseEntity<?> handleInvalidTicketException(InvalidTicketException ex) {
+        return createResponseEntity(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
 }

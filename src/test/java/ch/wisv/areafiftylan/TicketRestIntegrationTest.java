@@ -23,9 +23,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.RestAssured.when;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.*;
 
 /**
  * Created by beer on 5-1-16.
@@ -70,9 +68,8 @@ public class TicketRestIntegrationTest extends IntegrationTest {
 
     private Ticket makeTicket() {
         Ticket t = new Ticket(user, TicketType.EARLY_FULL, false, false);
-        t = ticketRepository.saveAndFlush(t);
-
-        return t;
+        t.setValid(true);
+        return ticketRepository.saveAndFlush(t);
     }
 
     @Test
@@ -465,6 +462,7 @@ public class TicketRestIntegrationTest extends IntegrationTest {
         userRepository.saveAndFlush(teamMate);
 
         Ticket teamTicket = new Ticket(teamMate, TicketType.REGULAR_FULL, false, false);
+        teamTicket.setValid(true);
         ticketRepository.saveAndFlush(teamTicket);
 
         Team team = new Team("Superawesome", user);

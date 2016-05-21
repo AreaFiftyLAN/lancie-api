@@ -83,7 +83,7 @@ public class TicketRestController {
     public Collection<Ticket> getTicketsFromTeamMembers(Authentication auth) {
         User u = (User)auth.getPrincipal();
 
-        return ticketService.getTicketsFromTeamMembers(u);
+        return ticketService.getOwnedTicketsAndFromTeamMembers(u);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
