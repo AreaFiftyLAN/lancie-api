@@ -160,6 +160,11 @@ public class TicketServiceImpl implements TicketService {
         return ticketRepository.findAll();
     }
 
+    @Override
+    public Collection<Ticket> getAllTicketsWithTransport() {
+        return ticketRepository.findByPickupService_True();
+    }
+
     private TicketTransferToken getTicketTransferTokenIfValid(String token) {
         TicketTransferToken ttt = tttRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
 

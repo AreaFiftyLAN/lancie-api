@@ -23,7 +23,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.RestAssured.when;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasSize;
 
 /**
  * Created by beer on 5-1-16.
@@ -111,7 +113,7 @@ public class TicketRestIntegrationTest extends IntegrationTest {
                 .get("/tickets")
         .then()
                 .statusCode(HttpStatus.SC_OK)
-                .body("", hasSize(1));
+                .body("$", hasSize(1));
         //@formatter:on
     }
 
@@ -470,5 +472,50 @@ public class TicketRestIntegrationTest extends IntegrationTest {
         teamRepository.saveAndFlush(team);
 
         return teamMate;
+    }
+
+    @Test
+    public void testGetAllTicketsForTransport_Anon() {
+        //@formatter:off
+        when()
+            .get("/tickets/transport")
+        .then()
+            .statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
+    }
+
+    @Test
+    public void testGetAllTicketsForTransport_User() {
+        SessionData login = login(user.getUsername(), userCleartextPassword);
+
+        //@formatter:off
+        given()
+            .filter(sessionFilter)
+            .header(login.getCsrfHeader())
+        .when()
+            .get("/tickets/transport")
+        .then()
+            .statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
+    }
+
+    @Test
+    public void testGetAllTicketsForTransport_Admin() {
+        makeTicket();
+        ticketRepository.saveAndFlush(new Ticket(user, TicketType.REGULAR_FULL, true, false));
+
+        SessionData login = login(admin.getUsername(), adminCleartextPassword);
+
+        //@formatter:off
+        given()
+            .filter(sessionFilter)
+            .header(login.getCsrfHeader())
+        .when()
+            .get("/tickets/transport")
+        .then()
+            .statusCode(HttpStatus.SC_OK)
+            .body("$", hasSize(1))
+            .body("pickupService", contains(true));
+        //@formatter:on
     }
 }
