@@ -1,20 +1,16 @@
 package ch.wisv.areafiftylan.controller;
 
 import ch.wisv.areafiftylan.dto.TicketInformationResponse;
-import ch.wisv.areafiftylan.exception.TicketUnavailableException;
 import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.exception.DuplicateTicketTransferTokenException;
-import ch.wisv.areafiftylan.model.relations.RFIDLink;
 import ch.wisv.areafiftylan.security.token.TicketTransferToken;
 import ch.wisv.areafiftylan.service.OrderService;
-import ch.wisv.areafiftylan.service.RFIDService;
 import ch.wisv.areafiftylan.service.TicketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -88,5 +84,11 @@ public class TicketRestController {
         User u = (User)auth.getPrincipal();
 
         return ticketService.getTicketsFromTeamMembers(u);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @RequestMapping(value = "/tickets", method = RequestMethod.GET)
+    public Collection<Ticket> getAllTickets() {
+        return ticketService.getAllTickets();
     }
 }

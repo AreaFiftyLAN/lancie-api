@@ -3,7 +3,6 @@ package ch.wisv.areafiftylan.service;
 import ch.wisv.areafiftylan.exception.TicketUnavailableException;
 import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.User;
-import ch.wisv.areafiftylan.model.relations.RFIDLink;
 import ch.wisv.areafiftylan.model.util.TicketType;
 import ch.wisv.areafiftylan.security.token.TicketTransferToken;
 
@@ -17,6 +16,8 @@ public interface TicketService {
     Integer getNumberSoldOfType(TicketType type);
 
     Collection<Ticket> findValidTicketsByOwnerUsername(String username);
+
+    Collection<Ticket> getAllTickets();
 
     /**
      * Mark the ticket with the given Id as valid.

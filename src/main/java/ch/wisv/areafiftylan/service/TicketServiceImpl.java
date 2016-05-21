@@ -155,6 +155,11 @@ public class TicketServiceImpl implements TicketService {
                 .filter(TicketTransferToken::isValid).collect(Collectors.toList());
     }
 
+    @Override
+    public Collection<Ticket> getAllTickets() {
+        return ticketRepository.findAll();
+    }
+
     private TicketTransferToken getTicketTransferTokenIfValid(String token) {
         TicketTransferToken ttt = tttRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
 
