@@ -504,6 +504,25 @@ public class SeatRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
+    public void reserveSeatWithInvalidTicket() {
+        userTicket.setValid(false);
+        ticketRepository.save(userTicket);
+
+        SessionData login = login(user.getUsername(), userCleartextPassword);
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            param("ticketId", userTicket.getId()).
+            post("/seats/A/1").
+        then().
+            statusCode(HttpStatus.SC_BAD_REQUEST);
+        //@formatter:on
+    }
+
+    @Test
     public void changeSeatAsUser() {
         SessionData login = login("user", userCleartextPassword);
 

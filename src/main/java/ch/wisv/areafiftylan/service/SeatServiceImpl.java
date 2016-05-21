@@ -2,6 +2,7 @@ package ch.wisv.areafiftylan.service;
 
 import ch.wisv.areafiftylan.dto.SeatGroupDTO;
 import ch.wisv.areafiftylan.dto.SeatmapResponse;
+import ch.wisv.areafiftylan.exception.InvalidTicketException;
 import ch.wisv.areafiftylan.model.Seat;
 import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.model.Ticket;
@@ -58,6 +59,10 @@ public class SeatServiceImpl implements SeatService {
     @Override
     public boolean reserveSeatForTicket(String groupname, int seatnumber, Long ticketId) {
         Ticket ticket = ticketRepository.findOne(ticketId);
+
+        if(!ticket.isValid()){
+            throw new InvalidTicketException("Unable to reserve seat for an invalid Ticket");
+        }
 
         Optional<Seat> previousSeat = seatRepository.findByTicketId(ticketId);
 
