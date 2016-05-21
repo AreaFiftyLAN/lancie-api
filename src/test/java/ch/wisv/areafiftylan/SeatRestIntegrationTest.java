@@ -62,6 +62,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
         seatRepository.save(seatList);
 
         userTicket = new Ticket(user, TicketType.EARLY_FULL, false, false);
+        userTicket.setValid(true);
         userTicket = ticketRepository.saveAndFlush(userTicket);
     }
 
@@ -87,7 +88,9 @@ public class SeatRestIntegrationTest extends IntegrationTest {
                         "0906-0777", null);
         teamCaptain = userRepository.saveAndFlush(teamCaptain);
 
-        captainTicket = ticketRepository.save(new Ticket(teamCaptain, TicketType.EARLY_FULL, false, false));
+        captainTicket = new Ticket(teamCaptain, TicketType.EARLY_FULL, false, false);
+        captainTicket.setValid(true);
+        captainTicket = ticketRepository.save(captainTicket);
 
 
         team = new Team("team", teamCaptain);
