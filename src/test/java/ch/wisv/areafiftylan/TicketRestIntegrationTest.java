@@ -485,7 +485,7 @@ public class TicketRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testGetAllTicketsForTransport_User() {
-        SessionData login = login("user", userCleartextPassword);
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
 
         //@formatter:off
@@ -501,9 +501,10 @@ public class TicketRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testGetAllTicketsForTransport_Admin() {
+        makeTicket();
         ticketRepository.saveAndFlush(new Ticket(user, TicketType.REGULAR_FULL, true, false));
 
-        SessionData login = login("admin", adminCleartextPassword);
+        SessionData login = login(admin.getUsername(), adminCleartextPassword);
 
         //@formatter:off
         given()
