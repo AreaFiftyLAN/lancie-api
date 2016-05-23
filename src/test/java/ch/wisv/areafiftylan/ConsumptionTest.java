@@ -106,6 +106,84 @@ public class ConsumptionTest extends IntegrationTest {
                 statusCode(HttpStatus.SC_OK).
                 body("$", hasSize(2)).
                 body("$", containsInAnyOrder(coldMilkshake.getName(), spicyFood.getName()));
+    }
+
+    @Test
+    public void getIsConsumed_True(){
+
+    }
+
+    @Test
+    public void getIsConsumed_False(){
+
+    }
+
+    @Test
+    public void getTicketConsumptions_NoneConsumed(){
+
+    }
+
+    @Test
+    public void getTicketConsumptions_OneConsumed(){
+
+    }
+
+    @Test
+    public void getTicketConsumptions_MultipleConsumed(){
+
+    }
+
+    @Test
+    public void consumeConsumption(){
+
+    }
+
+    @Test
+    public void consumeConsumption_AlreadyConsumer(){
+
+    }
+
+    @Test
+    public void consumeConsumption_ConsumptionDoesntExist(){
+
+    }
+
+    @Test
+    public void consumeConsumption_ConsumptionDeleted(){
+
+    }
+
+    @Test
+    public void resetConsumption(){
+
+    }
+
+    @Test
+    public void resetConsumption_ConsumptionDoesntExist(){
+
+    }
+
+    @Test
+    public void resetConsumption_ConsumptionDeleted(){
+
+    }
+
+    @Test
+    public void addPossibleConsumption(){
+
+    }
+
+    @Test
+    public void addPossibleConsumption_Duplicate(){
+
+    }
+
+    @Test
+    public void removePossibleConsumption(){
+
+    }
+
+    public void removePossibleConsumption_DoesntExist(){
 
     }
 }
