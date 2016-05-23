@@ -9,7 +9,7 @@ import java.util.Collection;
  * Created by beer on 16-5-16.
  */
 public interface ConsumptionService {
-    ConsumptionMap getByTicketId(Long ticketId);
+    ConsumptionMap getByTicketIdIfValid(Long ticketId);
 
     boolean isConsumed(Long ticketId, Long consumptionId);
 

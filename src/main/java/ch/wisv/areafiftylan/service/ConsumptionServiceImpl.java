@@ -1,6 +1,7 @@
 package ch.wisv.areafiftylan.service;
 
 import ch.wisv.areafiftylan.exception.ConsumptionNotFoundException;
+import ch.wisv.areafiftylan.exception.InvalidTicketException;
 import ch.wisv.areafiftylan.model.ConsumptionMap;
 import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.util.Consumption;
@@ -31,14 +32,18 @@ public class ConsumptionServiceImpl implements ConsumptionService {
     }
 
     @Override
-    public ConsumptionMap getByTicketId(Long ticketId) {
+    public ConsumptionMap getByTicketIdIfValid(Long ticketId) {
+        if(!ticketService.getTicketById(ticketId).isValid()){
+            throw new InvalidTicketException("Ticket is invalid; can't reset consumptions");
+        }
+
         return consumptionMapsRepository.findByTicketId(ticketId).orElse(InitializeConsumptionMap(ticketId));
     }
 
     @Override
     public boolean isConsumed(Long ticketId, Long consumptionId) {
         Consumption c = getByConsumptionId(consumptionId);
-        return getByTicketId(ticketId).isConsumed(c);
+        return getByTicketIdIfValid(ticketId).isConsumed(c);
     }
 
     private ConsumptionMap InitializeConsumptionMap(Long ticketId){
@@ -48,7 +53,7 @@ public class ConsumptionServiceImpl implements ConsumptionService {
 
     @Override
     public void consume(Long ticketId, Long consumptionId) {
-        ConsumptionMap consumptions = getByTicketId(ticketId);
+        ConsumptionMap consumptions = getByTicketIdIfValid(ticketId);
         Consumption consumption = getByConsumptionId(consumptionId);
         consumptions.consume(consumption);
         consumptionMapsRepository.saveAndFlush(consumptions);
@@ -56,7 +61,7 @@ public class ConsumptionServiceImpl implements ConsumptionService {
 
     @Override
     public void reset(Long ticketId, Long consumptionId) {
-        ConsumptionMap consumptions = getByTicketId(ticketId);
+        ConsumptionMap consumptions = getByTicketIdIfValid(ticketId);
         Consumption consumption = getByConsumptionId(consumptionId);
         consumptions.reset(consumption);
         consumptionMapsRepository.saveAndFlush(consumptions);

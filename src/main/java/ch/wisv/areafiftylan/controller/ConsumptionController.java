@@ -3,21 +3,17 @@ package ch.wisv.areafiftylan.controller;
 import ch.wisv.areafiftylan.dto.ConsumptionDTO;
 import ch.wisv.areafiftylan.exception.AlreadyConsumedException;
 import ch.wisv.areafiftylan.exception.ConsumptionNotFoundException;
-import ch.wisv.areafiftylan.model.ConsumptionMap;
 import ch.wisv.areafiftylan.model.util.Consumption;
 import ch.wisv.areafiftylan.service.ConsumptionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static ch.wisv.areafiftylan.util.ResponseEntityBuilder.createResponseEntity;
 
@@ -39,7 +35,7 @@ public class ConsumptionController {
 
     @RequestMapping(value = "/{ticketId}", method = RequestMethod.GET)
     public Collection<Consumption> consumptionsMade(@PathVariable Long ticketId){
-        return consumptionService.getByTicketId(ticketId).getConsumptionsMade();
+        return consumptionService.getByTicketIdIfValid(ticketId).getConsumptionsMade();
     }
 
     @RequestMapping(value = "/available", method = RequestMethod.GET)
