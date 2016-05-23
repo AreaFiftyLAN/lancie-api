@@ -1,6 +1,8 @@
 package ch.wisv.areafiftylan.model.util;
 
 import lombok.Getter;
+
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
 import javax.persistence.Entity;
@@ -10,8 +12,12 @@ import javax.persistence.Entity;
  */
 @Entity
 public class Consumption {
+    @GeneratedValue
     @Getter
     @Id
+    Long id;
+
+    @Getter
     String name;
 
     public Consumption() {

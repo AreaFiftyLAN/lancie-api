@@ -2,7 +2,7 @@ package ch.wisv.areafiftylan.controller;
 
 import ch.wisv.areafiftylan.dto.ConsumptionDTO;
 import ch.wisv.areafiftylan.exception.AlreadyConsumedException;
-import ch.wisv.areafiftylan.exception.ConsumptionNotSupportedException;
+import ch.wisv.areafiftylan.exception.ConsumptionNotFoundException;
 import ch.wisv.areafiftylan.model.ConsumptionMap;
 import ch.wisv.areafiftylan.model.util.Consumption;
 import ch.wisv.areafiftylan.service.ConsumptionService;
@@ -31,8 +31,7 @@ public class ConsumptionController {
 
     @RequestMapping(method = RequestMethod.GET)
     public boolean isConsumed(@RequestBody ConsumptionDTO consumptionDTO){
-        Consumption c = new Consumption(consumptionDTO.getConsumption());
-        return consumptionService.getByTicketId(consumptionDTO.getTicketId()).isConsumed(c);
+        return consumptionService.isConsumed(consumptionDTO.getTicketId(), consumptionDTO.getConsumptionId());
     }
 
     @RequestMapping(value = "/{ticketId}", method = RequestMethod.GET)
@@ -53,32 +52,28 @@ public class ConsumptionController {
 
     @RequestMapping(value = "/available/{consumptionName}", method = RequestMethod.POST)
     public ResponseEntity<?> addAvailableConsumption(@PathVariable String consumptionName){
-        Consumption c = new Consumption(consumptionName);
-        consumptionService.addPossibleConsumption(c);
+        consumptionService.addPossibleConsumption(consumptionName);
 
-        return createResponseEntity(HttpStatus.OK, "Succesfully added " + c.getName() + " as a supported consumption.");
+        return createResponseEntity(HttpStatus.OK, "Succesfully added " + consumptionName + " as a supported consumption.");
     }
 
-    @RequestMapping(value = "/available/{consumptionName}", method = RequestMethod.DELETE)
-    public ResponseEntity<?> removeAvailableConsumption(@PathVariable String consumptionName){
-        Consumption c = new Consumption(consumptionName);
-        consumptionService.removePossibleConsumption(c);
+    @RequestMapping(value = "/available/{consumptionId}", method = RequestMethod.DELETE)
+    public ResponseEntity<?> removeAvailableConsumption(@PathVariable Long consumptionId){
+        Consumption c = consumptionService.removePossibleConsumption(consumptionId);
 
         return createResponseEntity(HttpStatus.OK, "Succesfully removed " + c.getName() + " as a supported consumption.");
     }
 
     @RequestMapping(value = "/consume", method = RequestMethod.POST)
     public ResponseEntity<?> consume(@RequestBody ConsumptionDTO consumptionDTO){
-        Consumption c = new Consumption(consumptionDTO.getConsumption());
-        consumptionService.consume(consumptionDTO.getTicketId(), c);
-        return createResponseEntity(HttpStatus.OK, "Successfully consumed " + consumptionDTO.getConsumption());
+        consumptionService.consume(consumptionDTO.getTicketId(), consumptionDTO.getConsumptionId());
+        return createResponseEntity(HttpStatus.OK, "Successfully consumed consumption");
     }
 
     @RequestMapping(value = "/reset", method = RequestMethod.POST)
     public ResponseEntity<?> reset(@RequestBody ConsumptionDTO consumptionDTO){
-        Consumption c = new Consumption(consumptionDTO.getConsumption());
-        consumptionService.reset(consumptionDTO.getTicketId(), c);
-        return createResponseEntity(HttpStatus.OK, "Successfully reset consumption " + consumptionDTO.getConsumption());
+        consumptionService.reset(consumptionDTO.getTicketId(), consumptionDTO.getConsumptionId());
+        return createResponseEntity(HttpStatus.OK, "Successfully reset consumption");
     }
 
     @ExceptionHandler(value = AlreadyConsumedException.class)
@@ -86,8 +81,8 @@ public class ConsumptionController {
         return createResponseEntity(HttpStatus.CONFLICT, e.getMessage());
     }
 
-    @ExceptionHandler(value = ConsumptionNotSupportedException.class)
-    public ResponseEntity<?> handleConsumptionNotSupported(ConsumptionNotSupportedException e){
+    @ExceptionHandler(value = ConsumptionNotFoundException.class)
+    public ResponseEntity<?> handleConsumptionNotSupported(ConsumptionNotFoundException e){
         return createResponseEntity(HttpStatus.NOT_FOUND, e.getMessage());
     }
 }

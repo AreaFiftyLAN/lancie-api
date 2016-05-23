@@ -2,9 +2,6 @@ package ch.wisv.areafiftylan.service;
 
 import ch.wisv.areafiftylan.model.ConsumptionMap;
 import ch.wisv.areafiftylan.model.util.Consumption;
-import ch.wisv.areafiftylan.service.repository.ConsumptionRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 
@@ -14,15 +11,17 @@ import java.util.Collection;
 public interface ConsumptionService {
     ConsumptionMap getByTicketId(Long ticketId);
 
-    void consume(Long ticketId, Consumption consumption);
+    boolean isConsumed(Long ticketId, Long consumptionId);
 
-    void reset(Long ticketId, Consumption consumption);
+    void consume(Long ticketId, Long consumptionId);
+
+    void reset(Long ticketId, Long consumptionId);
+
+    Consumption getByConsumptionId(Long consumptionId);
 
     Collection<Consumption> getPossibleConsumptions();
 
-    void removePossibleConsumption(Consumption consumption);
+    Consumption removePossibleConsumption(Long consumptionId);
 
-    void addPossibleConsumption(Consumption consumption);
-
-    //TODO: Make logic for setting the master consumption list
+    Consumption addPossibleConsumption(String consumptionName);
 }

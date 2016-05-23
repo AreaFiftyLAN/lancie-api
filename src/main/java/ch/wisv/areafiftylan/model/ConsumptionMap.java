@@ -1,7 +1,6 @@
 package ch.wisv.areafiftylan.model;
 
 import ch.wisv.areafiftylan.exception.AlreadyConsumedException;
-import ch.wisv.areafiftylan.exception.ConsumptionNotSupportedException;
 import ch.wisv.areafiftylan.model.util.Consumption;
 import lombok.Getter;
 import lombok.NonNull;
@@ -17,8 +16,6 @@ import java.util.List;
  */
 @Entity
 public class ConsumptionMap {
-    public static Collection<Consumption> PossibleConsumptions;//TODO: Initializing and storing of this field
-
     @Id
     Long id;
 
@@ -41,14 +38,10 @@ public class ConsumptionMap {
     }
 
     public boolean isConsumed(Consumption consumption){
-        checkIfConsumptionAllowedAndThrowIfNot(consumption);
-
         return consumptionsMade.contains(consumption);
     }
 
     public void consume(Consumption consumption){
-        checkIfConsumptionAllowedAndThrowIfNot(consumption);
-
         if(isConsumed(consumption)){
             throw new AlreadyConsumedException(consumption);
         }
@@ -57,8 +50,6 @@ public class ConsumptionMap {
     }
 
     public void reset(Consumption consumption){
-        checkIfConsumptionAllowedAndThrowIfNot(consumption);
-
         if(isConsumed(consumption)){
             consumptionsMade.remove(consumption);
         }
@@ -66,11 +57,5 @@ public class ConsumptionMap {
 
     public Collection<Consumption> getConsumptionsMade(){
         return consumptionsMade;
-    }
-
-    private void checkIfConsumptionAllowedAndThrowIfNot(Consumption consumption){
-        if(!PossibleConsumptions.contains(consumption)) {
-            throw new ConsumptionNotSupportedException(consumption);
-        }
     }
 }

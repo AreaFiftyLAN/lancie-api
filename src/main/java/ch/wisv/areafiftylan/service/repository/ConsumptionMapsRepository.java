@@ -10,6 +10,6 @@ import java.util.Optional;
  * Created by beer on 16-5-16.
  */
 @Repository
-public interface ConsumptionRepository extends JpaRepository<ConsumptionMap, Long> {
+public interface ConsumptionMapsRepository extends JpaRepository<ConsumptionMap, Long> {
     Optional<ConsumptionMap> findByTicketId(Long ticketId);
 }

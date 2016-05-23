@@ -5,7 +5,7 @@ import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.util.Consumption;
 import ch.wisv.areafiftylan.model.util.TicketType;
 import ch.wisv.areafiftylan.service.ConsumptionService;
-import ch.wisv.areafiftylan.service.repository.ConsumptionRepository;
+import ch.wisv.areafiftylan.service.repository.ConsumptionMapsRepository;
 import ch.wisv.areafiftylan.service.repository.PossibleConsumptionsRepository;
 import ch.wisv.areafiftylan.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.util.SessionData;
@@ -30,7 +30,7 @@ public class ConsumptionTest extends IntegrationTest {
     private ConsumptionService consumptionService;
 
     @Autowired
-    private ConsumptionRepository consumptionRepository;
+    private ConsumptionMapsRepository consumptionMapsRepository;
 
     @Autowired
     private PossibleConsumptionsRepository possibleConsumptionsRepository;
@@ -38,16 +38,15 @@ public class ConsumptionTest extends IntegrationTest {
     @Autowired
     private TicketRepository ticketRepository;
 
-    private Consumption spicyFood = new Consumption("Nice Spicy Food");
-    private Consumption coldMilkshake = new Consumption("Deliciously Cold Milkshake");
+    private Consumption spicyFood;
+    private Consumption coldMilkshake;
 
     private Ticket ticket;
 
     @Before
     public void InitConsumptionTest(){
-        ConsumptionMap.PossibleConsumptions = possibleConsumptionsRepository.findAll();
-        consumptionService.addPossibleConsumption(spicyFood);
-        consumptionService.addPossibleConsumption(coldMilkshake);
+        spicyFood = consumptionService.addPossibleConsumption("Nice Spicy Food");
+        coldMilkshake = consumptionService.addPossibleConsumption("Deliciously Cold Milkshake");
         ticket = makeTicket();
     }
 
@@ -59,7 +58,7 @@ public class ConsumptionTest extends IntegrationTest {
 
     @After
     public void consumptionTestCleanup(){
-        consumptionRepository.deleteAll();
+        consumptionMapsRepository.deleteAll();
         possibleConsumptionsRepository.deleteAll();
         ticketRepository.deleteAll();
     }
@@ -80,8 +79,8 @@ public class ConsumptionTest extends IntegrationTest {
     @Test
     public void getAllPossibleConsumptionsTestNone_Admin(){
         SessionData session = login(admin.getUsername(), adminCleartextPassword);
-        consumptionService.removePossibleConsumption(spicyFood);
-        consumptionService.removePossibleConsumption(coldMilkshake);
+        consumptionService.removePossibleConsumption(spicyFood.getId());
+        consumptionService.removePossibleConsumption(coldMilkshake.getId());
 
         given().
                 filter(sessionFilter).
@@ -96,7 +95,7 @@ public class ConsumptionTest extends IntegrationTest {
     @Test
     public void getAllPossibleConsumptionsTestSingle_Admin(){
         SessionData session = login(admin.getUsername(), adminCleartextPassword);
-        consumptionService.removePossibleConsumption(spicyFood);
+        consumptionService.removePossibleConsumption(spicyFood.getId());
 
         given().
                 filter(sessionFilter).
@@ -126,7 +125,7 @@ public class ConsumptionTest extends IntegrationTest {
 
     @Test
     public void getIsConsumed_True(){
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
+
     }
 
     @Test
@@ -170,6 +169,11 @@ public class ConsumptionTest extends IntegrationTest {
     }
 
     @Test
+    public void consumeConsumption_InvalidTicket(){
+
+    }
+
+    @Test
     public void resetConsumption(){
 
     }
@@ -181,6 +185,11 @@ public class ConsumptionTest extends IntegrationTest {
 
     @Test
     public void resetConsumption_ConsumptionDeleted(){
+
+    }
+
+    @Test
+    public void resetConsumption_InvalidTicket(){
 
     }
 

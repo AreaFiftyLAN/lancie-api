@@ -13,5 +13,5 @@ public class ConsumptionDTO {
 
     @Getter
     @Setter
-    String consumption;
+    Long consumptionId;
 }
