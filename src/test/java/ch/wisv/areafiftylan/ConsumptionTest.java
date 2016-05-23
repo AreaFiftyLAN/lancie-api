@@ -1,10 +1,13 @@
 package ch.wisv.areafiftylan;
 
 import ch.wisv.areafiftylan.model.ConsumptionMap;
+import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.util.Consumption;
+import ch.wisv.areafiftylan.model.util.TicketType;
 import ch.wisv.areafiftylan.service.ConsumptionService;
 import ch.wisv.areafiftylan.service.repository.ConsumptionRepository;
 import ch.wisv.areafiftylan.service.repository.PossibleConsumptionsRepository;
+import ch.wisv.areafiftylan.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.util.SessionData;
 import org.apache.http.HttpStatus;
 import org.junit.Before;
@@ -32,20 +35,33 @@ public class ConsumptionTest extends IntegrationTest {
     @Autowired
     private PossibleConsumptionsRepository possibleConsumptionsRepository;
 
+    @Autowired
+    private TicketRepository ticketRepository;
+
     private Consumption spicyFood = new Consumption("Nice Spicy Food");
     private Consumption coldMilkshake = new Consumption("Deliciously Cold Milkshake");
+
+    private Ticket ticket;
 
     @Before
     public void InitConsumptionTest(){
         ConsumptionMap.PossibleConsumptions = possibleConsumptionsRepository.findAll();
         consumptionService.addPossibleConsumption(spicyFood);
         consumptionService.addPossibleConsumption(coldMilkshake);
+        ticket = makeTicket();
+    }
+
+    private Ticket makeTicket() {
+        Ticket t = new Ticket(user, TicketType.EARLY_FULL, false, false);
+        t.setValid(true);
+        return ticketRepository.saveAndFlush(t);
     }
 
     @After
     public void consumptionTestCleanup(){
         consumptionRepository.deleteAll();
         possibleConsumptionsRepository.deleteAll();
+        ticketRepository.deleteAll();
     }
 
     @Test
@@ -110,7 +126,7 @@ public class ConsumptionTest extends IntegrationTest {
 
     @Test
     public void getIsConsumed_True(){
-
+        SessionData session = login(admin.getUsername(), adminCleartextPassword);
     }
 
     @Test
