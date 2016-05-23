@@ -27,4 +27,16 @@ public class Consumption {
     public Consumption(String name) {
         this.name = name;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Consumption)) return false;
+
+        Consumption that = (Consumption) o;
+
+        if (id != that.id) return false;
+        return name.equals(that.getName());
+
+    }
 }
