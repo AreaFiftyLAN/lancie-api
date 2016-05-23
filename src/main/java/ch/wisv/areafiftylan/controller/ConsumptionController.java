@@ -53,15 +53,15 @@ public class ConsumptionController {
         return consumptions;
     }
 
-    @RequestMapping(value = "/available/{consumptionName}", method = RequestMethod.POST)
-    public ResponseEntity<?> addAvailableConsumption(@PathVariable String consumptionName){
+    @RequestMapping(value = "/available", method = RequestMethod.POST)
+    public ResponseEntity<?> addAvailableConsumption(@RequestBody String consumptionName){
         consumptionService.addPossibleConsumption(consumptionName);
 
         return createResponseEntity(HttpStatus.OK, "Succesfully added " + consumptionName + " as a supported consumption.");
     }
 
-    @RequestMapping(value = "/available/{consumptionId}", method = RequestMethod.DELETE)
-    public ResponseEntity<?> removeAvailableConsumption(@PathVariable Long consumptionId){
+    @RequestMapping(value = "/available", method = RequestMethod.DELETE)
+    public ResponseEntity<?> removeAvailableConsumption(@RequestBody Long consumptionId){
         Consumption c = consumptionService.removePossibleConsumption(consumptionId);
 
         return createResponseEntity(HttpStatus.OK, "Succesfully removed " + c.getName() + " as a supported consumption.");
