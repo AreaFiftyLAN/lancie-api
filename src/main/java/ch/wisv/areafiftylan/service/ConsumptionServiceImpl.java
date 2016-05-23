@@ -13,6 +13,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -39,7 +40,14 @@ public class ConsumptionServiceImpl implements ConsumptionService {
             throw new InvalidTicketException("Ticket is invalid; can't reset consumptions");
         }
 
-        return consumptionMapsRepository.findByTicketId(ticketId).orElse(InitializeConsumptionMap(ticketId));
+        Collection<ConsumptionMap> consumptionMaps = consumptionMapsRepository.findAll();
+        Optional<ConsumptionMap> mapOptional = consumptionMapsRepository.findByTicketId(ticketId);
+
+        if(mapOptional.isPresent()){
+            return mapOptional.get();
+        }else{
+            return InitializeConsumptionMap(ticketId);
+        }
     }
 
     @Override
