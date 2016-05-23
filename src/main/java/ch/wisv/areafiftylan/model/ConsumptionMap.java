@@ -17,6 +17,7 @@ import java.util.List;
 @Entity
 public class ConsumptionMap {
     @Id
+    @GeneratedValue
     Long id;
 
     @NonNull
