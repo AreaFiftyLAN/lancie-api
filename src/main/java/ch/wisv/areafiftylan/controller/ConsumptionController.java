@@ -22,7 +22,7 @@ import static ch.wisv.areafiftylan.util.ResponseEntityBuilder.createResponseEnti
 /**
  * Created by beer on 16-5-16.
  */
-@Controller
+@RestController
 @PreAuthorize("hasRole('ADMIN')")
 @RequestMapping(value = "/consumptions")
 public class ConsumptionController {
