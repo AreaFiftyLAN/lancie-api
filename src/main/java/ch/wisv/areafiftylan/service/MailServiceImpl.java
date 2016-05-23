@@ -93,16 +93,16 @@ public class MailServiceImpl implements MailService {
     @Override
     public void sendVerificationmail(User user, String url) {
         String message = "Please click on the following link to complete your registration: <a href=\"" +
-                url + "\">" + url + "</a><br><br>If the link does not work, please copy the link and" +
-                " paste it in your browser.";
+                url + "\">" + url + "</a><br /><br />If the link does not work, please copy the link and" +
+                " paste it into your browser.";
         sendMail(user.getEmail(), user.getUsername(), "Confirm your registration", message);
     }
 
     @Override
     public void sendPasswordResetMail(User user, String url) {
         String message = "Please click on the following link to reset your password: <a href=\"" +
-                url + "\">" + url + "</a><br><br>If the link does not work, please copy the link and" +
-                " paste it in your browser.";
+                url + "\">" + url + "</a><br /><br />If the link does not work, please copy the link and" +
+                " paste it into your browser.";
         sendMail(user.getEmail(), user.getUsername(), "Password reset requested", message);
     }
 
