@@ -7,11 +7,13 @@ import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.util.Consumption;
 import ch.wisv.areafiftylan.service.repository.ConsumptionMapsRepository;
 import ch.wisv.areafiftylan.service.repository.PossibleConsumptionsRepository;
+import ch.wisv.areafiftylan.service.repository.TicketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 /**
  * Created by beer on 16-5-16.
@@ -81,6 +83,9 @@ public class ConsumptionServiceImpl implements ConsumptionService {
     @Override
     public Consumption removePossibleConsumption(Long consumptionId) {
         Consumption consumption = getByConsumptionId(consumptionId);
+
+        resetConsumptionEverywhere(consumption);
+
         possibleConsumptionsRepository.delete(consumption);
         return consumption;
     }
@@ -93,5 +98,12 @@ public class ConsumptionServiceImpl implements ConsumptionService {
 
         Consumption consumption = new Consumption(consumptionName);
         return possibleConsumptionsRepository.saveAndFlush(consumption);
+    }
+
+    private void resetConsumptionEverywhere(Consumption consumption){
+        Collection<Ticket> allValidTickets = ticketService.getAllTickets().stream()
+                .filter(t -> t.isValid()).collect(Collectors.toList());
+
+        allValidTickets.forEach(t -> reset(t.getId(), consumption.getId()));
     }
 }
