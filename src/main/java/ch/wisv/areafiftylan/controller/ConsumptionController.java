@@ -14,7 +14,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static ch.wisv.areafiftylan.util.ResponseEntityBuilder.createResponseEntity;
@@ -30,8 +32,9 @@ public class ConsumptionController {
     private ConsumptionService consumptionService;
 
     @RequestMapping(method = RequestMethod.GET)
-    public boolean isConsumed(@RequestBody ConsumptionDTO consumptionDTO){
-        return consumptionService.isConsumed(consumptionDTO.getTicketId(), consumptionDTO.getConsumptionId());
+    public Map<String, Boolean> isConsumed(@RequestBody ConsumptionDTO consumptionDTO){
+        boolean consumed = consumptionService.isConsumed(consumptionDTO.getTicketId(), consumptionDTO.getConsumptionId());
+        return Collections.singletonMap("consumed", consumed);
     }
 
     @RequestMapping(value = "/{ticketId}", method = RequestMethod.GET)
