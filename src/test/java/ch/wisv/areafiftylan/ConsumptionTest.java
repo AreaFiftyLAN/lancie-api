@@ -10,7 +10,10 @@ import ch.wisv.areafiftylan.service.repository.PossibleConsumptionsRepository;
 import ch.wisv.areafiftylan.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.util.SessionData;
 import com.jayway.restassured.http.ContentType;
+import com.jayway.restassured.response.Response;
+import com.jayway.restassured.response.ValidatableResponse;
 import org.apache.http.HttpStatus;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.After;
 import org.junit.Test;
@@ -21,7 +24,6 @@ import java.util.Map;
 
 import static com.jayway.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 
@@ -46,6 +48,7 @@ public class ConsumptionTest extends IntegrationTest {
 
     private Consumption spicyFood;
     private Consumption coldMilkshake;
+    private final String UNUSED_CONSUMPTION_NAME = "Hot Chocolate";
 
     private Ticket ticket;
 
@@ -73,178 +76,215 @@ public class ConsumptionTest extends IntegrationTest {
     public void getAllPossibleConsumptionsTestNone_NoAdmin(){
         SessionData session = login(user.getUsername(), userCleartextPassword);
 
-        given().
-                filter(sessionFilter).
-                header(session.getCsrfHeader()).
-        when().
-                get(CONSUMPTIONS_POSSIBLE_ENDPOINT).
-        then().
+        getAllPossibleTickets(session).
+            then().
                 statusCode(HttpStatus.SC_FORBIDDEN);
     }
 
     @Test
     public void getAllPossibleConsumptionsTestNone_Admin(){
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
         consumptionService.removePossibleConsumption(spicyFood.getId());
         consumptionService.removePossibleConsumption(coldMilkshake.getId());
 
-        given().
-                filter(sessionFilter).
-                header(session.getCsrfHeader()).
-        when().
-                get(CONSUMPTIONS_POSSIBLE_ENDPOINT).
-        then().
+
+        getAllPossibleTickets_AsAdmin().
+            then().
                 statusCode(HttpStatus.SC_OK).
                 body("$", hasSize(0));
     }
 
     @Test
     public void getAllPossibleConsumptionsTestSingle_Admin(){
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
         consumptionService.removePossibleConsumption(spicyFood.getId());
 
-        given().
-                filter(sessionFilter).
-                header(session.getCsrfHeader()).
-        when().
-                get(CONSUMPTIONS_POSSIBLE_ENDPOINT).
-        then().
+        getAllPossibleTickets_AsAdmin().
+            then().
                 statusCode(HttpStatus.SC_OK).
                 body("$", hasSize(1)).
-                body("$", containsInAnyOrder(coldMilkshake.getName()));
+                body("name", containsInAnyOrder(coldMilkshake.getName()));
     }
 
     @Test
     public void getAllPossibleConsumptionsTestMultiple_Admin(){
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
-
-        given().
-                filter(sessionFilter).
-                header(session.getCsrfHeader()).
-        when().
-                get(CONSUMPTIONS_POSSIBLE_ENDPOINT).
-        then().
+        getAllPossibleTickets_AsAdmin().
+            then().
                 statusCode(HttpStatus.SC_OK).
                 body("$", hasSize(2)).
-                body("$", containsInAnyOrder(coldMilkshake.getName(), spicyFood.getName()));
+                body("name", containsInAnyOrder(coldMilkshake.getName(), spicyFood.getName()));
     }
 
     @Test
     public void getIsConsumed_True(){
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
-
         consumptionService.consume(ticket.getId(), spicyFood.getId());
 
-        Map<String, String> seatGroupDTO = makeConsumptionRequestBody(ticket.getId(), spicyFood.getId());
-
-        given().
-                filter(sessionFilter).
-                header(session.getCsrfHeader()).
-        when().
-                content(seatGroupDTO).
-                contentType(ContentType.JSON).
-                get(CONSUMPTION_ENDPOINT).
-        then().
+        getIsConsumed(ticket, spicyFood).
+            then().
                 statusCode(HttpStatus.SC_OK).
                 body("consumed", is(true));
     }
 
     @Test
     public void getIsConsumed_False(){
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
-
-        Map<String, String> seatGroupDTO = makeConsumptionRequestBody(ticket.getId(), spicyFood.getId());
-
-        given().
-                filter(sessionFilter).
-                header(session.getCsrfHeader()).
-        when().
-                content(seatGroupDTO).
-                contentType(ContentType.JSON).
-                get(CONSUMPTION_ENDPOINT).
-        then().
+        getIsConsumed(ticket, spicyFood).
+            then().
                 statusCode(HttpStatus.SC_OK).
                 body("consumed", is(false));
     }
 
     @Test
-    public void getTicketConsumptions_NoneConsumed(){
+    public void getIsConsumed_ConsumptionDoesntExist(){
+        getIsConsumed(ticket.getId(), getUnusedConsumptionId()).
+                then().statusCode(HttpStatus.SC_NOT_FOUND);
+    }
 
+    @Test
+    public void getIsConsumed_InvalidTicket(){
+        invalidateTicket();
+
+        getIsConsumed(ticket, spicyFood).
+                then().statusCode(HttpStatus.SC_BAD_REQUEST);
+    }
+
+    @Test
+    public void getTicketConsumptions_NoneConsumed(){
+        getTicketConsumptions(ticket).
+            then().
+                statusCode(HttpStatus.SC_OK).
+                body("$", hasSize(0));
     }
 
     @Test
     public void getTicketConsumptions_OneConsumed(){
+        consumptionService.consume(ticket.getId(), spicyFood.getId());
 
+        getTicketConsumptions(ticket).
+            then().
+                statusCode(HttpStatus.SC_OK).
+                body("$", hasSize(1)).
+                body("name", containsInAnyOrder(spicyFood.getName()));
     }
 
     @Test
-    public void getTicketConsumptions_MultipleConsumed(){
+    public void getTicketConsumptions_OneConsumedAndDeleted(){
+        consumptionService.consume(ticket.getId(), spicyFood.getId());
+        consumptionService.removePossibleConsumption(spicyFood.getId());
 
+        getTicketConsumptions(ticket).
+            then().
+                statusCode(HttpStatus.SC_OK).
+                body("$", hasSize(0));
     }
 
     @Test
     public void consumeConsumption(){
+        consumeConsumption(ticket, spicyFood).
+                then().statusCode(HttpStatus.SC_OK);
 
+        Assert.assertTrue(consumptionService.isConsumed(ticket.getId(), spicyFood.getId()));
     }
 
     @Test
-    public void consumeConsumption_AlreadyConsumer(){
-
+    public void consumeConsumption_AlreadyConsumed(){
+        consumeConsumption(ticket, spicyFood);
+        consumeConsumption(ticket, spicyFood).
+                then().statusCode(HttpStatus.SC_CONFLICT);
     }
 
     @Test
     public void consumeConsumption_ConsumptionDoesntExist(){
-
+        consumeConsumption(ticket.getId(), getUnusedConsumptionId()).
+                then().statusCode(HttpStatus.SC_NOT_FOUND);
     }
 
     @Test
     public void consumeConsumption_ConsumptionDeleted(){
-
+        consumptionService.removePossibleConsumption(spicyFood.getId());
+        consumeConsumption(ticket, spicyFood).
+                then().statusCode(HttpStatus.SC_NOT_FOUND);
     }
 
     @Test
     public void consumeConsumption_InvalidTicket(){
+        invalidateTicket();
 
+        consumeConsumption(ticket, spicyFood).
+                then().statusCode(HttpStatus.SC_BAD_REQUEST);
     }
 
     @Test
     public void resetConsumption(){
-
+        consumeAndResetConsumption(ticket, spicyFood).
+                then().statusCode(HttpStatus.SC_OK);
     }
 
     @Test
     public void resetConsumption_ConsumptionDoesntExist(){
+        SessionData session = login(admin.getUsername(), adminCleartextPassword);
 
+        resetConsumption(ticket.getId(), getUnusedConsumptionId(), session).
+                then().statusCode(HttpStatus.SC_NOT_FOUND);
     }
 
     @Test
     public void resetConsumption_ConsumptionDeleted(){
+        SessionData session = login(admin.getUsername(), adminCleartextPassword);
 
+        consumptionService.consume(ticket.getId(), spicyFood.getId());
+
+        consumptionService.removePossibleConsumption(spicyFood.getId());
+
+        resetConsumption(ticket.getId(), spicyFood.getId(), session).
+                then().statusCode(HttpStatus.SC_NOT_FOUND);
     }
 
     @Test
     public void resetConsumption_InvalidTicket(){
+        SessionData session = login(admin.getUsername(), adminCleartextPassword);
 
+        consumptionService.consume(ticket.getId(), spicyFood.getId());
+
+        invalidateTicket();
+
+        resetConsumption(ticket.getId(), spicyFood.getId(), session).
+                then().statusCode(HttpStatus.SC_BAD_REQUEST);
     }
 
     @Test
     public void addPossibleConsumption(){
+        addPossibleConsumption(UNUSED_CONSUMPTION_NAME)
+                .then().statusCode(HttpStatus.SC_OK);
 
+        boolean consumptionExists =
+                consumptionService.getPossibleConsumptions()
+                        .stream()
+                        .anyMatch(c -> c.getName().equals(UNUSED_CONSUMPTION_NAME));
+        Assert.assertTrue(consumptionExists);
     }
 
     @Test
     public void addPossibleConsumption_Duplicate(){
+        addPossibleConsumption(UNUSED_CONSUMPTION_NAME);
+        addPossibleConsumption(UNUSED_CONSUMPTION_NAME)
+                .then().statusCode(HttpStatus.SC_CONFLICT);
 
     }
 
     @Test
     public void removePossibleConsumption(){
+        removePossibleConsumption(spicyFood)
+                .then().statusCode(HttpStatus.SC_OK);
 
+        boolean consumptionExists =
+                consumptionService.getPossibleConsumptions()
+                        .stream()
+                        .anyMatch(c -> c.getName().equals(UNUSED_CONSUMPTION_NAME));
+        Assert.assertFalse(consumptionExists);
     }
 
     @Test
     public void removePossibleConsumption_DoesntExist(){
-
+        removePossibleConsumption(getUnusedConsumptionId())
+                .then().statusCode(HttpStatus.SC_NOT_FOUND);
     }
 
     private Map<String, String> makeConsumptionRequestBody(Long ticketId, Long consumptionId){
@@ -252,5 +292,133 @@ public class ConsumptionTest extends IntegrationTest {
         consumptionDTO.put("ticketId", ticketId.toString());
         consumptionDTO.put("consumptionId", consumptionId.toString());
         return consumptionDTO;
+    }
+
+    private void invalidateTicket(){
+        ticket.setValid(false);
+        ticketRepository.saveAndFlush(ticket);
+    }
+
+    private Response getAllPossibleTickets_AsAdmin(){
+        SessionData session = login(admin.getUsername(), adminCleartextPassword);
+
+        return getAllPossibleTickets(session);
+    }
+
+    private Response getAllPossibleTickets(SessionData session){
+        return given().
+                filter(sessionFilter).
+                header(session.getCsrfHeader()).
+        when().
+                get(CONSUMPTIONS_POSSIBLE_ENDPOINT);
+    }
+
+    private Response getIsConsumed(Ticket localTicket, Consumption localConsumption){
+        return getIsConsumed(localTicket.getId(), localConsumption.getId());
+    }
+
+    private Response getIsConsumed(Long ticketId, Long consumptionId){
+        SessionData session = login(admin.getUsername(), adminCleartextPassword);
+
+        Map<String, String> seatGroupDTO = makeConsumptionRequestBody(ticketId, consumptionId);
+
+        return given().
+                filter(sessionFilter).
+                header(session.getCsrfHeader()).
+        when().
+                content(seatGroupDTO).
+                contentType(ContentType.JSON).
+                get(CONSUMPTION_ENDPOINT);
+    }
+
+    private Response getTicketConsumptions(Ticket localTicket){
+        SessionData session = login(admin.getUsername(), adminCleartextPassword);
+
+        return given().
+                filter(sessionFilter).
+                header(session.getCsrfHeader()).
+        when().
+                get(CONSUMPTION_ENDPOINT + "/" + localTicket.getId());
+    }
+
+    private Response consumeConsumption(Ticket localTicket, Consumption localConsumption){
+        return consumeConsumption(localTicket.getId(), localConsumption.getId());
+    }
+
+    private Response consumeConsumption(Long ticketId, Long consumptionId){
+        SessionData session = login(admin.getUsername(), adminCleartextPassword);
+
+        Map<String, String> seatGroupDTO = makeConsumptionRequestBody(ticketId, consumptionId);
+
+        return given().
+                filter(sessionFilter).
+                header(session.getCsrfHeader()).
+        when().
+                content(seatGroupDTO).
+                contentType(ContentType.JSON).
+                post(CONSUMPTION_ENDPOINT + "/consume");
+    }
+
+    private Response consumeAndResetConsumption(Ticket localTicket, Consumption localConsumption){
+        return consumeAndResetConsumption(localTicket.getId(), localConsumption.getId());
+    }
+
+    private Response consumeAndResetConsumption(Long ticketId, Long consumptionId){
+        SessionData session = login(admin.getUsername(), adminCleartextPassword);
+
+        consumptionService.consume(ticketId, consumptionId);
+
+        return resetConsumption(ticketId, consumptionId, session);
+    }
+
+    private Response resetConsumption(Long ticketId, Long consumptionId, SessionData session){
+        Map<String, String> seatGroupDTO = makeConsumptionRequestBody(ticketId, consumptionId);
+
+        return given().
+                filter(sessionFilter).
+                header(session.getCsrfHeader()).
+        when().
+                content(seatGroupDTO).
+                contentType(ContentType.JSON).
+                post(CONSUMPTION_ENDPOINT + "/reset");
+    }
+
+    private Response addPossibleConsumption(String consumptionName){
+        SessionData session = login(admin.getUsername(), adminCleartextPassword);
+
+        return given().
+                filter(sessionFilter).
+                header(session.getCsrfHeader()).
+                when().
+                content(consumptionName).
+                contentType(ContentType.JSON).
+                post(CONSUMPTIONS_POSSIBLE_ENDPOINT);
+    }
+
+    private Response removePossibleConsumption(Consumption consumption){
+        return removePossibleConsumption(consumption.getId());
+    }
+
+
+    private Response removePossibleConsumption(Long consumptionId){
+        SessionData session = login(admin.getUsername(), adminCleartextPassword);
+
+        return given().
+                filter(sessionFilter).
+                header(session.getCsrfHeader()).
+        when().
+                content(consumptionId).
+                contentType(ContentType.JSON).
+                delete(CONSUMPTIONS_POSSIBLE_ENDPOINT);
+    }
+
+    private Long getUnusedConsumptionId(){
+        Long id = 0L
+                ;
+        while(possibleConsumptionsRepository.findById(id).isPresent()){
+            id++;
+        }
+
+        return id;
     }
 }
