@@ -37,7 +37,7 @@ public class ConsumptionServiceImpl implements ConsumptionService {
     @Override
     public ConsumptionMap getByTicketIdIfValid(Long ticketId) {
         if(!ticketService.getTicketById(ticketId).isValid()){
-            throw new InvalidTicketException("Ticket is invalid; can't reset consumptions");
+            throw new InvalidTicketException("Ticket is invalid; It can not be used for consumptions.");
         }
 
         Collection<ConsumptionMap> consumptionMaps = consumptionMapsRepository.findAll();
