@@ -9,6 +9,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -89,6 +91,29 @@ public class UserRestController {
     @RequestMapping(method = RequestMethod.GET)
     public Collection<User> readUsers() {
         return userService.getAllUsers();
+    }
+
+    /**
+     * Get the User currently logged in. Because our User model implements the Spring Security UserDetails, this can be
+     * directly derived from the Authentication object which is automatically added. Returns a not-found entity if
+     * there's no user logged in. Returns the user
+     *
+     * @param auth Current Authentication object, automatically taken from the SecurityContext
+     *
+     * @return The currently logged in User.
+     */
+    @RequestMapping(value = "/current", method = RequestMethod.GET)
+    public ResponseEntity<?> getCurrentUser(Authentication auth) {
+        // To prevent 403 errors on this endpoint, we manually handle unauthenticated users, instead of a
+        // preauthorize tag.
+        if (auth != null) {
+            // Get the currently logged in user from the autowired Authentication object.
+            UserDetails currentUser = (UserDetails) auth.getPrincipal();
+            User user = userService.getUserByUsername(currentUser.getUsername()).get();
+            return new ResponseEntity<>(user, HttpStatus.OK);
+        } else {
+            return createResponseEntity(HttpStatus.OK, "Not logged in");
+        }
     }
 
     /**

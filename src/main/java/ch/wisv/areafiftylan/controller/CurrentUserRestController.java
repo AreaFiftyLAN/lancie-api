@@ -46,27 +46,9 @@ public class CurrentUserRestController {
     }
 
     /**
-     * Get the User currently logged in. Because our User model implements the Spring Security UserDetails, this can be
-     * directly derived from the Authentication object which is automatically added. Returns a not-found entity if
-     * there's no user logged in. Returns the user
-     *
-     * @param auth Current Authentication object, automatically taken from the SecurityContext
-     *
-     * @return The currently logged in User.
+     * The GET /users/current/ mapping is located in the UserRestController as all methods in this controller require
+     * Authentication
      */
-    @RequestMapping(method = RequestMethod.GET)
-    public ResponseEntity<?> getCurrentUser(Authentication auth) {
-        // To prevent 403 errors on this endpoint, we manually handle unauthenticated users, instead of a
-        // preauthorize tag.
-        if (auth != null) {
-            // Get the currently logged in user from the autowired Authentication object.
-            UserDetails currentUser = (UserDetails) auth.getPrincipal();
-            User user = userService.getUserByUsername(currentUser.getUsername()).get();
-            return new ResponseEntity<>(user, HttpStatus.OK);
-        } else {
-            return createResponseEntity(HttpStatus.OK, "Not logged in");
-        }
-    }
 
     /**
      * This mapping allows the user to change their password while logged in. This is different from the password reset
