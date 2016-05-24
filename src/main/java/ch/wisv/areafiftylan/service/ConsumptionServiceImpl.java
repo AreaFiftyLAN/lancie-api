@@ -40,7 +40,6 @@ public class ConsumptionServiceImpl implements ConsumptionService {
             throw new InvalidTicketException("Ticket is invalid; It can not be used for consumptions.");
         }
 
-        Collection<ConsumptionMap> consumptionMaps = consumptionMapsRepository.findAll();
         Optional<ConsumptionMap> mapOptional = consumptionMapsRepository.findByTicketId(ticketId);
 
         if(mapOptional.isPresent()){
