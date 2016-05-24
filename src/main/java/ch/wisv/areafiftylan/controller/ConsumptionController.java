@@ -27,12 +27,6 @@ public class ConsumptionController {
     @Autowired
     private ConsumptionService consumptionService;
 
-    @RequestMapping(method = RequestMethod.GET)
-    public Map<String, Boolean> isConsumed(@RequestBody ConsumptionDTO consumptionDTO){
-        boolean consumed = consumptionService.isConsumed(consumptionDTO.getTicketId(), consumptionDTO.getConsumptionId());
-        return Collections.singletonMap("consumed", consumed);
-    }
-
     @RequestMapping(value = "/{ticketId}", method = RequestMethod.GET)
     public Collection<Consumption> consumptionsMade(@PathVariable Long ticketId){
         return consumptionService.getByTicketIdIfValid(ticketId).getConsumptionsMade();
