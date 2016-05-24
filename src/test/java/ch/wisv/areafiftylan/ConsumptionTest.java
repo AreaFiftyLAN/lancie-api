@@ -1,6 +1,5 @@
 package ch.wisv.areafiftylan;
 
-import ch.wisv.areafiftylan.model.ConsumptionMap;
 import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.util.Consumption;
 import ch.wisv.areafiftylan.model.util.TicketType;
@@ -11,7 +10,6 @@ import ch.wisv.areafiftylan.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.util.SessionData;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Response;
-import com.jayway.restassured.response.ValidatableResponse;
 import org.apache.http.HttpStatus;
 import org.junit.Assert;
 import org.junit.Before;
@@ -32,7 +30,6 @@ import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
  */
 public class ConsumptionTest extends IntegrationTest {
     private final String CONSUMPTION_ENDPOINT = "/consumptions";
-    private final String CONSUMPTIONS_POSSIBLE_ENDPOINT = CONSUMPTION_ENDPOINT + "/available";
 
     @Autowired
     private ConsumptionService consumptionService;
@@ -76,7 +73,7 @@ public class ConsumptionTest extends IntegrationTest {
     public void getAllPossibleConsumptionsTestNone_NoAdmin(){
         SessionData session = login(user.getUsername(), userCleartextPassword);
 
-        getAllPossibleTickets(session).
+        getAllPossibleConsumptions(session).
             then().
                 statusCode(HttpStatus.SC_FORBIDDEN);
     }
@@ -87,7 +84,7 @@ public class ConsumptionTest extends IntegrationTest {
         consumptionService.removePossibleConsumption(coldMilkshake.getId());
 
 
-        getAllPossibleTickets_AsAdmin().
+        getAllPossibleConsumptions_AsAdmin().
             then().
                 statusCode(HttpStatus.SC_OK).
                 body("$", hasSize(0));
@@ -97,7 +94,7 @@ public class ConsumptionTest extends IntegrationTest {
     public void getAllPossibleConsumptionsTestSingle_Admin(){
         consumptionService.removePossibleConsumption(spicyFood.getId());
 
-        getAllPossibleTickets_AsAdmin().
+        getAllPossibleConsumptions_AsAdmin().
             then().
                 statusCode(HttpStatus.SC_OK).
                 body("$", hasSize(1)).
@@ -106,43 +103,11 @@ public class ConsumptionTest extends IntegrationTest {
 
     @Test
     public void getAllPossibleConsumptionsTestMultiple_Admin(){
-        getAllPossibleTickets_AsAdmin().
+        getAllPossibleConsumptions_AsAdmin().
             then().
                 statusCode(HttpStatus.SC_OK).
                 body("$", hasSize(2)).
                 body("name", containsInAnyOrder(coldMilkshake.getName(), spicyFood.getName()));
-    }
-
-    @Test
-    public void getIsConsumed_True(){
-        consumptionService.consume(ticket.getId(), spicyFood.getId());
-
-        getIsConsumed(ticket, spicyFood).
-            then().
-                statusCode(HttpStatus.SC_OK).
-                body("consumed", is(true));
-    }
-
-    @Test
-    public void getIsConsumed_False(){
-        getIsConsumed(ticket, spicyFood).
-            then().
-                statusCode(HttpStatus.SC_OK).
-                body("consumed", is(false));
-    }
-
-    @Test
-    public void getIsConsumed_ConsumptionDoesntExist(){
-        getIsConsumed(ticket.getId(), getUnusedConsumptionId()).
-                then().statusCode(HttpStatus.SC_NOT_FOUND);
-    }
-
-    @Test
-    public void getIsConsumed_InvalidTicket(){
-        invalidateTicket();
-
-        getIsConsumed(ticket, spicyFood).
-                then().statusCode(HttpStatus.SC_BAD_REQUEST);
     }
 
     @Test
@@ -299,35 +264,17 @@ public class ConsumptionTest extends IntegrationTest {
         ticketRepository.saveAndFlush(ticket);
     }
 
-    private Response getAllPossibleTickets_AsAdmin(){
+    private Response getAllPossibleConsumptions_AsAdmin(){
         SessionData session = login(admin.getUsername(), adminCleartextPassword);
 
-        return getAllPossibleTickets(session);
+        return getAllPossibleConsumptions(session);
     }
 
-    private Response getAllPossibleTickets(SessionData session){
+    private Response getAllPossibleConsumptions(SessionData session){
         return given().
                 filter(sessionFilter).
                 header(session.getCsrfHeader()).
         when().
-                get(CONSUMPTIONS_POSSIBLE_ENDPOINT);
-    }
-
-    private Response getIsConsumed(Ticket localTicket, Consumption localConsumption){
-        return getIsConsumed(localTicket.getId(), localConsumption.getId());
-    }
-
-    private Response getIsConsumed(Long ticketId, Long consumptionId){
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
-
-        Map<String, String> seatGroupDTO = makeConsumptionRequestBody(ticketId, consumptionId);
-
-        return given().
-                filter(sessionFilter).
-                header(session.getCsrfHeader()).
-        when().
-                content(seatGroupDTO).
-                contentType(ContentType.JSON).
                 get(CONSUMPTION_ENDPOINT);
     }
 
@@ -389,10 +336,10 @@ public class ConsumptionTest extends IntegrationTest {
         return given().
                 filter(sessionFilter).
                 header(session.getCsrfHeader()).
-                when().
+        when().
                 content(consumptionName).
                 contentType(ContentType.JSON).
-                post(CONSUMPTIONS_POSSIBLE_ENDPOINT);
+                post(CONSUMPTION_ENDPOINT);
     }
 
     private Response removePossibleConsumption(Consumption consumption){
@@ -409,7 +356,7 @@ public class ConsumptionTest extends IntegrationTest {
         when().
                 content(consumptionId).
                 contentType(ContentType.JSON).
-                delete(CONSUMPTIONS_POSSIBLE_ENDPOINT);
+                delete(CONSUMPTION_ENDPOINT);
     }
 
     private Long getUnusedConsumptionId(){
