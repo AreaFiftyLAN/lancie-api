@@ -26,6 +26,7 @@ import static ch.wisv.areafiftylan.util.ResponseEntityBuilder.createResponseEnti
 
 @RestController
 @RequestMapping("/users/current")
+@PreAuthorize("isAuthenticated()")
 public class CurrentUserRestController {
 
     private UserService userService;
@@ -35,7 +36,8 @@ public class CurrentUserRestController {
     private TicketService ticketService;
 
     @Autowired
-    CurrentUserRestController(UserService userService, OrderService orderService, TicketService ticketService, TeamService teamService, SeatService seatService) {
+    CurrentUserRestController(UserService userService, OrderService orderService, TicketService ticketService,
+                              TeamService teamService, SeatService seatService) {
         this.userService = userService;
         this.seatService = seatService;
         this.orderService = orderService;
@@ -71,12 +73,11 @@ public class CurrentUserRestController {
      * functionality which works with tokens. Users have to provide both their old and new password, and have to be
      * fully authenticated, meaning that they can't be coming from a "Remember me" session.
      *
-     * @param auth The current user
+     * @param auth              The current user
      * @param passwordChangeDTO DTO containing oldPassword and newPassword
      *
      * @return Statusmessage
      */
-    @PreAuthorize("isFullyAuthenticated()")
     @RequestMapping(value = "password", method = RequestMethod.PUT)
     public ResponseEntity<?> changeCurrentUserPassword(Authentication auth,
                                                        @RequestBody @Validated PasswordChangeDTO passwordChangeDTO) {
@@ -90,18 +91,18 @@ public class CurrentUserRestController {
 
     /**
      * Get all the Teams the current user is a member of.
+     *
      * @param auth Current Authentication object, automatically taken from the SecurityContext
+     *
      * @return A Collection of Teams of which the current User is a member
      */
     @JsonView(View.Team.class)
-    @PreAuthorize("isAuthenticated()")
     @RequestMapping(value = "/teams", method = RequestMethod.GET)
     public Collection<Team> getCurrentTeams(Authentication auth) {
         UserDetails currentUser = (UserDetails) auth.getPrincipal();
         return teamService.getTeamsByUsername(currentUser.getUsername());
     }
 
-    @PreAuthorize("isAuthenticated()")
     @RequestMapping(value = "/teams/invites", method = RequestMethod.GET)
     public List<TeamInviteResponse> getOpenInvites(Authentication auth) {
         User currentUser = (User) auth.getPrincipal();
@@ -117,6 +118,7 @@ public class CurrentUserRestController {
      *
      * @return A collection of Orders of the current User.
      */
+    @JsonView(View.OrderOverview.class)
     @RequestMapping(value = "/orders", method = RequestMethod.GET)
     public Collection<Order> getAllOrders(Authentication auth) {
         UserDetails currentUser = (UserDetails) auth.getPrincipal();
@@ -130,7 +132,6 @@ public class CurrentUserRestController {
      *
      * @return The current owned tickets, if any exist
      */
-    @PreAuthorize("isAuthenticated()")
     @RequestMapping(value = "/tickets", method = RequestMethod.GET)
     public Collection<Ticket> getAllTickets(Authentication auth) {
         UserDetails currentUser = (UserDetails) auth.getPrincipal();
@@ -150,6 +151,13 @@ public class CurrentUserRestController {
         return orderService.getOpenOrders(currentUser.getUsername());
     }
 
+    /**
+     * Gett the seats of the current user
+     *
+     * @param auth Currently logged in user
+     *
+     * @return Returns a list of reserved seats by the user
+     */
     @RequestMapping(value = "/seat", method = RequestMethod.GET)
     public List<Seat> getCurrentUserSeat(Authentication auth) {
         User user = (User) auth.getPrincipal();
