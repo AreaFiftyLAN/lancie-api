@@ -134,7 +134,7 @@ public class CurrentUserRestController {
     }
 
     /**
-     * Gett the seats of the current user
+     * Get the seats of the current user
      *
      * @param auth Currently logged in user
      *
