@@ -7,7 +7,6 @@ import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.util.Consumption;
 import ch.wisv.areafiftylan.service.repository.ConsumptionMapsRepository;
 import ch.wisv.areafiftylan.service.repository.PossibleConsumptionsRepository;
-import ch.wisv.areafiftylan.service.repository.TicketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
@@ -45,7 +44,7 @@ public class ConsumptionServiceImpl implements ConsumptionService {
         if(mapOptional.isPresent()){
             return mapOptional.get();
         }else{
-            return InitializeConsumptionMap(ticketId);
+            return initializeConsumptionMap(ticketId);
         }
     }
 
@@ -55,7 +54,7 @@ public class ConsumptionServiceImpl implements ConsumptionService {
         return getByTicketIdIfValid(ticketId).isConsumed(c);
     }
 
-    private ConsumptionMap InitializeConsumptionMap(Long ticketId){
+    private ConsumptionMap initializeConsumptionMap(Long ticketId){
         Ticket t = ticketService.getTicketById(ticketId);
         return consumptionMapsRepository.saveAndFlush(new ConsumptionMap(t));
     }
