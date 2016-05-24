@@ -32,7 +32,7 @@ public class ConsumptionController {
         return consumptionService.getByTicketIdIfValid(ticketId).getConsumptionsMade();
     }
 
-    @RequestMapping(value = "/available", method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET)
     public Collection<Consumption> getAllPossibleConsumptions(){
         return consumptionService.getPossibleConsumptions();
     }
