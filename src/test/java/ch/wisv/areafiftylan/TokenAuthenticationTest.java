@@ -107,6 +107,48 @@ public class TokenAuthenticationTest extends IntegrationTest {
     }
 
     @Test
+    public void testVerifyValidToken() {
+        Header header = getTokenHeader(user.getUsername(), userCleartextPassword);
+
+        //@formatter:off
+        given().
+            header(header).
+        when().
+            post("/token/verify").
+        then().
+            statusCode(HttpStatus.SC_OK);
+        //@formatter:on
+    }
+
+    @Test
+    public void testVerifyInvalidToken() {
+        Header header = new Header("X-Auth-Token", "invalid");
+
+        //@formatter:off
+        given().
+            header(header).
+        when().
+            post("/token/verify").
+        then().
+            statusCode(HttpStatus.SC_UNAUTHORIZED);
+        //@formatter:on
+    }
+
+    @Test
+    public void testVerifyMissingToken() {
+        Header header = new Header("X-Auth-Token", "");
+
+        //@formatter:off
+        given().
+            header(header).
+        when().
+            post("/token/verify").
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
+    }
+
+    @Test
     public void testGetCurrentUserWithToken() {
         Header header = getTokenHeader(user.getUsername(), userCleartextPassword);
 

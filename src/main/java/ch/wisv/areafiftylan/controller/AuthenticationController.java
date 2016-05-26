@@ -17,6 +17,7 @@ import org.apache.logging.log4j.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -76,6 +77,12 @@ public class AuthenticationController {
         String authToken = authenticationService.createNewAuthToken(userDTO.getUsername(), userDTO.getPassword());
 
         return createResponseEntity(HttpStatus.OK, "Token successfully created", authToken);
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @RequestMapping(value = "/token/verify", method = RequestMethod.POST)
+    public ResponseEntity<?> verifyToken() {
+        return createResponseEntity(HttpStatus.OK, "Token is valid!");
     }
 
     /**
