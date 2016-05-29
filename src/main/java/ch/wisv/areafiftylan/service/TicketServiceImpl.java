@@ -138,6 +138,10 @@ public class TicketServiceImpl implements TicketService {
         TicketTransferToken ttt = getTicketTransferTokenIfValid(token);
         Ticket t = ttt.getTicket();
 
+        if(rfidService.isTicketLinked(t.getId())){
+            throw new TicketAlreadyLinkedException();
+        }
+
         User newOwner = ttt.getUser();
         t.setOwner(newOwner);
 

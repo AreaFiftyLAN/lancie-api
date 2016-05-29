@@ -213,7 +213,6 @@ public class TicketRestIntegrationTest extends IntegrationTest {
         Assert.assertTrue(ticket.getOwner().equals(user));
     }
 
-
     @Test
     public void testDoTransfer_Receiver() {
         TicketTransferToken ttt = addTicketTransferGetToken();
@@ -235,6 +234,33 @@ public class TicketRestIntegrationTest extends IntegrationTest {
 
         Assert.assertTrue(!ttt.isValid());
         Assert.assertTrue(ticket.getOwner().equals(ticketReceiver));
+    }
+
+    @Test
+    public void testDoTransferTicketLinked_Receiver() {
+        TicketTransferToken ttt = addTicketTransferGetToken();
+        TicketAlreadyLinkedException e = new TicketAlreadyLinkedException();
+
+        SessionData login = login(ticketReceiver.getUsername(), ticketReceiverCleartextPassword);
+
+        rfidLinkRepository.saveAndFlush(new RFIDLink("1212121212", ticket));
+
+        given().
+                filter(sessionFilter).
+                header(login.getCsrfHeader()).
+        when().
+                content(ttt.getToken()).
+                put(TRANSFER_ENDPOINT).
+        then().
+                statusCode(HttpStatus.SC_CONFLICT).
+                body(containsString(e.getMessage()));
+
+        String token = ttt.getToken();
+        ttt = tttRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
+        ticket = ticketRepository.findOne(ticket.getId());
+
+        Assert.assertTrue(ttt.isValid());
+        Assert.assertTrue(ticket.getOwner().equals(user));
     }
 
     @Test
