@@ -1,12 +1,14 @@
 package ch.wisv.areafiftylan.util;
 
 import ch.wisv.areafiftylan.dto.SeatGroupDTO;
+import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.model.util.Gender;
 import ch.wisv.areafiftylan.model.util.Role;
 import ch.wisv.areafiftylan.model.util.TicketType;
 import ch.wisv.areafiftylan.service.SeatService;
+import ch.wisv.areafiftylan.service.repository.TeamRepository;
 import ch.wisv.areafiftylan.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.service.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
@@ -19,12 +21,14 @@ public class TestDataRunner implements CommandLineRunner {
     private final UserRepository accountRepository;
     private final TicketRepository ticketRepository;
     private final SeatService seatService;
+    private final TeamRepository teamRepository;
 
     public TestDataRunner(UserRepository accountRepository, TicketRepository ticketRepository,
-                          SeatService seatService) {
+                          TeamRepository teamRepository, SeatService seatService) {
         this.accountRepository = accountRepository;
         this.ticketRepository = ticketRepository;
         this.seatService = seatService;
+        this.teamRepository = teamRepository;
     }
 
     @Override
@@ -40,22 +44,22 @@ public class TestDataRunner implements CommandLineRunner {
                         "0611", null);
         User testUser3 = new User("user3", new BCryptPasswordEncoder().encode("password"), "katrien@ms.com");
         testUser3.getProfile()
-                .setAllFields("Katrien", "Zwanenburg", "Admiral Cheesecake", Gender.FEMALE, "Ganzenlaan 5",
-                        "2826CD", "Duckstad", "0906-0666", null);
+                .setAllFields("Katrien", "Zwanenburg", "Admiral Cheesecake", Gender.FEMALE, "Ganzenlaan 5", "2826CD",
+                        "Duckstad", "0906-0666", null);
         User testUser4 = new User("noticket", new BCryptPasswordEncoder().encode("password"), "user@yahoo.com");
         testUser4.getProfile()
-                .setAllFields("Kees", "Jager", "l33tz0r", Gender.MALE, "Herenweg 2", "2826CD", "Delft",
-                        "0902-30283", null);
+                .setAllFields("Kees", "Jager", "l33tz0r", Gender.MALE, "Herenweg 2", "2826CD", "Delft", "0902-30283",
+                        null);
         User testUser5 = new User("user5", new BCryptPasswordEncoder().encode("password"), "custom@myself.com");
         testUser5.getProfile()
                 .setAllFields("Gert", "Gertson", "Whosyourdaddy", Gender.MALE, "Jansstraat", "8826CD", "Delft",
                         "0238-2309736", null);
 
-        accountRepository.saveAndFlush(testUser1);
-        accountRepository.saveAndFlush(testUser2);
-        accountRepository.saveAndFlush(testUser3);
-        accountRepository.saveAndFlush(testUser4);
-        accountRepository.saveAndFlush(testUser5);
+        testUser1 = accountRepository.saveAndFlush(testUser1);
+        testUser2 = accountRepository.saveAndFlush(testUser2);
+        testUser3 = accountRepository.saveAndFlush(testUser3);
+        testUser4 = accountRepository.saveAndFlush(testUser4);
+        testUser5 = accountRepository.saveAndFlush(testUser5);
 
         Ticket ticket = new Ticket(testUser1, TicketType.EARLY_FULL, false, false);
         Ticket ticket2 = new Ticket(testUser2, TicketType.EARLY_FULL, false, false);
@@ -65,6 +69,12 @@ public class TestDataRunner implements CommandLineRunner {
         ticketRepository.save(ticket);
         ticketRepository.save(ticket2);
         ticketRepository.save(ticket3);
+
+        Team team = new Team("testTeam", testUser1);
+        team.addMember(testUser2);
+        team.addMember(testUser3);
+
+        teamRepository.save(team);
 
         for (char s = 'A'; s <= 'J'; s++) {
             SeatGroupDTO seatGroup = new SeatGroupDTO();

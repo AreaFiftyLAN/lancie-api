@@ -1,12 +1,13 @@
 package ch.wisv.areafiftylan.controller;
 
+import ch.wisv.areafiftylan.dto.UserDTO;
 import ch.wisv.areafiftylan.exception.InvalidTokenException;
 import ch.wisv.areafiftylan.exception.TokenNotFoundException;
 import ch.wisv.areafiftylan.exception.UserNotFoundException;
 import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.security.token.PasswordResetToken;
 import ch.wisv.areafiftylan.security.token.VerificationToken;
-import ch.wisv.areafiftylan.service.MailService;
+import ch.wisv.areafiftylan.service.AuthenticationService;
 import ch.wisv.areafiftylan.service.UserService;
 import ch.wisv.areafiftylan.service.repository.token.PasswordResetTokenRepository;
 import ch.wisv.areafiftylan.service.repository.token.VerificationTokenRepository;
@@ -15,6 +16,7 @@ import org.apache.logging.log4j.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -34,17 +36,22 @@ import static ch.wisv.areafiftylan.util.ResponseEntityBuilder.createResponseEnti
 @Log4j2
 public class AuthenticationController {
 
-    @Autowired
-    MailService mailService;
+    private UserService userService;
+    private AuthenticationService authenticationService;
+
+    private VerificationTokenRepository verificationTokenRepository;
+    private PasswordResetTokenRepository passwordResetTokenRepository;
 
     @Autowired
-    UserService userService;
+    public AuthenticationController(UserService userService, AuthenticationService authenticationService,
+                                    VerificationTokenRepository verificationTokenRepository,
+                                    PasswordResetTokenRepository passwordResetTokenRepository) {
+        this.userService = userService;
+        this.authenticationService = authenticationService;
 
-    @Autowired
-    VerificationTokenRepository verificationTokenRepository;
-
-    @Autowired
-    PasswordResetTokenRepository passwordResetTokenRepository;
+        this.verificationTokenRepository = verificationTokenRepository;
+        this.passwordResetTokenRepository = passwordResetTokenRepository;
+    }
 
     /**
      * This basic GET method for the /login endpoint returns a simple login form.
@@ -59,6 +66,19 @@ public class AuthenticationController {
     @RequestMapping(value = "/token", method = RequestMethod.GET)
     public ResponseEntity<?> checkSession() {
         return createResponseEntity(HttpStatus.OK, "Here's your token!");
+    }
+
+    @RequestMapping(value = "/token", method = RequestMethod.POST)
+    public ResponseEntity<?> createAuthenticationToken(@RequestBody UserDTO userDTO) {
+        String authToken = authenticationService.createNewAuthToken(userDTO.getUsername(), userDTO.getPassword());
+
+        return createResponseEntity(HttpStatus.OK, "Token successfully created", authToken);
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @RequestMapping(value = "/token/verify", method = RequestMethod.GET)
+    public ResponseEntity<?> verifyToken() {
+        return createResponseEntity(HttpStatus.OK, "Token is valid!");
     }
 
     /**
