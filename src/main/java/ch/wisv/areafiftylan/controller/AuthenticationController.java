@@ -8,7 +8,6 @@ import ch.wisv.areafiftylan.model.User;
 import ch.wisv.areafiftylan.security.token.PasswordResetToken;
 import ch.wisv.areafiftylan.security.token.VerificationToken;
 import ch.wisv.areafiftylan.service.AuthenticationService;
-import ch.wisv.areafiftylan.service.MailService;
 import ch.wisv.areafiftylan.service.UserService;
 import ch.wisv.areafiftylan.service.repository.token.PasswordResetTokenRepository;
 import ch.wisv.areafiftylan.service.repository.token.VerificationTokenRepository;
@@ -37,7 +36,6 @@ import static ch.wisv.areafiftylan.util.ResponseEntityBuilder.createResponseEnti
 @Log4j2
 public class AuthenticationController {
 
-    private MailService mailService;
     private UserService userService;
     private AuthenticationService authenticationService;
 
@@ -45,11 +43,9 @@ public class AuthenticationController {
     private PasswordResetTokenRepository passwordResetTokenRepository;
 
     @Autowired
-    public AuthenticationController(MailService mailService, UserService userService,
-                                    AuthenticationService authenticationService,
+    public AuthenticationController(UserService userService, AuthenticationService authenticationService,
                                     VerificationTokenRepository verificationTokenRepository,
                                     PasswordResetTokenRepository passwordResetTokenRepository) {
-        this.mailService = mailService;
         this.userService = userService;
         this.authenticationService = authenticationService;
 
@@ -80,7 +76,7 @@ public class AuthenticationController {
     }
 
     @PreAuthorize("isAuthenticated()")
-    @RequestMapping(value = "/token/verify", method = RequestMethod.POST)
+    @RequestMapping(value = "/token/verify", method = RequestMethod.GET)
     public ResponseEntity<?> verifyToken() {
         return createResponseEntity(HttpStatus.OK, "Token is valid!");
     }
