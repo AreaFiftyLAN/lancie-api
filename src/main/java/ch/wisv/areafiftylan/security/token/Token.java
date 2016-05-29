@@ -108,4 +108,33 @@ public abstract class Token {
     public boolean isUnused() {
         return !used;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        Token token1 = (Token) o;
+
+        if (!id.equals(token1.id)) {
+            return false;
+        }
+        if (!token.equals(token1.token)) {
+            return false;
+        }
+        return user != null ? user.equals(token1.user) : token1.user == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id.hashCode();
+        result = 31 * result + token.hashCode();
+        result = 31 * result + (user != null ? user.hashCode() : 0);
+        return result;
+    }
 }

@@ -5,6 +5,7 @@ import ch.wisv.areafiftylan.service.repository.token.AuthenticationTokenReposito
 import ch.wisv.areafiftylan.util.SessionData;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Header;
+import com.jayway.restassured.response.Response;
 import org.apache.http.HttpStatus;
 import org.hamcrest.Matchers;
 import org.junit.After;
@@ -17,6 +18,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static com.jayway.restassured.RestAssured.given;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 
@@ -27,6 +29,8 @@ public class TokenAuthenticationTest extends IntegrationTest {
 
     @Autowired
     AuthenticationTokenRepository authenticationTokenRepository;
+
+    private final String AUTH_HEADER = "X-Auth-Token";
 
     @After
     public void cleanupAuthTest() {
@@ -48,11 +52,32 @@ public class TokenAuthenticationTest extends IntegrationTest {
                 extract().path("object");
         //@formatter:on
 
-        return new Header("X-Auth-Token", token);
+        return new Header(AUTH_HEADER, token);
     }
 
     @Test
     public void testRequestToken() {
+        Map<String, String> userDTO = new HashMap<>();
+        userDTO.put("username", user.getUsername());
+        userDTO.put("password", userCleartextPassword);
+
+        //@formatter:off
+        Response response = given().
+        when().
+            content(userDTO).contentType(ContentType.JSON).
+            post("/token");
+
+        Optional<AuthenticationToken> authenticationToken =
+                authenticationTokenRepository.findByUserUsername(user.getUsername());
+
+        Assert.assertTrue(authenticationToken.isPresent());
+
+        response.then().statusCode(HttpStatus.SC_OK).body("object", containsString(authenticationToken.get().getToken()));
+
+    }
+
+    @Test
+    public void testRequestTokenRenew() {
         Map<String, String> userDTO = new HashMap<>();
         userDTO.put("username", user.getUsername());
         userDTO.put("password", userCleartextPassword);
@@ -85,28 +110,6 @@ public class TokenAuthenticationTest extends IntegrationTest {
     }
 
     @Test
-    public void testRequestTokenRenew() {
-        Map<String, String> userDTO = new HashMap<>();
-        userDTO.put("username", user.getUsername());
-        userDTO.put("password", userCleartextPassword);
-
-        //@formatter:off
-        given().
-        when().
-            content(userDTO).contentType(ContentType.JSON).
-            post("/token").
-        then().
-            statusCode(HttpStatus.SC_OK);
-        //@formatter:on
-
-        Optional<AuthenticationToken> authenticationToken =
-                authenticationTokenRepository.findByUserUsername(user.getUsername());
-
-        Assert.assertTrue(authenticationToken.isPresent());
-
-    }
-
-    @Test
     public void testVerifyValidToken() {
         Header header = getTokenHeader(user.getUsername(), userCleartextPassword);
 
@@ -114,7 +117,7 @@ public class TokenAuthenticationTest extends IntegrationTest {
         given().
             header(header).
         when().
-            post("/token/verify").
+            get("/token/verify").
         then().
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
@@ -122,7 +125,7 @@ public class TokenAuthenticationTest extends IntegrationTest {
 
     @Test
     public void testVerifyInvalidToken() {
-        Header header = new Header("X-Auth-Token", "invalid");
+        Header header = new Header(AUTH_HEADER, "invalid");
 
         //@formatter:off
         given().
@@ -136,7 +139,7 @@ public class TokenAuthenticationTest extends IntegrationTest {
 
     @Test
     public void testVerifyMissingToken() {
-        Header header = new Header("X-Auth-Token", "");
+        Header header = new Header(AUTH_HEADER, "");
 
         //@formatter:off
         given().
@@ -207,7 +210,7 @@ public class TokenAuthenticationTest extends IntegrationTest {
     public void testEvadeCSRFWithTokenHeader() {
         SessionData login = login(user.getUsername(), userCleartextPassword);
 
-        Header header = new Header("X-Auth-Token", "hack");
+        Header header = new Header(AUTH_HEADER, "hack");
 
         //@formatter:off
         given().

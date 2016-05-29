@@ -10,11 +10,14 @@ import javax.persistence.Entity;
 @Entity
 public class AuthenticationToken extends Token {
 
+    // Default 5 days validity
+    private static final int EXPIRATION = 60 * 24 * 5;
+
     public AuthenticationToken() {
         // JPA ONLY
     }
 
-    public AuthenticationToken(User user, int expiration) {
-        super(user, expiration);
+    public AuthenticationToken(User user) {
+        super(user, EXPIRATION);
     }
 }

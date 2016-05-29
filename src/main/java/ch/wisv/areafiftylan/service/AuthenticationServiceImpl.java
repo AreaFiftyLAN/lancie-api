@@ -30,7 +30,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             authenticationTokenRepository.findByUserUsername(username)
                     .ifPresent(t -> authenticationTokenRepository.delete(t));
 
-            return authenticationTokenRepository.save(new AuthenticationToken(user, 60 * 24 * 2)).getToken();
+            return authenticationTokenRepository.save(new AuthenticationToken(user)).getToken();
         }
 
         throw new AuthenticationCredentialsNotFoundException("Incorrect credentials");
