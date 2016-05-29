@@ -51,15 +51,15 @@ public class ConsumptionController {
         return createResponseEntity(HttpStatus.OK, "Successfully removed " + c.getName() + " as a supported consumption.");
     }
 
-    @RequestMapping(value = "/consume", method = RequestMethod.POST)
-    public ResponseEntity<?> consume(@RequestBody ConsumptionDTO consumptionDTO){
-        consumptionService.consume(consumptionDTO.getTicketId(), consumptionDTO.getConsumptionId());
+    @RequestMapping(value = "/{ticketId}/consume", method = RequestMethod.POST)
+    public ResponseEntity<?> consume(@PathVariable Long ticketId, @RequestBody Long consumptionId){
+        consumptionService.consume(ticketId, consumptionId);
         return createResponseEntity(HttpStatus.OK, "Successfully consumed consumption");
     }
 
-    @RequestMapping(value = "/reset", method = RequestMethod.POST)
-    public ResponseEntity<?> reset(@RequestBody ConsumptionDTO consumptionDTO){
-        consumptionService.reset(consumptionDTO.getTicketId(), consumptionDTO.getConsumptionId());
+    @RequestMapping(value = "/{ticketId}/reset", method = RequestMethod.POST)
+    public ResponseEntity<?> reset(@PathVariable Long ticketId, @RequestBody Long consumptionId){
+        consumptionService.reset(ticketId, consumptionId);
         return createResponseEntity(HttpStatus.OK, "Successfully reset consumption");
     }
 
