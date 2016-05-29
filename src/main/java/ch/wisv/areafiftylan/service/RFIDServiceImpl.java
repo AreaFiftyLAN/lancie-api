@@ -53,6 +53,10 @@ public class RFIDServiceImpl implements RFIDService{
             throw new TicketAlreadyLinkedException();
         }
 
+        if(!ticketService.getTicketById(ticketId).isValid()){
+            throw new InvalidTicketException("Can't link ticket to RFID; ticket is invalid.");
+        }
+
         Ticket t = ticketService.getTicketById(ticketId);
 
         RFIDLink newLink = new RFIDLink(rfid, t);

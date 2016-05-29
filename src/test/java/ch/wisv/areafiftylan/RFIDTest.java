@@ -55,8 +55,8 @@ public class RFIDTest extends IntegrationTest {
 
     private Ticket makeTicket(){
         Ticket t = new Ticket(user, TicketType.EARLY_FULL, false, false);
+        t.setValid(true);
         t = ticketRepository.saveAndFlush(t);
-
         return t;
     }
 
@@ -266,6 +266,28 @@ public class RFIDTest extends IntegrationTest {
         .then()
                 .statusCode(HttpStatus.SC_CONFLICT)
                 .body(containsString(e.getMessage()));
+
+        Assert.assertFalse(rfidLinkRepository.findByRfid(UNUSED_RFID).isPresent());
+    }
+
+
+
+    @Test
+    public void testAddRFIDLink_TicketInvalid_Admin(){
+        SessionData session = login(admin.getUsername(), adminCleartextPassword);
+
+        otherTicket.setValid(false);
+        ticketRepository.saveAndFlush(otherTicket);
+
+        given()
+                .filter(sessionFilter)
+                .header(session.getCsrfHeader())
+        .when()
+                .content(makeRFIDLinkDTO(UNUSED_RFID, otherTicket.getId()))
+                .contentType(ContentType.JSON)
+                .post(RFID_ENDPOINT)
+        .then()
+                .statusCode(HttpStatus.SC_BAD_REQUEST);
 
         Assert.assertFalse(rfidLinkRepository.findByRfid(UNUSED_RFID).isPresent());
     }
