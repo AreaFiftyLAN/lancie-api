@@ -1,6 +1,5 @@
 package ch.wisv.areafiftylan.controller;
 
-import ch.wisv.areafiftylan.dto.ConsumptionDTO;
 import ch.wisv.areafiftylan.exception.AlreadyConsumedException;
 import ch.wisv.areafiftylan.exception.ConsumptionNotFoundException;
 import ch.wisv.areafiftylan.model.util.Consumption;
