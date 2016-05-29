@@ -1,12 +1,15 @@
 package ch.wisv.areafiftylan;
 
+import ch.wisv.areafiftylan.exception.TicketAlreadyLinkedException;
 import ch.wisv.areafiftylan.exception.TokenNotFoundException;
 import ch.wisv.areafiftylan.model.Team;
 import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.User;
+import ch.wisv.areafiftylan.model.relations.RFIDLink;
 import ch.wisv.areafiftylan.model.util.Gender;
 import ch.wisv.areafiftylan.model.util.TicketType;
 import ch.wisv.areafiftylan.security.token.TicketTransferToken;
+import ch.wisv.areafiftylan.service.repository.RFIDLinkRepository;
 import ch.wisv.areafiftylan.service.repository.TeamRepository;
 import ch.wisv.areafiftylan.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.service.repository.token.TicketTransferTokenRepository;
@@ -42,6 +45,8 @@ public class TicketRestIntegrationTest extends IntegrationTest {
     private TicketTransferTokenRepository tttRepository;
     @Autowired
     private TeamRepository teamRepository;
+    @Autowired
+    private RFIDLinkRepository rfidLinkRepository;
 
     @Before
     public void initTransferTest() {
@@ -51,6 +56,7 @@ public class TicketRestIntegrationTest extends IntegrationTest {
 
     @After
     public void cleanTransferTest() {
+        rfidLinkRepository.deleteAll();
         teamRepository.deleteAll();
         tttRepository.deleteAll();
         ticketRepository.deleteAll();
@@ -274,6 +280,18 @@ public class TicketRestIntegrationTest extends IntegrationTest {
         response.then()
                 .statusCode(HttpStatus.SC_BAD_REQUEST);
         //@formatter:on
+    }
+
+    @Test
+    public void testRFIDLinkedSetupForTransfer() {
+        TicketAlreadyLinkedException e = new TicketAlreadyLinkedException();
+
+        rfidLinkRepository.save(new RFIDLink("1212121212", ticket));
+
+        addTicketTransfer(user.getUsername(), userCleartextPassword)
+                .then()
+                .statusCode(HttpStatus.SC_CONFLICT)
+                .body(containsString(e.getMessage()));
     }
 
     @Test
