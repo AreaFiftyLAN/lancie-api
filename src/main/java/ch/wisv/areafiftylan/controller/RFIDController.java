@@ -68,11 +68,6 @@ public class RFIDController {
         return createResponseEntity(HttpStatus.CONFLICT, e.getMessage());
     }
 
-    @ExceptionHandler(TicketAlreadyLinkedException.class)
-    public ResponseEntity<?> handleInvalidRFIDException(TicketAlreadyLinkedException e){
-        return createResponseEntity(HttpStatus.CONFLICT, e.getMessage());
-    }
-
     @ExceptionHandler(InvalidRFIDException.class)
     public ResponseEntity<?> handleInvalidRFIDException(InvalidRFIDException e){
         return createResponseEntity(HttpStatus.BAD_REQUEST, e.getMessage());

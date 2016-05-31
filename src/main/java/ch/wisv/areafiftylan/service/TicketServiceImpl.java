@@ -27,6 +27,7 @@ public class TicketServiceImpl implements TicketService {
     private TicketTransferTokenRepository tttRepository;
     private MailService mailService;
     private TeamService teamService;
+    private RFIDService rfidService;
 
     @Value("${a5l.user.acceptTransferUrl}")
     private String acceptTransferUrl;
@@ -43,6 +44,11 @@ public class TicketServiceImpl implements TicketService {
         this.tttRepository = tttRepository;
         this.mailService = mailService;
         this.teamService = teamService;
+    }
+
+    @Autowired
+    public void setRFIDService(RFIDService rfidService){
+        this.rfidService = rfidService;
     }
 
     @Override
@@ -113,6 +119,8 @@ public class TicketServiceImpl implements TicketService {
 
         if (!ticketTransferTokens.isEmpty()) {
             throw new DuplicateTicketTransferTokenException(ticketId);
+        } if(rfidService.isTicketLinked(ticketId)) {
+            throw new TicketAlreadyLinkedException();
         } else {
             TicketTransferToken ttt = new TicketTransferToken(u, t);
 
@@ -129,6 +137,10 @@ public class TicketServiceImpl implements TicketService {
     public void transferTicket(String token) {
         TicketTransferToken ttt = getTicketTransferTokenIfValid(token);
         Ticket t = ttt.getTicket();
+
+        if(rfidService.isTicketLinked(t.getId())){
+            throw new TicketAlreadyLinkedException();
+        }
 
         User newOwner = ttt.getUser();
         t.setOwner(newOwner);
