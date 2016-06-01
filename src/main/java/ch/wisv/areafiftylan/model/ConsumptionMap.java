@@ -21,7 +21,7 @@ public class ConsumptionMap {
     Long id;
 
     @NonNull
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ManyToMany
     private Collection<Consumption> consumptionsMade;
 
     @OneToOne(targetEntity = Ticket.class, cascade = CascadeType.MERGE)
