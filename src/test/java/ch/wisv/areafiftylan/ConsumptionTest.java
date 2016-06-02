@@ -261,6 +261,25 @@ public class ConsumptionTest extends IntegrationTest {
     }
 
     @Test
+    public void consumeConsumption_InSuccession(){
+        Ticket otherTicket = makeTicket();
+
+        consumptionService.consume(otherTicket.getId(), spicyFood.getId());
+
+        SessionData session = login(admin.getUsername(), adminCleartextPassword);
+
+        given().
+                filter(sessionFilter).
+                header(session.getCsrfHeader()).
+        when().
+                content(spicyFood.getId()).
+                contentType(ContentType.JSON).
+                post(CONSUMPTION_ENDPOINT + "/" + ticket.getId() + "/consume").
+        then().
+                statusCode(HttpStatus.SC_OK);
+    }
+
+    @Test
     public void resetConsumption(){
         SessionData session = login(admin.getUsername(), adminCleartextPassword);
 
