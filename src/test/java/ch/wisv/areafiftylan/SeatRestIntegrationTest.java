@@ -99,17 +99,6 @@ public class SeatRestIntegrationTest extends IntegrationTest {
         team = teamRepository.save(team);
     }
 
-    //region Test Get Seat
-    @Test
-    public void getAllSeatAsAnon() {
-        //@formatter:off
-        when().
-            get("/seats").
-        then().
-            statusCode(HttpStatus.SC_FORBIDDEN);
-        //@formatter:on
-    }
-
     @Test
     public void getAllSeatAsUser() {
         setTicketOnA1(userTicket);
