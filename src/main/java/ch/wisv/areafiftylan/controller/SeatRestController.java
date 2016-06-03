@@ -150,7 +150,6 @@ public class SeatRestController {
      * @return A list of all Seats in the seatmap.
      */
     @JsonView(View.Public.class)
-    @PreAuthorize("isAuthenticated()")
     @RequestMapping(value = "/seats", method = RequestMethod.GET)
     SeatmapResponse getAllSeats() {
         return seatService.getAllSeats();
