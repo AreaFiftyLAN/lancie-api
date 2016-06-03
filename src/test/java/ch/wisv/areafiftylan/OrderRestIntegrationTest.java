@@ -119,7 +119,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
     public void testCreateSingleOrder_User() {
         Map<String, String> order = new HashMap<>();
         order.put("pickupService", "true");
-        order.put("type", TicketType.EARLY_FULL.toString());
+        order.put("type", TicketType.LAST_MINUTE.toString());
         order.put("chMember", "false");
         SessionData login = login(user.getUsername(), userCleartextPassword);
 
@@ -136,8 +136,8 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             body("object.status", is("CREATING")).
             body("object.tickets", hasSize(1)).
             body("object.tickets.pickupService", hasItem(true)).
-            body("object.tickets.type", hasItem(is("EARLY_FULL"))).
-            body("object.amount",equalTo(40.00F));
+            body("object.tickets.type", hasItem(is("LAST_MINUTE"))).
+            body("object.amount",equalTo(45.00F));
         //@formatter:on
     }
 
@@ -169,7 +169,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         Map<String, String> order = new HashMap<>();
         order.put("pickupService", "false");
         order.put("chMember", "true");
-        order.put("type", TicketType.EARLY_FULL.toString());
+        order.put("type", TicketType.LAST_MINUTE.toString());
         SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
@@ -185,8 +185,8 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             body("object.status", is("CREATING")).
             body("object.tickets", hasSize(1)).
             body("object.tickets.pickupService", hasItem(false)).
-            body("object.tickets.type", hasItem(is("EARLY_FULL"))).
-            body("object.amount",equalTo(32.50F));
+            body("object.tickets.type", hasItem(is("LAST_MINUTE"))).
+            body("object.amount", equalTo(37.50F));
         //@formatter:on
     }
 
@@ -363,7 +363,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
     protected String createOrderAndReturnLocation() {
         Map<String, String> order = new HashMap<>();
         order.put("pickupService", "false");
-        order.put("type", TicketType.EARLY_FULL.toString());
+        order.put("type", TicketType.LAST_MINUTE.toString());
         order.put("chMember", "false");
         SessionData login = login(user.getUsername(), userCleartextPassword);
 
@@ -412,9 +412,9 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             body("reference", is(nullValue())).
             body("user.username", is("user")).
             body("tickets", hasSize(1)).
-            body("tickets.type", hasItem(is("EARLY_FULL"))).
+            body("tickets.type", hasItem(is("LAST_MINUTE"))).
             body("tickets.pickupService", hasItem(is(false))).
-            body("amount",equalTo(37.50F));
+            body("amount",equalTo(42.50F));
         //@formatter:on
     }
 
@@ -437,9 +437,9 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             body("[0].reference", is(nullValue())).
             body("[0].user.username", is("user")).
             body("[0].tickets", hasSize(1)).
-            body("[0].tickets.type", hasItem(is("EARLY_FULL"))).
+            body("[0].tickets.type", hasItem(is("LAST_MINUTE"))).
             body("[0].tickets.pickupService", hasItem(is(false))).
-            body("[0].amount",equalTo(37.50F));
+            body("[0].amount",equalTo(42.50F));
         //@formatter:on
     }
 
@@ -462,9 +462,9 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             body("reference", hasItem(is(nullValue()))).
             body("user.username", hasItem(is("user"))).
             body("tickets", hasSize(1)).
-            body("tickets.type", hasItem(hasItem(is("EARLY_FULL")))).
+            body("tickets.type", hasItem(hasItem(is("LAST_MINUTE")))).
             body("tickets.pickupService", hasItem(hasItem(is(false)))).
-            body("amount",hasItem(equalTo(37.50F)));
+            body("amount",hasItem(equalTo(42.50F)));
         //@formatter:on
     }
 
@@ -522,9 +522,9 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             body("status", is("CREATING")).
             body("reference", is(nullValue())).
             body("user.username", is("user")).
-            body("tickets.type", hasItem(is("EARLY_FULL"))).
+            body("tickets.type", hasItem(is("LAST_MINUTE"))).
             body("tickets.pickupService", hasItem(is(false))).
-            body("amount",equalTo(37.50F));
+            body("amount",equalTo(42.50F));
         //@formatter:on
     }
 
