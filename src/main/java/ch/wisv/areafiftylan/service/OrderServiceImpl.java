@@ -196,10 +196,11 @@ public class OrderServiceImpl implements OrderService {
         Collection<TicketInformationResponse> ticketInfo = new ArrayList<>();
 
         for (TicketType ticketType : TicketType.values()) {
-            Integer typeSold = ticketService.getNumberSoldOfType(ticketType);
-            ticketInfo.add(new TicketInformationResponse(ticketType, typeSold));
+            if (ticketType.isBuyable()) {
+                Integer typeSold = ticketService.getNumberSoldOfType(ticketType);
+                ticketInfo.add(new TicketInformationResponse(ticketType, typeSold));
+            }
         }
-
         return ticketInfo;
     }
 }

@@ -60,6 +60,12 @@ public class OrderRestController {
         HttpHeaders headers = new HttpHeaders();
         User user = (User) auth.getPrincipal();
 
+        // You can't buy non-buyable Tickts for yourself, this should be done bia the createAdminOrder() method.
+        if (!ticketDTO.getType().isBuyable()) {
+            return createResponseEntity(HttpStatus.FORBIDDEN,
+                    "Can't order tickets with type " + ticketDTO.getType().getText());
+        }
+
         Order order = orderService.create(user.getId(), ticketDTO);
 
         headers.setLocation(
@@ -148,7 +154,7 @@ public class OrderRestController {
         return createResponseEntity(HttpStatus.OK, headers, "Please go to " + paymentUrl + " to finish your payment");
     }
 
-    @PreAuthorize("hasRole('ADMIN'")
+    @PreAuthorize("hasRole('ADMIN')")
     @RequestMapping(value = "/orders/{orderId}/checkout", method = RequestMethod.POST, params = "admin")
     public ResponseEntity<?> approveOrder(@PathVariable Long orderId) {
         orderService.adminApproveOrder(orderId);
