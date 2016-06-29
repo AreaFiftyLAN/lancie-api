@@ -38,9 +38,12 @@ public interface OrderService {
     Order addTicketToOrder(Long orderId, TicketDTO ticketDTO);
 
     /**
-     * Removes a ticket with the given DTO from an order. Throws a NotFoundException when a ticket with such a DTO can't be found
-     * @param orderId Order from which the Ticket should be removed
+     * Removes a ticket with the given DTO from an order. Throws a NotFoundException when a ticket with such a DTO can't
+     * be found
+     *
+     * @param orderId   Order from which the Ticket should be removed
      * @param ticketDTO Ticket which should be removed from the Order
+     *
      * @return The modified Order
      */
     Order removeTicketFromOrder(Long orderId, TicketDTO ticketDTO);
@@ -58,15 +61,19 @@ public interface OrderService {
 
     Order updateOrderStatus(Long orderId);
 
+    void adminApproveOrder(Long orderId);
+
     /**
-     * Expire an order which will remove the order from the orders table and enter a relevant
-     * entry in the expired orders table
+     * Expire an order which will remove the order from the orders table and enter a relevant entry in the expired
+     * orders table
+     *
      * @param o The order to expire
      */
     void expireOrder(Order o);
 
     /**
      * This method returns an overview of all available tickets, and information about them
+     *
      * @return A collection of TicketInformation objects
      */
     Collection<TicketInformationResponse> getAvailableTickets();

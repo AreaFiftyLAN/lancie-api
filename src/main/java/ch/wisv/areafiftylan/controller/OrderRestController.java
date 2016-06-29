@@ -1,7 +1,6 @@
 package ch.wisv.areafiftylan.controller;
 
 import ch.wisv.areafiftylan.dto.TicketDTO;
-import ch.wisv.areafiftylan.dto.TicketInformationResponse;
 import ch.wisv.areafiftylan.exception.ImmutableOrderException;
 import ch.wisv.areafiftylan.exception.TicketNotFoundException;
 import ch.wisv.areafiftylan.exception.TicketUnavailableException;
@@ -70,6 +69,20 @@ public class OrderRestController {
                 "Ticket available and order successfully created at " + headers.getLocation(), order);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @JsonView(View.OrderOverview.class)
+    @RequestMapping(value = "/users/{userId}/orders", method = RequestMethod.POST)
+    public ResponseEntity<?> createAdminOrder(@PathVariable Long userId, @RequestBody @Validated TicketDTO ticketDTO) {
+        HttpHeaders headers = new HttpHeaders();
+        Order order = orderService.create(userId, ticketDTO);
+
+        headers.setLocation(ServletUriComponentsBuilder.fromCurrentContextPath().path("/orders/{id}").
+                buildAndExpand(order.getId()).toUri());
+
+        return createResponseEntity(HttpStatus.CREATED, headers,
+                "Ticket available and order successfully created at " + headers.getLocation(), order);
+    }
+
     /**
      * This method handles GET requests on a specific Order.
      *
@@ -128,12 +141,19 @@ public class OrderRestController {
     @PreAuthorize("@currentUserServiceImpl.canAccessOrder(principal, #orderId)")
     @RequestMapping(value = "/orders/{orderId}/checkout", method = RequestMethod.GET)
     public ResponseEntity<?> payOrder(@PathVariable Long orderId) throws URISyntaxException {
-        //TODO: Implement Paymentprovider calls here.
         String paymentUrl = orderService.requestPayment(orderId);
         HttpHeaders headers = new HttpHeaders();
         headers.setLocation(new URI(paymentUrl));
 
         return createResponseEntity(HttpStatus.OK, headers, "Please go to " + paymentUrl + " to finish your payment");
+    }
+
+    @PreAuthorize("hasRole('ADMIN'")
+    @RequestMapping(value = "/orders/{orderId}/checkout", method = RequestMethod.POST, params = "admin")
+    public ResponseEntity<?> approveOrder(@PathVariable Long orderId) {
+        orderService.adminApproveOrder(orderId);
+
+        return createResponseEntity(HttpStatus.OK, "Order successfully approved");
     }
 
 
