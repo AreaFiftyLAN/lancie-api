@@ -12,6 +12,7 @@ import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Response;
 import org.apache.http.HttpStatus;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -970,7 +971,9 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         when().
             get("/tickets/available").
         then().
-            body("ticketType", hasItems(equalTo("EARLY_FULL"), equalTo("REGULAR_FULL")));
+            body("ticketType", hasItems(equalTo("EARLY_FULL"), equalTo("REGULAR_FULL"))).
+            body("ticketType", not(hasItems(equalTo(equalTo(TicketType.TEST.toString())), equalTo(TicketType.FREE
+                    .toString()))));
     }
 
     @Test
@@ -1018,6 +1021,63 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         then().
             body("object", hasSize(0));
         //@formatter:on
+    }
+
+    @Test
+    public void testAdminCheckoutAsAdmin() {
+        String location = createOrderAndReturnLocation();
+        logout();
+
+        String locationParse = location.substring(location.lastIndexOf('/') + 1);
+        Long orderId = Long.parseLong(locationParse);
+
+        SessionData login = login(admin.getUsername(), adminCleartextPassword);
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            post(location + "/checkout?admin").
+        then().
+            statusCode(HttpStatus.SC_OK).
+            body("message", containsString("successfully approved"));
+        //@formatter:on
+
+        Order order = orderRepository.findOne(orderId);
+
+        assertThat("Orderstatus updated", order.getStatus(), equalTo(OrderStatus.PAID));
+        for (Ticket ticket : order.getTickets()) {
+            Assert.assertTrue(ticket.isValid());
+        }
+    }
+
+    @Test
+    public void testAdminCheckoutAsUser() {
+        String location = createOrderAndReturnLocation();
+        logout();
+
+        String locationParse = location.substring(location.lastIndexOf('/') + 1);
+        Long orderId = Long.parseLong(locationParse);
+
+        SessionData login = login(user.getUsername(), userCleartextPassword);
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            post(location + "/checkout?admin").
+                then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
+
+        Order order = orderRepository.findOne(orderId);
+
+        assertThat("Orderstatus WAITING", order.getStatus(), equalTo(OrderStatus.CREATING));
+        for (Ticket ticket : order.getTickets()) {
+            Assert.assertFalse(ticket.isValid());
+        }
     }
 }
 
