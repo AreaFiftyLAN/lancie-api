@@ -61,6 +61,12 @@ public interface OrderService {
 
     Order updateOrderStatus(Long orderId);
 
+    /**
+     * Manually approve an order, without going through the paymentprovider. This method sets the Orderstatus to PAID
+     * and validates all the tickets
+     *
+     * @param orderId Order to be approved
+     */
     void adminApproveOrder(Long orderId);
 
     /**

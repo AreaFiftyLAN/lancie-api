@@ -60,7 +60,7 @@ public class OrderRestController {
         HttpHeaders headers = new HttpHeaders();
         User user = (User) auth.getPrincipal();
 
-        // You can't buy non-buyable Tickts for yourself, this should be done bia the createAdminOrder() method.
+        // You can't buy non-buyable Tickts for yourself, this should be done via the createAdminOrder() method.
         if (!ticketDTO.getType().isBuyable()) {
             return createResponseEntity(HttpStatus.FORBIDDEN,
                     "Can't order tickets with type " + ticketDTO.getType().getText());
@@ -154,8 +154,16 @@ public class OrderRestController {
         return createResponseEntity(HttpStatus.OK, headers, "Please go to " + paymentUrl + " to finish your payment");
     }
 
+    /**
+     * This endpoint can be used to approve orders, without going through the paymentprovider. You can use this to
+     * appoint free tickets or manually approve other orders.
+     *
+     * @param orderId Order to be approved
+     *
+     * @return Status message
+     */
     @PreAuthorize("hasRole('ADMIN')")
-    @RequestMapping(value = "/orders/{orderId}/checkout", method = RequestMethod.POST, params = "admin")
+    @RequestMapping(value = "/orders/{orderId}/approve", method = RequestMethod.POST)
     public ResponseEntity<?> approveOrder(@PathVariable Long orderId) {
         orderService.adminApproveOrder(orderId);
 

@@ -1038,7 +1038,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             filter(sessionFilter).
             header(login.getCsrfHeader()).
         when().
-            post(location + "/checkout?admin").
+            post(location + "/approve").
         then().
             statusCode(HttpStatus.SC_OK).
             body("message", containsString("successfully approved"));
@@ -1067,8 +1067,8 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             filter(sessionFilter).
             header(login.getCsrfHeader()).
         when().
-            post(location + "/checkout?admin").
-                then().
+            post(location + "/approve").
+        then().
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
 
