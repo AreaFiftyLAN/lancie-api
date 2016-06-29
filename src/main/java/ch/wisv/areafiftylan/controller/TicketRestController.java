@@ -1,9 +1,9 @@
 package ch.wisv.areafiftylan.controller;
 
 import ch.wisv.areafiftylan.dto.TicketInformationResponse;
+import ch.wisv.areafiftylan.exception.DuplicateTicketTransferTokenException;
 import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.User;
-import ch.wisv.areafiftylan.exception.DuplicateTicketTransferTokenException;
 import ch.wisv.areafiftylan.security.token.TicketTransferToken;
 import ch.wisv.areafiftylan.service.OrderService;
 import ch.wisv.areafiftylan.service.TicketService;
@@ -20,6 +20,7 @@ import java.util.Collection;
 import static ch.wisv.areafiftylan.util.ResponseEntityBuilder.createResponseEntity;
 
 @RestController
+@RequestMapping(value = "/tickets")
 public class TicketRestController {
     private TicketService ticketService;
     private OrderService orderService;
@@ -31,41 +32,37 @@ public class TicketRestController {
     }
 
     @PreAuthorize("@currentUserServiceImpl.isTicketOwner(principal, #ticketId)")
-    @RequestMapping(value = "/tickets/transfer/{ticketId}", method = RequestMethod.POST)
-    public ResponseEntity<?> requestTicketTransfer(@PathVariable Long ticketId, @RequestBody String goalUsername){
+    @RequestMapping(value = "/transfer/{ticketId}", method = RequestMethod.POST)
+    public ResponseEntity<?> requestTicketTransfer(@PathVariable Long ticketId, @RequestBody String goalUsername) {
         TicketTransferToken ttt = ticketService.setupForTransfer(ticketId, goalUsername);
 
         return createResponseEntity(HttpStatus.OK, "Ticket successfully set up for transfer.", ttt.getToken());
     }
 
     @PreAuthorize("@currentUserServiceImpl.isTicketReceiver(principal, #token)")
-    @RequestMapping(value = "/tickets/transfer", method = RequestMethod.PUT)
-    public ResponseEntity<?> transferTicket(@RequestBody String token){
+    @RequestMapping(value = "/transfer", method = RequestMethod.PUT)
+    public ResponseEntity<?> transferTicket(@RequestBody String token) {
         ticketService.transferTicket(token);
 
         return createResponseEntity(HttpStatus.OK, "Ticket successfully transferred.");
     }
 
     @PreAuthorize("@currentUserServiceImpl.isTicketSender(principal, #token)")
-    @RequestMapping(value = "/tickets/transfer", method = RequestMethod.DELETE)
-    public ResponseEntity<?> cancelTicketTransfer(@RequestBody String token){
+    @RequestMapping(value = "/transfer", method = RequestMethod.DELETE)
+    public ResponseEntity<?> cancelTicketTransfer(@RequestBody String token) {
         ticketService.cancelTicketTransfer(token);
 
         return createResponseEntity(HttpStatus.OK, "Ticket transfer successfully cancelled.");
     }
 
     @PreAuthorize("isAuthenticated()")
-    @RequestMapping(value = "/tickets/tokens", method = RequestMethod.GET)
+    @RequestMapping(value = "/tokens", method = RequestMethod.GET)
     public ResponseEntity<?> getTicketTokensOpenForTransfer(Authentication auth) {
         UserDetails currentUser = (UserDetails) auth.getPrincipal();
-        Collection<TicketTransferToken> tokens = ticketService.getValidTicketTransferTokensByUser(currentUser.getUsername());
+        Collection<TicketTransferToken> tokens =
+                ticketService.getValidTicketTransferTokensByUser(currentUser.getUsername());
 
         return createResponseEntity(HttpStatus.OK, "Ticket transfer tokens successfully retrieved.", tokens);
-    }
-
-    @ExceptionHandler(DuplicateTicketTransferTokenException.class)
-    public ResponseEntity<?> handleDuplicateTicketTransFerException(DuplicateTicketTransferTokenException ex) {
-        return createResponseEntity(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
     /**
@@ -73,28 +70,33 @@ public class TicketRestController {
      *
      * @return A collection of all TicketTypes and their availability
      */
-    @RequestMapping(value = "/tickets/available", method = RequestMethod.GET)
+    @RequestMapping(value = "/available", method = RequestMethod.GET)
     public Collection<TicketInformationResponse> getAvailableTickets() {
         return orderService.getAvailableTickets();
     }
 
     @PreAuthorize("isAuthenticated()")
-    @RequestMapping(value = "/tickets/teammembers", method = RequestMethod.GET)
+    @RequestMapping(value = "/teammembers", method = RequestMethod.GET)
     public Collection<Ticket> getTicketsFromTeamMembers(Authentication auth) {
-        User u = (User)auth.getPrincipal();
+        User u = (User) auth.getPrincipal();
 
         return ticketService.getOwnedTicketsAndFromTeamMembers(u);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @RequestMapping(value = "/tickets", method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET)
     public Collection<Ticket> getAllTickets() {
         return ticketService.getAllTickets();
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @RequestMapping(value = "/tickets/transport", method = RequestMethod.GET)
+    @RequestMapping(value = "/transport", method = RequestMethod.GET)
     public Collection<Ticket> getAllTicketsWithTransport() {
         return ticketService.getAllTicketsWithTransport();
+    }
+
+    @ExceptionHandler(DuplicateTicketTransferTokenException.class)
+    public ResponseEntity<?> handleDuplicateTicketTransFerException(DuplicateTicketTransferTokenException ex) {
+        return createResponseEntity(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 }

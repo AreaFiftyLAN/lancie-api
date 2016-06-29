@@ -3,6 +3,7 @@ package ch.wisv.areafiftylan;
 import ch.wisv.areafiftylan.model.Order;
 import ch.wisv.areafiftylan.model.Ticket;
 import ch.wisv.areafiftylan.model.util.OrderStatus;
+import ch.wisv.areafiftylan.model.util.TicketOptions;
 import ch.wisv.areafiftylan.model.util.TicketType;
 import ch.wisv.areafiftylan.service.repository.OrderRepository;
 import ch.wisv.areafiftylan.service.repository.TicketRepository;
@@ -11,6 +12,7 @@ import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Response;
 import org.apache.http.HttpStatus;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -119,7 +121,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
     public void testCreateSingleOrder_User() {
         Map<String, String> order = new HashMap<>();
         order.put("pickupService", "true");
-        order.put("type", TicketType.LAST_MINUTE.toString());
+        order.put("type", TicketType.TEST.toString());
         order.put("chMember", "false");
         SessionData login = login(user.getUsername(), userCleartextPassword);
 
@@ -136,8 +138,8 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             body("object.status", is("CREATING")).
             body("object.tickets", hasSize(1)).
             body("object.tickets.pickupService", hasItem(true)).
-            body("object.tickets.type", hasItem(is("LAST_MINUTE"))).
-            body("object.amount",equalTo(45.00F));
+            body("object.tickets.type", hasItem(is(TicketType.TEST.toString()))).
+            body("object.amount",equalTo(TicketType.TEST.getPrice() + TicketOptions.PICKUPSERVICE.getPrice()));
         //@formatter:on
     }
 
@@ -169,7 +171,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         Map<String, String> order = new HashMap<>();
         order.put("pickupService", "false");
         order.put("chMember", "true");
-        order.put("type", TicketType.LAST_MINUTE.toString());
+        order.put("type", TicketType.TEST.toString());
         SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
@@ -185,8 +187,8 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             body("object.status", is("CREATING")).
             body("object.tickets", hasSize(1)).
             body("object.tickets.pickupService", hasItem(false)).
-            body("object.tickets.type", hasItem(is("LAST_MINUTE"))).
-            body("object.amount", equalTo(37.50F));
+            body("object.tickets.type", hasItem(is(TicketType.TEST.toString()))).
+            body("object.amount", equalTo(TicketType.TEST.getPrice() + TicketOptions.CHMEMBER.getPrice()));
         //@formatter:on
     }
 
@@ -363,9 +365,9 @@ public class OrderRestIntegrationTest extends IntegrationTest {
     protected String createOrderAndReturnLocation() {
         Map<String, String> order = new HashMap<>();
         order.put("pickupService", "false");
-        order.put("type", TicketType.LAST_MINUTE.toString());
+        order.put("type", TicketType.TEST.toString());
         order.put("chMember", "false");
-        SessionData login = login(user.getUsername(), userCleartextPassword);
+        SessionData login = login(admin.getUsername(), adminCleartextPassword);
 
         //@formatter:off
         return given().
@@ -373,7 +375,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             header(login.getCsrfHeader()).
         when().
             content(order).contentType(ContentType.JSON).
-            post(ORDER_ENDPOINT)
+            post("/users/" + user.getId() + "/orders")
         .then().extract().header("Location");
         //@formatter:on
     }
@@ -412,9 +414,9 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             body("reference", is(nullValue())).
             body("user.username", is("user")).
             body("tickets", hasSize(1)).
-            body("tickets.type", hasItem(is("LAST_MINUTE"))).
+            body("tickets.type", hasItem(is(TicketType.TEST.toString()))).
             body("tickets.pickupService", hasItem(is(false))).
-            body("amount",equalTo(42.50F));
+            body("amount",equalTo(TicketType.TEST.getPrice()));
         //@formatter:on
     }
 
@@ -437,9 +439,9 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             body("[0].reference", is(nullValue())).
             body("[0].user.username", is("user")).
             body("[0].tickets", hasSize(1)).
-            body("[0].tickets.type", hasItem(is("LAST_MINUTE"))).
+            body("[0].tickets.type", hasItem(is(TicketType.TEST.toString()))).
             body("[0].tickets.pickupService", hasItem(is(false))).
-            body("[0].amount",equalTo(42.50F));
+            body("[0].amount",equalTo(TicketType.TEST.getPrice()));
         //@formatter:on
     }
 
@@ -462,9 +464,9 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             body("reference", hasItem(is(nullValue()))).
             body("user.username", hasItem(is("user"))).
             body("tickets", hasSize(1)).
-            body("tickets.type", hasItem(hasItem(is("LAST_MINUTE")))).
+            body("tickets.type", hasItem(hasItem(is(TicketType.TEST.toString())))).
             body("tickets.pickupService", hasItem(hasItem(is(false)))).
-            body("amount",hasItem(equalTo(42.50F)));
+            body("amount",hasItem(equalTo(TicketType.TEST.getPrice())));
         //@formatter:on
     }
 
@@ -522,9 +524,9 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             body("status", is("CREATING")).
             body("reference", is(nullValue())).
             body("user.username", is("user")).
-            body("tickets.type", hasItem(is("LAST_MINUTE"))).
+            body("tickets.type", hasItem(is(TicketType.TEST.toString()))).
             body("tickets.pickupService", hasItem(is(false))).
-            body("amount",equalTo(42.50F));
+            body("amount",equalTo(TicketType.TEST.getPrice()));
         //@formatter:on
     }
 
@@ -969,7 +971,9 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         when().
             get("/tickets/available").
         then().
-            body("ticketType", hasItems(equalTo("EARLY_FULL"), equalTo("REGULAR_FULL")));
+            body("ticketType", hasItems(equalTo("EARLY_FULL"), equalTo("REGULAR_FULL"))).
+            body("ticketType", not(hasItems(equalTo(equalTo(TicketType.TEST.toString())), equalTo(TicketType.FREE
+                    .toString()))));
     }
 
     @Test
@@ -1017,6 +1021,63 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         then().
             body("object", hasSize(0));
         //@formatter:on
+    }
+
+    @Test
+    public void testAdminCheckoutAsAdmin() {
+        String location = createOrderAndReturnLocation();
+        logout();
+
+        String locationParse = location.substring(location.lastIndexOf('/') + 1);
+        Long orderId = Long.parseLong(locationParse);
+
+        SessionData login = login(admin.getUsername(), adminCleartextPassword);
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            post(location + "/approve").
+        then().
+            statusCode(HttpStatus.SC_OK).
+            body("message", containsString("successfully approved"));
+        //@formatter:on
+
+        Order order = orderRepository.findOne(orderId);
+
+        assertThat("Orderstatus updated", order.getStatus(), equalTo(OrderStatus.PAID));
+        for (Ticket ticket : order.getTickets()) {
+            Assert.assertTrue(ticket.isValid());
+        }
+    }
+
+    @Test
+    public void testAdminCheckoutAsUser() {
+        String location = createOrderAndReturnLocation();
+        logout();
+
+        String locationParse = location.substring(location.lastIndexOf('/') + 1);
+        Long orderId = Long.parseLong(locationParse);
+
+        SessionData login = login(user.getUsername(), userCleartextPassword);
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            post(location + "/approve").
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
+
+        Order order = orderRepository.findOne(orderId);
+
+        assertThat("Orderstatus WAITING", order.getStatus(), equalTo(OrderStatus.CREATING));
+        for (Ticket ticket : order.getTickets()) {
+            Assert.assertFalse(ticket.isValid());
+        }
     }
 }
 

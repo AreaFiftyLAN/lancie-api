@@ -82,8 +82,8 @@ public class OrderServiceImpl implements OrderService {
 
         // Request a ticket to see if one is available. If a ticket is sold out, the method ends here due to the
         // exception thrown. Else, we'll get a new ticket to add to the order.
-        Ticket ticket = ticketService.requestTicketOfType(ticketDTO.getType(), user, ticketDTO.hasPickupService(),
-                ticketDTO.isCHMember());
+        Ticket ticket = ticketService
+                .requestTicketOfType(ticketDTO.getType(), user, ticketDTO.hasPickupService(), ticketDTO.isCHMember());
 
         Order order = new Order(user);
 
@@ -110,8 +110,8 @@ public class OrderServiceImpl implements OrderService {
 
         // Request a ticket to see if one is available. If a ticket is sold out, the method ends here due to the
         // exception thrown. Else, we'll get a new ticket to add to the order.
-        Ticket ticket = ticketService.requestTicketOfType(ticketDTO.getType(), user, ticketDTO.hasPickupService(),
-                ticketDTO.isCHMember());
+        Ticket ticket = ticketService
+                .requestTicketOfType(ticketDTO.getType(), user, ticketDTO.hasPickupService(), ticketDTO.isCHMember());
 
         order.addTicket(ticket);
         return orderRepository.save(order);
@@ -153,12 +153,16 @@ public class OrderServiceImpl implements OrderService {
         Order order = paymentService.updateStatus(orderReference);
 
         // Set all tickets from this Order to valid
+        validateTicketsIfPaid(order);
+        return order;
+    }
+
+    private void validateTicketsIfPaid(Order order) {
         if (order.getStatus().equals(OrderStatus.PAID)) {
             for (Ticket ticket : order.getTickets()) {
                 ticketService.validateTicket(ticket.getId());
             }
         }
-        return order;
     }
 
     @Override
@@ -169,6 +173,14 @@ public class OrderServiceImpl implements OrderService {
         } else {
             throw new PaymentException("Order with id " + order + " has not been checked out yet");
         }
+    }
+
+    @Override
+    public void adminApproveOrder(Long orderId) {
+        Order order = orderRepository.findOne(orderId);
+        order.setStatus(OrderStatus.PAID);
+        validateTicketsIfPaid(order);
+        orderRepository.save(order);
     }
 
     @Override
@@ -184,10 +196,11 @@ public class OrderServiceImpl implements OrderService {
         Collection<TicketInformationResponse> ticketInfo = new ArrayList<>();
 
         for (TicketType ticketType : TicketType.values()) {
-            Integer typeSold = ticketService.getNumberSoldOfType(ticketType);
-            ticketInfo.add(new TicketInformationResponse(ticketType, typeSold));
+            if (ticketType.isBuyable() && ticketType != TicketType.TEST) {
+                Integer typeSold = ticketService.getNumberSoldOfType(ticketType);
+                ticketInfo.add(new TicketInformationResponse(ticketType, typeSold));
+            }
         }
-
         return ticketInfo;
     }
 }
