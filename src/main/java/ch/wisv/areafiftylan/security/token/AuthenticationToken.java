@@ -17,7 +17,7 @@
 
 package ch.wisv.areafiftylan.security.token;
 
-import ch.wisv.areafiftylan.model.User;
+import ch.wisv.areafiftylan.users.model.User;
 
 import javax.persistence.Entity;
 

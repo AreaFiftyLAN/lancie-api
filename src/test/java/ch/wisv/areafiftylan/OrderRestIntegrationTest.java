@@ -17,14 +17,14 @@
 
 package ch.wisv.areafiftylan;
 
-import ch.wisv.areafiftylan.model.Order;
-import ch.wisv.areafiftylan.model.Ticket;
-import ch.wisv.areafiftylan.model.util.OrderStatus;
-import ch.wisv.areafiftylan.model.util.TicketOptions;
-import ch.wisv.areafiftylan.model.util.TicketType;
-import ch.wisv.areafiftylan.service.repository.OrderRepository;
-import ch.wisv.areafiftylan.service.repository.TicketRepository;
-import ch.wisv.areafiftylan.util.SessionData;
+import ch.wisv.areafiftylan.products.model.Order;
+import ch.wisv.areafiftylan.products.model.Ticket;
+import ch.wisv.areafiftylan.products.model.OrderStatus;
+import ch.wisv.areafiftylan.products.model.TicketOptions;
+import ch.wisv.areafiftylan.products.model.TicketType;
+import ch.wisv.areafiftylan.products.service.OrderRepository;
+import ch.wisv.areafiftylan.products.service.TicketRepository;
+import ch.wisv.areafiftylan.utils.SessionData;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Response;
 import org.apache.http.HttpStatus;

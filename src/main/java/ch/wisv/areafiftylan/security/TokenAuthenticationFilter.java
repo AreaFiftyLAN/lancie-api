@@ -17,9 +17,9 @@
 
 package ch.wisv.areafiftylan.security;
 
-import ch.wisv.areafiftylan.model.User;
+import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.security.token.AuthenticationToken;
-import ch.wisv.areafiftylan.service.repository.token.AuthenticationTokenRepository;
+import ch.wisv.areafiftylan.security.token.repository.AuthenticationTokenRepository;
 import com.google.common.base.Strings;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;

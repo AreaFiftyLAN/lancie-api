@@ -24,7 +24,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import static ch.wisv.areafiftylan.util.ResponseEntityBuilder.createResponseEntity;
+import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEntity;
 
 /**
  * This class handles exceptions for ALL Controllers. Whenever a Controller throws an exception that is listed here, the

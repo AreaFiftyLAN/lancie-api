@@ -28,7 +28,7 @@ import java.io.IOException;
 
 /**
  * This class overrides Springs default behaviour for unauthorized requests. Whenever a user is supposed to be logged in
- * and the controller doesn't handle it, it will return a 401 Status message
+ * and the authentication doesn't handle it, it will return a 401 Status message
  */
 @Component
 public class RESTAuthenticationEntryPoint implements AuthenticationEntryPoint {

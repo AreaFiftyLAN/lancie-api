@@ -18,8 +18,8 @@
 package ch.wisv.areafiftylan;
 
 import ch.wisv.areafiftylan.security.token.AuthenticationToken;
-import ch.wisv.areafiftylan.service.repository.token.AuthenticationTokenRepository;
-import ch.wisv.areafiftylan.util.SessionData;
+import ch.wisv.areafiftylan.security.token.repository.AuthenticationTokenRepository;
+import ch.wisv.areafiftylan.utils.SessionData;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Header;
 import com.jayway.restassured.response.Response;

@@ -18,12 +18,12 @@
 package ch.wisv.areafiftylan;
 
 import ch.wisv.areafiftylan.exception.*;
-import ch.wisv.areafiftylan.model.Ticket;
-import ch.wisv.areafiftylan.model.relations.RFIDLink;
-import ch.wisv.areafiftylan.model.util.TicketType;
-import ch.wisv.areafiftylan.service.repository.RFIDLinkRepository;
-import ch.wisv.areafiftylan.service.repository.TicketRepository;
-import ch.wisv.areafiftylan.util.SessionData;
+import ch.wisv.areafiftylan.products.model.Ticket;
+import ch.wisv.areafiftylan.extras.rfid.model.RFIDLink;
+import ch.wisv.areafiftylan.products.model.TicketType;
+import ch.wisv.areafiftylan.extras.rfid.model.RFIDLinkRepository;
+import ch.wisv.areafiftylan.products.service.TicketRepository;
+import ch.wisv.areafiftylan.utils.SessionData;
 import com.jayway.restassured.http.ContentType;
 import org.apache.http.HttpStatus;
 import org.junit.After;
@@ -32,9 +32,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 import static com.jayway.restassured.RestAssured.given;

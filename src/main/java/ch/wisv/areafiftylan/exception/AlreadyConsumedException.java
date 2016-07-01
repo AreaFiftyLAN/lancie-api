@@ -17,7 +17,7 @@
 
 package ch.wisv.areafiftylan.exception;
 
-import ch.wisv.areafiftylan.model.util.Consumption;
+import ch.wisv.areafiftylan.extras.consumption.model.Consumption;
 
 /**
  * Created by beer on 16-5-16.

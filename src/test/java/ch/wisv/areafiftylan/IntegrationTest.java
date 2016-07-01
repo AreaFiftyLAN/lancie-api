@@ -17,13 +17,11 @@
 
 package ch.wisv.areafiftylan;
 
-import ch.wisv.areafiftylan.model.User;
-import ch.wisv.areafiftylan.model.util.Gender;
-import ch.wisv.areafiftylan.model.util.Role;
-import ch.wisv.areafiftylan.service.repository.SeatRepository;
-import ch.wisv.areafiftylan.service.repository.TicketRepository;
-import ch.wisv.areafiftylan.service.repository.UserRepository;
-import ch.wisv.areafiftylan.util.SessionData;
+import ch.wisv.areafiftylan.users.model.User;
+import ch.wisv.areafiftylan.users.model.Gender;
+import ch.wisv.areafiftylan.users.model.Role;
+import ch.wisv.areafiftylan.users.service.UserRepository;
+import ch.wisv.areafiftylan.utils.SessionData;
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.filter.session.SessionFilter;
 import com.jayway.restassured.response.Response;
@@ -32,7 +30,6 @@ import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.WebIntegrationTest;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;

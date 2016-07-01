@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import static ch.wisv.areafiftylan.util.ResponseEntityBuilder.createResponseEntity;
+import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEntity;
 
 @RestController
 @RequestMapping("/web/properties")

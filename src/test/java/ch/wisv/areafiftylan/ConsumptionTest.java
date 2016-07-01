@@ -17,29 +17,22 @@
 
 package ch.wisv.areafiftylan;
 
-import ch.wisv.areafiftylan.model.ConsumptionMap;
-import ch.wisv.areafiftylan.model.Ticket;
-import ch.wisv.areafiftylan.model.util.Consumption;
-import ch.wisv.areafiftylan.model.util.TicketType;
-import ch.wisv.areafiftylan.service.ConsumptionService;
-import ch.wisv.areafiftylan.service.repository.ConsumptionMapsRepository;
-import ch.wisv.areafiftylan.service.repository.PossibleConsumptionsRepository;
-import ch.wisv.areafiftylan.service.repository.TicketRepository;
-import ch.wisv.areafiftylan.util.SessionData;
+import ch.wisv.areafiftylan.extras.consumption.model.ConsumptionMap;
+import ch.wisv.areafiftylan.products.model.Ticket;
+import ch.wisv.areafiftylan.extras.consumption.model.Consumption;
+import ch.wisv.areafiftylan.products.model.TicketType;
+import ch.wisv.areafiftylan.extras.consumption.service.ConsumptionService;
+import ch.wisv.areafiftylan.extras.consumption.model.ConsumptionMapsRepository;
+import ch.wisv.areafiftylan.extras.consumption.model.PossibleConsumptionsRepository;
+import ch.wisv.areafiftylan.products.service.TicketRepository;
+import ch.wisv.areafiftylan.utils.SessionData;
 import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.response.Response;
 import org.apache.http.HttpStatus;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.After;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static com.jayway.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.containsInAnyOrder;

@@ -17,9 +17,7 @@
 
 package ch.wisv.areafiftylan.exception;
 
-import ch.wisv.areafiftylan.model.util.TicketType;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import ch.wisv.areafiftylan.products.model.TicketType;
 
 /**
  * Created by sille on 22-12-15.

@@ -17,7 +17,7 @@
 
 package ch.wisv.areafiftylan.security;
 
-import ch.wisv.areafiftylan.service.repository.token.AuthenticationTokenRepository;
+import ch.wisv.areafiftylan.security.token.repository.AuthenticationTokenRepository;
 import com.allanditzel.springframework.security.web.csrf.CsrfTokenResponseHeaderBindingFilter;
 import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;

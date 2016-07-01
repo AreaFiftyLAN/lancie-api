@@ -18,12 +18,12 @@
 package ch.wisv.areafiftylan;
 
 
-import ch.wisv.areafiftylan.model.Order;
-import ch.wisv.areafiftylan.model.util.OrderStatus;
-import ch.wisv.areafiftylan.service.MailService;
-import ch.wisv.areafiftylan.service.MolliePaymentService;
-import ch.wisv.areafiftylan.service.PaymentService;
-import ch.wisv.areafiftylan.service.repository.OrderRepository;
+import ch.wisv.areafiftylan.products.model.Order;
+import ch.wisv.areafiftylan.products.model.OrderStatus;
+import ch.wisv.areafiftylan.utils.mail.MailService;
+import ch.wisv.areafiftylan.products.service.MolliePaymentService;
+import ch.wisv.areafiftylan.products.service.PaymentService;
+import ch.wisv.areafiftylan.products.service.OrderRepository;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;

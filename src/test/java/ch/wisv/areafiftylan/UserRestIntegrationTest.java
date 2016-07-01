@@ -17,11 +17,11 @@
 
 package ch.wisv.areafiftylan;
 
-import ch.wisv.areafiftylan.model.User;
+import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.security.token.VerificationToken;
-import ch.wisv.areafiftylan.service.TaskScheduler;
-import ch.wisv.areafiftylan.service.repository.token.VerificationTokenRepository;
-import ch.wisv.areafiftylan.util.SessionData;
+import ch.wisv.areafiftylan.utils.TaskScheduler;
+import ch.wisv.areafiftylan.security.token.repository.VerificationTokenRepository;
+import ch.wisv.areafiftylan.utils.SessionData;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Header;
 import com.jayway.restassured.response.Response;

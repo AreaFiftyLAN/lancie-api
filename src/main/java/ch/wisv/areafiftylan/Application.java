@@ -18,11 +18,11 @@
 package ch.wisv.areafiftylan;
 
 
-import ch.wisv.areafiftylan.service.SeatService;
-import ch.wisv.areafiftylan.service.repository.TeamRepository;
-import ch.wisv.areafiftylan.service.repository.TicketRepository;
-import ch.wisv.areafiftylan.service.repository.UserRepository;
-import ch.wisv.areafiftylan.util.TestDataRunner;
+import ch.wisv.areafiftylan.seats.service.SeatService;
+import ch.wisv.areafiftylan.teams.service.TeamRepository;
+import ch.wisv.areafiftylan.products.service.TicketRepository;
+import ch.wisv.areafiftylan.users.service.UserRepository;
+import ch.wisv.areafiftylan.utils.TestDataRunner;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;

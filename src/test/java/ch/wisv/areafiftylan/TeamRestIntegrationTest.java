@@ -17,16 +17,16 @@
 
 package ch.wisv.areafiftylan;
 
-import ch.wisv.areafiftylan.model.Team;
-import ch.wisv.areafiftylan.model.Ticket;
-import ch.wisv.areafiftylan.model.User;
-import ch.wisv.areafiftylan.model.util.Gender;
-import ch.wisv.areafiftylan.model.util.TicketType;
+import ch.wisv.areafiftylan.teams.model.Team;
+import ch.wisv.areafiftylan.products.model.Ticket;
+import ch.wisv.areafiftylan.users.model.User;
+import ch.wisv.areafiftylan.users.model.Gender;
+import ch.wisv.areafiftylan.products.model.TicketType;
 import ch.wisv.areafiftylan.security.token.TeamInviteToken;
-import ch.wisv.areafiftylan.service.repository.TeamRepository;
-import ch.wisv.areafiftylan.service.repository.TicketRepository;
-import ch.wisv.areafiftylan.service.repository.token.TeamInviteTokenRepository;
-import ch.wisv.areafiftylan.util.SessionData;
+import ch.wisv.areafiftylan.teams.service.TeamRepository;
+import ch.wisv.areafiftylan.products.service.TicketRepository;
+import ch.wisv.areafiftylan.security.token.repository.TeamInviteTokenRepository;
+import ch.wisv.areafiftylan.utils.SessionData;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Response;
 import org.apache.http.HttpStatus;

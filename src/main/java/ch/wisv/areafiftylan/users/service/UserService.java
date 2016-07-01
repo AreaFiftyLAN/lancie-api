@@ -1,0 +1,69 @@
+/*
+ * Copyright (c) 2016  W.I.S.V. 'Christiaan Huygens'
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package ch.wisv.areafiftylan.users.service;
+
+
+import ch.wisv.areafiftylan.users.model.ProfileDTO;
+import ch.wisv.areafiftylan.users.model.UserDTO;
+import ch.wisv.areafiftylan.users.model.Profile;
+import ch.wisv.areafiftylan.users.model.User;
+import org.springframework.dao.DataIntegrityViolationException;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.Collection;
+import java.util.Optional;
+
+public interface UserService {
+    User getUserById(long id);
+
+    Optional<User> getUserByEmail(String email);
+
+    Optional<User> getUserByUsername(String username);
+
+    Collection<User> getAllUsers();
+
+    User create(UserDTO userDTO, HttpServletRequest request) throws DataIntegrityViolationException;
+
+    User replace(Long userId, UserDTO userDTO);
+
+    void delete(Long userId);
+
+    User edit(Long userId, UserDTO userDTO);
+
+    User addProfile(Long userId, ProfileDTO profileDTO);
+
+    User changeProfile(Long userId, ProfileDTO profileDTO);
+
+    Profile resetProfile(Long userId);
+
+    void lock(Long userId);
+
+    void unlock(Long userId);
+
+    void verify(Long userId);
+
+    void requestResetPassword(User user, HttpServletRequest request);
+
+    void resetPassword(Long userId, String password);
+
+    void changePassword(Long userId, String oldPassword, String newPassword);
+
+    Boolean checkEmailAvailable(String email);
+
+    Boolean checkUsernameAvailable(String username);
+}

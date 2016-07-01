@@ -17,7 +17,7 @@
 
 package ch.wisv.areafiftylan.security.token;
 
-import ch.wisv.areafiftylan.model.User;
+import ch.wisv.areafiftylan.users.model.User;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
@@ -44,7 +44,7 @@ public abstract class Token {
     @Column(nullable=false, columnDefinition = "BOOLEAN DEFAULT TRUE")
     private boolean expirable = true;
 
-    @Type(type = "ch.wisv.areafiftylan.util.LocalDateTimeUserType")
+    @Type(type = "ch.wisv.areafiftylan.utils.LocalDateTimeUserType")
     private LocalDateTime expiryDate;
 
 
