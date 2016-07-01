@@ -18,10 +18,10 @@
 package ch.wisv.areafiftylan.users.service;
 
 
-import ch.wisv.areafiftylan.users.model.ProfileDTO;
-import ch.wisv.areafiftylan.users.model.UserDTO;
 import ch.wisv.areafiftylan.users.model.Profile;
+import ch.wisv.areafiftylan.users.model.ProfileDTO;
 import ch.wisv.areafiftylan.users.model.User;
+import ch.wisv.areafiftylan.users.model.UserDTO;
 import org.springframework.dao.DataIntegrityViolationException;
 
 import javax.servlet.http.HttpServletRequest;

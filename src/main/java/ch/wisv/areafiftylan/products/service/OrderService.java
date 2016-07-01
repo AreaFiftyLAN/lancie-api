@@ -17,9 +17,9 @@
 
 package ch.wisv.areafiftylan.products.service;
 
+import ch.wisv.areafiftylan.products.model.Order;
 import ch.wisv.areafiftylan.products.model.TicketDTO;
 import ch.wisv.areafiftylan.products.model.TicketInformationResponse;
-import ch.wisv.areafiftylan.products.model.Order;
 
 import java.util.Collection;
 import java.util.List;

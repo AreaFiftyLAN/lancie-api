@@ -17,16 +17,16 @@
 
 package ch.wisv.areafiftylan.utils;
 
-import ch.wisv.areafiftylan.seats.model.SeatGroupDTO;
-import ch.wisv.areafiftylan.teams.model.Team;
 import ch.wisv.areafiftylan.products.model.Ticket;
-import ch.wisv.areafiftylan.users.model.User;
+import ch.wisv.areafiftylan.products.model.TicketType;
+import ch.wisv.areafiftylan.products.service.TicketRepository;
+import ch.wisv.areafiftylan.seats.model.SeatGroupDTO;
+import ch.wisv.areafiftylan.seats.service.SeatService;
+import ch.wisv.areafiftylan.teams.model.Team;
+import ch.wisv.areafiftylan.teams.service.TeamRepository;
 import ch.wisv.areafiftylan.users.model.Gender;
 import ch.wisv.areafiftylan.users.model.Role;
-import ch.wisv.areafiftylan.products.model.TicketType;
-import ch.wisv.areafiftylan.seats.service.SeatService;
-import ch.wisv.areafiftylan.teams.service.TeamRepository;
-import ch.wisv.areafiftylan.products.service.TicketRepository;
+import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.users.service.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;

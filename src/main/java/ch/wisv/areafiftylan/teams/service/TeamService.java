@@ -17,10 +17,10 @@
 
 package ch.wisv.areafiftylan.teams.service;
 
+import ch.wisv.areafiftylan.security.token.TeamInviteToken;
+import ch.wisv.areafiftylan.teams.model.Team;
 import ch.wisv.areafiftylan.teams.model.TeamDTO;
 import ch.wisv.areafiftylan.teams.model.TeamInviteResponse;
-import ch.wisv.areafiftylan.teams.model.Team;
-import ch.wisv.areafiftylan.security.token.TeamInviteToken;
 
 import java.util.Collection;
 import java.util.List;

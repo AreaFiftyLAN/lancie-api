@@ -19,12 +19,12 @@ package ch.wisv.areafiftylan.utils;
 
 import ch.wisv.areafiftylan.products.model.Order;
 import ch.wisv.areafiftylan.products.model.OrderStatus;
+import ch.wisv.areafiftylan.products.service.OrderRepository;
 import ch.wisv.areafiftylan.products.service.OrderService;
 import ch.wisv.areafiftylan.security.token.Token;
 import ch.wisv.areafiftylan.security.token.VerificationToken;
-import ch.wisv.areafiftylan.products.service.OrderRepository;
-import ch.wisv.areafiftylan.users.service.UserRepository;
 import ch.wisv.areafiftylan.security.token.repository.VerificationTokenRepository;
+import ch.wisv.areafiftylan.users.service.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;

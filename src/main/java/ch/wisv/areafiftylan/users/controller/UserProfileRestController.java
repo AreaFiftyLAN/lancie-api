@@ -17,8 +17,8 @@
 
 package ch.wisv.areafiftylan.users.controller;
 
-import ch.wisv.areafiftylan.users.model.ProfileDTO;
 import ch.wisv.areafiftylan.users.model.Profile;
+import ch.wisv.areafiftylan.users.model.ProfileDTO;
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.users.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;

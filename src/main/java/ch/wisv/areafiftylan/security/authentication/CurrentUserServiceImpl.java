@@ -18,18 +18,18 @@
 package ch.wisv.areafiftylan.security.authentication;
 
 import ch.wisv.areafiftylan.exception.TokenNotFoundException;
-import ch.wisv.areafiftylan.teams.model.Team;
 import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.service.OrderService;
+import ch.wisv.areafiftylan.products.service.TicketRepository;
 import ch.wisv.areafiftylan.products.service.TicketService;
-import ch.wisv.areafiftylan.teams.service.TeamService;
-import ch.wisv.areafiftylan.users.model.User;
-import ch.wisv.areafiftylan.users.model.Role;
 import ch.wisv.areafiftylan.security.token.TeamInviteToken;
 import ch.wisv.areafiftylan.security.token.TicketTransferToken;
-import ch.wisv.areafiftylan.products.service.TicketRepository;
 import ch.wisv.areafiftylan.security.token.repository.TeamInviteTokenRepository;
 import ch.wisv.areafiftylan.security.token.repository.TicketTransferTokenRepository;
+import ch.wisv.areafiftylan.teams.model.Team;
+import ch.wisv.areafiftylan.teams.service.TeamService;
+import ch.wisv.areafiftylan.users.model.Role;
+import ch.wisv.areafiftylan.users.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;

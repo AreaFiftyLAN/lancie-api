@@ -17,17 +17,11 @@
 
 package ch.wisv.areafiftylan.products.service;
 
-import ch.wisv.areafiftylan.products.model.TicketDTO;
-import ch.wisv.areafiftylan.products.model.TicketInformationResponse;
 import ch.wisv.areafiftylan.exception.ImmutableOrderException;
 import ch.wisv.areafiftylan.exception.PaymentException;
 import ch.wisv.areafiftylan.exception.TicketNotFoundException;
-import ch.wisv.areafiftylan.products.model.ExpiredOrder;
-import ch.wisv.areafiftylan.products.model.Order;
-import ch.wisv.areafiftylan.products.model.Ticket;
+import ch.wisv.areafiftylan.products.model.*;
 import ch.wisv.areafiftylan.users.model.User;
-import ch.wisv.areafiftylan.products.model.OrderStatus;
-import ch.wisv.areafiftylan.products.model.TicketType;
 import ch.wisv.areafiftylan.users.service.UserService;
 import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;

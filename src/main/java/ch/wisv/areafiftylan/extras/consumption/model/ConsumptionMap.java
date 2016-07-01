@@ -18,7 +18,6 @@
 package ch.wisv.areafiftylan.extras.consumption.model;
 
 import ch.wisv.areafiftylan.exception.AlreadyConsumedException;
-import ch.wisv.areafiftylan.extras.consumption.model.Consumption;
 import ch.wisv.areafiftylan.products.model.Ticket;
 import lombok.Getter;
 import lombok.NonNull;
@@ -54,25 +53,25 @@ public class ConsumptionMap {
         this.ticket = t;
     }
 
-    public boolean isConsumed(Consumption consumption){
+    public boolean isConsumed(Consumption consumption) {
         return consumptionsMade.contains(consumption);
     }
 
-    public void consume(Consumption consumption){
-        if(isConsumed(consumption)){
+    public void consume(Consumption consumption) {
+        if (isConsumed(consumption)) {
             throw new AlreadyConsumedException(consumption);
         }
 
         consumptionsMade.add(consumption);
     }
 
-    public void reset(Consumption consumption){
-        if(isConsumed(consumption)){
+    public void reset(Consumption consumption) {
+        if (isConsumed(consumption)) {
             consumptionsMade.remove(consumption);
         }
     }
 
-    public Collection<Consumption> getConsumptionsMade(){
+    public Collection<Consumption> getConsumptionsMade() {
         return consumptionsMade;
     }
 }

@@ -17,13 +17,13 @@
 
 package ch.wisv.areafiftylan.products.controller;
 
-import ch.wisv.areafiftylan.products.model.TicketInformationResponse;
 import ch.wisv.areafiftylan.exception.DuplicateTicketTransferTokenException;
 import ch.wisv.areafiftylan.products.model.Ticket;
-import ch.wisv.areafiftylan.users.model.User;
-import ch.wisv.areafiftylan.security.token.TicketTransferToken;
+import ch.wisv.areafiftylan.products.model.TicketInformationResponse;
 import ch.wisv.areafiftylan.products.service.OrderService;
 import ch.wisv.areafiftylan.products.service.TicketService;
+import ch.wisv.areafiftylan.security.token.TicketTransferToken;
+import ch.wisv.areafiftylan.users.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

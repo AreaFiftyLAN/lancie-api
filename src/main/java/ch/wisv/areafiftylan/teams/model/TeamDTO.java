@@ -21,13 +21,15 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.validator.constraints.NotEmpty;
 
-import javax.validation.constraints.NotNull;
-
 public class TeamDTO {
 
-    @NotEmpty @Getter @Setter
+    @NotEmpty
+    @Getter
+    @Setter
     private String teamName = "";
 
-    @NotEmpty @Getter @Setter
+    @NotEmpty
+    @Getter
+    @Setter
     private String captainUsername = "";
 }

@@ -17,8 +17,6 @@
 
 package ch.wisv.areafiftylan.products.model;
 
-import ch.wisv.areafiftylan.products.model.Order;
-
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import java.time.LocalDateTime;
@@ -40,7 +38,7 @@ public class ExpiredOrder {
 
     String createdBy;
 
-    public ExpiredOrder(){
+    public ExpiredOrder() {
         //JPA Only
     }
 

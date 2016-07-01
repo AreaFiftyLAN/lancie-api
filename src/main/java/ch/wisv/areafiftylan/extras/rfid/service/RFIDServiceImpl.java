@@ -27,13 +27,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 
-import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEntity;
-
 /**
  * Created by beer on 5-5-16.
  */
 @Service
-public class RFIDServiceImpl implements RFIDService{
+public class RFIDServiceImpl implements RFIDService {
     @Autowired
     private RFIDLinkRepository rfidLinkRepository;
 
@@ -62,15 +60,15 @@ public class RFIDServiceImpl implements RFIDService{
 
     @Override
     public void addRFIDLink(String rfid, Long ticketId) {
-        if(isRFIDUsed(rfid)){
+        if (isRFIDUsed(rfid)) {
             throw new RFIDTakenException(rfid);
         }
 
-        if(isTicketLinked(ticketId)){
+        if (isTicketLinked(ticketId)) {
             throw new TicketAlreadyLinkedException();
         }
 
-        if(!ticketService.getTicketById(ticketId).isValid()){
+        if (!ticketService.getTicketById(ticketId).isValid()) {
             throw new InvalidTicketException("Can't link ticket to RFID; ticket is invalid.");
         }
 
@@ -82,7 +80,7 @@ public class RFIDServiceImpl implements RFIDService{
     }
 
     @Override
-    public RFIDLink removeRFIDLink(String rfid){
+    public RFIDLink removeRFIDLink(String rfid) {
         RFIDLink link = getLinkByRFID(rfid);
 
         rfidLinkRepository.delete(link);
@@ -91,7 +89,7 @@ public class RFIDServiceImpl implements RFIDService{
     }
 
     @Override
-    public RFIDLink removeRFIDLink(Long ticketId){
+    public RFIDLink removeRFIDLink(Long ticketId) {
         RFIDLink link = getLinkByTicketId(ticketId);
 
         rfidLinkRepository.delete(link);
@@ -100,16 +98,14 @@ public class RFIDServiceImpl implements RFIDService{
     }
 
     public RFIDLink getLinkByRFID(String rfid) {
-        if(!RFIDLink.isValidRFID(rfid)){
+        if (!RFIDLink.isValidRFID(rfid)) {
             throw new InvalidRFIDException(rfid);
         }
 
-        return rfidLinkRepository.findByRfid(rfid)
-                .orElseThrow(() -> new RFIDNotFoundException());
+        return rfidLinkRepository.findByRfid(rfid).orElseThrow(() -> new RFIDNotFoundException());
     }
 
     public RFIDLink getLinkByTicketId(Long ticketId) {
-        return rfidLinkRepository.findByTicketId(ticketId)
-                .orElseThrow(() -> new RFIDNotFoundException());
+        return rfidLinkRepository.findByTicketId(ticketId).orElseThrow(() -> new RFIDNotFoundException());
     }
 }

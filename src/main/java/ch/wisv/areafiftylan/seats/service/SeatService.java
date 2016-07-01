@@ -17,9 +17,9 @@
 
 package ch.wisv.areafiftylan.seats.service;
 
+import ch.wisv.areafiftylan.seats.model.Seat;
 import ch.wisv.areafiftylan.seats.model.SeatGroupDTO;
 import ch.wisv.areafiftylan.seats.model.SeatmapResponse;
-import ch.wisv.areafiftylan.seats.model.Seat;
 
 import java.util.List;
 

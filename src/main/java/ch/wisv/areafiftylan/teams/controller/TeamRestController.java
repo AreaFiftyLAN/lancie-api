@@ -17,13 +17,13 @@
 
 package ch.wisv.areafiftylan.teams.controller;
 
+import ch.wisv.areafiftylan.teams.model.Team;
 import ch.wisv.areafiftylan.teams.model.TeamDTO;
 import ch.wisv.areafiftylan.teams.model.TeamInviteResponse;
-import ch.wisv.areafiftylan.teams.model.Team;
-import ch.wisv.areafiftylan.users.model.User;
-import ch.wisv.areafiftylan.users.model.Role;
-import ch.wisv.areafiftylan.utils.view.View;
 import ch.wisv.areafiftylan.teams.service.TeamService;
+import ch.wisv.areafiftylan.users.model.Role;
+import ch.wisv.areafiftylan.users.model.User;
+import ch.wisv.areafiftylan.utils.view.View;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -66,8 +66,9 @@ public class TeamRestController {
     @JsonView(View.Public.class)
     @RequestMapping(method = RequestMethod.POST)
     ResponseEntity<?> add(@Validated @RequestBody TeamDTO teamDTO, Authentication auth) {
-        if(teamService.teamnameUsed(teamDTO.getTeamName())){
-            return createResponseEntity(HttpStatus.CONFLICT, "Team with name \"" + teamDTO.getTeamName() + "\" already exists.");
+        if (teamService.teamnameUsed(teamDTO.getTeamName())) {
+            return createResponseEntity(HttpStatus.CONFLICT,
+                    "Team with name \"" + teamDTO.getTeamName() + "\" already exists.");
         }
 
         Team team;

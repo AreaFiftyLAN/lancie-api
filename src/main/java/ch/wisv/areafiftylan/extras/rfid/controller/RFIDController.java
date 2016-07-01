@@ -20,9 +20,9 @@ package ch.wisv.areafiftylan.extras.rfid.controller;
 import ch.wisv.areafiftylan.exception.InvalidRFIDException;
 import ch.wisv.areafiftylan.exception.RFIDNotFoundException;
 import ch.wisv.areafiftylan.exception.RFIDTakenException;
-import ch.wisv.areafiftylan.extras.rfid.service.RFIDService;
 import ch.wisv.areafiftylan.extras.rfid.model.RFIDLink;
 import ch.wisv.areafiftylan.extras.rfid.model.RFIDLinkDTO;
+import ch.wisv.areafiftylan.extras.rfid.service.RFIDService;
 import ch.wisv.areafiftylan.products.service.TicketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -49,46 +49,46 @@ public class RFIDController {
     private TicketService ticketService;
 
     @RequestMapping(method = RequestMethod.GET)
-    public Collection<RFIDLink> getRFIDLinks(){
+    public Collection<RFIDLink> getRFIDLinks() {
         return rfidService.getAllRFIDLinks();
     }
 
     @RequestMapping(value = "/{rfid}/ticketId", method = RequestMethod.GET)
-    public Long getTicketId(@PathVariable String rfid){
+    public Long getTicketId(@PathVariable String rfid) {
         return rfidService.getTicketIdByRFID(rfid);
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity<?> addRFIDLink(@RequestBody RFIDLinkDTO rfidLinkDTO){
+    public ResponseEntity<?> addRFIDLink(@RequestBody RFIDLinkDTO rfidLinkDTO) {
         rfidService.addRFIDLink(rfidLinkDTO.getRfid(), rfidLinkDTO.getTicketId());
 
         return createResponseEntity(HttpStatus.OK, "Succesfully linked RFID with Ticket");
     }
 
     @RequestMapping(value = "/{rfid}", method = RequestMethod.DELETE)
-    public RFIDLink removeRFIDLinkByRFID(@PathVariable String rfid){
+    public RFIDLink removeRFIDLinkByRFID(@PathVariable String rfid) {
         return rfidService.removeRFIDLink(rfid);
     }
 
     @RequestMapping(value = "/tickets/{ticketId}", method = RequestMethod.DELETE)
-    public RFIDLink deleteRFIDByTicketId(@PathVariable Long ticketId){
+    public RFIDLink deleteRFIDByTicketId(@PathVariable Long ticketId) {
         return rfidService.removeRFIDLink(ticketId);
     }
 
     //Exceptions
 
     @ExceptionHandler(RFIDTakenException.class)
-    public ResponseEntity<?> handleRFIDTakenException(RFIDTakenException e){
+    public ResponseEntity<?> handleRFIDTakenException(RFIDTakenException e) {
         return createResponseEntity(HttpStatus.CONFLICT, e.getMessage());
     }
 
     @ExceptionHandler(InvalidRFIDException.class)
-    public ResponseEntity<?> handleInvalidRFIDException(InvalidRFIDException e){
+    public ResponseEntity<?> handleInvalidRFIDException(InvalidRFIDException e) {
         return createResponseEntity(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 
     @ExceptionHandler(RFIDNotFoundException.class)
-    public ResponseEntity<?> handleRFIDNotFoundException(RFIDNotFoundException e){
+    public ResponseEntity<?> handleRFIDNotFoundException(RFIDNotFoundException e) {
         return createResponseEntity(HttpStatus.NOT_FOUND, e.getMessage());
     }
 }

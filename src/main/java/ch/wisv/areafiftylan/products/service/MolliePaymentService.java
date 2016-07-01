@@ -65,9 +65,8 @@ public class MolliePaymentService implements PaymentService {
         metadata.put("A5LId", order.getId());
 
         String method = "ideal";
-        CreatePayment payment =
-                new CreatePayment(
-                        method, (double) order.getAmount(), "Area FiftyLAN Ticket", returnUrl + "?order=" + order.getId(), metadata);
+        CreatePayment payment = new CreatePayment(method, (double) order.getAmount(), "Area FiftyLAN Ticket",
+                returnUrl + "?order=" + order.getId(), metadata);
 
         //First try is for IOExceptions coming from the Mollie Client.
         try {

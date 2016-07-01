@@ -74,7 +74,7 @@ class GlobalControllerExceptionHandler {
     }
 
     @ExceptionHandler(TicketAlreadyLinkedException.class)
-    public ResponseEntity<?> handleInvalidRFIDException(TicketAlreadyLinkedException e){
+    public ResponseEntity<?> handleInvalidRFIDException(TicketAlreadyLinkedException e) {
         return createResponseEntity(HttpStatus.CONFLICT, e.getMessage());
     }
 }

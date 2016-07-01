@@ -17,18 +17,18 @@
 
 package ch.wisv.areafiftylan.teams.service;
 
-import ch.wisv.areafiftylan.teams.model.TeamDTO;
-import ch.wisv.areafiftylan.teams.model.TeamInviteResponse;
 import ch.wisv.areafiftylan.exception.TeamNotFoundException;
 import ch.wisv.areafiftylan.exception.TokenNotFoundException;
 import ch.wisv.areafiftylan.exception.UserNotFoundException;
-import ch.wisv.areafiftylan.teams.model.Team;
-import ch.wisv.areafiftylan.utils.mail.MailService;
-import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.security.token.TeamInviteToken;
 import ch.wisv.areafiftylan.security.token.Token;
 import ch.wisv.areafiftylan.security.token.repository.TeamInviteTokenRepository;
+import ch.wisv.areafiftylan.teams.model.Team;
+import ch.wisv.areafiftylan.teams.model.TeamDTO;
+import ch.wisv.areafiftylan.teams.model.TeamInviteResponse;
+import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.users.service.UserService;
+import ch.wisv.areafiftylan.utils.mail.MailService;
 import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

@@ -18,17 +18,17 @@
 package ch.wisv.areafiftylan.products.service;
 
 import ch.wisv.areafiftylan.exception.*;
-import ch.wisv.areafiftylan.teams.model.Team;
-import ch.wisv.areafiftylan.products.model.Ticket;
-import ch.wisv.areafiftylan.utils.mail.MailService;
 import ch.wisv.areafiftylan.extras.rfid.service.RFIDService;
-import ch.wisv.areafiftylan.teams.service.TeamService;
-import ch.wisv.areafiftylan.users.model.User;
+import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.model.TicketType;
 import ch.wisv.areafiftylan.security.token.TicketTransferToken;
 import ch.wisv.areafiftylan.security.token.Token;
 import ch.wisv.areafiftylan.security.token.repository.TicketTransferTokenRepository;
+import ch.wisv.areafiftylan.teams.model.Team;
+import ch.wisv.areafiftylan.teams.service.TeamService;
+import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.users.service.UserService;
+import ch.wisv.areafiftylan.utils.mail.MailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -67,7 +67,7 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Autowired
-    public void setRFIDService(RFIDService rfidService){
+    public void setRFIDService(RFIDService rfidService) {
         this.rfidService = rfidService;
     }
 
@@ -139,7 +139,8 @@ public class TicketServiceImpl implements TicketService {
 
         if (!ticketTransferTokens.isEmpty()) {
             throw new DuplicateTicketTransferTokenException(ticketId);
-        } if(rfidService.isTicketLinked(ticketId)) {
+        }
+        if (rfidService.isTicketLinked(ticketId)) {
             throw new TicketAlreadyLinkedException();
         } else {
             TicketTransferToken ttt = new TicketTransferToken(u, t);
@@ -158,7 +159,7 @@ public class TicketServiceImpl implements TicketService {
         TicketTransferToken ttt = getTicketTransferTokenIfValid(token);
         Ticket t = ttt.getTicket();
 
-        if(rfidService.isTicketLinked(t.getId())){
+        if (rfidService.isTicketLinked(t.getId())) {
             throw new TicketAlreadyLinkedException();
         }
 
@@ -225,10 +226,8 @@ public class TicketServiceImpl implements TicketService {
     private Collection<Ticket> getCaptainedTickets(User u) {
         Collection<Team> captainedTeams = teamService.getTeamByCaptainId(u.getId());
 
-        return captainedTeams.stream()
-                .flatMap(t -> t.getMembers().stream()).filter(m -> !m.equals(u))
-                .flatMap(m -> ticketRepository.findAllByOwnerUsernameIgnoreCase(m.getUsername()).stream()
-                        .filter(Ticket::isValid))
-                .collect(Collectors.toList());
+        return captainedTeams.stream().flatMap(t -> t.getMembers().stream()).filter(m -> !m.equals(u)).flatMap(
+                m -> ticketRepository.findAllByOwnerUsernameIgnoreCase(m.getUsername()).stream()
+                        .filter(Ticket::isValid)).collect(Collectors.toList());
     }
 }

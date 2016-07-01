@@ -17,14 +17,14 @@
 
 package ch.wisv.areafiftylan.products.controller;
 
-import ch.wisv.areafiftylan.products.model.TicketDTO;
 import ch.wisv.areafiftylan.exception.ImmutableOrderException;
 import ch.wisv.areafiftylan.exception.TicketNotFoundException;
 import ch.wisv.areafiftylan.exception.TicketUnavailableException;
 import ch.wisv.areafiftylan.products.model.Order;
+import ch.wisv.areafiftylan.products.model.TicketDTO;
+import ch.wisv.areafiftylan.products.service.OrderService;
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.utils.view.View;
-import ch.wisv.areafiftylan.products.service.OrderService;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;

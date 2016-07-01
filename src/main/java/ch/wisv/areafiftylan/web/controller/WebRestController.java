@@ -63,7 +63,7 @@ public class WebRestController {
      * @return A collection with all committee members.
      */
     @RequestMapping("/committee")
-    public Collection<CommitteeMember> getCommittee(){
+    public Collection<CommitteeMember> getCommittee() {
         Collection<CommitteeMember> committeeMembers = new ArrayList<>();
         committeeMembers.add(new CommitteeMember("Sille Kamoen", "Chairman", "people"));
         committeeMembers.add(new CommitteeMember("Rebecca Glans", "Secretary", "women"));

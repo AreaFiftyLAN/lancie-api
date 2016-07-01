@@ -36,7 +36,7 @@ public class TicketTransferToken extends Token {
     @JoinColumn(nullable = false)
     private Ticket ticket;
 
-    public TicketTransferToken(){
+    public TicketTransferToken() {
     }
 
     public TicketTransferToken(User user, Ticket ticket) {
@@ -44,7 +44,7 @@ public class TicketTransferToken extends Token {
         this.ticket = ticket;
     }
 
-    public Ticket getTicket(){
+    public Ticket getTicket() {
         return ticket;
     }
 }

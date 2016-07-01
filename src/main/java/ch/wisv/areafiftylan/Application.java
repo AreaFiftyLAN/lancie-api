@@ -18,9 +18,9 @@
 package ch.wisv.areafiftylan;
 
 
+import ch.wisv.areafiftylan.products.service.TicketRepository;
 import ch.wisv.areafiftylan.seats.service.SeatService;
 import ch.wisv.areafiftylan.teams.service.TeamRepository;
-import ch.wisv.areafiftylan.products.service.TicketRepository;
 import ch.wisv.areafiftylan.users.service.UserRepository;
 import ch.wisv.areafiftylan.utils.TestDataRunner;
 import org.springframework.boot.CommandLineRunner;

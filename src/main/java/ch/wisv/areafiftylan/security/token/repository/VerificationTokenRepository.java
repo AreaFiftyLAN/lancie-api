@@ -17,8 +17,8 @@
 
 package ch.wisv.areafiftylan.security.token.repository;
 
-import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.security.token.VerificationToken;
+import ch.wisv.areafiftylan.users.model.User;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;

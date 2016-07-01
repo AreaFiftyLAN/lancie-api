@@ -36,12 +36,12 @@ public class RFIDLink {
     @OneToOne(cascade = CascadeType.MERGE)
     private Ticket ticket;
 
-    public RFIDLink(){
+    public RFIDLink() {
         //JPA Only
     }
 
     public RFIDLink(String rfid, Ticket ticket) {
-        if(!isValidRFID(rfid)){
+        if (!isValidRFID(rfid)) {
             throw new InvalidRFIDException(rfid);
         }
 
@@ -49,18 +49,18 @@ public class RFIDLink {
         this.ticket = ticket;
     }
 
-    public String getRFID(){
+    public String getRFID() {
         return rfid;
     }
 
-    public Ticket getTicket(){
+    public Ticket getTicket() {
         return ticket;
     }
 
     //Static Content
     public static final int RFID_CHAR_COUNT = 10;
 
-    public static boolean isValidRFID(String rfid){
+    public static boolean isValidRFID(String rfid) {
         return rfid.length() == RFID_CHAR_COUNT;
     }
 }

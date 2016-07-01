@@ -17,8 +17,8 @@
 
 package ch.wisv.areafiftylan.products.model;
 
-import ch.wisv.areafiftylan.utils.view.View;
 import ch.wisv.areafiftylan.users.model.User;
+import ch.wisv.areafiftylan.utils.view.View;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import javax.persistence.*;
@@ -69,7 +69,9 @@ public class Ticket {
         //JPA Only
     }
 
-    public Long getId(){ return id; }
+    public Long getId() {
+        return id;
+    }
 
     public boolean isPickupService() {
         return pickupService;

@@ -25,15 +25,23 @@ import javax.validation.constraints.NotNull;
 
 public class UserDTO {
 
-    @NotEmpty @Getter @Setter
+    @NotEmpty
+    @Getter
+    @Setter
     private String username = "";
 
-    @NotEmpty @Getter @Setter
+    @NotEmpty
+    @Getter
+    @Setter
     private String email = "";
 
-    @NotEmpty @Getter @Setter
+    @NotEmpty
+    @Getter
+    @Setter
     private String password = "";
 
-    @NotNull @Getter @Setter
+    @NotNull
+    @Getter
+    @Setter
     private Role role = Role.ROLE_USER;
 }

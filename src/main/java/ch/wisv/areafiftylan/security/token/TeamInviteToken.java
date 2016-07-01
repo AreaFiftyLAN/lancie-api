@@ -39,7 +39,7 @@ public class TeamInviteToken extends Token {
         //JPA Only
     }
 
-    public TeamInviteToken(User user, Team team){
+    public TeamInviteToken(User user, Team team) {
         super(user, 0);
         this.team = team;
     }

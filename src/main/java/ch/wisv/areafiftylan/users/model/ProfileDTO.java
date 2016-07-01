@@ -25,30 +25,46 @@ import javax.validation.constraints.NotNull;
 
 public class ProfileDTO {
 
-    @NotNull @Getter @Setter
+    @NotNull
+    @Getter
+    @Setter
     private Gender gender;
 
-    @NotEmpty @Getter @Setter
+    @NotEmpty
+    @Getter
+    @Setter
     private String address = "";
 
-    @NotEmpty @Getter @Setter
+    @NotEmpty
+    @Getter
+    @Setter
     private String zipcode = "";
 
-    @NotEmpty @Getter @Setter
+    @NotEmpty
+    @Getter
+    @Setter
     private String city = "";
 
-    @NotEmpty @Getter @Setter
+    @NotEmpty
+    @Getter
+    @Setter
     private String phoneNumber = "";
 
-    @Getter @Setter
+    @Getter
+    @Setter
     private String notes = "";
 
-    @NotEmpty @Getter @Setter
+    @NotEmpty
+    @Getter
+    @Setter
     private String firstName = "";
 
-    @NotEmpty @Getter @Setter
+    @NotEmpty
+    @Getter
+    @Setter
     private String lastName = "";
 
-    @Getter @Setter
+    @Getter
+    @Setter
     private String displayName = "";
 }

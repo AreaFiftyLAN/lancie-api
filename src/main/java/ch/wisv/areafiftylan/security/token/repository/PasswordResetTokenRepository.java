@@ -21,5 +21,4 @@ import ch.wisv.areafiftylan.security.token.PasswordResetToken;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface PasswordResetTokenRepository extends TokenRepository<PasswordResetToken> {
-}
+public interface PasswordResetTokenRepository extends TokenRepository<PasswordResetToken> {}

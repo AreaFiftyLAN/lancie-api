@@ -19,10 +19,10 @@ package ch.wisv.areafiftylan.extras.consumption.service;
 
 import ch.wisv.areafiftylan.exception.ConsumptionNotFoundException;
 import ch.wisv.areafiftylan.exception.InvalidTicketException;
-import ch.wisv.areafiftylan.extras.consumption.model.PossibleConsumptionsRepository;
 import ch.wisv.areafiftylan.extras.consumption.model.Consumption;
 import ch.wisv.areafiftylan.extras.consumption.model.ConsumptionMap;
 import ch.wisv.areafiftylan.extras.consumption.model.ConsumptionMapsRepository;
+import ch.wisv.areafiftylan.extras.consumption.model.PossibleConsumptionsRepository;
 import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.service.TicketService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,15 +53,15 @@ public class ConsumptionServiceImpl implements ConsumptionService {
 
     @Override
     public ConsumptionMap getByTicketIdIfValid(Long ticketId) {
-        if(!ticketService.getTicketById(ticketId).isValid()){
+        if (!ticketService.getTicketById(ticketId).isValid()) {
             throw new InvalidTicketException("Ticket is invalid; It can not be used for consumptions.");
         }
 
         Optional<ConsumptionMap> mapOptional = consumptionMapsRepository.findByTicketId(ticketId);
 
-        if(mapOptional.isPresent()){
+        if (mapOptional.isPresent()) {
             return mapOptional.get();
-        }else{
+        } else {
             return initializeConsumptionMap(ticketId);
         }
     }
@@ -72,7 +72,7 @@ public class ConsumptionServiceImpl implements ConsumptionService {
         return getByTicketIdIfValid(ticketId).isConsumed(c);
     }
 
-    private ConsumptionMap initializeConsumptionMap(Long ticketId){
+    private ConsumptionMap initializeConsumptionMap(Long ticketId) {
         Ticket t = ticketService.getTicketById(ticketId);
         return consumptionMapsRepository.saveAndFlush(new ConsumptionMap(t));
     }
@@ -116,7 +116,7 @@ public class ConsumptionServiceImpl implements ConsumptionService {
 
     @Override
     public Consumption addPossibleConsumption(String consumptionName) {
-        if(possibleConsumptionsRepository.findByName(consumptionName).isPresent()){
+        if (possibleConsumptionsRepository.findByName(consumptionName).isPresent()) {
             throw new DuplicateKeyException("Consumption " + consumptionName + " is already supported");
         }
 
@@ -124,9 +124,9 @@ public class ConsumptionServiceImpl implements ConsumptionService {
         return possibleConsumptionsRepository.saveAndFlush(consumption);
     }
 
-    private void resetConsumptionEverywhere(Consumption consumption){
-        Collection<Ticket> allValidTickets = ticketService.getAllTickets().stream()
-                .filter(t -> t.isValid()).collect(Collectors.toList());
+    private void resetConsumptionEverywhere(Consumption consumption) {
+        Collection<Ticket> allValidTickets =
+                ticketService.getAllTickets().stream().filter(t -> t.isValid()).collect(Collectors.toList());
 
         allValidTickets.forEach(t -> reset(t.getId(), consumption.getId()));
     }

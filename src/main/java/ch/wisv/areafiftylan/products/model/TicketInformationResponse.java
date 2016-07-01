@@ -17,8 +17,6 @@
 
 package ch.wisv.areafiftylan.products.model;
 
-import ch.wisv.areafiftylan.products.model.TicketOptions;
-import ch.wisv.areafiftylan.products.model.TicketType;
 import lombok.Getter;
 
 /**

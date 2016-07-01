@@ -17,7 +17,6 @@
 
 package ch.wisv.areafiftylan.extras.rfid.model;
 
-import ch.wisv.areafiftylan.extras.rfid.model.RFIDLink;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

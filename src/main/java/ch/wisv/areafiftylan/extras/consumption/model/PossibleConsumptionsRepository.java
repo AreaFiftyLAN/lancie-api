@@ -17,7 +17,6 @@
 
 package ch.wisv.areafiftylan.extras.consumption.model;
 
-import ch.wisv.areafiftylan.extras.consumption.model.Consumption;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

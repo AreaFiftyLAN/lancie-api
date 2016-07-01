@@ -41,17 +41,17 @@ public abstract class Token {
     private User user;
 
 
-    @Column(nullable=false, columnDefinition = "BOOLEAN DEFAULT TRUE")
+    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
     private boolean expirable = true;
 
     @Type(type = "ch.wisv.areafiftylan.utils.LocalDateTimeUserType")
     private LocalDateTime expiryDate;
 
 
-    @Column(nullable=false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private boolean used = false;
 
-    @Column(nullable=false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private boolean revoked = false;
 
     public Token() {

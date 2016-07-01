@@ -19,9 +19,9 @@ package ch.wisv.areafiftylan.products.service;
 
 import ch.wisv.areafiftylan.exception.TicketUnavailableException;
 import ch.wisv.areafiftylan.products.model.Ticket;
-import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.products.model.TicketType;
 import ch.wisv.areafiftylan.security.token.TicketTransferToken;
+import ch.wisv.areafiftylan.users.model.User;
 
 import java.util.Collection;
 
@@ -59,7 +59,8 @@ public interface TicketService {
 
     /**
      * Sets up the ticket for transfer
-     * @param ticketId The ID of the ticket to be transferred
+     *
+     * @param ticketId     The ID of the ticket to be transferred
      * @param goalUserName The name of the user which should receive the ticket
      */
     TicketTransferToken setupForTransfer(Long ticketId, String goalUserName);
@@ -79,9 +80,11 @@ public interface TicketService {
     void cancelTicketTransfer(String token);
 
     /**
-     * Get all tickets over which a user has control. His own, as well as his teammates their tickets if the user is captain.
+     * Get all tickets over which a user has control. His own, as well as his teammates their tickets if the user is
+     * captain.
      *
      * @param user The user whose tickets are requested
+     *
      * @return All tickets over which a user has control.
      */
     Collection<Ticket> getOwnedTicketsAndFromTeamMembers(User user);

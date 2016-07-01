@@ -17,8 +17,8 @@
 
 package ch.wisv.areafiftylan.teams.model;
 
-import ch.wisv.areafiftylan.utils.view.View;
 import ch.wisv.areafiftylan.users.model.User;
+import ch.wisv.areafiftylan.utils.view.View;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import javax.persistence.*;

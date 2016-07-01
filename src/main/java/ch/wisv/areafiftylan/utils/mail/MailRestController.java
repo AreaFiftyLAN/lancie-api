@@ -18,8 +18,8 @@
 package ch.wisv.areafiftylan.utils.mail;
 
 import ch.wisv.areafiftylan.teams.model.Team;
-import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.teams.service.TeamService;
+import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.users.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

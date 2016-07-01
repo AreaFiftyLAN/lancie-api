@@ -17,7 +17,6 @@
 
 package ch.wisv.areafiftylan.products.model;
 
-import ch.wisv.areafiftylan.products.model.TicketType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -27,17 +26,21 @@ import javax.validation.constraints.NotNull;
  * Created by sille on 22-12-15.
  */
 public class TicketDTO {
-    @NotNull @Getter @Setter
+    @NotNull
+    @Getter
+    @Setter
     TicketType type;
 
-    @NotNull @Setter
+    @NotNull
+    @Setter
     Boolean pickupService;
 
     public boolean hasPickupService() {
         return pickupService;
     }
 
-    @NotNull @Setter
+    @NotNull
+    @Setter
     Boolean chMember;
 
     public Boolean isCHMember() {

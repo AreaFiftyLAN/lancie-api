@@ -17,15 +17,15 @@
 
 package ch.wisv.areafiftylan.seats.service;
 
+import ch.wisv.areafiftylan.exception.InvalidTicketException;
+import ch.wisv.areafiftylan.products.model.Ticket;
+import ch.wisv.areafiftylan.products.service.TicketRepository;
+import ch.wisv.areafiftylan.seats.model.Seat;
 import ch.wisv.areafiftylan.seats.model.SeatGroupDTO;
 import ch.wisv.areafiftylan.seats.model.SeatmapResponse;
-import ch.wisv.areafiftylan.exception.InvalidTicketException;
-import ch.wisv.areafiftylan.seats.model.Seat;
 import ch.wisv.areafiftylan.teams.model.Team;
-import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.teams.service.TeamService;
 import ch.wisv.areafiftylan.users.model.User;
-import ch.wisv.areafiftylan.products.service.TicketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -77,7 +77,7 @@ public class SeatServiceImpl implements SeatService {
     public boolean reserveSeatForTicket(String groupname, int seatnumber, Long ticketId) {
         Ticket ticket = ticketRepository.findOne(ticketId);
 
-        if(!ticket.isValid()){
+        if (!ticket.isValid()) {
             throw new InvalidTicketException("Unable to reserve seat for an invalid Ticket");
         }
 

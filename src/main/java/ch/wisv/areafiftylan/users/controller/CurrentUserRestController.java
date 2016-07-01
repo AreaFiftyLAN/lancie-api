@@ -18,19 +18,19 @@
 package ch.wisv.areafiftylan.users.controller;
 
 
-import ch.wisv.areafiftylan.seats.model.Seat;
-import ch.wisv.areafiftylan.seats.service.SeatService;
-import ch.wisv.areafiftylan.security.authentication.PasswordChangeDTO;
-import ch.wisv.areafiftylan.teams.model.TeamInviteResponse;
-import ch.wisv.areafiftylan.teams.model.Team;
-import ch.wisv.areafiftylan.teams.service.TeamService;
-import ch.wisv.areafiftylan.utils.view.View;
 import ch.wisv.areafiftylan.products.model.Order;
 import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.service.OrderService;
 import ch.wisv.areafiftylan.products.service.TicketService;
+import ch.wisv.areafiftylan.seats.model.Seat;
+import ch.wisv.areafiftylan.seats.service.SeatService;
+import ch.wisv.areafiftylan.security.authentication.PasswordChangeDTO;
+import ch.wisv.areafiftylan.teams.model.Team;
+import ch.wisv.areafiftylan.teams.model.TeamInviteResponse;
+import ch.wisv.areafiftylan.teams.service.TeamService;
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.users.service.UserService;
+import ch.wisv.areafiftylan.utils.view.View;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -71,7 +71,8 @@ public class CurrentUserRestController {
     }
 
     /**
-     * The GET /users/current/ mapping is located in the UserRestController as all methods in this authentication require
+     * The GET /users/current/ mapping is located in the UserRestController as all methods in this authentication
+     * require
      * Authentication
      */
 

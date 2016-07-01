@@ -17,8 +17,8 @@
 
 package ch.wisv.areafiftylan.users.controller;
 
-import ch.wisv.areafiftylan.users.model.UserDTO;
 import ch.wisv.areafiftylan.users.model.User;
+import ch.wisv.areafiftylan.users.model.UserDTO;
 import ch.wisv.areafiftylan.users.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;

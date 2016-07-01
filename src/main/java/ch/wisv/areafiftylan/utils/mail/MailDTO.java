@@ -22,9 +22,11 @@ import lombok.Setter;
 
 public class MailDTO {
 
-    @Getter @Setter
+    @Getter
+    @Setter
     String subject;
 
-    @Getter @Setter
+    @Getter
+    @Setter
     String message;
 }

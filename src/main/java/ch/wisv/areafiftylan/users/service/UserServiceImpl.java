@@ -17,15 +17,15 @@
 
 package ch.wisv.areafiftylan.users.service;
 
-import ch.wisv.areafiftylan.users.model.ProfileDTO;
-import ch.wisv.areafiftylan.users.model.UserDTO;
-import ch.wisv.areafiftylan.users.model.Profile;
-import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.security.token.PasswordResetToken;
 import ch.wisv.areafiftylan.security.token.VerificationToken;
-import ch.wisv.areafiftylan.utils.mail.MailService;
 import ch.wisv.areafiftylan.security.token.repository.PasswordResetTokenRepository;
 import ch.wisv.areafiftylan.security.token.repository.VerificationTokenRepository;
+import ch.wisv.areafiftylan.users.model.Profile;
+import ch.wisv.areafiftylan.users.model.ProfileDTO;
+import ch.wisv.areafiftylan.users.model.User;
+import ch.wisv.areafiftylan.users.model.UserDTO;
+import ch.wisv.areafiftylan.utils.mail.MailService;
 import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

@@ -17,14 +17,14 @@
 
 package ch.wisv.areafiftylan.seats.controller;
 
+import ch.wisv.areafiftylan.seats.model.Seat;
 import ch.wisv.areafiftylan.seats.model.SeatGroupDTO;
 import ch.wisv.areafiftylan.seats.model.SeatReservationDTO;
 import ch.wisv.areafiftylan.seats.model.SeatmapResponse;
-import ch.wisv.areafiftylan.seats.model.Seat;
-import ch.wisv.areafiftylan.users.model.User;
-import ch.wisv.areafiftylan.utils.view.View;
 import ch.wisv.areafiftylan.seats.service.SeatService;
+import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.users.service.UserService;
+import ch.wisv.areafiftylan.utils.view.View;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
