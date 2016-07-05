@@ -1,12 +1,12 @@
 package ch.wisv.areafiftylan.web.controller;
 
 import ch.wisv.areafiftylan.web.model.CommitteeMember;
-import ch.wisv.areafiftylan.web.model.Event;
 import ch.wisv.areafiftylan.web.model.Sponsor;
 import ch.wisv.areafiftylan.web.model.Tournament;
-import ch.wisv.areafiftylan.web.service.EventServiceImpl;
-import ch.wisv.areafiftylan.web.service.SponsorServiceImpl;
-import ch.wisv.areafiftylan.web.service.TournamentServiceImpl;
+import ch.wisv.areafiftylan.web.model.WebEvent;
+import ch.wisv.areafiftylan.web.service.WebEventsService;
+import ch.wisv.areafiftylan.web.service.WebSponsorServiceImpl;
+import ch.wisv.areafiftylan.web.service.WebTournamentServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,13 +18,13 @@ import java.util.Collection;
 @RequestMapping("/web")
 public class WebRestController {
 
-    TournamentServiceImpl tournamentService;
-    EventServiceImpl eventService;
-    SponsorServiceImpl sponsorService;
+    WebTournamentServiceImpl tournamentService;
+    WebEventsService eventService;
+    WebSponsorServiceImpl sponsorService;
 
     @Autowired
-    public WebRestController(TournamentServiceImpl tournamentService, EventServiceImpl eventService,
-                             SponsorServiceImpl sponsorService) {
+    public WebRestController(WebTournamentServiceImpl tournamentService, WebEventsService eventService,
+                             WebSponsorServiceImpl sponsorService) {
         this.tournamentService = tournamentService;
         this.eventService = eventService;
         this.sponsorService = sponsorService;
@@ -36,7 +36,7 @@ public class WebRestController {
     }
 
     @RequestMapping("/events")
-    public Collection<Event> getAllEvents() {
+    public Collection<WebEvent> getAllEvents() {
         return eventService.getAllEvents();
     }
 

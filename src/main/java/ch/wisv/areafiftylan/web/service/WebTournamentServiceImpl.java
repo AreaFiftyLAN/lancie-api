@@ -13,7 +13,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 
 @Service
-public class TournamentServiceImpl {
+public class WebTournamentServiceImpl {
 
     public Collection<Tournament> getAllTournaments() {
         return getDummyTournaments();
