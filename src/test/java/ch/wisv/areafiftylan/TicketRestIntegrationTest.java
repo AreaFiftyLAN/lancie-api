@@ -1,19 +1,36 @@
+/*
+ * Copyright (c) 2016  W.I.S.V. 'Christiaan Huygens'
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package ch.wisv.areafiftylan;
 
 import ch.wisv.areafiftylan.exception.TicketAlreadyLinkedException;
 import ch.wisv.areafiftylan.exception.TokenNotFoundException;
-import ch.wisv.areafiftylan.model.Team;
-import ch.wisv.areafiftylan.model.Ticket;
-import ch.wisv.areafiftylan.model.User;
-import ch.wisv.areafiftylan.model.relations.RFIDLink;
-import ch.wisv.areafiftylan.model.util.Gender;
-import ch.wisv.areafiftylan.model.util.TicketType;
+import ch.wisv.areafiftylan.teams.model.Team;
+import ch.wisv.areafiftylan.products.model.Ticket;
+import ch.wisv.areafiftylan.users.model.User;
+import ch.wisv.areafiftylan.extras.rfid.model.RFIDLink;
+import ch.wisv.areafiftylan.users.model.Gender;
+import ch.wisv.areafiftylan.products.model.TicketType;
 import ch.wisv.areafiftylan.security.token.TicketTransferToken;
-import ch.wisv.areafiftylan.service.repository.RFIDLinkRepository;
-import ch.wisv.areafiftylan.service.repository.TeamRepository;
-import ch.wisv.areafiftylan.service.repository.TicketRepository;
-import ch.wisv.areafiftylan.service.repository.token.TicketTransferTokenRepository;
-import ch.wisv.areafiftylan.util.SessionData;
+import ch.wisv.areafiftylan.extras.rfid.model.RFIDLinkRepository;
+import ch.wisv.areafiftylan.teams.service.TeamRepository;
+import ch.wisv.areafiftylan.products.service.TicketRepository;
+import ch.wisv.areafiftylan.security.token.repository.TicketTransferTokenRepository;
+import ch.wisv.areafiftylan.utils.SessionData;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Response;
 import org.apache.http.HttpStatus;

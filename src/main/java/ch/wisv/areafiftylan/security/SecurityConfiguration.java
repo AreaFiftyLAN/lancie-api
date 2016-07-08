@@ -1,6 +1,23 @@
+/*
+ * Copyright (c) 2016  W.I.S.V. 'Christiaan Huygens'
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package ch.wisv.areafiftylan.security;
 
-import ch.wisv.areafiftylan.service.repository.token.AuthenticationTokenRepository;
+import ch.wisv.areafiftylan.security.token.repository.AuthenticationTokenRepository;
 import com.allanditzel.springframework.security.web.csrf.CsrfTokenResponseHeaderBindingFilter;
 import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,14 +89,14 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         //@formatter:on
 
         http.csrf().
-            // This is used for the Mollie webhook, so it shouldn't be protected by CSRF
-            ignoringAntMatchers("/orders/status").
-            // Don't require CSRF on requests with valid Tokens
-            requireCsrfProtectionMatcher(csrfRequestMatcher).
-            // We also ignore this for Token requests
-            ignoringAntMatchers("/token").
-            // Ignore the route to request a password reset, no CSRF protection is needed
-            ignoringAntMatchers("/requestResetPassword");
+                // This is used for the Mollie webhook, so it shouldn't be protected by CSRF
+                        ignoringAntMatchers("/orders/status").
+                // Don't require CSRF on requests with valid Tokens
+                        requireCsrfProtectionMatcher(csrfRequestMatcher).
+                // We also ignore this for Token requests
+                        ignoringAntMatchers("/token").
+                // Ignore the route to request a password reset, no CSRF protection is needed
+                        ignoringAntMatchers("/requestResetPassword");
         //@formatter:on
 
         // This is the filter that adds the CSRF Token to the header. CSRF is enabled by default in Spring, this just
