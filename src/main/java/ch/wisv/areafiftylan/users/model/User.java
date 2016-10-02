@@ -25,8 +25,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 
 
 @Entity
@@ -57,7 +57,7 @@ public class User implements Serializable, UserDetails {
     @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
     @CollectionTable(name = "user_role")
-    private Collection<Role> roles;
+    private Set<Role> roles;
 
     @JsonIgnore
     private boolean accountNonExpired = true;
@@ -93,7 +93,7 @@ public class User implements Serializable, UserDetails {
     }
 
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
+    public Set<? extends GrantedAuthority> getAuthorities() {
         return roles;
     }
 

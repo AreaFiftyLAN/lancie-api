@@ -17,9 +17,9 @@
 
 package ch.wisv.areafiftylan;
 
-import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.users.model.Gender;
 import ch.wisv.areafiftylan.users.model.Role;
+import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.users.service.UserRepository;
 import ch.wisv.areafiftylan.utils.SessionData;
 import com.jayway.restassured.RestAssured;
@@ -30,11 +30,10 @@ import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.boot.test.WebIntegrationTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.config.RedirectConfig.redirectConfig;
@@ -43,9 +42,8 @@ import static com.jayway.restassured.config.RestAssuredConfig.config;
 /**
  * Created by sille on 12-11-15.
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = ApplicationTest.class)
-@WebIntegrationTest("server.port=0")
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = ApplicationTest.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 public abstract class IntegrationTest {
     @Value("${local.server.port}")
@@ -85,7 +83,7 @@ public abstract class IntegrationTest {
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
     }
 
-    private User makeUser(){
+    private User makeUser() {
         User user = new User("user", new BCryptPasswordEncoder().encode(userCleartextPassword), "user@mail.com");
         user.getProfile()
                 .setAllFields("Jan", "de Groot", "MonsterKiller9001", Gender.MALE, "Mekelweg 4", "2826CD", "Delft",
@@ -94,7 +92,7 @@ public abstract class IntegrationTest {
         return user;
     }
 
-    private User makeAdmin(){
+    private User makeAdmin() {
         User admin = new User("admin", new BCryptPasswordEncoder().encode(adminCleartextPassword), "bert@mail.com");
         admin.addRole(Role.ROLE_ADMIN);
         admin.getProfile()
@@ -104,7 +102,7 @@ public abstract class IntegrationTest {
         return admin;
     }
 
-    private User makeOutsider(){
+    private User makeOutsider() {
         User outsider = new User("outsider", new BCryptPasswordEncoder().encode("password"), "outsider@gmail.com");
         outsider.getProfile()
                 .setAllFields("Nottin", "Todoeo Witit", "Lookinin", Gender.FEMALE, "LoserStreet 1", "2826GJ", "China",

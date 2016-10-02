@@ -42,20 +42,28 @@ import java.util.regex.Pattern;
 @Order(SecurityProperties.ACCESS_OVERRIDE_ORDER)
 class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-    @Autowired
-    private UserDetailsService userDetailsService;
+    private final UserDetailsService userDetailsService;
+
+    private final AuthenticationTokenRepository authenticationTokenRepository;
+
+    private final RESTAuthenticationEntryPoint authenticationEntryPoint;
+
+    private final RESTAuthenticationSuccessHandler authenticationSuccessHandler;
+
+    private final RESTAuthenticationFailureHandler authenticationFailureHandler;
 
     @Autowired
-    private AuthenticationTokenRepository authenticationTokenRepository;
-
-    @Autowired
-    private RESTAuthenticationEntryPoint authenticationEntryPoint;
-
-    @Autowired
-    private RESTAuthenticationSuccessHandler authenticationSuccessHandler;
-
-    @Autowired
-    private RESTAuthenticationFailureHandler authenticationFailureHandler;
+    public SecurityConfiguration(AuthenticationTokenRepository authenticationTokenRepository,
+                                 RESTAuthenticationFailureHandler authenticationFailureHandler,
+                                 UserDetailsService userDetailsService,
+                                 RESTAuthenticationSuccessHandler authenticationSuccessHandler,
+                                 RESTAuthenticationEntryPoint authenticationEntryPoint) {
+        this.authenticationTokenRepository = authenticationTokenRepository;
+        this.authenticationFailureHandler = authenticationFailureHandler;
+        this.userDetailsService = userDetailsService;
+        this.authenticationSuccessHandler = authenticationSuccessHandler;
+        this.authenticationEntryPoint = authenticationEntryPoint;
+    }
 
     /**
      * This method is responsible for the main security configuration. The formlogin() section defines how to login.
