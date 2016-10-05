@@ -26,11 +26,14 @@ import ch.wisv.areafiftylan.utils.TestDataRunner;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.flyway.FlywayDataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.EnableScheduling;
+
+import java.io.File;
 
 @Configuration
 @ComponentScan
@@ -45,14 +48,14 @@ public class Application {
     /**
      * This function inserts some testdata into the database for development testing.
      */
-    @Bean
-    @Profile("dev")
-    CommandLineRunner init(UserRepository accountRepository, TicketRepository ticketRepository, SeatService seatService,
-                           TeamRepository teamRepository) {
-
-        return new TestDataRunner(accountRepository, ticketRepository, teamRepository, seatService);
-
-    }
+//    @Bean
+//    @Profile("dev")
+//    CommandLineRunner init(UserRepository accountRepository, TicketRepository ticketRepository, SeatService seatService,
+//                           TeamRepository teamRepository) {
+//
+//        return new TestDataRunner(accountRepository, ticketRepository, teamRepository, seatService);
+//
+//    }
 
 
 }
