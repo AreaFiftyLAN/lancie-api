@@ -49,26 +49,23 @@ class TokenAuthenticationFilter extends GenericFilterBean {
         String xAuth = ((HttpServletRequest) request).getHeader("X-Auth-Token");
 
         if (!Strings.isNullOrEmpty(xAuth)) {
-            AuthenticationToken authenticationToken =
-                    extractOptional(authenticationTokenRepository.findByToken(xAuth), response);
-            if (authenticationToken.isValid()) {
-                User user = authenticationToken.getUser();
-                SecurityContextHolder.getContext()
-                        .setAuthentication(new PreAuthenticatedAuthenticationToken(user, "N/A", user.getAuthorities()));
+            Optional<AuthenticationToken> authenticationTokenOptional = authenticationTokenRepository.findByToken(xAuth);
+            if (!authenticationTokenOptional.isPresent()) {
+                ((HttpServletResponse) response).sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token not found");
+                return;
             } else {
-                ((HttpServletResponse) response).sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token Expired");
+                AuthenticationToken authenticationToken = authenticationTokenOptional.get();
+                if (!authenticationToken.isValid()) {
+                    ((HttpServletResponse) response).sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token Expired");
+                    return;
+                } else {
+                    User user = authenticationToken.getUser();
+                    SecurityContextHolder.getContext()
+                            .setAuthentication(new PreAuthenticatedAuthenticationToken(user, "N/A", user.getAuthorities()));
+                }
             }
         }
-        chain.doFilter(request, response);
-    }
 
-    private AuthenticationToken extractOptional(Optional<AuthenticationToken> op, ServletResponse response)
-            throws IOException {
-        if (!op.isPresent()) {
-            ((HttpServletResponse) response).sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token not found");
-            return null;
-        } else {
-            return op.get();
-        }
+        chain.doFilter(request, response);
     }
 }

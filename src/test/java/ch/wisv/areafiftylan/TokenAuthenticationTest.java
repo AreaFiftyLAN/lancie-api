@@ -148,7 +148,7 @@ public class TokenAuthenticationTest extends IntegrationTest {
         given().
             header(header).
         when().
-            post("/token/verify").
+            get("/token/verify").
         then().
             statusCode(HttpStatus.SC_UNAUTHORIZED);
         //@formatter:on
@@ -162,7 +162,7 @@ public class TokenAuthenticationTest extends IntegrationTest {
         given().
             header(header).
         when().
-            post("/token/verify").
+            get("/token/verify").
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
