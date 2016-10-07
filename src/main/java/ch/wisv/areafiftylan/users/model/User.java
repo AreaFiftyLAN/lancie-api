@@ -30,8 +30,7 @@ import java.util.Set;
 
 
 @Entity
-@Table(uniqueConstraints = { @UniqueConstraint(name = "username", columnNames = { "username" }),
-        @UniqueConstraint(name = "email", columnNames = { "email" }) })
+@Table(uniqueConstraints = { @UniqueConstraint(name = "username", columnNames = { "username" }) })
 public class User implements Serializable, UserDetails {
 
     @Column(nullable = false)
@@ -40,10 +39,6 @@ public class User implements Serializable, UserDetails {
     @Column(nullable = false)
     @JsonView(View.NoProfile.class)
     protected String username;
-
-    @Column(nullable = false)
-    @JsonView(View.NoProfile.class)
-    protected String email;
 
     @OneToOne(targetEntity = Profile.class, cascade = CascadeType.ALL)
     @JsonView(View.Public.class)
@@ -68,10 +63,9 @@ public class User implements Serializable, UserDetails {
     @JsonIgnore
     private boolean enabled = true;
 
-    public User(String username, String passwordHash, String email) {
+    public User(String username, String passwordHash) {
         this.username = username;
         this.passwordHash = passwordHash;
-        this.email = email;
         this.profile = new Profile();
         this.roles = new HashSet<>();
         roles.add(Role.ROLE_USER);
@@ -131,14 +125,6 @@ public class User implements Serializable, UserDetails {
         return enabled;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
     public void resetProfile() {
         this.profile = new Profile();
     }
@@ -171,14 +157,13 @@ public class User implements Serializable, UserDetails {
 
         User user = (User) o;
 
-        return username.equals(user.username) && email.equals(user.email) && id.equals(user.id);
+        return username.equals(user.username) && id.equals(user.id);
 
     }
 
     @Override
     public int hashCode() {
         int result = username.hashCode();
-        result = 31 * result + email.hashCode();
         result = 31 * result + id.hashCode();
         return result;
     }

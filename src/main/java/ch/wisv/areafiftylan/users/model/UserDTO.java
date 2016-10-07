@@ -33,11 +33,6 @@ public class UserDTO {
     @NotEmpty
     @Getter
     @Setter
-    private String email = "";
-
-    @NotEmpty
-    @Getter
-    @Setter
     private String password = "";
 
     @NotNull

@@ -83,8 +83,8 @@ public abstract class IntegrationTest {
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
     }
 
-    private User makeUser() {
-        User user = new User("user", new BCryptPasswordEncoder().encode(userCleartextPassword), "user@mail.com");
+    private User makeUser(){
+        User user = new User("user@mail.com", new BCryptPasswordEncoder().encode(userCleartextPassword));
         user.getProfile()
                 .setAllFields("Jan", "de Groot", "MonsterKiller9001", Gender.MALE, "Mekelweg 4", "2826CD", "Delft",
                         "0906-0666", null);
@@ -92,8 +92,8 @@ public abstract class IntegrationTest {
         return user;
     }
 
-    private User makeAdmin() {
-        User admin = new User("admin", new BCryptPasswordEncoder().encode(adminCleartextPassword), "bert@mail.com");
+    private User makeAdmin(){
+        User admin = new User("admin@mail.com", new BCryptPasswordEncoder().encode(adminCleartextPassword));
         admin.addRole(Role.ROLE_ADMIN);
         admin.getProfile()
                 .setAllFields("Bert", "Kleijn", "ILoveZombies", Gender.OTHER, "Mekelweg 20", "2826CD", "Amsterdam",
@@ -102,8 +102,8 @@ public abstract class IntegrationTest {
         return admin;
     }
 
-    private User makeOutsider() {
-        User outsider = new User("outsider", new BCryptPasswordEncoder().encode("password"), "outsider@gmail.com");
+    private User makeOutsider(){
+        User outsider = new User("outsider@gmail.com", new BCryptPasswordEncoder().encode("password"));
         outsider.getProfile()
                 .setAllFields("Nottin", "Todoeo Witit", "Lookinin", Gender.FEMALE, "LoserStreet 1", "2826GJ", "China",
                         "0906-3928", null);

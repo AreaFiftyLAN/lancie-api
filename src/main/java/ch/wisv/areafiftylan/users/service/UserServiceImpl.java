@@ -70,18 +70,13 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public Optional<User> getUserByEmail(String email) {
-        return userRepository.findOneByEmailIgnoreCase(email);
-    }
-
-    @Override
     public Optional<User> getUserByUsername(String username) {
         return userRepository.findOneByUsernameIgnoreCase(username);
     }
 
     @Override
     public Collection<User> getAllUsers() {
-        return userRepository.findAll(new Sort("email"));
+        return userRepository.findAll(new Sort("username"));
     }
 
     @Override
@@ -90,7 +85,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
         // Hash the plain password coming from the DTO
         String passwordHash = getPasswordHash(userDTO.getPassword());
-        User user = new User(userDTO.getUsername(), passwordHash, userDTO.getEmail());
+        User user = new User(userDTO.getUsername(), passwordHash);
         user.addRole(userDTO.getRole());
         // All users that register through the service have to be verified
         user.setEnabled(false);
@@ -107,11 +102,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         // Check if the username already exists
         userRepository.findOneByUsernameIgnoreCase(userDTO.getUsername()).ifPresent(u -> {
             throw new DataIntegrityViolationException("username already in use");
-        });
-
-        // Check if the email is already in use
-        userRepository.findOneByEmailIgnoreCase(userDTO.getEmail()).ifPresent(u -> {
-            throw new DataIntegrityViolationException("email already in use");
         });
     }
 
@@ -130,7 +120,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         User user = userRepository.getOne(userId);
 
         user.setUsername(userDTO.getUsername());
-        user.setEmail(userDTO.getEmail());
         user.setPasswordHash(getPasswordHash(userDTO.getPassword()));
         user.resetProfile();
 
@@ -148,9 +137,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         User user = userRepository.findOne(userId);
         if (!Strings.isNullOrEmpty(userDTO.getUsername())) {
             user.setUsername(userDTO.getUsername());
-        }
-        if (!Strings.isNullOrEmpty(userDTO.getEmail())) {
-            user.setEmail(userDTO.getEmail());
         }
         if (!Strings.isNullOrEmpty(userDTO.getPassword())) {
             user.setPasswordHash(getPasswordHash(userDTO.getPassword()));
@@ -232,11 +218,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         } else {
             throw new AccessDeniedException("Wrong password");
         }
-    }
-
-    @Override
-    public Boolean checkEmailAvailable(String email) {
-        return !userRepository.findOneByEmailIgnoreCase(email).isPresent();
     }
 
     @Override

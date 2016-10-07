@@ -151,7 +151,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             post(ORDER_ENDPOINT)
         .then().
             statusCode(HttpStatus.SC_CREATED).
-            body("object.user.username", is("user")).
+            body("object.user.username", is("user@mail.com")).
             body("object.status", is("CREATING")).
             body("object.tickets", hasSize(1)).
             body("object.tickets.pickupService", hasItem(true)).
@@ -200,7 +200,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             post(ORDER_ENDPOINT)
         .then().
             statusCode(HttpStatus.SC_CREATED).
-            body("object.user.username", is("user")).
+            body("object.user.username", is("user@mail.com")).
             body("object.status", is("CREATING")).
             body("object.tickets", hasSize(1)).
             body("object.tickets.pickupService", hasItem(false)).
@@ -429,7 +429,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             statusCode(HttpStatus.SC_OK).
             body("status", is("CREATING")).
             body("reference", is(nullValue())).
-            body("user.username", is("user")).
+            body("user.username", is("user@mail.com")).
             body("tickets", hasSize(1)).
             body("tickets.type", hasItem(is(TicketType.TEST.toString()))).
             body("tickets.pickupService", hasItem(is(false))).
@@ -454,7 +454,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             statusCode(HttpStatus.SC_OK).
             body("[0].status", equalTo("CREATING")).
             body("[0].reference", is(nullValue())).
-            body("[0].user.username", is("user")).
+            body("[0].user.username", is("user@mail.com")).
             body("[0].tickets", hasSize(1)).
             body("[0].tickets.type", hasItem(is(TicketType.TEST.toString()))).
             body("[0].tickets.pickupService", hasItem(is(false))).
@@ -479,7 +479,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             statusCode(HttpStatus.SC_OK).
             body("status", hasItem(equalTo("CREATING"))).
             body("reference", hasItem(is(nullValue()))).
-            body("user.username", hasItem(is("user"))).
+            body("user.username", hasItem(is("user@mail.com"))).
             body("tickets", hasSize(1)).
             body("tickets.type", hasItem(hasItem(is(TicketType.TEST.toString())))).
             body("tickets.pickupService", hasItem(hasItem(is(false)))).
@@ -540,7 +540,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             statusCode(HttpStatus.SC_OK).
             body("status", is("CREATING")).
             body("reference", is(nullValue())).
-            body("user.username", is("user")).
+            body("user.username", is("user@mail.com")).
             body("tickets.type", hasItem(is(TicketType.TEST.toString()))).
             body("tickets.pickupService", hasItem(is(false))).
             body("amount",equalTo(TicketType.TEST.getPrice()));
@@ -1006,7 +1006,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
     @Test
     public void testGetOneValidTicket() {
         insertTestOrders();
-        SessionData login = login("user", userCleartextPassword);
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         Ticket ticket = new Ticket(user, TicketType.EARLY_FULL, false, false);
         ticket.setValid(true);
@@ -1020,14 +1020,14 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             get("/users/current/tickets").
         then().
             body("object", hasSize(1)).
-            body("[0].owner.username", is("user"));
+            body("[0].owner.username", is("user@mail.com"));
         //@formatter:on
     }
 
     @Test
     public void testZeroValidTickets() {
         insertTestOrders();
-        SessionData login = login("user", userCleartextPassword);
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
         given().

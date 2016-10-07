@@ -48,8 +48,8 @@ import static org.hamcrest.core.IsCollectionContaining.hasItem;
 
 public class TeamRestIntegrationTest extends IntegrationTest {
 
-    protected User teamCaptain;
-    protected final String teamCaptainCleartextPassword = "password";
+    protected User captain;
+    protected final String captainCleartextPassword = "password";
     private Ticket captainTicket;
 
     @Autowired
@@ -65,15 +65,14 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
     @Before
     public void initTeamTest() {
-        teamCaptain = new User("captain", new BCryptPasswordEncoder().encode(teamCaptainCleartextPassword),
-                "captain@mail.com");
-        teamCaptain.getProfile()
+        captain = new User("captain@mail.com", new BCryptPasswordEncoder().encode(captainCleartextPassword));
+        captain.getProfile()
                 .setAllFields("Captain", "Hook", "PeterPanKiller", Gender.MALE, "High Road 3", "2826ZZ", "Neverland",
                         "0906-0777", null);
 
-        teamCaptain = userRepository.saveAndFlush(teamCaptain);
+        captain = userRepository.saveAndFlush(captain);
 
-        Ticket captainTicket = new Ticket(teamCaptain, TicketType.EARLY_FULL, false, false);
+        Ticket captainTicket = new Ticket(captain, TicketType.EARLY_FULL, false, false);
         captainTicket.setValid(true);
 
         Ticket userTicket = new Ticket(user, TicketType.EARLY_FULL, false, false);
@@ -90,12 +89,12 @@ public class TeamRestIntegrationTest extends IntegrationTest {
         ticketRepository.deleteAll();
         teamInviteTokenRepository.deleteAll();
         teamRepository.deleteAll();
-        userRepository.delete(teamCaptain);
+        userRepository.delete(captain);
     }
 
     //region Private Helper Functions
     private void addUserAsAdmin(String location, User user) {
-        SessionData sessionData = login("admin", adminCleartextPassword);
+        SessionData sessionData = login(admin.getUsername(), adminCleartextPassword);
 
         //@formatter:off
         given().
@@ -112,7 +111,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     }
 
     private void inviteUserAsCaptain(String location, User user) {
-        SessionData sessionData = login("captain", teamCaptainCleartextPassword);
+        SessionData sessionData = login(captain.getUsername(), captainCleartextPassword);
 
         //@formatter:off
         given().
@@ -129,9 +128,9 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     }
 
     private String createTeamWithCaptain() {
-        SessionData sessionData = login("captain", teamCaptainCleartextPassword);
+        SessionData sessionData = login(captain.getUsername(), captainCleartextPassword);
 
-        team1.put("captainUsername", teamCaptain.getUsername());
+        team1.put("captainUsername", captain.getUsername());
 
         //@formatter:off
         Response response =
@@ -167,9 +166,9 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     //region Test Create Teams
     @Test
     public void testCreateTeamAsCaptain() {
-        team1.put("captainUsername", teamCaptain.getUsername());
+        team1.put("captainUsername", captain.getUsername());
 
-        SessionData login = login("captain", teamCaptainCleartextPassword);
+        SessionData login = login(captain.getUsername(), captainCleartextPassword);
 
         //@formatter:off
         Integer teamId =
@@ -183,7 +182,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
                 statusCode(HttpStatus.SC_CREATED).
                 header("Location", containsString("/teams/")).
                 body("object.teamName", equalTo(team1.get("teamName"))).
-                body("object.captain.profile.displayName", equalTo(teamCaptain.getProfile().getDisplayName())).
+                body("object.captain.profile.displayName", equalTo(captain.getProfile().getDisplayName())).
                 body("object.members", hasSize(1)).
             extract().response().path("object.id");
         //@formatter:on
@@ -194,9 +193,9 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testCreateTeamAsCaptainDifferentCase() {
-        team1.put("captainUsername", teamCaptain.getUsername().toUpperCase());
+        team1.put("captainUsername", captain.getUsername().toUpperCase());
 
-        SessionData login = login("captain", teamCaptainCleartextPassword);
+        SessionData login = login(captain.getUsername(), captainCleartextPassword);
 
         //@formatter:off
         Integer teamId =
@@ -210,7 +209,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
                 statusCode(HttpStatus.SC_CREATED).
                 header("Location", containsString("/teams/")).
                 body("object.teamName", equalTo(team1.get("teamName"))).
-                body("object.captain.profile.displayName", equalTo(teamCaptain.getProfile().getDisplayName())).
+                body("object.captain.profile.displayName", equalTo(captain.getProfile().getDisplayName())).
                 body("object.members", hasSize(1)).
             extract().response().path("object.id");
         //@formatter:on
@@ -222,9 +221,9 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     @Test
     public void testCreateTeamMissingTicket() {
         ticketRepository.deleteAll();
-        team1.put("captainUsername", teamCaptain.getUsername());
+        team1.put("captainUsername", captain.getUsername());
 
-        SessionData login = login("captain", teamCaptainCleartextPassword);
+        SessionData login = login(captain.getUsername(), captainCleartextPassword);
 
         //@formatter:off
         given().
@@ -241,7 +240,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     @Test
     public void testCreateTeamAsUserMissingCaptainParameter() {
 
-        SessionData login = login("captain", teamCaptainCleartextPassword);
+        SessionData login = login(captain.getUsername(), captainCleartextPassword);
 
         //@formatter:off
         given().
@@ -259,7 +258,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     public void testCreateTeamWithDifferentCaptainUsername() {
         team1.put("captainUsername", user.getUsername());
 
-        SessionData login = login("captain", teamCaptainCleartextPassword);
+        SessionData login = login(captain.getUsername(), captainCleartextPassword);
 
         //@formatter:off
         given().
@@ -275,9 +274,9 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testCreateTeamAsAdminWithDifferentCaptain() {
-        team1.put("captainUsername", teamCaptain.getUsername());
+        team1.put("captainUsername", captain.getUsername());
 
-        SessionData login = login("admin", adminCleartextPassword);
+        SessionData login = login(admin.getUsername(), adminCleartextPassword);
 
         //@formatter:off
         given().
@@ -290,16 +289,16 @@ public class TeamRestIntegrationTest extends IntegrationTest {
             statusCode(HttpStatus.SC_CREATED).
             header("Location", containsString("/teams/")).
             body("object.teamName", equalTo(team1.get("teamName"))).
-            body("object.captain.profile.displayName", equalTo(teamCaptain.getProfile().getDisplayName())).
+            body("object.captain.profile.displayName", equalTo(captain.getProfile().getDisplayName())).
             body("object.members", hasSize(1));
         //@formatter:on
     }
 
     @Test
     public void testCreateTeamAsUserDuplicateTeamName() {
-        team1.put("captainUsername", teamCaptain.getUsername());
+        team1.put("captainUsername", captain.getUsername());
 
-        SessionData login = login("captain", teamCaptainCleartextPassword);
+        SessionData login = login(captain.getUsername(), captainCleartextPassword);
 
         //@formatter:off
         given().
@@ -312,14 +311,14 @@ public class TeamRestIntegrationTest extends IntegrationTest {
             statusCode(HttpStatus.SC_CREATED).
             header("Location", containsString("/teams/")).
             body("object.teamName", equalTo(team1.get("teamName"))).
-            body("object.captain.profile.displayName", equalTo(teamCaptain.getProfile().getDisplayName())).
-            body("object.members.profile.displayName", hasItem(teamCaptain.getProfile().getDisplayName()));
+            body("object.captain.profile.displayName", equalTo(captain.getProfile().getDisplayName())).
+            body("object.members.profile.displayName", hasItem(captain.getProfile().getDisplayName()));
 
         logout();
 
         team1.put("captainUsername", user.getUsername());
 
-        SessionData login2 = login("user", userCleartextPassword);
+        SessionData login2 = login(user.getUsername(), userCleartextPassword);
 
         given().
             filter(sessionFilter).
@@ -334,9 +333,9 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testCreateTeamAsUserDuplicateTeamNameDifferentCasing() {
-        team1.put("captainUsername", teamCaptain.getUsername());
+        team1.put("captainUsername", captain.getUsername());
 
-        SessionData login = login("captain", teamCaptainCleartextPassword);
+        SessionData login = login(captain.getUsername(), captainCleartextPassword);
 
         //@formatter:off
         given().
@@ -349,15 +348,15 @@ public class TeamRestIntegrationTest extends IntegrationTest {
                 statusCode(HttpStatus.SC_CREATED).
                 header("Location", containsString("/teams/")).
                 body("object.teamName", equalTo(team1.get("teamName"))).
-                body("object.captain.profile.displayName", equalTo(teamCaptain.getProfile().getDisplayName())).
-                body("object.members.profile.displayName", hasItem(teamCaptain.getProfile().getDisplayName()));
+                body("object.captain.profile.displayName", equalTo(captain.getProfile().getDisplayName())).
+                body("object.members.profile.displayName", hasItem(captain.getProfile().getDisplayName()));
 
         logout();
 
         team1.put("captainUsername", user.getUsername());
         team1.put("teamName", "Testteam1");
 
-        SessionData login2 = login("user", userCleartextPassword);
+        SessionData login2 = login(user.getUsername(), userCleartextPassword);
 
         given().
                 filter(sessionFilter).
@@ -374,14 +373,14 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     //region Test Get Team
     @Test
     public void getTeamAsAdmin() {
-        Response team = getTeam(createTeamWithCaptain(), "admin", adminCleartextPassword);
+        Response team = getTeam(createTeamWithCaptain(), admin.getUsername(), adminCleartextPassword);
 
         team.then().statusCode(HttpStatus.SC_OK);
     }
 
     @Test
     public void getTeamAsCaptain() {
-        Response team = getTeam(createTeamWithCaptain(), "captain", teamCaptainCleartextPassword);
+        Response team = getTeam(createTeamWithCaptain(), captain.getUsername(), captainCleartextPassword);
 
         team.then().statusCode(HttpStatus.SC_OK);
     }
@@ -390,7 +389,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     public void getTeamAsMember() {
         String location = createTeamWithCaptain();
         addUserAsAdmin(location, user);
-        Response team = getTeam(location, "user", userCleartextPassword);
+        Response team = getTeam(location, user.getUsername(), userCleartextPassword);
 
         team.then().statusCode(HttpStatus.SC_OK);
     }
@@ -398,7 +397,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     @Test
     public void getTeamAsUser() {
         String location = createTeamWithCaptain();
-        Response team = getTeam(location, "user", userCleartextPassword);
+        Response team = getTeam(location, user.getUsername(), userCleartextPassword);
 
         team.then().statusCode(HttpStatus.SC_FORBIDDEN);
     }
@@ -407,7 +406,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     public void getTeamCurrentUser() {
         createTeamWithCaptain();
 
-        SessionData login = login(teamCaptain.getUsername(), teamCaptainCleartextPassword);
+        SessionData login = login(captain.getUsername(), captainCleartextPassword);
 
         //@formatter:off
         given().
@@ -418,8 +417,8 @@ public class TeamRestIntegrationTest extends IntegrationTest {
         then().
             statusCode(HttpStatus.SC_OK).
             body("[0].teamName", equalTo(team1.get("teamName"))).
-            body("[0].captain.profile.displayName", equalTo(teamCaptain.getProfile().getDisplayName())).
-            body("[0].members.profile.displayName", hasItem(teamCaptain.getProfile().getDisplayName()));
+            body("[0].captain.profile.displayName", equalTo(captain.getProfile().getDisplayName())).
+            body("[0].members.profile.displayName", hasItem(captain.getProfile().getDisplayName()));
         //@formatter:on
     }
     //endregion
@@ -430,7 +429,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
         //@formatter:off
         String location = createTeamWithCaptain();
 
-        SessionData sessionData = login("admin", adminCleartextPassword);
+        SessionData sessionData = login(admin.getUsername(), adminCleartextPassword);
 
         //@formatter:off
         given().
@@ -453,7 +452,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
         //@formatter:off
         String location = createTeamWithCaptain();
 
-        SessionData login = login("admin", adminCleartextPassword);
+        SessionData login = login(admin.getUsername(), adminCleartextPassword);
 
         given().
             filter(sessionFilter).
@@ -472,7 +471,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
         then().
             statusCode(HttpStatus.SC_OK).
             body("members.profile.displayName", hasItems(
-                    teamCaptain.getProfile().getDisplayName(),
+                    captain.getProfile().getDisplayName(),
                     user.getProfile().getDisplayName())).
             body("size", equalTo(2));
         //@formatter:on
@@ -483,7 +482,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
         //@formatter:off
         String location = createTeamWithCaptain();
 
-        SessionData sessionData = login("captain", teamCaptainCleartextPassword);
+        SessionData sessionData = login(captain.getUsername(), captainCleartextPassword);
 
         //@formatter:off
         given().
@@ -505,7 +504,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
         //@formatter:off
         String location = createTeamWithCaptain();
 
-        SessionData sessionData = login("captain", teamCaptainCleartextPassword);
+        SessionData sessionData = login(captain.getUsername(), captainCleartextPassword);
 
         //@formatter:off
         given().
@@ -529,7 +528,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
         inviteUserAsCaptain(location, user);
 
-        SessionData sessionData = login("captain", teamCaptainCleartextPassword);
+        SessionData sessionData = login(captain.getUsername(), captainCleartextPassword);
 
         given().
             filter(sessionFilter).
@@ -552,7 +551,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
         inviteUserAsCaptain(location, user);
 
-        SessionData sessionData = login("captain", teamCaptainCleartextPassword);
+        SessionData sessionData = login(captain.getUsername(), captainCleartextPassword);
 
         given().
             filter(sessionFilter).
@@ -570,14 +569,14 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testAddMemberAsMember() {
-        team1.put("captainUsername", teamCaptain.getUsername());
+        team1.put("captainUsername", captain.getUsername());
 
         //@formatter:off
         String location = createTeamWithCaptain();
 
         addUserAsAdmin(location, user);
 
-        SessionData login = login("user", userCleartextPassword);
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
         given().
@@ -593,14 +592,14 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testInviteMemberAsMember() {
-        team1.put("captainUsername", teamCaptain.getUsername());
+        team1.put("captainUsername", captain.getUsername());
 
         //@formatter:off
         String location = createTeamWithCaptain();
 
         addUserAsAdmin(location, user);
 
-        SessionData login = login("user", userCleartextPassword);
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
         given().
@@ -619,7 +618,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
         //@formatter:off
         String location = createTeamWithCaptain();
 
-        SessionData login = login("user", userCleartextPassword);
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         given().
             filter(sessionFilter).
@@ -637,7 +636,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
         //@formatter:off
         String location = createTeamWithCaptain();
 
-        SessionData login = login("user", userCleartextPassword);
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         given().
             filter(sessionFilter).
@@ -654,14 +653,14 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     public void testAddSelfToTeamAsCaptain() {
         String location = createTeamWithCaptain();
 
-        SessionData login = login("captain", teamCaptainCleartextPassword);
+        SessionData login = login(captain.getUsername(), captainCleartextPassword);
 
         //@formatter:off
         given().
             filter(sessionFilter).
             header(login.getCsrfHeader()).
         when().
-            content(teamCaptain.getUsername()).
+            content(captain.getUsername()).
             post(location).
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
@@ -672,14 +671,14 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     public void testInviteSelfToTeamAsCaptain() {
         String location = createTeamWithCaptain();
 
-        SessionData login = login("captain", teamCaptainCleartextPassword);
+        SessionData login = login(captain.getUsername(), captainCleartextPassword);
 
         //@formatter:off
         given().
             filter(sessionFilter).
             header(login.getCsrfHeader()).
         when().
-            content(teamCaptain.getUsername()).
+            content(captain.getUsername()).
             post(location + "/invites").
         then().
             statusCode(HttpStatus.SC_CONFLICT);
@@ -692,7 +691,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
         addUserAsAdmin(location, user);
 
-        SessionData login = login("captain", teamCaptainCleartextPassword);
+        SessionData login = login(captain.getUsername(), captainCleartextPassword);
 
         //@formatter:off
         given().
@@ -710,7 +709,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     public void testInviteMemberWithoutTicket() {
         String location = createTeamWithCaptain();
 
-        SessionData login = login("captain", teamCaptainCleartextPassword);
+        SessionData login = login(captain.getUsername(), captainCleartextPassword);
 
         //@formatter:off
         given().
@@ -728,7 +727,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     public void testAddMemberAsAdminDuplicate() {
         String location = createTeamWithCaptain();
 
-        SessionData login = login("admin", adminCleartextPassword);
+        SessionData login = login(admin.getUsername(), adminCleartextPassword);
 
         //@formatter:off
         given().
@@ -760,7 +759,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
         inviteUserAsCaptain(location, user);
 
-        SessionData login = login("user", userCleartextPassword);
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
         given().
@@ -782,7 +781,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
         inviteUserAsCaptain(location, user);
 
-        SessionData login = login("captain", teamCaptainCleartextPassword);
+        SessionData login = login(captain.getUsername(), captainCleartextPassword);
 
         //@formatter:off
         given().
@@ -810,7 +809,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
         inviteUserAsCaptain(location, admin);
 
-        SessionData login = login("user", userCleartextPassword);
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
         given().
@@ -829,7 +828,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
         inviteUserAsCaptain(location, user);
 
-        SessionData login = login("admin", adminCleartextPassword);
+        SessionData login = login(admin.getUsername(), adminCleartextPassword);
 
         //@formatter:off
         given().
@@ -869,7 +868,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
         TeamInviteToken token =
                 teamInviteTokenRepository.findByUserUsernameIgnoreCase(user.getUsername()).stream().findFirst().get();
 
-        SessionData login = login("user", userCleartextPassword);
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
         given().
@@ -895,7 +894,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
         TeamInviteToken token =
                 teamInviteTokenRepository.findByUserUsernameIgnoreCase(user.getUsername()).stream().findFirst().get();
 
-        SessionData login = login("user", userCleartextPassword);
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
         given().
@@ -923,7 +922,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
         addUserAsAdmin(location, user);
 
-        SessionData login = login("captain", teamCaptainCleartextPassword);
+        SessionData login = login(captain.getUsername(), captainCleartextPassword);
 
         //@formatter:off
         given().
@@ -942,14 +941,14 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
         addUserAsAdmin(location, user);
 
-        SessionData login = login("captain", teamCaptainCleartextPassword);
+        SessionData login = login(captain.getUsername(), captainCleartextPassword);
 
         //@formatter:off
         given().
             filter(sessionFilter).
             header(login.getCsrfHeader()).
         when().
-            content(teamCaptain.getUsername()).
+            content(captain.getUsername()).
             delete(location + "/members").
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
@@ -962,7 +961,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
         addUserAsAdmin(location, user);
 
-        SessionData login = login("admin", adminCleartextPassword);
+        SessionData login = login(admin.getUsername(), adminCleartextPassword);
 
         //@formatter:off
         given().
@@ -981,7 +980,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
         addUserAsAdmin(location, user);
 
-        SessionData login = login("user", userCleartextPassword);
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
         given().
@@ -1000,7 +999,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
         addUserAsAdmin(location, admin);
 
-        SessionData login = login("user", userCleartextPassword);
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
         given().
@@ -1014,7 +1013,3 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     }
     //endregion
 }
-
-
-
-

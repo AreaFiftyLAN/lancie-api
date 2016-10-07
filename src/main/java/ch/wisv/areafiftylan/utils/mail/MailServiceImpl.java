@@ -103,7 +103,7 @@ public class MailServiceImpl implements MailService {
 
     @Override
     public void sendTemplateMailToUser(User user, MailDTO mailDTO) {
-        sendMail(user.getEmail(), user.getProfile().getFirstName(), mailDTO.getSubject(), mailDTO.getMessage());
+        sendMail(user.getUsername(), user.getProfile().getFirstName(), mailDTO.getSubject(), mailDTO.getMessage());
     }
 
     @Override
@@ -111,7 +111,7 @@ public class MailServiceImpl implements MailService {
         String message = "Please click on the following link to complete your registration: <a href=\"" +
                 url + "\">" + url + "</a><br /><br />If the link does not work, please copy the link and" +
                 " paste it into your browser.";
-        sendMail(user.getEmail(), user.getUsername(), "Confirm your registration", message);
+        sendMail(user.getUsername(), user.getUsername(), "Confirm your registration", message);
     }
 
     @Override
@@ -119,7 +119,7 @@ public class MailServiceImpl implements MailService {
         String message = "Please click on the following link to reset your password: <a href=\"" +
                 url + "\">" + url + "</a><br /><br />If the link does not work, please copy the link and" +
                 " paste it into your browser.";
-        sendMail(user.getEmail(), user.getUsername(), "Password reset requested", message);
+        sendMail(user.getUsername(), user.getUsername(), "Password reset requested", message);
     }
 
     @Override
@@ -132,7 +132,7 @@ public class MailServiceImpl implements MailService {
                 teamCaptain.getProfile().getLastName() +
                 "! Please log in to My Area to accept the invitation.";
 
-        sendMail(user.getEmail(), user.getUsername(), "You've been invited to \"Team " + teamName + "\"", message);
+        sendMail(user.getUsername(), user.getUsername(), "You've been invited to \"Team " + teamName + "\"", message);
     }
 
     @Override
@@ -140,7 +140,7 @@ public class MailServiceImpl implements MailService {
         String message = sender.getProfile().firstName +
                 " has sent you a ticket for AreaFiftyLAN! To accept this ticket please click on the following link: " +
                 "<a href=\"" + url + "\">" + url + "</a>";
-        sendMail(receiver.getEmail(), receiver.getProfile().getFirstName() + " " + receiver.getProfile().getLastName(),
+        sendMail(receiver.getUsername(), receiver.getProfile().getFirstName() + " " + receiver.getProfile().getLastName(),
                 "A ticket for AreaFiftyLAN has been sent to you!", message);
     }
 }

@@ -148,19 +148,6 @@ public class UserRestController {
     }
 
     /**
-     * Checks for the availability of an email address. Returns false when another user is already registered with this
-     * email.
-     *
-     * @param email The emailaddress to be checked.
-     *
-     * @return Whether this emailaddress has already been registered.
-     */
-    @RequestMapping(value = "/checkEmail", method = RequestMethod.GET)
-    public Boolean checkEmailExists(@RequestParam String email) {
-        return userService.checkEmailAvailable(email);
-    }
-
-    /**
      * Checks for the availability of a username. Returns false when another user is already registered with this
      * username.
      *

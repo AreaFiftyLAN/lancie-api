@@ -47,14 +47,14 @@ public class UserRestIntegrationTest extends IntegrationTest {
     @Autowired
     VerificationTokenRepository verificationTokenRepository;
 
-    protected User testuser;
-    protected final String testuserCleartextPassword = "password";
+    protected User testUser;
+    protected final String testUserCleartextPassword = "password";
     @Autowired
     TaskScheduler taskScheduler;
 
     @After
     public void cleanupUserTest() {
-        testuser = null;
+        testUser = null;
         verificationTokenRepository.deleteAll();
     }
 
@@ -74,9 +74,8 @@ public class UserRestIntegrationTest extends IntegrationTest {
 
     private String createEnabledTestUser() {
         Map<String, String> userDTO = new HashMap<>();
-        userDTO.put("username", "testuser");
-        userDTO.put("password", testuserCleartextPassword);
-        userDTO.put("email", "testuser@mail.com");
+        userDTO.put("username", "testUser@mail.com");
+        userDTO.put("password", testUserCleartextPassword);
 
         //@formatter:off
         Response response =
@@ -90,9 +89,9 @@ public class UserRestIntegrationTest extends IntegrationTest {
                 extract().response();
         //@formatter:on
 
-        testuser = userRepository.findOneByUsernameIgnoreCase("testuser").get();
-        testuser.setEnabled(true);
-        userRepository.saveAndFlush(testuser);
+        testUser = userRepository.findOneByUsernameIgnoreCase("testUser@mail.com").get();
+        testUser.setEnabled(true);
+        userRepository.saveAndFlush(testUser);
 
         return response.getHeader("Location");
     }
@@ -116,22 +115,12 @@ public class UserRestIntegrationTest extends IntegrationTest {
     @Test
     public void testUsernameTaken() {
 
-        when().get("/users/checkUsername?username=user").then().body(equalTo("false"));
+        when().get("/users/checkUsername?username=user@mail.com").then().body(equalTo("false"));
     }
 
     @Test
     public void testUsernameFree() {
-        when().get("/users/checkUsername?username=freeUsername").then().body(equalTo("true"));
-    }
-
-    @Test
-    public void testEmailTaken() {
-        when().get("/users/checkEmail?email=user@mail.com").then().body(equalTo("false"));
-    }
-
-    @Test
-    public void testEmailFree() {
-        when().get("/users/checkEmail?email=freemail@mail.com").then().body(equalTo("true"));
+        when().get("/users/checkUsername?username=freeUsername@mail.com").then().body(equalTo("true"));
     }
 
     @Test
@@ -162,7 +151,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testGetAllUsersAsAdmin() {
-        SessionData login = login("admin", "password");
+        SessionData login = login(admin.getUsername(), adminCleartextPassword);
 
         //@formatter:off
         given().
@@ -203,14 +192,13 @@ public class UserRestIntegrationTest extends IntegrationTest {
             get("/users/current").
         then().statusCode(HttpStatus.SC_OK).
             body("username", equalTo(user.getUsername())).
-            body("email", equalTo(user.getEmail())).
             body("authorities", hasItem("ROLE_USER"));
         //@formatter:on
     }
 
     @Test
     public void testGetCurrentUserAsAdmin() {
-        SessionData login = login("admin", "password");
+        SessionData login = login(admin.getUsername(), adminCleartextPassword);
 
         //@formatter:off
         given().
@@ -220,7 +208,6 @@ public class UserRestIntegrationTest extends IntegrationTest {
             get("/users/current").
         then().statusCode(HttpStatus.SC_OK).
             body("username", equalTo(admin.getUsername())).
-            body("email", equalTo(admin.getEmail())).
             body("authorities", hasItem("ROLE_ADMIN"));
         //@formatter:on
     }
@@ -253,7 +240,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
     @Test
     public void testGetOtherUserAsAdmin() {
         long userId = user.getId();
-        SessionData login = login("admin", "password");
+        SessionData login = login(admin.getUsername(), adminCleartextPassword);
 
         //@formatter:off
         given().
@@ -262,8 +249,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
         when().
             get("/users/" + userId).
         then().statusCode(HttpStatus.SC_OK).
-            body("username", equalTo(user.getUsername())).
-            body("email", equalTo(user.getEmail()));
+            body("username", equalTo(user.getUsername()));
         //@formatter:on
     }
 
@@ -278,8 +264,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
         when().
             get("/users/" + user.getId()).
         then().statusCode(HttpStatus.SC_OK).
-            body("username", equalTo(user.getUsername())).
-            body("email", equalTo(user.getEmail()));
+            body("username", equalTo(user.getUsername()));
         //@formatter:on
     }
 
@@ -288,9 +273,8 @@ public class UserRestIntegrationTest extends IntegrationTest {
     @Test
     public void createUser() {
         Map<String, String> userDTO = new HashMap<>();
-        userDTO.put("username", "testuser");
-        userDTO.put("password", testuserCleartextPassword);
-        userDTO.put("email", "test@mail.com");
+        userDTO.put("username", "test@mail.com");
+        userDTO.put("password", testUserCleartextPassword);
 
         //@formatter:off
         given().
@@ -302,8 +286,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
         then().
             statusCode(HttpStatus.SC_CREATED).
             body("message", containsString("User successfully created at")).
-            body("object.username", is(userDTO.get("username"))).
-            body("object.email", is(userDTO.get("email")));
+            body("object.username", is(userDTO.get("username")));
         //@formatter:on
     }
 
@@ -311,7 +294,6 @@ public class UserRestIntegrationTest extends IntegrationTest {
     public void createUserMissingUsernameField() {
         Map<String, String> userDTO = new HashMap<>();
         userDTO.put("password", "password");
-        userDTO.put("email", "test@mail.com");
 
         //@formatter:off
         given().
@@ -330,44 +312,6 @@ public class UserRestIntegrationTest extends IntegrationTest {
         Map<String, String> userDTO = new HashMap<>();
         userDTO.put("username", "");
         userDTO.put("password", "password");
-        userDTO.put("email", "test@mail.com");
-
-        //@formatter:off
-        given().
-            header(getCSRFHeader()).
-            filter(sessionFilter).
-        when().
-            content(userDTO).contentType(ContentType.JSON).
-            post("/users").
-        then().
-            statusCode(HttpStatus.SC_BAD_REQUEST);
-        //@formatter:on
-    }
-
-    @Test
-    public void createUserMissingEmailField() {
-        Map<String, String> userDTO = new HashMap<>();
-        userDTO.put("username", "testuser");
-        userDTO.put("password", testuserCleartextPassword);
-
-        //@formatter:off
-        given().
-            header(getCSRFHeader()).
-            filter(sessionFilter).
-        when().
-            content(userDTO).contentType(ContentType.JSON).
-            post("/users").
-        then().
-            statusCode(HttpStatus.SC_BAD_REQUEST);
-        //@formatter:on
-    }
-
-    @Test
-    public void createUserEmptyEmailField() {
-        Map<String, String> userDTO = new HashMap<>();
-        userDTO.put("username", "testuser");
-        userDTO.put("password", testuserCleartextPassword);
-        userDTO.put("email", "");
 
         //@formatter:off
         given().
@@ -384,8 +328,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
     @Test
     public void createUserMissingPasswordField() {
         Map<String, String> userDTO = new HashMap<>();
-        userDTO.put("username", "testuser");
-        userDTO.put("email", "test@mail.com");
+        userDTO.put("username", "testUser");
 
         //@formatter:off
         given().
@@ -402,9 +345,8 @@ public class UserRestIntegrationTest extends IntegrationTest {
     @Test
     public void createUserEmptyPasswordField() {
         Map<String, String> userDTO = new HashMap<>();
-        userDTO.put("username", "testuser");
+        userDTO.put("username", "testUser");
         userDTO.put("password", "");
-        userDTO.put("email", "test@mail.com");
 
         //@formatter:off
         given().
@@ -421,9 +363,8 @@ public class UserRestIntegrationTest extends IntegrationTest {
     @Test
     public void createUserTakenUsername() {
         Map<String, String> userDTO = new HashMap<>();
-        userDTO.put("username", "user");
+        userDTO.put("username", "user@mail.com");
         userDTO.put("password", userCleartextPassword);
-        userDTO.put("email", "test@mail.com");
 
         //@formatter:off
         given().
@@ -440,47 +381,8 @@ public class UserRestIntegrationTest extends IntegrationTest {
     @Test
     public void createUserTakenUsernameDifferentCase() {
         Map<String, String> userDTO = new HashMap<>();
-        userDTO.put("username", "uSeR");
+        userDTO.put("username", "uSeR@mail.com");
         userDTO.put("password", userCleartextPassword);
-        userDTO.put("email", "test@mail.com");
-
-        //@formatter:off
-        given().
-            header(getCSRFHeader()).
-            filter(sessionFilter).
-        when().
-            content(userDTO).contentType(ContentType.JSON).
-            post("/users").
-        then().
-            statusCode(HttpStatus.SC_CONFLICT);
-        //@formatter:on
-    }
-
-    @Test
-    public void createUserTakenEmail() {
-        Map<String, String> userDTO = new HashMap<>();
-        userDTO.put("username", "testuser");
-        userDTO.put("password", testuserCleartextPassword);
-        userDTO.put("email", "user@mail.com");
-
-        //@formatter:off
-        given().
-            header(getCSRFHeader()).
-            filter(sessionFilter).
-        when().
-            content(userDTO).contentType(ContentType.JSON).
-            post("/users").
-        then().
-            statusCode(HttpStatus.SC_CONFLICT);
-        //@formatter:on
-    }
-
-    @Test
-    public void createUserTakenEmailDifferentCase() {
-        Map<String, String> userDTO = new HashMap<>();
-        userDTO.put("username", "testuser");
-        userDTO.put("password", testuserCleartextPassword);
-        userDTO.put("email", "usER@maiL.com");
 
         //@formatter:off
         given().
@@ -500,7 +402,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
 
         Map<String, String> profileDTO = getProfileDTO();
 
-        SessionData login = login(testuser.getUsername(), testuserCleartextPassword);
+        SessionData login = login(testUser.getUsername(), testUserCleartextPassword);
 
         //@formatter:off
         given().
@@ -530,7 +432,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
 
         Map<String, String> profileDTO = getProfileDTO();
 
-        SessionData login = login(testuser.getUsername(), testuserCleartextPassword);
+        SessionData login = login(testUser.getUsername(), testUserCleartextPassword);
 
         //@formatter:off
         given().
@@ -612,7 +514,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
         Map<String, String> profileDTO = getProfileDTO();
         profileDTO.remove("city");
 
-        SessionData login = login(testuser.getUsername(), testuserCleartextPassword);
+        SessionData login = login(testUser.getUsername(), testUserCleartextPassword);
 
         //@formatter:off
         given().
@@ -634,7 +536,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
         Map<String, String> profileDTO = getProfileDTO();
         profileDTO.put("gender", "unknown");
 
-        SessionData login = login(testuser.getUsername(), testuserCleartextPassword);
+        SessionData login = login(testUser.getUsername(), testUserCleartextPassword);
 
         //@formatter:off
         given().
@@ -656,7 +558,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
         Map<String, String> profileDTO = getProfileDTO();
         profileDTO.put("displayName", "");
 
-        SessionData login = login(testuser.getUsername(), testuserCleartextPassword);
+        SessionData login = login(testUser.getUsername(), testUserCleartextPassword);
 
         //@formatter:off
         given().
@@ -687,7 +589,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
         Map<String, String> profileDTO = getProfileDTO();
         profileDTO.remove("notes");
 
-        SessionData login = login(testuser.getUsername(), testuserCleartextPassword);
+        SessionData login = login(testUser.getUsername(), testUserCleartextPassword);
 
         //@formatter:off
         given().
@@ -715,7 +617,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
     public void deleteUserAsAdmin() {
         createEnabledTestUser();
 
-        User testuser = userRepository.findOneByUsernameIgnoreCase(this.testuser.getUsername()).get();
+        User testuser = userRepository.findOneByUsernameIgnoreCase(this.testUser.getUsername()).get();
         long userId = testuser.getId();
 
         SessionData login = login(admin.getUsername(), adminCleartextPassword);
@@ -739,10 +641,10 @@ public class UserRestIntegrationTest extends IntegrationTest {
     public void deleteUserAsUser() {
         createEnabledTestUser();
 
-        User testuser = userRepository.findOneByUsernameIgnoreCase(this.testuser.getUsername()).get();
+        User testuser = userRepository.findOneByUsernameIgnoreCase(this.testUser.getUsername()).get();
         long userId = testuser.getId();
 
-        SessionData login = login(testuser.getUsername(), testuserCleartextPassword);
+        SessionData login = login(testuser.getUsername(), testUserCleartextPassword);
 
         //@formatter:off
         given().
@@ -760,7 +662,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
     public void deleteUserAsAnon() {
         createEnabledTestUser();
 
-        User testuser = userRepository.findOneByUsernameIgnoreCase(this.testuser.getUsername()).get();
+        User testuser = userRepository.findOneByUsernameIgnoreCase(this.testUser.getUsername()).get();
         long userId = testuser.getId();
 
         //@formatter:off
@@ -804,14 +706,12 @@ public class UserRestIntegrationTest extends IntegrationTest {
             get("/users/current").
         then().statusCode(HttpStatus.SC_OK).
             body("username", equalTo(user.getUsername())).
-            body("email", equalTo(user.getEmail())).
             body("authorities", hasItem("ROLE_USER"));
         //@formatter:on
     }
 
     @Test
     public void testChangePasswordWrongOldPassword() {
-
         Map<String, String> passwordDTO = new HashMap<>();
         passwordDTO.put("oldPassword", "wrongPassword");
         passwordDTO.put("newPassword", "newPassword");
@@ -854,9 +754,8 @@ public class UserRestIntegrationTest extends IntegrationTest {
 
     private void makeTempUser(String appendix) {
         Map<String, String> userDTO = new HashMap<>();
-        userDTO.put("username", "tempUser" + appendix);
+        userDTO.put("username", "tempUser" + appendix + "@mail.com");
         userDTO.put("password", "password");
-        userDTO.put("email", "tempuser" + appendix + "@mail.com");
 
         //@formatter:off
         given().
@@ -870,7 +769,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
     }
 
     private User getTempUser(String appendix){
-        return userRepository.findOneByUsernameIgnoreCase("tempUser" + appendix).orElse(null);
+        return userRepository.findOneByUsernameIgnoreCase("tempUser" + appendix + "@mail.com").orElse(null);
     }
 
     private User makeAndGetTempUser(String appendix){
@@ -936,12 +835,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
             get("/users/current").
         then().statusCode(HttpStatus.SC_OK).
             body("username", equalTo(user.getUsername())).
-            body("email", equalTo(user.getEmail())).
             body("authorities", hasItem("ROLE_USER"));
         //@formatter:on
     }
 }
-
-
-
-
