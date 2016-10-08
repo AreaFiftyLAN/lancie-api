@@ -59,7 +59,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
     @Autowired
     TicketRepository ticketRepository;
 
-    private User captian;
+    private User captain;
     private String captainCleartextPassword = "password";
 
     private Team team;
@@ -98,18 +98,18 @@ public class SeatRestIntegrationTest extends IntegrationTest {
     }
 
     private void createCaptainAndTeam() {
-        captian = new User("captain@mail.com", new BCryptPasswordEncoder().encode(captainCleartextPassword));
-        captian.getProfile()
+        captain = new User("captain@mail.com", new BCryptPasswordEncoder().encode(captainCleartextPassword));
+        captain.getProfile()
                 .setAllFields("Captain", "Hook", "PeterPanKiller", Gender.MALE, "High Road 3", "2826ZZ", "Neverland",
                         "0906-0777", null);
-        captian = userRepository.saveAndFlush(captian);
+        captain = userRepository.saveAndFlush(captain);
 
-        captainTicket = new Ticket(captian, TicketType.EARLY_FULL, false, false);
+        captainTicket = new Ticket(captain, TicketType.EARLY_FULL, false, false);
         captainTicket.setValid(true);
         captainTicket = ticketRepository.save(captainTicket);
 
 
-        team = new Team("team", captian);
+        team = new Team("team", captain);
         team.addMember(user);
 
         team = teamRepository.save(team);
@@ -319,7 +319,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
             statusCode(HttpStatus.SC_OK).
             body("$", hasSize(2)).
             body("ticket.owner.profile.displayName", hasItems(
-                    captian.getProfile().getDisplayName(),
+                    captain.getProfile().getDisplayName(),
                     user.getProfile().getDisplayName())).
             body("ticket.owner", not(hasKey("username"))).
             body("ticket.owner.profile", not(hasKey("firstName")));
@@ -448,7 +448,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
     public void reserveSeatForUserAsTeamCaptain() {
         createCaptainAndTeam();
 
-        SessionData login = login(captian.getUsername(), captainCleartextPassword);
+        SessionData login = login(captain.getUsername(), captainCleartextPassword);
 
         //@formatter:off
         given().
@@ -484,7 +484,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
     public void reserveTakenSeatAsUser() {
         createCaptainAndTeam();
 
-        SessionData login = login(captian.getUsername(), captainCleartextPassword);
+        SessionData login = login(captain.getUsername(), captainCleartextPassword);
 
         //@formatter:off
         given().
@@ -612,7 +612,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
 
         logout();
 
-        login = login(captian.getUsername(), captainCleartextPassword);
+        login = login(captain.getUsername(), captainCleartextPassword);
 
         given().
             filter(sessionFilter).
