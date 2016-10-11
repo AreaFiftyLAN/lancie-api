@@ -168,6 +168,6 @@ public class UserRestController {
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<?> handleConstraintViolationException(ConstraintViolationException ex) {
-        return createResponseEntity(HttpStatus.BAD_REQUEST, "Username should be a valid Email!");
+        return createResponseEntity(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 }

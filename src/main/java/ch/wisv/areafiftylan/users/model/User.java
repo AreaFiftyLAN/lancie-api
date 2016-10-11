@@ -39,7 +39,7 @@ public class User implements Serializable, UserDetails {
 
     @Column(nullable = false)
     @JsonView(View.NoProfile.class)
-    @Email(message = "Should contain a valid email address")
+    @Email(message = "Username should be a valid Email!")
     protected String username;
 
     @OneToOne(targetEntity = Profile.class, cascade = CascadeType.ALL)
