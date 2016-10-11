@@ -291,6 +291,24 @@ public class UserRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
+    public void createUserNoEmail() {
+        Map<String, String> userDTO = new HashMap<>();
+        userDTO.put("username", "user");
+        userDTO.put("password", userCleartextPassword);
+
+        //@formatter:off
+        given().
+                header(getCSRFHeader()).
+                filter(sessionFilter).
+                when().
+                content(userDTO).contentType(ContentType.JSON).
+                post("/users").
+                then().
+                statusCode(HttpStatus.SC_BAD_REQUEST);
+        //@formatter:on
+    }
+
+    @Test
     public void createUserMissingUsernameField() {
         Map<String, String> userDTO = new HashMap<>();
         userDTO.put("password", "password");

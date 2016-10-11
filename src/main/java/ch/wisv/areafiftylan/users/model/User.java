@@ -20,6 +20,7 @@ package ch.wisv.areafiftylan.users.model;
 import ch.wisv.areafiftylan.utils.view.View;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
+import org.hibernate.validator.constraints.Email;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -38,6 +39,7 @@ public class User implements Serializable, UserDetails {
 
     @Column(nullable = false)
     @JsonView(View.NoProfile.class)
+    @Email(message = "Should contain a valid email address")
     protected String username;
 
     @OneToOne(targetEntity = Profile.class, cascade = CascadeType.ALL)
@@ -163,8 +165,6 @@ public class User implements Serializable, UserDetails {
 
     @Override
     public int hashCode() {
-        int result = username.hashCode();
-        result = 31 * result + id.hashCode();
-        return result;
+        return username.hashCode();
     }
 }
