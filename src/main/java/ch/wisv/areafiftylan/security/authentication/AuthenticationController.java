@@ -109,17 +109,17 @@ public class AuthenticationController {
     @RequestMapping(value = "/requestResetPassword", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<?> requestResetPassword(HttpServletRequest request, @RequestBody Map<String, String> body) {
-        String email = body.get("email");
+        String username = body.get("username");
 
-        log.log(Level.getLevel("A5L"), "Requesting password reset on email {}.", email);
+        log.log(Level.getLevel("A5L"), "Requesting password reset on email {}.", username);
 
-        User user = userService.getUserByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
+        User user = userService.getUserByUsername(username).orElseThrow(() -> new UserNotFoundException(username));
 
         userService.requestResetPassword(user, request);
 
-        log.log(Level.getLevel("A5L"), "Successfully requested password reset on email {}.", email);
+        log.log(Level.getLevel("A5L"), "Successfully requested password reset on email {}.", username);
 
-        return createResponseEntity(HttpStatus.OK, "Password reset link sent to " + email);
+        return createResponseEntity(HttpStatus.OK, "Password reset link sent to " + username);
     }
 
     /**

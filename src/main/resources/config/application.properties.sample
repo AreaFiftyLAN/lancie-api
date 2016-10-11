@@ -52,6 +52,8 @@ spring.jpa.properties.hibernate.default_schema=public
 flyway.baseline-on-migrate=true
 # Database migration automation. Set to false for development
 flyway.enabled=true
+# The location of the flyway database migration scripts
+flyway.locations=classpath:ch/wisv/areafiftylan/utils/db/migration
 
 #DEVELOPMENT ONLY : DELETES DATA ON STARTUP:
 #spring.jpa.hibernate.ddl-auto=create

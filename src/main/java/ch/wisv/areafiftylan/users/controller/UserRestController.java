@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.ConstraintViolationException;
 import java.util.Collection;
 
 import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEntity;
@@ -148,19 +149,6 @@ public class UserRestController {
     }
 
     /**
-     * Checks for the availability of an email address. Returns false when another user is already registered with this
-     * email.
-     *
-     * @param email The emailaddress to be checked.
-     *
-     * @return Whether this emailaddress has already been registered.
-     */
-    @RequestMapping(value = "/checkEmail", method = RequestMethod.GET)
-    public Boolean checkEmailExists(@RequestParam String email) {
-        return userService.checkEmailAvailable(email);
-    }
-
-    /**
      * Checks for the availability of a username. Returns false when another user is already registered with this
      * username.
      *
@@ -176,5 +164,10 @@ public class UserRestController {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<?> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
         return createResponseEntity(HttpStatus.CONFLICT, "Username or Email already taken!");
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<?> handleConstraintViolationException(ConstraintViolationException ex) {
+        return createResponseEntity(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 }

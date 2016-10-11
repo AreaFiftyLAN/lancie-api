@@ -54,6 +54,7 @@ public class TicketRestIntegrationTest extends IntegrationTest {
 
     private User ticketReceiver;
     private final String ticketReceiverCleartextPassword = "password";
+    private final String teamMemberCleartextPassword = "password";
     private Ticket ticket;
 
     @Autowired
@@ -80,8 +81,7 @@ public class TicketRestIntegrationTest extends IntegrationTest {
     }
 
     private User makeTicketReceiver() {
-        User receiver = new User("receiver", new BCryptPasswordEncoder().encode(ticketReceiverCleartextPassword),
-                "receiver@gmail.com");
+        User receiver = new User("receiver@mail.com", new BCryptPasswordEncoder().encode(ticketReceiverCleartextPassword));
         receiver.getProfile()
                 .setAllFields("receiver", " of tickets", "GotYaTicket", Gender.MALE, "Money Owner 4", "2826GJ",
                         "Tomorrowland", "0906-1111", null);
@@ -107,7 +107,7 @@ public class TicketRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testGetAllTickets_User() {
-        SessionData login = login("user", userCleartextPassword);
+        SessionData login = login(user.getUsername(), userCleartextPassword);
 
 
         //@formatter:off
@@ -123,7 +123,7 @@ public class TicketRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testGetAllTickets_Admin() {
-        SessionData login = login("admin", adminCleartextPassword);
+        SessionData login = login(admin.getUsername(), adminCleartextPassword);
 
         //@formatter:off
         given()
@@ -502,7 +502,7 @@ public class TicketRestIntegrationTest extends IntegrationTest {
     public void testGetTicketInControlMemberOfTeam() {
         User teamMate = createTeamReturnSingleMember();
 
-        SessionData login = login(teamMate.getUsername(), "password");
+        SessionData login = login(teamMate.getUsername(), teamMemberCleartextPassword);
 
         given().
                 filter(sessionFilter).
@@ -516,7 +516,7 @@ public class TicketRestIntegrationTest extends IntegrationTest {
     }
 
     private User createTeamReturnSingleMember() {
-        User teamMate = new User("teamMate", new BCryptPasswordEncoder().encode("password"), "teammate@email.com");
+        User teamMate = new User("teammate@email.com", new BCryptPasswordEncoder().encode(teamMemberCleartextPassword));
         teamMate.getProfile()
                 .setAllFields("Team", "Mate", "IloveYOU", Gender.MALE, "Buddy 7", "2826GJ", "Holland", "0906-7777",
                         null);

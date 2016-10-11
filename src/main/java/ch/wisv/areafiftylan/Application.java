@@ -53,6 +53,4 @@ public class Application {
         return new TestDataRunner(accountRepository, ticketRepository, teamRepository, seatService);
 
     }
-
-
 }

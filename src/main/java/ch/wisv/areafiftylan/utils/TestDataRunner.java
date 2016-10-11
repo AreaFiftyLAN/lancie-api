@@ -50,24 +50,24 @@ public class TestDataRunner implements CommandLineRunner {
 
     @Override
     public void run(String... evt) throws Exception {
-        User testUser1 = new User("user", new BCryptPasswordEncoder().encode("password"), "user@mail.com");
+        User testUser1 = new User("user@mail.com", new BCryptPasswordEncoder().encode("password"));
         testUser1.addRole(Role.ROLE_ADMIN);
         testUser1.getProfile()
                 .setAllFields("Jan", "de Groot", "MonsterKiller9001", Gender.MALE, "Mekelweg 4", "2826CD", "Delft",
                         "0906-0666", null);
-        User testUser2 = new User("user2", new BCryptPasswordEncoder().encode("password"), "bert@mail.com");
+        User testUser2 = new User("bert@mail.com", new BCryptPasswordEncoder().encode("password"));
         testUser2.getProfile()
                 .setAllFields("Bert", "Kleijn", "ILoveZombies", Gender.OTHER, "Mekelweg 20", "2826CD", "Amsterdam",
                         "0611", null);
-        User testUser3 = new User("user3", new BCryptPasswordEncoder().encode("password"), "katrien@ms.com");
+        User testUser3 = new User("katrien@ms.com", new BCryptPasswordEncoder().encode("password"));
         testUser3.getProfile()
                 .setAllFields("Katrien", "Zwanenburg", "Admiral Cheesecake", Gender.FEMALE, "Ganzenlaan 5", "2826CD",
                         "Duckstad", "0906-0666", null);
-        User testUser4 = new User("noticket", new BCryptPasswordEncoder().encode("password"), "user@yahoo.com");
+        User testUser4 = new User("user@yahoo.com", new BCryptPasswordEncoder().encode("password"));
         testUser4.getProfile()
                 .setAllFields("Kees", "Jager", "l33tz0r", Gender.MALE, "Herenweg 2", "2826CD", "Delft", "0902-30283",
                         null);
-        User testUser5 = new User("user5", new BCryptPasswordEncoder().encode("password"), "custom@myself.com");
+        User testUser5 = new User("custom@myself.com", new BCryptPasswordEncoder().encode("password"));
         testUser5.getProfile()
                 .setAllFields("Gert", "Gertson", "Whosyourdaddy", Gender.MALE, "Jansstraat", "8826CD", "Delft",
                         "0238-2309736", null);

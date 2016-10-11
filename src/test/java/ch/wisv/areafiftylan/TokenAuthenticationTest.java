@@ -179,8 +179,7 @@ public class TokenAuthenticationTest extends IntegrationTest {
             get("/users/current").
         then().
             statusCode(HttpStatus.SC_OK).
-            body("username", equalTo(user.getUsername())).
-            body("email", equalTo(user.getEmail()));
+            body("username", equalTo(user.getUsername()));
         //@formatter:on
     }
 
