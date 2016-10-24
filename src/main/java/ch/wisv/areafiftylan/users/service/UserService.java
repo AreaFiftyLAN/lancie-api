@@ -62,4 +62,6 @@ public interface UserService {
     void changePassword(Long userId, String oldPassword, String newPassword);
 
     Boolean checkUsernameAvailable(String username);
+
+    Collection<User> getAllUsersWithPickup();
 }

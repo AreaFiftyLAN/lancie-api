@@ -140,6 +140,11 @@ public class SeatServiceImpl implements SeatService {
     }
 
     @Override
+    public Collection<Seat> getSeatsBySeatGroup(String seatGroup) {
+        return seatRepository.findBySeatGroup(seatGroup);
+    }
+
+    @Override
     public void clearSeat(String groupName, int seatNumber) {
         Seat seat = seatRepository.findBySeatGroupAndSeatNumber(groupName, seatNumber);
         seat.setTicket(null);

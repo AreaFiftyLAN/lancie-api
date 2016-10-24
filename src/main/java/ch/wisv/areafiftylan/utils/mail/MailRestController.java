@@ -17,6 +17,9 @@
 
 package ch.wisv.areafiftylan.utils.mail;
 
+import ch.wisv.areafiftylan.products.service.TicketService;
+import ch.wisv.areafiftylan.seats.model.Seat;
+import ch.wisv.areafiftylan.seats.service.SeatService;
 import ch.wisv.areafiftylan.teams.model.Team;
 import ch.wisv.areafiftylan.teams.service.TeamService;
 import ch.wisv.areafiftylan.users.model.User;
@@ -28,6 +31,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collection;
+import java.util.stream.Collectors;
+
 import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEntity;
 
 @RestController
@@ -35,16 +41,20 @@ import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEnt
 @RequestMapping("/mail")
 public class MailRestController {
 
-    @Autowired
-    public MailRestController(MailService mailService, UserService userService, TeamService teamService) {
-        this.mailService = mailService;
-        this.userService = userService;
-        this.teamService = teamService;
-    }
 
     private MailService mailService;
     private UserService userService;
     private TeamService teamService;
+    private TicketService ticketService;
+    private SeatService seatService;
+
+    @Autowired
+    public MailRestController(MailService mailService, UserService userService, TeamService teamService, TicketService ticketService) {
+        this.mailService = mailService;
+        this.userService = userService;
+        this.teamService = teamService;
+        this.ticketService = ticketService;
+    }
 
     @RequestMapping(value = "/user/{userId}", method = RequestMethod.POST)
     ResponseEntity<?> sendMailToUser(@PathVariable Long userId, @Validated @RequestBody MailDTO mailDTO) {
@@ -62,6 +72,55 @@ public class MailRestController {
         mailService.sendTemplateMailToTeam(team, mailDTO);
 
         return createResponseEntity(HttpStatus.OK, "Mail successfully sent");
+    }
+
+    @RequestMapping(value = "/noticket", method = RequestMethod.POST)
+    ResponseEntity<?> sendMailToUserWithoutTicket(@Validated @RequestBody MailDTO mailDTO) {
+        Collection<User> users = ticketService.getAllTickets().stream()
+                .map(t -> t.getOwner())
+                .distinct()
+                .collect(Collectors.toList());
+
+        Collection<User> usersWithoutTicket = userService.getAllUsers().stream()
+                .filter(u -> !users.contains(u))
+                .collect(Collectors.toList());
+
+        mailService.sendTemplateMailToAll(usersWithoutTicket, mailDTO);
+
+        return createResponseEntity(HttpStatus.OK, "Mail successfully sent");
+    }
+
+    @RequestMapping(value = "/ticket", method = RequestMethod.POST)
+    ResponseEntity<?> sendMailToUserWithTicket(@Validated @RequestBody MailDTO mailDTO) {
+        Collection<User> users = ticketService.getAllTickets().stream()
+                .map(t -> t.getOwner())
+                .distinct()
+                .collect(Collectors.toList());
+
+        mailService.sendTemplateMailToAll(users, mailDTO);
+
+        return createResponseEntity(HttpStatus.OK, "Mail successfully sent");
+    }
+
+    @RequestMapping(value = "/pickup", method = RequestMethod.POST)
+    ResponseEntity<?> sendMailToUserWithPickup(@Validated @RequestBody MailDTO mailDTO) {
+        Collection<User> users = userService.getAllUsersWithPickup();
+
+        mailService.sendTemplateMailToAll(users, mailDTO);
+
+        return createResponseEntity(HttpStatus.OK, "Mail was successfully sent");
+    }
+
+    @RequestMapping(value = "/user/{seatgroup}", method = RequestMethod.POST)
+    ResponseEntity<?> sendMailToSeatGroup(@RequestParam String seatGroup, @Validated @RequestBody MailDTO mailDTO) {
+        Collection<User> users = seatService.getSeatsBySeatGroup(seatGroup).stream()
+                .filter(s -> s.isTaken())
+                .map(Seat::getUser)
+                .collect(Collectors.toList());
+
+        mailService.sendTemplateMailToAll(users, mailDTO);
+
+        return createResponseEntity(HttpStatus.OK, "Mail was successfully sent");
     }
 
     @RequestMapping(value = "/users/all/YESREALLY", method = RequestMethod.POST)
