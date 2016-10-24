@@ -226,11 +226,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     }
 
-    @Override
-    public Collection<User> getAllUsersWithPickup() {
-        return userRepository.findByPickupTrue();
-    }
-
     /**
      * Encrypt the password using the BCryptPasswordEncoder with default settings
      *

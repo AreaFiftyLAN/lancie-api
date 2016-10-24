@@ -17,6 +17,7 @@
 
 package ch.wisv.areafiftylan.utils.mail;
 
+import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.service.TicketService;
 import ch.wisv.areafiftylan.seats.model.Seat;
 import ch.wisv.areafiftylan.seats.service.SeatService;
@@ -49,11 +50,12 @@ public class MailRestController {
     private SeatService seatService;
 
     @Autowired
-    public MailRestController(MailService mailService, UserService userService, TeamService teamService, TicketService ticketService) {
+    public MailRestController(MailService mailService, UserService userService, TeamService teamService, TicketService ticketService, SeatService seatService) {
         this.mailService = mailService;
         this.userService = userService;
         this.teamService = teamService;
         this.ticketService = ticketService;
+        this.seatService = seatService;
     }
 
     @RequestMapping(value = "/user/{userId}", method = RequestMethod.POST)
@@ -104,7 +106,9 @@ public class MailRestController {
 
     @RequestMapping(value = "/pickup", method = RequestMethod.POST)
     ResponseEntity<?> sendMailToUserWithPickup(@Validated @RequestBody MailDTO mailDTO) {
-        Collection<User> users = userService.getAllUsersWithPickup();
+        Collection<User> users = ticketService.getAllTicketsWithTransport().stream()
+                .map(Ticket::getOwner)
+                .collect(Collectors.toList());
 
         mailService.sendTemplateMailToAll(users, mailDTO);
 
