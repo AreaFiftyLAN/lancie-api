@@ -115,14 +115,13 @@ public class MailRestController {
         return createResponseEntity(HttpStatus.OK, "Mail was successfully sent");
     }
 
-    @RequestMapping(value = "/user/{seatgroup}", method = RequestMethod.POST)
-    ResponseEntity<?> sendMailToSeatGroup(@RequestParam String seatGroup, @Validated @RequestBody MailDTO mailDTO) {
-        Collection<User> users = seatService.getSeatsBySeatGroup(seatGroup).stream()
-                .filter(s -> s.isTaken())
-                .map(Seat::getUser)
+    @RequestMapping(value = "/users", method = RequestMethod.POST)
+    ResponseEntity<?> sendMailToUsers(@RequestParam Collection<String> users, @Validated @RequestBody MailDTO mailDTO) {
+        Collection<User> mailToUsers = userService.getAllUsers().stream()
+                .filter(u -> users.contains(u.getUsername()))
                 .collect(Collectors.toList());
 
-        mailService.sendTemplateMailToAll(users, mailDTO);
+        mailService.sendTemplateMailToAll(mailToUsers, mailDTO);
 
         return createResponseEntity(HttpStatus.OK, "Mail was successfully sent");
     }
