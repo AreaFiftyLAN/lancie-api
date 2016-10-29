@@ -19,13 +19,11 @@ package ch.wisv.areafiftylan.users.model;
 
 import ch.wisv.areafiftylan.utils.view.View;
 import com.fasterxml.jackson.annotation.JsonView;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import java.io.Serializable;
-import java.time.LocalDate;
 import java.util.Calendar;
 
 @Entity
