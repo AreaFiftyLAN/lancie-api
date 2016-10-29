@@ -22,6 +22,7 @@ import lombok.Setter;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
+import java.time.LocalDate;
 
 public class ProfileDTO {
 
@@ -29,6 +30,11 @@ public class ProfileDTO {
     @Getter
     @Setter
     private Gender gender;
+
+    @NotNull
+    @Getter
+    @Setter
+    private LocalDate birthday;
 
     @NotEmpty
     @Getter

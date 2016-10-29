@@ -35,6 +35,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.time.LocalDate;
+
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.config.RedirectConfig.redirectConfig;
 import static com.jayway.restassured.config.RestAssuredConfig.config;
@@ -86,7 +88,7 @@ public abstract class IntegrationTest {
     private User makeUser(){
         User user = new User("user@mail.com", new BCryptPasswordEncoder().encode(userCleartextPassword));
         user.getProfile()
-                .setAllFields("Jan", "de Groot", "MonsterKiller9001", Gender.MALE, "Mekelweg 4", "2826CD", "Delft",
+                .setAllFields("Jan", "de Groot", "MonsterKiller9001", LocalDate.of(2000, 1, 1), Gender.MALE, "Mekelweg 4", "2826CD", "Delft",
                         "0906-0666", null);
 
         return user;
@@ -96,7 +98,7 @@ public abstract class IntegrationTest {
         User admin = new User("admin@mail.com", new BCryptPasswordEncoder().encode(adminCleartextPassword));
         admin.addRole(Role.ROLE_ADMIN);
         admin.getProfile()
-                .setAllFields("Bert", "Kleijn", "ILoveZombies", Gender.OTHER, "Mekelweg 20", "2826CD", "Amsterdam",
+                .setAllFields("Bert", "Kleijn", "ILoveZombies", LocalDate.of(2000, 1, 1), Gender.OTHER, "Mekelweg 20", "2826CD", "Amsterdam",
                         "0611", null);
 
         return admin;
@@ -105,7 +107,7 @@ public abstract class IntegrationTest {
     private User makeOutsider(){
         User outsider = new User("outsider@gmail.com", new BCryptPasswordEncoder().encode("password"));
         outsider.getProfile()
-                .setAllFields("Nottin", "Todoeo Witit", "Lookinin", Gender.FEMALE, "LoserStreet 1", "2826GJ", "China",
+                .setAllFields("Nottin", "Todoeo Witit", "Lookinin", LocalDate.of(2000, 1, 1), Gender.FEMALE, "LoserStreet 1", "2826GJ", "China",
                         "0906-3928", null);
 
         return userRepository.saveAndFlush(outsider);

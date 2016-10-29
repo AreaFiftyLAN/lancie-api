@@ -17,15 +17,15 @@
 
 package ch.wisv.areafiftylan;
 
-import ch.wisv.areafiftylan.teams.model.Team;
 import ch.wisv.areafiftylan.products.model.Ticket;
-import ch.wisv.areafiftylan.users.model.User;
-import ch.wisv.areafiftylan.users.model.Gender;
 import ch.wisv.areafiftylan.products.model.TicketType;
-import ch.wisv.areafiftylan.security.token.TeamInviteToken;
-import ch.wisv.areafiftylan.teams.service.TeamRepository;
 import ch.wisv.areafiftylan.products.service.TicketRepository;
+import ch.wisv.areafiftylan.security.token.TeamInviteToken;
 import ch.wisv.areafiftylan.security.token.repository.TeamInviteTokenRepository;
+import ch.wisv.areafiftylan.teams.model.Team;
+import ch.wisv.areafiftylan.teams.service.TeamRepository;
+import ch.wisv.areafiftylan.users.model.Gender;
+import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.utils.SessionData;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Response;
@@ -37,6 +37,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -67,7 +68,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     public void initTeamTest() {
         captain = new User("captain@mail.com", new BCryptPasswordEncoder().encode(captainCleartextPassword));
         captain.getProfile()
-                .setAllFields("Captain", "Hook", "PeterPanKiller", Gender.MALE, "High Road 3", "2826ZZ", "Neverland",
+                .setAllFields("Captain", "Hook", "PeterPanKiller", LocalDate.of(2000, 1, 1), Gender.MALE, "High Road 3", "2826ZZ", "Neverland",
                         "0906-0777", null);
 
         captain = userRepository.saveAndFlush(captain);

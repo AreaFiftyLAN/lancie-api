@@ -20,10 +20,10 @@ package ch.wisv.areafiftylan;
 
 import ch.wisv.areafiftylan.products.model.Order;
 import ch.wisv.areafiftylan.products.model.OrderStatus;
-import ch.wisv.areafiftylan.utils.mail.MailService;
 import ch.wisv.areafiftylan.products.service.MolliePaymentService;
-import ch.wisv.areafiftylan.products.service.PaymentService;
 import ch.wisv.areafiftylan.products.service.OrderRepository;
+import ch.wisv.areafiftylan.products.service.PaymentService;
+import ch.wisv.areafiftylan.utils.mail.MailService;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;

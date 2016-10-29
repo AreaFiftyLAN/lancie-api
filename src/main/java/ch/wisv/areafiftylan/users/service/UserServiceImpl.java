@@ -151,8 +151,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
         // Set all the profile fields at once
         user.getProfile().setAllFields(profileDTO.getFirstName(), profileDTO.getLastName(), profileDTO.getDisplayName(),
-                profileDTO.getGender(), profileDTO.getAddress(), profileDTO.getZipcode(), profileDTO.getCity(),
-                profileDTO.getPhoneNumber(), profileDTO.getNotes());
+                profileDTO.getBirthday(), profileDTO.getGender(), profileDTO.getAddress(), profileDTO.getZipcode(),
+                profileDTO.getCity(), profileDTO.getPhoneNumber(), profileDTO.getNotes());
         return userRepository.saveAndFlush(user);
 
     }

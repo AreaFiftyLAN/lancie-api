@@ -17,11 +17,7 @@
 
 package ch.wisv.areafiftylan;
 
-import ch.wisv.areafiftylan.products.model.Order;
-import ch.wisv.areafiftylan.products.model.Ticket;
-import ch.wisv.areafiftylan.products.model.OrderStatus;
-import ch.wisv.areafiftylan.products.model.TicketOptions;
-import ch.wisv.areafiftylan.products.model.TicketType;
+import ch.wisv.areafiftylan.products.model.*;
 import ch.wisv.areafiftylan.products.service.OrderRepository;
 import ch.wisv.areafiftylan.products.service.TicketRepository;
 import ch.wisv.areafiftylan.utils.SessionData;

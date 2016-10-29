@@ -24,6 +24,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import java.io.Serializable;
+import java.time.LocalDate;
 
 @Entity
 public class Profile implements Serializable {
@@ -33,6 +34,8 @@ public class Profile implements Serializable {
 
     @JsonView(View.Public.class)
     public String displayName;
+
+    public LocalDate birthday;
 
     public Gender gender;
     public String address;
@@ -49,11 +52,12 @@ public class Profile implements Serializable {
 
     }
 
-    public Profile(String firstName, String lastName, String displayName, Gender gender, String address, String zipcode,
+    public Profile(String firstName, String lastName, String displayName, LocalDate birthday, Gender gender, String address, String zipcode,
                    String city, String phoneNumber, String notes) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.displayName = displayName;
+        this.birthday = birthday;
         this.gender = gender;
         this.address = address;
         this.zipcode = zipcode;
@@ -106,6 +110,7 @@ public class Profile implements Serializable {
         int result = firstName != null ? firstName.hashCode() : 0;
         result = 31 * result + (lastName != null ? lastName.hashCode() : 0);
         result = 31 * result + (displayName != null ? displayName.hashCode() : 0);
+        result = 31 * result + (birthday != null ? birthday.hashCode() : 0);
         result = 31 * result + (gender != null ? gender.hashCode() : 0);
         result = 31 * result + (address != null ? address.hashCode() : 0);
         result = 31 * result + (zipcode != null ? zipcode.hashCode() : 0);
@@ -113,6 +118,14 @@ public class Profile implements Serializable {
         result = 31 * result + (phoneNumber != null ? phoneNumber.hashCode() : 0);
         result = 31 * result + (notes != null ? notes.hashCode() : 0);
         return result;
+    }
+
+    public LocalDate getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(LocalDate birthday) {
+        this.birthday = birthday;
     }
 
     public Gender getGender() {
@@ -187,11 +200,12 @@ public class Profile implements Serializable {
         this.displayName = displayName;
     }
 
-    public void setAllFields(String firstName, String lastName, String displayName, Gender gender, String address,
+    public void setAllFields(String firstName, String lastName, String displayName, LocalDate birthday, Gender gender, String address,
                              String zipcode, String city, String phoneNumber, String notes) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.displayName = displayName;
+        this.birthday = birthday;
         this.gender = gender;
         this.address = address;
         this.zipcode = zipcode;
