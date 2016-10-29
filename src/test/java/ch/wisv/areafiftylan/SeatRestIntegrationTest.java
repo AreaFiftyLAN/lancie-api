@@ -101,7 +101,7 @@ public class SeatRestIntegrationTest extends IntegrationTest {
     private void createCaptainAndTeam() {
         captain = new User("captain@mail.com", new BCryptPasswordEncoder().encode(captainCleartextPassword));
         captain.getProfile()
-                .setAllFields("Captain", "Hook", "PeterPanKiller", LocalDate.of(2000, 1, 1), Gender.MALE, "High Road 3", "2826ZZ", "Neverland",
+                .setAllFields("Captain", "Hook", "PeterPanKiller", calendar, Gender.MALE, "High Road 3", "2826ZZ", "Neverland",
                         "0906-0777", null);
         captain = userRepository.saveAndFlush(captain);
 

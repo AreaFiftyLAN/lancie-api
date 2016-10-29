@@ -576,28 +576,6 @@ public class UserRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void createProfileInvalidBirthday() {
-        createEnabledTestUser();
-
-        Map<String, String> profileDTO = getProfileDTO();
-        profileDTO.put("birthday", "2000-13-1");
-
-        SessionData login = login(testUser.getUsername(), testUserCleartextPassword);
-
-        //@formatter:off
-        given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
-        when().
-            content(profileDTO).
-            contentType(ContentType.JSON).
-            post("/users/current/profile").
-        then().
-            statusCode(HttpStatus.SC_BAD_REQUEST);
-        //@formatter:on
-    }
-
-    @Test
     public void createProfileInvalidGender() {
         createEnabledTestUser();
 

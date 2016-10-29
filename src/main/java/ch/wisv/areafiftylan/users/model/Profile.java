@@ -19,12 +19,14 @@ package ch.wisv.areafiftylan.users.model;
 
 import ch.wisv.areafiftylan.utils.view.View;
 import com.fasterxml.jackson.annotation.JsonView;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.Calendar;
 
 @Entity
 public class Profile implements Serializable {
@@ -35,7 +37,7 @@ public class Profile implements Serializable {
     @JsonView(View.Public.class)
     public String displayName;
 
-    public LocalDate birthday;
+    public Calendar birthday;
 
     public Gender gender;
     public String address;
@@ -52,7 +54,7 @@ public class Profile implements Serializable {
 
     }
 
-    public Profile(String firstName, String lastName, String displayName, LocalDate birthday, Gender gender, String address, String zipcode,
+    public Profile(String firstName, String lastName, String displayName, Calendar birthday, Gender gender, String address, String zipcode,
                    String city, String phoneNumber, String notes) {
         this.firstName = firstName;
         this.lastName = lastName;
@@ -120,11 +122,11 @@ public class Profile implements Serializable {
         return result;
     }
 
-    public LocalDate getBirthday() {
+    public Calendar getBirthday() {
         return birthday;
     }
 
-    public void setBirthday(LocalDate birthday) {
+    public void setBirthday(Calendar birthday) {
         this.birthday = birthday;
     }
 
@@ -200,7 +202,7 @@ public class Profile implements Serializable {
         this.displayName = displayName;
     }
 
-    public void setAllFields(String firstName, String lastName, String displayName, LocalDate birthday, Gender gender, String address,
+    public void setAllFields(String firstName, String lastName, String displayName, Calendar birthday, Gender gender, String address,
                              String zipcode, String city, String phoneNumber, String notes) {
         this.firstName = firstName;
         this.lastName = lastName;

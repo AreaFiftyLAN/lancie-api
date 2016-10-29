@@ -85,7 +85,7 @@ public class TicketRestIntegrationTest extends IntegrationTest {
     private User makeTicketReceiver() {
         User receiver = new User("receiver@mail.com", new BCryptPasswordEncoder().encode(ticketReceiverCleartextPassword));
         receiver.getProfile()
-                .setAllFields("receiver", " of tickets", "GotYaTicket", LocalDate.of(2000, 1, 1), Gender.MALE, "Money Owner 4", "2826GJ",
+                .setAllFields("receiver", " of tickets", "GotYaTicket", calendar, Gender.MALE, "Money Owner 4", "2826GJ",
                         "Tomorrowland", "0906-1111", null);
 
         return userRepository.saveAndFlush(receiver);
@@ -520,7 +520,7 @@ public class TicketRestIntegrationTest extends IntegrationTest {
     private User createTeamReturnSingleMember() {
         User teamMate = new User("teammate@email.com", new BCryptPasswordEncoder().encode(teamMemberCleartextPassword));
         teamMate.getProfile()
-                .setAllFields("Team", "Mate", "IloveYOU", LocalDate.of(2000, 1, 1), Gender.MALE, "Buddy 7", "2826GJ", "Holland", "0906-7777",
+                .setAllFields("Team", "Mate", "IloveYOU", calendar, Gender.MALE, "Buddy 7", "2826GJ", "Holland", "0906-7777",
                         null);
         userRepository.saveAndFlush(teamMate);
 

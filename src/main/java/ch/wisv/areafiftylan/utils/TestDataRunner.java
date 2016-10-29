@@ -31,7 +31,9 @@ import ch.wisv.areafiftylan.users.service.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import java.time.LocalDate;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
 /**
  * Created by Sille Kamoen on 24-3-16.
@@ -52,26 +54,29 @@ public class TestDataRunner implements CommandLineRunner {
 
     @Override
     public void run(String... evt) throws Exception {
+        Calendar calendar = new GregorianCalendar();
+        calendar.set(2000, 1, 1, 0, 0, 0);
+
         User testUser1 = new User("user@mail.com", new BCryptPasswordEncoder().encode("password"));
         testUser1.addRole(Role.ROLE_ADMIN);
         testUser1.getProfile()
-                .setAllFields("Jan", "de Groot", "MonsterKiller9001", LocalDate.of(2000, 1, 1), Gender.MALE, "Mekelweg 4", "2826CD", "Delft",
+                .setAllFields("Jan", "de Groot", "MonsterKiller9001", calendar, Gender.MALE, "Mekelweg 4", "2826CD", "Delft",
                         "0906-0666", null);
         User testUser2 = new User("bert@mail.com", new BCryptPasswordEncoder().encode("password"));
         testUser2.getProfile()
-                .setAllFields("Bert", "Kleijn", "ILoveZombies", LocalDate.of(2000, 1, 1), Gender.OTHER, "Mekelweg 20", "2826CD", "Amsterdam",
+                .setAllFields("Bert", "Kleijn", "ILoveZombies", calendar, Gender.OTHER, "Mekelweg 20", "2826CD", "Amsterdam",
                         "0611", null);
         User testUser3 = new User("katrien@ms.com", new BCryptPasswordEncoder().encode("password"));
         testUser3.getProfile()
-                .setAllFields("Katrien", "Zwanenburg", "Admiral Cheesecake", LocalDate.of(2000, 1, 1), Gender.FEMALE, "Ganzenlaan 5", "2826CD",
+                .setAllFields("Katrien", "Zwanenburg", "Admiral Cheesecake", calendar, Gender.FEMALE, "Ganzenlaan 5", "2826CD",
                         "Duckstad", "0906-0666", null);
         User testUser4 = new User("user@yahoo.com", new BCryptPasswordEncoder().encode("password"));
         testUser4.getProfile()
-                .setAllFields("Kees", "Jager", "l33tz0r", LocalDate.of(2000, 1, 1), Gender.MALE, "Herenweg 2", "2826CD", "Delft", "0902-30283",
+                .setAllFields("Kees", "Jager", "l33tz0r", calendar, Gender.MALE, "Herenweg 2", "2826CD", "Delft", "0902-30283",
                         null);
         User testUser5 = new User("custom@myself.com", new BCryptPasswordEncoder().encode("password"));
         testUser5.getProfile()
-                .setAllFields("Gert", "Gertson", "Whosyourdaddy", LocalDate.of(2000, 1, 1), Gender.MALE, "Jansstraat", "8826CD", "Delft",
+                .setAllFields("Gert", "Gertson", "Whosyourdaddy", calendar, Gender.MALE, "Jansstraat", "8826CD", "Delft",
                         "0238-2309736", null);
 
         testUser1 = accountRepository.saveAndFlush(testUser1);

@@ -22,7 +22,7 @@ import lombok.Setter;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
-import java.time.LocalDate;
+import java.util.Calendar;
 
 public class ProfileDTO {
 
@@ -34,7 +34,7 @@ public class ProfileDTO {
     @NotNull
     @Getter
     @Setter
-    private LocalDate birthday;
+    private Calendar birthday;
 
     @NotEmpty
     @Getter
