@@ -21,6 +21,7 @@ import ch.wisv.areafiftylan.seats.model.Seat;
 import ch.wisv.areafiftylan.seats.model.SeatGroupDTO;
 import ch.wisv.areafiftylan.seats.model.SeatmapResponse;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface SeatService {
@@ -40,6 +41,8 @@ public interface SeatService {
     void addSeats(SeatGroupDTO seatGroupDTO);
 
     List<Seat> getSeatsByTeamName(String teamName);
+
+    Collection<Seat> getSeatsBySeatGroup(String seatGroup);
 
     void clearSeat(String groupName, int seatNumber);
 }

@@ -17,6 +17,10 @@
 
 package ch.wisv.areafiftylan.utils.mail;
 
+import ch.wisv.areafiftylan.products.model.Ticket;
+import ch.wisv.areafiftylan.products.service.TicketService;
+import ch.wisv.areafiftylan.seats.model.Seat;
+import ch.wisv.areafiftylan.seats.service.SeatService;
 import ch.wisv.areafiftylan.teams.model.Team;
 import ch.wisv.areafiftylan.teams.service.TeamService;
 import ch.wisv.areafiftylan.users.model.User;
@@ -28,6 +32,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collection;
+import java.util.stream.Collectors;
+
 import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEntity;
 
 @RestController
@@ -35,16 +42,21 @@ import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEnt
 @RequestMapping("/mail")
 public class MailRestController {
 
-    @Autowired
-    public MailRestController(MailService mailService, UserService userService, TeamService teamService) {
-        this.mailService = mailService;
-        this.userService = userService;
-        this.teamService = teamService;
-    }
 
     private MailService mailService;
     private UserService userService;
     private TeamService teamService;
+    private TicketService ticketService;
+    private SeatService seatService;
+
+    @Autowired
+    public MailRestController(MailService mailService, UserService userService, TeamService teamService, TicketService ticketService, SeatService seatService) {
+        this.mailService = mailService;
+        this.userService = userService;
+        this.teamService = teamService;
+        this.ticketService = ticketService;
+        this.seatService = seatService;
+    }
 
     @RequestMapping(value = "/user/{userId}", method = RequestMethod.POST)
     ResponseEntity<?> sendMailToUser(@PathVariable Long userId, @Validated @RequestBody MailDTO mailDTO) {
@@ -64,9 +76,80 @@ public class MailRestController {
         return createResponseEntity(HttpStatus.OK, "Mail successfully sent");
     }
 
+    @RequestMapping(value = "/noticket", method = RequestMethod.POST)
+    ResponseEntity<?> sendMailToUserWithoutTicket(@Validated @RequestBody MailDTO mailDTO) {
+        Collection<User> users = ticketService.getAllTickets().stream()
+                .map(t -> t.getOwner())
+                .distinct()
+                .collect(Collectors.toList());
+
+        Collection<User> usersWithoutTicket = userService.getAllUsers().stream()
+                .filter(u -> !users.contains(u))
+                .collect(Collectors.toList());
+
+        mailService.sendTemplateMailToAll(usersWithoutTicket, mailDTO);
+
+        return createResponseEntity(HttpStatus.OK, "Mail successfully sent");
+    }
+
+    @RequestMapping(value = "/ticket", method = RequestMethod.POST)
+    ResponseEntity<?> sendMailToUserWithTicket(@Validated @RequestBody MailDTO mailDTO) {
+        Collection<User> users = ticketService.getAllTickets().stream()
+                .map(t -> t.getOwner())
+                .distinct()
+                .collect(Collectors.toList());
+
+        mailService.sendTemplateMailToAll(users, mailDTO);
+
+        return createResponseEntity(HttpStatus.OK, "Mail successfully sent");
+    }
+
+    @RequestMapping(value = "/pickup", method = RequestMethod.POST)
+    ResponseEntity<?> sendMailToUserWithPickup(@Validated @RequestBody MailDTO mailDTO) {
+        Collection<User> users = ticketService.getAllTicketsWithTransport().stream()
+                .map(Ticket::getOwner)
+                .collect(Collectors.toList());
+
+        mailService.sendTemplateMailToAll(users, mailDTO);
+
+        return createResponseEntity(HttpStatus.OK, "Mail successfully sent");
+    }
+
+    @RequestMapping(value = "/noseat", method = RequestMethod.POST)
+    ResponseEntity<?> sendMailToUserWithTicketWithoutSeat(@Validated @RequestBody MailDTO mailDTO) {
+        // Collects every user with a seat reserved
+        Collection<User> seatUsers = seatService.getAllSeats().getSeatmap().values().stream()
+                .flatMap(Collection::stream)
+                .filter(Seat::isTaken)
+                .map(Seat::getUser)
+                .collect(Collectors.toList());
+
+        // Filters out the users with a ticket that are not in the collection of users with a seat
+        Collection<User> users = ticketService.getAllTickets().stream()
+                .map(Ticket::getOwner)
+                .filter(user -> !seatUsers.contains(user))
+                .collect(Collectors.toList());
+
+        mailService.sendTemplateMailToAll(users, mailDTO);
+
+        return createResponseEntity(HttpStatus.OK, "Mail successfully sent");
+    }
+
+    @RequestMapping(value = "/users", method = RequestMethod.POST)
+    ResponseEntity<?> sendMailToUsers(@RequestParam Collection<String> users, @Validated @RequestBody MailDTO mailDTO) {
+        Collection<User> mailToUsers = userService.getAllUsers().stream()
+                .filter(u -> users.contains(u.getUsername()))
+                .collect(Collectors.toList());
+
+        mailService.sendTemplateMailToAll(mailToUsers, mailDTO);
+
+        return createResponseEntity(HttpStatus.OK, "Mail successfully sent");
+    }
+
     @RequestMapping(value = "/users/all/YESREALLY", method = RequestMethod.POST)
     ResponseEntity<?> sendMailToAll(@Validated @RequestBody MailDTO mailDTO) {
         mailService.sendTemplateMailToAll(userService.getAllUsers(), mailDTO);
+
         return createResponseEntity(HttpStatus.OK, "Mail successfully sent");
     }
 }
