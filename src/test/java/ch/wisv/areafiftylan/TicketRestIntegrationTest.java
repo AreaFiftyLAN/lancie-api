@@ -19,17 +19,17 @@ package ch.wisv.areafiftylan;
 
 import ch.wisv.areafiftylan.exception.TicketAlreadyLinkedException;
 import ch.wisv.areafiftylan.exception.TokenNotFoundException;
-import ch.wisv.areafiftylan.teams.model.Team;
-import ch.wisv.areafiftylan.products.model.Ticket;
-import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.extras.rfid.model.RFIDLink;
-import ch.wisv.areafiftylan.users.model.Gender;
-import ch.wisv.areafiftylan.products.model.TicketType;
-import ch.wisv.areafiftylan.security.token.TicketTransferToken;
 import ch.wisv.areafiftylan.extras.rfid.model.RFIDLinkRepository;
-import ch.wisv.areafiftylan.teams.service.TeamRepository;
+import ch.wisv.areafiftylan.products.model.Ticket;
+import ch.wisv.areafiftylan.products.model.TicketType;
 import ch.wisv.areafiftylan.products.service.TicketRepository;
+import ch.wisv.areafiftylan.security.token.TicketTransferToken;
 import ch.wisv.areafiftylan.security.token.repository.TicketTransferTokenRepository;
+import ch.wisv.areafiftylan.teams.model.Team;
+import ch.wisv.areafiftylan.teams.service.TeamRepository;
+import ch.wisv.areafiftylan.users.model.Gender;
+import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.utils.SessionData;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Response;
@@ -83,7 +83,7 @@ public class TicketRestIntegrationTest extends IntegrationTest {
     private User makeTicketReceiver() {
         User receiver = new User("receiver@mail.com", new BCryptPasswordEncoder().encode(ticketReceiverCleartextPassword));
         receiver.getProfile()
-                .setAllFields("receiver", " of tickets", "GotYaTicket", Gender.MALE, "Money Owner 4", "2826GJ",
+                .setAllFields("receiver", " of tickets", "GotYaTicket", calendar, Gender.MALE, "Money Owner 4", "2826GJ",
                         "Tomorrowland", "0906-1111", null);
 
         return userRepository.saveAndFlush(receiver);
@@ -518,7 +518,7 @@ public class TicketRestIntegrationTest extends IntegrationTest {
     private User createTeamReturnSingleMember() {
         User teamMate = new User("teammate@email.com", new BCryptPasswordEncoder().encode(teamMemberCleartextPassword));
         teamMate.getProfile()
-                .setAllFields("Team", "Mate", "IloveYOU", Gender.MALE, "Buddy 7", "2826GJ", "Holland", "0906-7777",
+                .setAllFields("Team", "Mate", "IloveYOU", calendar, Gender.MALE, "Buddy 7", "2826GJ", "Holland", "0906-7777",
                         null);
         userRepository.saveAndFlush(teamMate);
 

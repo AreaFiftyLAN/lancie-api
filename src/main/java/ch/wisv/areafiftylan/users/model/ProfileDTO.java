@@ -22,6 +22,7 @@ import lombok.Setter;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
+import java.util.Calendar;
 
 public class ProfileDTO {
 
@@ -29,6 +30,11 @@ public class ProfileDTO {
     @Getter
     @Setter
     private Gender gender;
+
+    @NotNull
+    @Getter
+    @Setter
+    private Calendar birthday;
 
     @NotEmpty
     @Getter

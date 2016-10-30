@@ -35,6 +35,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.config.RedirectConfig.redirectConfig;
 import static com.jayway.restassured.config.RestAssuredConfig.config;
@@ -48,6 +51,8 @@ import static com.jayway.restassured.config.RestAssuredConfig.config;
 public abstract class IntegrationTest {
     @Value("${local.server.port}")
     int port;
+
+    Calendar calendar;
 
     @Autowired
     protected UserRepository userRepository;
@@ -66,6 +71,8 @@ public abstract class IntegrationTest {
 
     @Before
     public void initIntegrationTest() {
+        calendar = new GregorianCalendar(2000, 1, 1, 0, 0, 0);
+
         userRepository.deleteAll();
 
         user = makeUser();
@@ -86,7 +93,7 @@ public abstract class IntegrationTest {
     private User makeUser(){
         User user = new User("user@mail.com", new BCryptPasswordEncoder().encode(userCleartextPassword));
         user.getProfile()
-                .setAllFields("Jan", "de Groot", "MonsterKiller9001", Gender.MALE, "Mekelweg 4", "2826CD", "Delft",
+                .setAllFields("Jan", "de Groot", "MonsterKiller9001", calendar, Gender.MALE, "Mekelweg 4", "2826CD", "Delft",
                         "0906-0666", null);
 
         return user;
@@ -96,7 +103,7 @@ public abstract class IntegrationTest {
         User admin = new User("admin@mail.com", new BCryptPasswordEncoder().encode(adminCleartextPassword));
         admin.addRole(Role.ROLE_ADMIN);
         admin.getProfile()
-                .setAllFields("Bert", "Kleijn", "ILoveZombies", Gender.OTHER, "Mekelweg 20", "2826CD", "Amsterdam",
+                .setAllFields("Bert", "Kleijn", "ILoveZombies", calendar, Gender.OTHER, "Mekelweg 20", "2826CD", "Amsterdam",
                         "0611", null);
 
         return admin;
@@ -105,7 +112,7 @@ public abstract class IntegrationTest {
     private User makeOutsider(){
         User outsider = new User("outsider@gmail.com", new BCryptPasswordEncoder().encode("password"));
         outsider.getProfile()
-                .setAllFields("Nottin", "Todoeo Witit", "Lookinin", Gender.FEMALE, "LoserStreet 1", "2826GJ", "China",
+                .setAllFields("Nottin", "Todoeo Witit", "Lookinin", calendar, Gender.FEMALE, "LoserStreet 1", "2826GJ", "China",
                         "0906-3928", null);
 
         return userRepository.saveAndFlush(outsider);

@@ -18,10 +18,10 @@
 package ch.wisv.areafiftylan;
 
 import ch.wisv.areafiftylan.exception.*;
-import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.extras.rfid.model.RFIDLink;
-import ch.wisv.areafiftylan.products.model.TicketType;
 import ch.wisv.areafiftylan.extras.rfid.model.RFIDLinkRepository;
+import ch.wisv.areafiftylan.products.model.Ticket;
+import ch.wisv.areafiftylan.products.model.TicketType;
 import ch.wisv.areafiftylan.products.service.TicketRepository;
 import ch.wisv.areafiftylan.utils.SessionData;
 import com.jayway.restassured.http.ContentType;
@@ -37,7 +37,6 @@ import java.util.Optional;
 
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.RestAssured.when;
-
 import static org.hamcrest.Matchers.*;
 
 /**

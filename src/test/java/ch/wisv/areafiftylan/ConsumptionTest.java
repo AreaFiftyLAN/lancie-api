@@ -17,26 +17,25 @@
 
 package ch.wisv.areafiftylan;
 
-import ch.wisv.areafiftylan.extras.consumption.model.ConsumptionMap;
-import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.extras.consumption.model.Consumption;
-import ch.wisv.areafiftylan.products.model.TicketType;
-import ch.wisv.areafiftylan.extras.consumption.service.ConsumptionService;
+import ch.wisv.areafiftylan.extras.consumption.model.ConsumptionMap;
 import ch.wisv.areafiftylan.extras.consumption.model.ConsumptionMapsRepository;
 import ch.wisv.areafiftylan.extras.consumption.model.PossibleConsumptionsRepository;
+import ch.wisv.areafiftylan.extras.consumption.service.ConsumptionService;
+import ch.wisv.areafiftylan.products.model.Ticket;
+import ch.wisv.areafiftylan.products.model.TicketType;
 import ch.wisv.areafiftylan.products.service.TicketRepository;
 import ch.wisv.areafiftylan.utils.SessionData;
 import com.jayway.restassured.http.ContentType;
 import org.apache.http.HttpStatus;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.After;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static com.jayway.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 
 /**

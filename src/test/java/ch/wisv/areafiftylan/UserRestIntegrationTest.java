@@ -17,11 +17,11 @@
 
 package ch.wisv.areafiftylan;
 
-import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.security.token.VerificationToken;
-import ch.wisv.areafiftylan.utils.TaskScheduler;
 import ch.wisv.areafiftylan.security.token.repository.VerificationTokenRepository;
+import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.utils.SessionData;
+import ch.wisv.areafiftylan.utils.TaskScheduler;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Header;
 import com.jayway.restassured.response.Response;
@@ -37,8 +37,10 @@ import java.util.Map;
 
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.RestAssured.when;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.IsCollectionContaining.hasItem;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
 
@@ -98,6 +100,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
 
     static Map<String, String> getProfileDTO() {
         Map<String, String> profileDTO = new HashMap<>();
+        profileDTO.put("birthday", "2000-01-01");
         profileDTO.put("gender", "MALE");
         profileDTO.put("address", "Testaddress");
         profileDTO.put("zipcode", "Testzipcode");
@@ -432,6 +435,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
             post("/users/current/profile").
         then().
             statusCode(HttpStatus.SC_OK).
+            body("object.birthday", equalTo("2000-01-01")).
             body("object.gender", is("MALE")).
             body("object.address", equalTo("Testaddress")).
             body("object.zipcode", equalTo("Testzipcode")).
@@ -462,6 +466,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
             post(location + "/profile").
         then().
             statusCode(HttpStatus.SC_OK).
+            body("object.birthday", equalTo("2000-01-01")).
             body("object.gender", is("MALE")).
             body("object.address", equalTo("Testaddress")).
             body("object.zipcode", equalTo("Testzipcode")).
@@ -492,6 +497,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
             post(location + "/profile").
         then().
             statusCode(HttpStatus.SC_OK).
+            body("object.birthday", equalTo("2000-01-01")).
             body("object.gender", is("MALE")).
             body("object.address", equalTo("Testaddress")).
             body("object.zipcode", equalTo("Testzipcode")).
@@ -531,6 +537,28 @@ public class UserRestIntegrationTest extends IntegrationTest {
 
         Map<String, String> profileDTO = getProfileDTO();
         profileDTO.remove("city");
+
+        SessionData login = login(testUser.getUsername(), testUserCleartextPassword);
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            content(profileDTO).
+            contentType(ContentType.JSON).
+            post("/users/current/profile").
+        then().
+            statusCode(HttpStatus.SC_BAD_REQUEST);
+        //@formatter:on
+    }
+
+    @Test
+    public void createProfileNoBirthday() {
+        createEnabledTestUser();
+
+        Map<String, String> profileDTO = getProfileDTO();
+        profileDTO.put("birthday", "unknown");
 
         SessionData login = login(testUser.getUsername(), testUserCleartextPassword);
 
@@ -588,6 +616,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
             post("/users/current/profile").
         then().
             statusCode(HttpStatus.SC_OK).
+            body("object.birthday", equalTo("2000-01-01")).
             body("object.gender", is("MALE")).
             body("object.address", equalTo("Testaddress")).
             body("object.zipcode", equalTo("Testzipcode")).
@@ -619,15 +648,16 @@ public class UserRestIntegrationTest extends IntegrationTest {
             post("/users/current/profile").
         then().
         statusCode(HttpStatus.SC_OK).
-                body("object.gender", is("MALE")).
-                body("object.address", equalTo("Testaddress")).
-                body("object.zipcode", equalTo("Testzipcode")).
-                body("object.city", equalTo("Testcity")).
-                body("object.phoneNumber", equalTo("TestphoneNumber")).
-                body("object.notes", equalTo("")).
-                body("object.firstName", equalTo("TestfirstName")).
-                body("object.lastName", equalTo("TestlastName")).
-                body("object.displayName", equalTo("TestdisplayName"));
+            body("object.birthday", equalTo("2000-01-01")).
+            body("object.gender", is("MALE")).
+            body("object.address", equalTo("Testaddress")).
+            body("object.zipcode", equalTo("Testzipcode")).
+            body("object.city", equalTo("Testcity")).
+            body("object.phoneNumber", equalTo("TestphoneNumber")).
+            body("object.notes", equalTo("")).
+            body("object.firstName", equalTo("TestfirstName")).
+            body("object.lastName", equalTo("TestlastName")).
+            body("object.displayName", equalTo("TestdisplayName"));
         //@formatter:on
     }
 

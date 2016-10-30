@@ -58,6 +58,9 @@ flyway.locations=classpath:ch/wisv/areafiftylan/utils/db/migration
 #DEVELOPMENT ONLY : DELETES DATA ON STARTUP:
 #spring.jpa.hibernate.ddl-auto=create
 
+# The date format we use
+spring.jackson.date-format=yyyy-MM-dd
+
 # Default port used by frontend
 server.port=9000
 server.context-path=/api/v1
