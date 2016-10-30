@@ -112,7 +112,27 @@ public class MailRestController {
 
         mailService.sendTemplateMailToAll(users, mailDTO);
 
-        return createResponseEntity(HttpStatus.OK, "Mail was successfully sent");
+        return createResponseEntity(HttpStatus.OK, "Mail successfully sent");
+    }
+
+    @RequestMapping(value = "/noseat", method = RequestMethod.POST)
+    ResponseEntity<?> sendMailToUserWithTicketWithoutSeat(@Validated @RequestBody MailDTO mailDTO) {
+        // Collects every user with a seat reserved
+        Collection<User> seatUsers = seatService.getAllSeats().getSeatmap().values().stream()
+                .flatMap(Collection::stream)
+                .filter(Seat::isTaken)
+                .map(Seat::getUser)
+                .collect(Collectors.toList());
+
+        // Filters out the users with a ticket that are not in the collection of users with a seat
+        Collection<User> users = ticketService.getAllTickets().stream()
+                .map(Ticket::getOwner)
+                .filter(user -> !seatUsers.contains(user))
+                .collect(Collectors.toList());
+
+        mailService.sendTemplateMailToAll(users, mailDTO);
+
+        return createResponseEntity(HttpStatus.OK, "Mail successfully sent");
     }
 
     @RequestMapping(value = "/users", method = RequestMethod.POST)
@@ -123,12 +143,13 @@ public class MailRestController {
 
         mailService.sendTemplateMailToAll(mailToUsers, mailDTO);
 
-        return createResponseEntity(HttpStatus.OK, "Mail was successfully sent");
+        return createResponseEntity(HttpStatus.OK, "Mail successfully sent");
     }
 
     @RequestMapping(value = "/users/all/YESREALLY", method = RequestMethod.POST)
     ResponseEntity<?> sendMailToAll(@Validated @RequestBody MailDTO mailDTO) {
         mailService.sendTemplateMailToAll(userService.getAllUsers(), mailDTO);
+
         return createResponseEntity(HttpStatus.OK, "Mail successfully sent");
     }
 }
