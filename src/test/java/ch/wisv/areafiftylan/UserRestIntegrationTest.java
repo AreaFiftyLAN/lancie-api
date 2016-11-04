@@ -607,24 +607,24 @@ public class UserRestIntegrationTest extends IntegrationTest {
 
         //@formatter:off
         given().
-                filter(sessionFilter).
-                header(login.getCsrfHeader()).
-                when().
-                content(profileDTO).
-                contentType(ContentType.JSON).
-                post("/users/current/profile").
-                then().
-                statusCode(HttpStatus.SC_OK).
-                body("object.birthday", equalTo("2000-01-01")).
-                body("object.gender", is("MALE")).
-                body("object.address", equalTo("Testaddress")).
-                body("object.zipcode", equalTo("Testzipcode")).
-                body("object.city", equalTo("Testcity")).
-                body("object.phoneNumber", equalTo("TestphoneNumber")).
-                body("object.notes", equalTo("Testnotes")).
-                body("object.firstName", equalTo("TestfirstName")).
-                body("object.lastName", equalTo("TestlastName")).
-                body("object.displayName", equalTo(""));
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            content(profileDTO).
+            contentType(ContentType.JSON).
+            post("/users/current/profile").
+        then().
+            statusCode(HttpStatus.SC_OK).
+            body("object.birthday", equalTo("2000-01-01")).
+            body("object.gender", is("MALE")).
+            body("object.address", equalTo("Testaddress")).
+            body("object.zipcode", equalTo("Testzipcode")).
+            body("object.city", equalTo("Testcity")).
+            body("object.phoneNumber", equalTo("TestphoneNumber")).
+            body("object.notes", equalTo("Testnotes")).
+            body("object.firstName", equalTo("TestfirstName")).
+            body("object.lastName", equalTo("TestlastName")).
+            body("object.displayName", equalTo(""));
         //@formatter:on
     }
 
@@ -633,7 +633,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
         createEnabledTestUser();
 
         Map<String, String> profileDTO = getProfileDTO();
-        profileDTO.put("displayName", "MONSTERKILLER9001");
+        profileDTO.put("displayName", user.getProfile().getDisplayName().toUpperCase());
 
         SessionData login = login(testUser.getUsername(), testUserCleartextPassword);
 
@@ -646,7 +646,8 @@ public class UserRestIntegrationTest extends IntegrationTest {
             contentType(ContentType.JSON).
             post("/users/current/profile").
         then().
-            statusCode(HttpStatus.SC_CONFLICT);
+            statusCode(HttpStatus.SC_CONFLICT).
+            body("message", equalTo("DisplayName already in use"));
         //@formatter:on
     }
 
