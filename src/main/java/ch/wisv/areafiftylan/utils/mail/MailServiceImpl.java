@@ -45,6 +45,9 @@ public class MailServiceImpl implements MailService {
     @Value("${a5l.mail.sender}")
     String sender;
 
+    @Value("${a5l.mail.contact}")
+    String contact;
+
     @Autowired
     public MailServiceImpl(JavaMailSender mailSender, SpringTemplateEngine templateEngine) {
         this.mailSender = mailSender;
@@ -53,10 +56,9 @@ public class MailServiceImpl implements MailService {
 
     @Override
     public void sendMail(String recipientEmail, String recipientName, String subject, String messageString) {
-
         // Prepare message using a Spring helper
-        final MimeMessage mimeMessage = this.mailSender.createMimeMessage();
-        final MimeMessageHelper message;
+        MimeMessage mimeMessage = this.mailSender.createMimeMessage();
+        MimeMessageHelper message;
 
         try {
             message = new MimeMessageHelper(mimeMessage, true, "UTF-8");
@@ -75,7 +77,25 @@ public class MailServiceImpl implements MailService {
         } catch (MailException m) {
             throw new MailSendException("Unable to send email", m.getCause());
         }
+    }
 
+    @Override
+    public void sendContactMail(String senderEmail, String subject, String messageString) {
+        MimeMessage mimeMessage = this.mailSender.createMimeMessage();
+        MimeMessageHelper message;
+
+        try {
+            message = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+            message.setSubject("[Contact] " + subject);
+            message.setFrom(senderEmail);
+            message.setTo(contact);
+
+            message.setText(messageString);
+
+            this.mailSender.send(mimeMessage);
+        } catch (MessagingException m) {
+            throw new MailSendException("Unable to send email", m.getCause());
+        }
     }
 
     private String prepareHtmlContent(String name, String message) {
@@ -84,7 +104,6 @@ public class MailServiceImpl implements MailService {
         ctx.setVariable("name", name);
         ctx.setVariable("message", message);
         return this.templateEngine.process("mailTemplate", ctx);
-
     }
 
     @Override

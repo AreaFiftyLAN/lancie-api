@@ -81,6 +81,7 @@ a5l.user.resetUrl=https://areafiftylan.nl/#!/resetPassword
 a5l.user.acceptTransferUrl=https://areafiftylan.nl/#!/acceptTransfer
 # E-mail address used for sending e-mails
 a5l.mail.sender=LANcie <lancie@ch.tudelft.nl>
+a5l.mail.contact=LANcie <lancie@ch.tudelft.nl>
 a5l.orderLimit=5
 a5l.ticketLimit=200
 # API key for Google Maps

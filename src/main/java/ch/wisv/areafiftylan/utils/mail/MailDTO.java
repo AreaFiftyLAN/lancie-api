@@ -19,14 +19,16 @@ package ch.wisv.areafiftylan.utils.mail;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.validator.constraints.NotEmpty;
+
+import javax.validation.constraints.NotNull;
 
 public class MailDTO {
-
     @Getter
-    @Setter
+    @NotEmpty
     String subject;
 
     @Getter
-    @Setter
+    @NotEmpty
     String message;
 }
