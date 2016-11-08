@@ -109,7 +109,6 @@ public class UserRestIntegrationTest extends IntegrationTest {
         profileDTO.put("notes", "Testnotes");
         profileDTO.put("firstName", "TestfirstName");
         profileDTO.put("lastName", "TestlastName");
-        profileDTO.put("firstName", "TestfirstName");
         profileDTO.put("displayName", "TestdisplayName");
         return profileDTO;
     }
@@ -626,6 +625,29 @@ public class UserRestIntegrationTest extends IntegrationTest {
             body("object.firstName", equalTo("TestfirstName")).
             body("object.lastName", equalTo("TestlastName")).
             body("object.displayName", equalTo(""));
+        //@formatter:on
+    }
+
+    @Test
+    public void createProfileDuplicateDisplayName() {
+        createEnabledTestUser();
+
+        Map<String, String> profileDTO = getProfileDTO();
+        profileDTO.put("displayName", user.getProfile().getDisplayName().toUpperCase());
+
+        SessionData login = login(testUser.getUsername(), testUserCleartextPassword);
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            content(profileDTO).
+            contentType(ContentType.JSON).
+            post("/users/current/profile").
+        then().
+            statusCode(HttpStatus.SC_CONFLICT).
+            body("message", equalTo("DisplayName already in use"));
         //@formatter:on
     }
 

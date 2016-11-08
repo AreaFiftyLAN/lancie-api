@@ -146,7 +146,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public User addProfile(Long userId, ProfileDTO profileDTO) {
+    public User addProfile(Long userId, ProfileDTO profileDTO) throws DataIntegrityViolationException {
+        // No two identical displayNames are allowed
+        userRepository.findOneByProfileDisplayNameIgnoreCase(profileDTO.getDisplayName()).ifPresent(u -> {
+            throw new DataIntegrityViolationException("DisplayName already in use");});
+
         User user = userRepository.findOne(userId);
 
         // Set all the profile fields at once
