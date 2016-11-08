@@ -1,4 +1,4 @@
-# Area FiftyLAN API
+# Area FiftyLAN API [![Build Status](https://travis-ci.org/AreaFiftyLAN/lancie-api.svg?branch=master)](https://travis-ci.org/AreaFiftyLAN/lancie-api)
 This is a Spring based implementation of the LANcie API, used for [Area FiftyLAN](https://areafiftylan.nl/).
 This API is responsible for everything persistent, from user registration to ordering tickets.
 
