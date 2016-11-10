@@ -31,7 +31,6 @@ import org.springframework.web.bind.annotation.*;
 import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEntity;
 
 @RestController
-@PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("/mail")
 public class MailRestController {
 
@@ -46,6 +45,14 @@ public class MailRestController {
     private UserService userService;
     private TeamService teamService;
 
+    @RequestMapping(value = "/contact", method = RequestMethod.POST)
+    ResponseEntity<?> sendContactForm(@Validated @RequestBody ContactMailDTO mailDTO) {
+        mailService.sendContactMail(mailDTO.getSender(), mailDTO.getSubject(), mailDTO.getMessage());
+
+        return createResponseEntity(HttpStatus.OK, "Mail successfully sent");
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
     @RequestMapping(value = "/user/{userId}", method = RequestMethod.POST)
     ResponseEntity<?> sendMailToUser(@PathVariable Long userId, @Validated @RequestBody MailDTO mailDTO) {
         User user = userService.getUserById(userId);
@@ -56,6 +63,7 @@ public class MailRestController {
 
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @RequestMapping(value = "/team/{teamId}", method = RequestMethod.POST)
     ResponseEntity<?> sendMailToTeam(@PathVariable Long teamId, @Validated @RequestBody MailDTO mailDTO) {
         Team team = teamService.getTeamById(teamId);
@@ -64,6 +72,7 @@ public class MailRestController {
         return createResponseEntity(HttpStatus.OK, "Mail successfully sent");
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @RequestMapping(value = "/users/all/YESREALLY", method = RequestMethod.POST)
     ResponseEntity<?> sendMailToAll(@Validated @RequestBody MailDTO mailDTO) {
         mailService.sendTemplateMailToAll(userService.getAllUsers(), mailDTO);
