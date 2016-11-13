@@ -37,6 +37,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.config.RedirectConfig.redirectConfig;
@@ -71,7 +72,8 @@ public abstract class IntegrationTest {
 
     @Before
     public void initIntegrationTest() {
-        calendar = new GregorianCalendar(2000, 1, 1, 0, 0, 0);
+        calendar = new GregorianCalendar(2000, 0, 1, 0, 0, 0);
+        calendar.setTimeZone(TimeZone.getTimeZone("GMT+1"));
 
         userRepository.deleteAll();
 

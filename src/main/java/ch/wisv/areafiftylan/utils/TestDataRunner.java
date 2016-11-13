@@ -33,6 +33,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
 /**
  * Created by Sille Kamoen on 24-3-16.
@@ -53,8 +54,8 @@ public class TestDataRunner implements CommandLineRunner {
 
     @Override
     public void run(String... evt) throws Exception {
-        Calendar calendar = new GregorianCalendar();
-        calendar.set(2000, 1, 1, 0, 0, 0);
+        Calendar calendar = new GregorianCalendar(2000, 0, 1, 0, 0, 0);
+        calendar.setTimeZone(TimeZone.getTimeZone("GMT+1"));
 
         User testUser1 = new User("user@mail.com", new BCryptPasswordEncoder().encode("password"));
         testUser1.addRole(Role.ROLE_ADMIN);

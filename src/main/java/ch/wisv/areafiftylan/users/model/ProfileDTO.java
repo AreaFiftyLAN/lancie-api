@@ -70,6 +70,7 @@ public class ProfileDTO {
     @Setter
     private String lastName = "";
 
+    @NotEmpty
     @Getter
     @Setter
     private String displayName = "";
