@@ -614,17 +614,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
             contentType(ContentType.JSON).
             post("/users/current/profile").
         then().
-            statusCode(HttpStatus.SC_OK).
-            body("object.birthday", equalTo("2000-01-01")).
-            body("object.gender", is("MALE")).
-            body("object.address", equalTo("Testaddress")).
-            body("object.zipcode", equalTo("Testzipcode")).
-            body("object.city", equalTo("Testcity")).
-            body("object.phoneNumber", equalTo("TestphoneNumber")).
-            body("object.notes", equalTo("Testnotes")).
-            body("object.firstName", equalTo("TestfirstName")).
-            body("object.lastName", equalTo("TestlastName")).
-            body("object.displayName", equalTo(""));
+            statusCode(HttpStatus.SC_BAD_REQUEST);
         //@formatter:on
     }
 
