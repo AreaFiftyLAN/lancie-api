@@ -17,6 +17,7 @@
 
 package ch.wisv.areafiftylan.web.controller;
 
+import ch.wisv.areafiftylan.utils.ResponseEntityBuilder;
 import ch.wisv.areafiftylan.web.model.CommitteeMember;
 import ch.wisv.areafiftylan.web.model.Event;
 import ch.wisv.areafiftylan.web.model.Sponsor;
@@ -24,12 +25,14 @@ import ch.wisv.areafiftylan.web.model.Tournament;
 import ch.wisv.areafiftylan.web.service.EventServiceImpl;
 import ch.wisv.areafiftylan.web.service.SponsorServiceImpl;
 import ch.wisv.areafiftylan.web.service.TournamentServiceImpl;
+import ch.wisv.areafiftylan.web.service.WebService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @RestController
 @RequestMapping("/web")
@@ -39,12 +42,15 @@ public class WebRestController {
     private final EventServiceImpl eventService;
     private final SponsorServiceImpl sponsorService;
 
+    private WebService webService;
+
     @Autowired
     public WebRestController(TournamentServiceImpl tournamentService, EventServiceImpl eventService,
-                             SponsorServiceImpl sponsorService) {
+                             SponsorServiceImpl sponsorService, WebService webService) {
         this.tournamentService = tournamentService;
         this.eventService = eventService;
         this.sponsorService = sponsorService;
+        this.webService = webService;
     }
 
     @RequestMapping("/tournaments")
@@ -62,14 +68,21 @@ public class WebRestController {
      *
      * @return A collection with all committee members.
      */
-    @RequestMapping("/committee")
-    public Collection<CommitteeMember> getCommittee() {
-        Collection<CommitteeMember> committeeMembers = new ArrayList<>();
-        committeeMembers.add(new CommitteeMember("Sille Kamoen", "Chairman", "people"));
-        committeeMembers.add(new CommitteeMember("Rebecca Glans", "Secretary", "women"));
-        committeeMembers.add(new CommitteeMember("Sven Popping", "Treasurer", "money"));
+    @GetMapping("/committee")
+    public List<CommitteeMember> getCommittee() {
+        return webService.getAllCommitteeMembers();
+    }
 
-        return committeeMembers;
+    @PutMapping("/committee")
+    public ResponseEntity<?> setCommittee(@RequestBody List<CommitteeMember> committeeMembers) {
+        webService.setAllCommitteeMembers(committeeMembers);
+        return ResponseEntityBuilder.createResponseEntity(HttpStatus.OK, "Committee members saved succesfully.");
+    }
+
+    @PostMapping("/committee")
+    public ResponseEntity<?> setCommitteeMember(@RequestBody CommitteeMember committeeMember) {
+        webService.addCommitteeMember(committeeMember);
+        return ResponseEntityBuilder.createResponseEntity(HttpStatus.OK, "Committee member added succesfully.");
     }
 
     @RequestMapping("/sponsors")
