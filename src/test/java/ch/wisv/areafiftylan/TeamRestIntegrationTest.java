@@ -67,7 +67,7 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     public void initTeamTest() {
         captain = new User("captain@mail.com", new BCryptPasswordEncoder().encode(captainCleartextPassword));
         captain.getProfile()
-                .setAllFields("Captain", "Hook", "PeterPanKiller", calendar, Gender.MALE, "High Road 3", "2826ZZ", "Neverland",
+                .setAllFields("Captain", "Hook", "PeterPanKiller", localDate, Gender.MALE, "High Road 3", "2826ZZ", "Neverland",
                         "0906-0777", null);
 
         captain = userRepository.saveAndFlush(captain);

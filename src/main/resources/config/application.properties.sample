@@ -57,8 +57,7 @@ spring.jpa.properties.hibernate.hbm2ddl.auto=none
 #spring.jpa.hibernate.ddl-auto=create
 
 # The date format we use
-spring.jackson.date-format=yyyy-MM-dd
-spring.jackson.time-zone=GMT+1
+spring.jackson.date-format=com.fasterxml.jackson.databind.util.ISO8601DateFormat
 
 # Default port used by frontend
 server.port=9000
