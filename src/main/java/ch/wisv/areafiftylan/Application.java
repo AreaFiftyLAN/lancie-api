@@ -23,6 +23,7 @@ import ch.wisv.areafiftylan.seats.service.SeatService;
 import ch.wisv.areafiftylan.teams.service.TeamRepository;
 import ch.wisv.areafiftylan.users.service.UserRepository;
 import ch.wisv.areafiftylan.utils.TestDataRunner;
+import ch.wisv.areafiftylan.web.service.CommitteeMemberRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -48,7 +49,7 @@ public class Application {
     @Bean
     @Profile("dev")
     CommandLineRunner init(UserRepository accountRepository, TicketRepository ticketRepository, SeatService seatService,
-                           TeamRepository teamRepository) {
+                           TeamRepository teamRepository, CommitteeMemberRepository committeeMemberRepository) {
 
         return new TestDataRunner(accountRepository, ticketRepository, teamRepository, seatService, committeeMemberRepository);
 
