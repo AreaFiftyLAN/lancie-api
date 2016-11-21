@@ -100,7 +100,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
 
     static Map<String, String> getProfileDTO() {
         Map<String, String> profileDTO = new HashMap<>();
-        profileDTO.put("birthday", "2000-01-01");
+        profileDTO.put("birthday", "2000-01-02");
         profileDTO.put("gender", "MALE");
         profileDTO.put("address", "Testaddress");
         profileDTO.put("zipcode", "Testzipcode");
@@ -434,7 +434,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
             post("/users/current/profile").
         then().
             statusCode(HttpStatus.SC_OK).
-            body("object.birthday", equalTo("2000-01-01")).
+            body("object.birthday", equalTo("2000-01-02")).
             body("object.gender", is("MALE")).
             body("object.address", equalTo("Testaddress")).
             body("object.zipcode", equalTo("Testzipcode")).
@@ -465,7 +465,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
             post(location + "/profile").
         then().
             statusCode(HttpStatus.SC_OK).
-            body("object.birthday", equalTo("2000-01-01")).
+            body("object.birthday", equalTo("2000-01-02")).
             body("object.gender", is("MALE")).
             body("object.address", equalTo("Testaddress")).
             body("object.zipcode", equalTo("Testzipcode")).
@@ -496,7 +496,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
             post(location + "/profile").
         then().
             statusCode(HttpStatus.SC_OK).
-            body("object.birthday", equalTo("2000-01-01")).
+            body("object.birthday", equalTo("2000-01-02")).
             body("object.gender", is("MALE")).
             body("object.address", equalTo("Testaddress")).
             body("object.zipcode", equalTo("Testzipcode")).
@@ -614,17 +614,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
             contentType(ContentType.JSON).
             post("/users/current/profile").
         then().
-            statusCode(HttpStatus.SC_OK).
-            body("object.birthday", equalTo("2000-01-01")).
-            body("object.gender", is("MALE")).
-            body("object.address", equalTo("Testaddress")).
-            body("object.zipcode", equalTo("Testzipcode")).
-            body("object.city", equalTo("Testcity")).
-            body("object.phoneNumber", equalTo("TestphoneNumber")).
-            body("object.notes", equalTo("Testnotes")).
-            body("object.firstName", equalTo("TestfirstName")).
-            body("object.lastName", equalTo("TestlastName")).
-            body("object.displayName", equalTo(""));
+            statusCode(HttpStatus.SC_BAD_REQUEST);
         //@formatter:on
     }
 
@@ -670,7 +660,7 @@ public class UserRestIntegrationTest extends IntegrationTest {
             post("/users/current/profile").
         then().
         statusCode(HttpStatus.SC_OK).
-            body("object.birthday", equalTo("2000-01-01")).
+            body("object.birthday", equalTo("2000-01-02")).
             body("object.gender", is("MALE")).
             body("object.address", equalTo("Testaddress")).
             body("object.zipcode", equalTo("Testzipcode")).

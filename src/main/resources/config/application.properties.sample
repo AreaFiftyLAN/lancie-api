@@ -49,17 +49,15 @@ spring.jpa.generate-ddl=true
 
 # This setting defines the database creation/update behaviour. Change with caution.
 spring.jpa.properties.hibernate.default_schema=public
-flyway.baseline-on-migrate=true
 # Database migration automation. Set to false for development
 flyway.enabled=true
-# The location of the flyway database migration scripts
-flyway.locations=classpath:ch/wisv/areafiftylan/utils/db/migration
+spring.jpa.properties.hibernate.hbm2ddl.auto=none
 
 #DEVELOPMENT ONLY : DELETES DATA ON STARTUP:
 #spring.jpa.hibernate.ddl-auto=create
 
 # The date format we use
-spring.jackson.date-format=yyyy-MM-dd
+spring.jackson.date-format=com.fasterxml.jackson.databind.util.ISO8601DateFormat
 
 # Default port used by frontend
 server.port=9000
@@ -72,13 +70,13 @@ logging.config=classpath:log4j2-prod.xml
 # Key for sending a paymentrequest to the Mollie api
 a5l.molliekey=[CHANGE ME]
 # The return url for the frontend that displays the success message
-a5l.paymentReturnUrl=https://areafiftylan.nl/#!/ordersuccess
+a5l.paymentReturnUrl=https://areafiftylan.nl/ordersuccess
 # The return url for the frontend that confirms a registration
-a5l.mail.confirmUrl=https://areafiftylan.nl/#!/confirmRegistration
+a5l.mail.confirmUrl=https://areafiftylan.nl/confirmRegistration
 # The url for the frontend to change the users password
-a5l.user.resetUrl=https://areafiftylan.nl/#!/resetPassword
+a5l.user.resetUrl=https://areafiftylan.nl/resetPassword
 # The url for the frontend to accept a ticket transfer
-a5l.user.acceptTransferUrl=https://areafiftylan.nl/#!/acceptTransfer
+a5l.user.acceptTransferUrl=https://areafiftylan.nl/acceptTransfer
 # E-mail address used for sending e-mails
 a5l.mail.sender=LANcie <lancie@ch.tudelft.nl>
 a5l.mail.contact=LANcie <lancie@ch.tudelft.nl>

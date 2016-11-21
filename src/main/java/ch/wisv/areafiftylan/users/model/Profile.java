@@ -24,7 +24,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import java.io.Serializable;
-import java.util.Calendar;
+import java.time.LocalDate;
 
 @Entity
 public class Profile implements Serializable {
@@ -35,7 +35,7 @@ public class Profile implements Serializable {
     @JsonView(View.Public.class)
     public String displayName;
 
-    public Calendar birthday;
+    public LocalDate birthday;
 
     public Gender gender;
     public String address;
@@ -52,7 +52,7 @@ public class Profile implements Serializable {
 
     }
 
-    public Profile(String firstName, String lastName, String displayName, Calendar birthday, Gender gender, String address, String zipcode,
+    public Profile(String firstName, String lastName, String displayName, LocalDate birthday, Gender gender, String address, String zipcode,
                    String city, String phoneNumber, String notes) {
         this.firstName = firstName;
         this.lastName = lastName;
@@ -120,11 +120,11 @@ public class Profile implements Serializable {
         return result;
     }
 
-    public Calendar getBirthday() {
+    public LocalDate getBirthday() {
         return birthday;
     }
 
-    public void setBirthday(Calendar birthday) {
+    public void setBirthday(LocalDate birthday) {
         this.birthday = birthday;
     }
 
@@ -200,7 +200,7 @@ public class Profile implements Serializable {
         this.displayName = displayName;
     }
 
-    public void setAllFields(String firstName, String lastName, String displayName, Calendar birthday, Gender gender, String address,
+    public void setAllFields(String firstName, String lastName, String displayName, LocalDate birthday, Gender gender, String address,
                              String zipcode, String city, String phoneNumber, String notes) {
         this.firstName = firstName;
         this.lastName = lastName;
