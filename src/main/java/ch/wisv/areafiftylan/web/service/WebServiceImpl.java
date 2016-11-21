@@ -24,6 +24,7 @@ public class WebServiceImpl implements WebService {
 
     @Override
     public void setAllCommitteeMembers(List<CommitteeMember> committeeMembers) {
+        committeeMemberRepository.deleteAll();
         committeeMemberRepository.save(committeeMembers);
     }
 

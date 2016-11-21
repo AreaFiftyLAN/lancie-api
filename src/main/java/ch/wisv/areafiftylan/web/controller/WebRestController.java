@@ -63,11 +63,6 @@ public class WebRestController {
         return eventService.getAllEvents();
     }
 
-    /**
-     * Returns all committee members. This is done in the Controller because it's simple and static nature
-     *
-     * @return A collection with all committee members.
-     */
     @GetMapping("/committee")
     public List<CommitteeMember> getCommittee() {
         return webService.getAllCommitteeMembers();

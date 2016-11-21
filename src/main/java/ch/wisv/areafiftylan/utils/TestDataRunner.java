@@ -18,11 +18,8 @@
 package ch.wisv.areafiftylan.utils;
 
 import ch.wisv.areafiftylan.products.model.Ticket;
-import ch.wisv.areafiftylan.products.model.TicketOption;
 import ch.wisv.areafiftylan.products.model.TicketType;
-import ch.wisv.areafiftylan.products.service.repository.TicketOptionRepository;
-import ch.wisv.areafiftylan.products.service.repository.TicketRepository;
-import ch.wisv.areafiftylan.products.service.repository.TicketTypeRepository;
+import ch.wisv.areafiftylan.products.service.TicketRepository;
 import ch.wisv.areafiftylan.seats.model.SeatGroupDTO;
 import ch.wisv.areafiftylan.seats.service.SeatService;
 import ch.wisv.areafiftylan.teams.model.Team;
@@ -31,35 +28,36 @@ import ch.wisv.areafiftylan.users.model.Gender;
 import ch.wisv.areafiftylan.users.model.Role;
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.users.service.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import ch.wisv.areafiftylan.web.model.CommitteeMember;
+import ch.wisv.areafiftylan.web.service.CommitteeMemberRepository;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.TimeZone;
 
-@Component
-@Profile("dev")
+/**
+ * Created by Sille Kamoen on 24-3-16.
+ */
 public class TestDataRunner implements CommandLineRunner {
     private final UserRepository accountRepository;
     private final TicketRepository ticketRepository;
     private final SeatService seatService;
     private final TeamRepository teamRepository;
-    private final TicketOptionRepository ticketOptionRepository;
-    private final TicketTypeRepository ticketTypeRepository;
+    private final CommitteeMemberRepository committeeMemberRepository;
 
-    @Autowired
     public TestDataRunner(UserRepository accountRepository, TicketRepository ticketRepository,
                           TeamRepository teamRepository, SeatService seatService,
-                          TicketOptionRepository ticketOptionRepository, TicketTypeRepository ticketTypeRepository) {
+                          CommitteeMemberRepository committeeMemberRepository) {
         this.accountRepository = accountRepository;
         this.ticketRepository = ticketRepository;
         this.seatService = seatService;
         this.teamRepository = teamRepository;
-        this.ticketOptionRepository = ticketOptionRepository;
-        this.ticketTypeRepository = ticketTypeRepository;
+        this.committeeMemberRepository = committeeMemberRepository;
     }
 
     @Override
@@ -69,24 +67,24 @@ public class TestDataRunner implements CommandLineRunner {
         User testUser1 = new User("user@mail.com", new BCryptPasswordEncoder().encode("password"));
         testUser1.addRole(Role.ROLE_ADMIN);
         testUser1.getProfile()
-                .setAllFields("Jan", "de Groot", "MonsterKiller9001", localDate, Gender.MALE, "Mekelweg 4", "2826CD",
-                        "Delft", "0906-0666", null);
+                .setAllFields("Jan", "de Groot", "MonsterKiller9001", localDate, Gender.MALE, "Mekelweg 4", "2826CD", "Delft",
+                        "0906-0666", null);
         User testUser2 = new User("bert@mail.com", new BCryptPasswordEncoder().encode("password"));
         testUser2.getProfile()
-                .setAllFields("Bert", "Kleijn", "ILoveZombies", localDate, Gender.OTHER, "Mekelweg 20", "2826CD",
-                        "Amsterdam", "0611", null);
+                .setAllFields("Bert", "Kleijn", "ILoveZombies", localDate, Gender.OTHER, "Mekelweg 20", "2826CD", "Amsterdam",
+                        "0611", null);
         User testUser3 = new User("katrien@ms.com", new BCryptPasswordEncoder().encode("password"));
         testUser3.getProfile()
-                .setAllFields("Katrien", "Zwanenburg", "Admiral Cheesecake", localDate, Gender.FEMALE, "Ganzenlaan 5",
-                        "2826CD", "Duckstad", "0906-0666", null);
+                .setAllFields("Katrien", "Zwanenburg", "Admiral Cheesecake", localDate, Gender.FEMALE, "Ganzenlaan 5", "2826CD",
+                        "Duckstad", "0906-0666", null);
         User testUser4 = new User("user@yahoo.com", new BCryptPasswordEncoder().encode("password"));
         testUser4.getProfile()
-                .setAllFields("Kees", "Jager", "l33tz0r", localDate, Gender.MALE, "Herenweg 2", "2826CD", "Delft",
-                        "0902-30283", null);
+                .setAllFields("Kees", "Jager", "l33tz0r", localDate, Gender.MALE, "Herenweg 2", "2826CD", "Delft", "0902-30283",
+                        null);
         User testUser5 = new User("custom@myself.com", new BCryptPasswordEncoder().encode("password"));
         testUser5.getProfile()
-                .setAllFields("Gert", "Gertson", "Whosyourdaddy", localDate, Gender.MALE, "Jansstraat", "8826CD",
-                        "Delft", "0238-2309736", null);
+                .setAllFields("Gert", "Gertson", "Whosyourdaddy", localDate, Gender.MALE, "Jansstraat", "8826CD", "Delft",
+                        "0238-2309736", null);
 
         testUser1 = accountRepository.saveAndFlush(testUser1);
         testUser2 = accountRepository.saveAndFlush(testUser2);
@@ -94,19 +92,9 @@ public class TestDataRunner implements CommandLineRunner {
         testUser4 = accountRepository.saveAndFlush(testUser4);
         testUser5 = accountRepository.saveAndFlush(testUser5);
 
-        TicketOption chMember = ticketOptionRepository.save(new TicketOption("chMember", -5F));
-        TicketOption pickupService = ticketOptionRepository.save(new TicketOption("pickupService", 2.5F));
-        TicketType early = new TicketType("Early", "Early Bird", 35F, 50, LocalDateTime.now().plusDays(7L), true);
-        early.addPossibleOption(chMember);
-        early.addPossibleOption(pickupService);
-        early = ticketTypeRepository.save(early);
-
-        Ticket ticket = new Ticket(testUser1, early);
-        ticket.addOption(chMember);
-        ticket.addOption(pickupService);
-        Ticket ticket2 = new Ticket(testUser2, early);
-        ticket2.addOption(pickupService);
-        Ticket ticket3 = new Ticket(testUser3, early);
+        Ticket ticket = new Ticket(testUser1, TicketType.EARLY_FULL, false, false);
+        Ticket ticket2 = new Ticket(testUser2, TicketType.EARLY_FULL, false, false);
+        Ticket ticket3 = new Ticket(testUser3, TicketType.EARLY_FULL, false, false);
         ticket.setValid(true);
         ticket2.setValid(true);
         ticketRepository.save(ticket);
@@ -126,5 +114,22 @@ public class TestDataRunner implements CommandLineRunner {
             seatService.addSeats(seatGroup);
         }
         seatService.reserveSeatForTicket("A", 2, ticket.getId());
+
+        CommitteeMember committeeMember1 = new CommitteeMember("Lotte Bryan", "Chairman", "group", 1l);
+        CommitteeMember committeeMember2 = new CommitteeMember("Sterre Noorthoek", "Secretary", "male", 2l);
+        CommitteeMember committeeMember3 = new CommitteeMember("Francis Behnen", "Treasurer", "money", 3l);
+        CommitteeMember committeeMember4 = new CommitteeMember("Hilco van der Wilk", "Commissioner of Promo", "bullhorn", 4l);
+        CommitteeMember committeeMember5 = new CommitteeMember("Lotte Millen van Osch", "Commissioner of Logistics", "truck", 5l);
+        CommitteeMember committeeMember6 = new CommitteeMember("Matthijs Kok", "Commissioner of Systems", "cogs", 6l);
+        CommitteeMember committeeMember7 = new CommitteeMember("Beer van der Drift", "Qualitate Qua", "heart", 7l);
+        List<CommitteeMember> committeeMemberList = new ArrayList<>();
+        committeeMemberList.add(committeeMember1);
+        committeeMemberList.add(committeeMember2);
+        committeeMemberList.add(committeeMember3);
+        committeeMemberList.add(committeeMember4);
+        committeeMemberList.add(committeeMember5);
+        committeeMemberList.add(committeeMember6);
+        committeeMemberList.add(committeeMember7);
+        committeeMemberRepository.save(committeeMemberList);
     }
 }
