@@ -33,12 +33,9 @@ import ch.wisv.areafiftylan.web.service.CommitteeMemberRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import java.util.ArrayList;
 import java.time.LocalDate;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.TimeZone;
 
 /**
  * Created by Sille Kamoen on 24-3-16.
