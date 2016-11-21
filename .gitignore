@@ -51,3 +51,9 @@ bower_components
 
 # log folder
 logs/
+
+### macOS ###
+# Don't ask...
+Icon
+
+
