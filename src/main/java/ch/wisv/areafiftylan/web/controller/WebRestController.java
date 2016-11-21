@@ -29,6 +29,7 @@ import ch.wisv.areafiftylan.web.service.WebService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
@@ -68,14 +69,16 @@ public class WebRestController {
         return webService.getAllCommitteeMembers();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/committee")
-    public ResponseEntity<?> setCommittee(@RequestBody List<CommitteeMember> committeeMembers) {
+    public ResponseEntity<?> setAllCommitteeMembers(@RequestBody List<CommitteeMember> committeeMembers) {
         webService.setAllCommitteeMembers(committeeMembers);
         return ResponseEntityBuilder.createResponseEntity(HttpStatus.OK, "Committee members saved succesfully.");
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/committee")
-    public ResponseEntity<?> setCommitteeMember(@RequestBody CommitteeMember committeeMember) {
+    public ResponseEntity<?> addCommitteeMember(@RequestBody CommitteeMember committeeMember) {
         webService.addCommitteeMember(committeeMember);
         return ResponseEntityBuilder.createResponseEntity(HttpStatus.OK, "Committee member added succesfully.");
     }
