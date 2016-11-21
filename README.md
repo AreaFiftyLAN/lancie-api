@@ -43,6 +43,8 @@ The API has a number of properties that need to be set before the application ca
 There's a template in `resources/config/application.properties.sample`.
 Copy this file to a file `application.properties` in the `/config` directory, relative to the location of the JAR.
 If you run the JAR, the properties from this file will be used.
+### Templates
+In the `/config` directory, a folder `/templates` should contain the templates `loginForm.html` and `mailTemplate.html`. Check the git repository for examples.
 
 ## Contributing
 If you want to contribute, awesome! First, pick an issue and self-assign it. Make your changes in a new branch, with the following naming convention:
