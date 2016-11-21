@@ -65,7 +65,7 @@ public class WebRestController {
     }
 
     @GetMapping("/committee")
-    public List<CommitteeMember> getCommittee() {
+    public Collection<CommitteeMember> getCommittee() {
         return webService.getAllCommitteeMembers();
     }
 

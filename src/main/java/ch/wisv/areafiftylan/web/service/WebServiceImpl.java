@@ -4,6 +4,7 @@ import ch.wisv.areafiftylan.web.model.CommitteeMember;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
 
 @Service
@@ -23,7 +24,7 @@ public class WebServiceImpl implements WebService {
     }
 
     @Override
-    public void setAllCommitteeMembers(List<CommitteeMember> committeeMembers) {
+    public void setAllCommitteeMembers(Collection<CommitteeMember> committeeMembers) {
         committeeMemberRepository.deleteAll();
         committeeMemberRepository.save(committeeMembers);
     }
