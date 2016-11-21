@@ -26,9 +26,7 @@ import nl.stil4m.mollie.Client;
 import nl.stil4m.mollie.ClientBuilder;
 import nl.stil4m.mollie.ResponseOrError;
 import nl.stil4m.mollie.domain.CreatePayment;
-import nl.stil4m.mollie.domain.CreatedPayment;
-import nl.stil4m.mollie.domain.ErrorData;
-import nl.stil4m.mollie.domain.PaymentStatus;
+import nl.stil4m.mollie.domain.Payment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -36,10 +34,8 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
-/**
- * Created by sille on 25-12-15.
- */
 @Service
 public class MolliePaymentService implements PaymentService {
 
@@ -64,14 +60,15 @@ public class MolliePaymentService implements PaymentService {
         Map<String, Object> metadata = new HashMap<>();
         metadata.put("A5LId", order.getId());
 
-        String method = "ideal";
+        Optional<String> method = Optional.of("ideal");
         CreatePayment payment = new CreatePayment(method, (double) order.getAmount(), "Area FiftyLAN Ticket",
-                returnUrl + "?order=" + order.getId(), metadata);
+                returnUrl + "?order=" + order.getId(), Optional.empty(), metadata);
+
 
         //First try is for IOExceptions coming from the Mollie Client.
         try {
             // Create the payment over at Mollie
-            ResponseOrError<CreatedPayment> molliePayment = mollie.createPayment(payment);
+            ResponseOrError<Payment> molliePayment = mollie.payments().create(payment);
 
             if (molliePayment.getSuccess()) {
                 // All good, update the order
@@ -88,7 +85,7 @@ public class MolliePaymentService implements PaymentService {
         }
     }
 
-    private void updateOrder(Order order, ResponseOrError<CreatedPayment> molliePayment) {
+    private void updateOrder(Order order, ResponseOrError<Payment> molliePayment) {
         // Insert the Mollie ID for future reference
         order.setReference(molliePayment.getData().getId());
         order.setStatus(OrderStatus.WAITING);
@@ -105,7 +102,9 @@ public class MolliePaymentService implements PaymentService {
         // This try is for the Mollie API internal HttpClient
         try {
             // Request a payment from Mollie
-            ResponseOrError<PaymentStatus> molliePaymentStatus = mollie.getPaymentStatus(apiKey, orderReference);
+            ResponseOrError<Payment> molliePaymentStatus = mollie.payments().get(orderReference);
+            //            ResponseOrError<PaymentStatus> molliePaymentStatus = mollie.getPaymentStatus(apiKey,
+            // orderReference);
 
             // If the request was a success, we can update the order
             if (molliePaymentStatus.getSuccess()) {
@@ -147,11 +146,10 @@ public class MolliePaymentService implements PaymentService {
 
     private void handleMollieError(ResponseOrError<?> mollieResponseWithError) {
         // Some error occured, but connection to Mollie succeeded, which means they have something to say.
-        ErrorData molliePaymentError = mollieResponseWithError.getError();
+        Map molliePaymentError = mollieResponseWithError.getError();
 
         // Make the compiler shut up, this is something stupid in the Mollie API Client
-        @SuppressWarnings("unchecked") HashMap<String, Object> errorMap =
-                (HashMap<String, Object>) molliePaymentError.get("error");
-        throw new PaymentException((String) errorMap.get("message"));
+        Map error = (Map) molliePaymentError.get("error");
+        throw new PaymentException((String) error.get("message"));
     }
 }
