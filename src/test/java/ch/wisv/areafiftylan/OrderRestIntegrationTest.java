@@ -55,8 +55,10 @@ public class OrderRestIntegrationTest extends IntegrationTest {
     private final String ORDER_ENDPOINT = "/orders";
 
     private void insertTestOrders() {
-        Order order1 = new Order(user);
-        Order order2 = new Order(admin);
+        Order order1 = new Order();
+        order1.setUser(user);
+        Order order2 = new Order();
+        order2.setUser(admin);
 
         Ticket earlyAndPickup = new Ticket(user, TicketType.EARLY_FULL, true, false);
         Ticket earlyNoPickup = new Ticket(user, TicketType.EARLY_FULL, false, false);
@@ -124,7 +126,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             statusCode(HttpStatus.SC_OK).
             body("$", hasSize(2)).
             body("user.username", containsInAnyOrder(admin.getUsername(), user.getUsername())).
-            body("status", hasItems("CREATING", "CREATING"));
+            body("status", hasItems("ANONYMOUS", "ANONYMOUS"));
         //formatter:on
     }
 
@@ -148,7 +150,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         .then().
             statusCode(HttpStatus.SC_CREATED).
             body("object.user.username", is("user@mail.com")).
-            body("object.status", is("CREATING")).
+            body("object.status", is("ANONYMOUS")).
             body("object.tickets", hasSize(1)).
             body("object.tickets.pickupService", hasItem(true)).
             body("object.tickets.type", hasItem(is(TicketType.TEST.toString()))).
@@ -197,7 +199,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         .then().
             statusCode(HttpStatus.SC_CREATED).
             body("object.user.username", is("user@mail.com")).
-            body("object.status", is("CREATING")).
+            body("object.status", is("ANONYMOUS")).
             body("object.tickets", hasSize(1)).
             body("object.tickets.pickupService", hasItem(false)).
             body("object.tickets.type", hasItem(is(TicketType.TEST.toString()))).
@@ -423,7 +425,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             get(location).
         then().
             statusCode(HttpStatus.SC_OK).
-            body("status", is("CREATING")).
+            body("status", is("ANONYMOUS")).
             body("reference", is(nullValue())).
             body("user.username", is("user@mail.com")).
             body("tickets", hasSize(1)).
@@ -448,7 +450,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             get("/users/current/orders").
         then().
             statusCode(HttpStatus.SC_OK).
-            body("[0].status", equalTo("CREATING")).
+            body("[0].status", equalTo("ANONYMOUS")).
             body("[0].reference", is(nullValue())).
             body("[0].user.username", is("user@mail.com")).
             body("[0].tickets", hasSize(1)).
@@ -473,7 +475,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             get("/users/current/orders/open").
         then().
             statusCode(HttpStatus.SC_OK).
-            body("status", hasItem(equalTo("CREATING"))).
+            body("status", hasItem(equalTo("ANONYMOUS"))).
             body("reference", hasItem(is(nullValue()))).
             body("user.username", hasItem(is("user@mail.com"))).
             body("tickets", hasSize(1)).
@@ -534,7 +536,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             get(location).
         then().
             statusCode(HttpStatus.SC_OK).
-            body("status", is("CREATING")).
+            body("status", is("ANONYMOUS")).
             body("reference", is(nullValue())).
             body("user.username", is("user@mail.com")).
             body("tickets.type", hasItem(is(TicketType.TEST.toString()))).
@@ -663,7 +665,8 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         ticket.put("chMember", "false");
         ticket.put("type", TicketType.EARLY_FULL.toString());
 
-        Order order1 = new Order(user);
+        Order order1 = new Order();
+        order1.setUser(user);
 
         Collection<Ticket> ticketList = new ArrayList<>(5);
 
@@ -810,7 +813,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         Long orderId = Long.parseLong(locationParse);
 
         Order order = orderRepository.findOne(orderId);
-        order.setStatus(OrderStatus.WAITING);
+        order.setStatus(OrderStatus.PENDING);
         orderRepository.save(order);
 
         SessionData login = login(user.getUsername(), userCleartextPassword);
@@ -836,7 +839,8 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         ticket.put("chMember", "false");
         ticket.put("type", TicketType.EARLY_FULL.toString());
 
-        Order order1 = new Order(user);
+        Order order1 = new Order();
+        order1.setUser(user);
 
         Ticket earlyAndPickup = new Ticket(user, TicketType.EARLY_FULL, true, false);
         Ticket earlyNoPickup = new Ticket(user, TicketType.EARLY_FULL, false, false);
@@ -872,7 +876,8 @@ public class OrderRestIntegrationTest extends IntegrationTest {
         ticket.put("chMember", "false");
         ticket.put("type", TicketType.REGULAR_FULL.toString());
 
-        Order order1 = new Order(user);
+        Order order1 = new Order();
+        order1.setUser(user);
 
         Ticket earlyAndPickup = new Ticket(user, TicketType.EARLY_FULL, true, false);
         Ticket earlyNoPickup = new Ticket(user, TicketType.EARLY_FULL, false, false);
@@ -924,7 +929,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
 
         Order order = orderRepository.findOne(orderId);
 
-        assertThat("Orderstatus updated", order.getStatus(), equalTo(OrderStatus.WAITING));
+        assertThat("Orderstatus updated", order.getStatus(), equalTo(OrderStatus.PENDING));
     }
 
     @Test
@@ -952,7 +957,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
 
         Order order = orderRepository.findOne(orderId);
 
-        assertThat("Orderstatus updated", order.getStatus(), equalTo(OrderStatus.WAITING));
+        assertThat("Orderstatus updated", order.getStatus(), equalTo(OrderStatus.PENDING));
     }
 
     @Test
@@ -973,7 +978,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
 
         Order order = orderRepository.findOne(orderId);
 
-        assertThat("Orderstatus updated", order.getStatus(), equalTo(OrderStatus.CREATING));
+        assertThat("Orderstatus updated", order.getStatus(), equalTo(OrderStatus.ANONYMOUS));
     }
 
     @Test
@@ -1087,7 +1092,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
 
         Order order = orderRepository.findOne(orderId);
 
-        assertThat("Orderstatus WAITING", order.getStatus(), equalTo(OrderStatus.CREATING));
+        assertThat("Orderstatus PENDING", order.getStatus(), equalTo(OrderStatus.ANONYMOUS));
         for (Ticket ticket : order.getTickets()) {
             Assert.assertFalse(ticket.isValid());
         }
