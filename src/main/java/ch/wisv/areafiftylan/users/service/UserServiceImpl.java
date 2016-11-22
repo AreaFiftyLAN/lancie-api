@@ -40,7 +40,6 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
-import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService, UserDetailsService {
@@ -70,8 +69,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public Optional<User> getUserByUsername(String username) {
-        return userRepository.findOneByUsernameIgnoreCase(username);
+    public User getUserByUsername(String username) {
+        return userRepository.findOneByUsernameIgnoreCase(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User '" + username + "' not found"));
     }
 
     @Override

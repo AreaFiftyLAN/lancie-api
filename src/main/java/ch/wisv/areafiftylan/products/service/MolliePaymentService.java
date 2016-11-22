@@ -88,7 +88,7 @@ public class MolliePaymentService implements PaymentService {
     private void updateOrder(Order order, ResponseOrError<Payment> molliePayment) {
         // Insert the Mollie ID for future reference
         order.setReference(molliePayment.getData().getId());
-        order.setStatus(OrderStatus.WAITING);
+        order.setStatus(OrderStatus.PENDING);
 
         // Save the changes to the order
         orderRepository.save(order);
@@ -112,7 +112,7 @@ public class MolliePaymentService implements PaymentService {
                 // statuses to translate to our own status.
                 switch (molliePaymentStatus.getData().getStatus()) {
                     case "pending": {
-                        order.setStatus(OrderStatus.WAITING);
+                        order.setStatus(OrderStatus.PENDING);
                         break;
                     }
                     case "cancelled": {

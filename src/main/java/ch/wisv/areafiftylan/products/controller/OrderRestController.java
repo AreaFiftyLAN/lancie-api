@@ -23,7 +23,6 @@ import ch.wisv.areafiftylan.exception.TicketUnavailableException;
 import ch.wisv.areafiftylan.products.model.Order;
 import ch.wisv.areafiftylan.products.model.TicketDTO;
 import ch.wisv.areafiftylan.products.service.OrderService;
-import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.utils.view.View;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,17 +64,14 @@ public class OrderRestController {
      * always contains at least one ticket. Optional next tickets should be added to the order by POSTing to the
      * location provided.
      *
-     * @param auth      The User that is currently logged in
      * @param ticketDTO Object containing information about the Ticket that is being ordered.
      *
      * @return A message informing about the result of the request
      */
-    @PreAuthorize("isAuthenticated()")
     @RequestMapping(value = "/orders", method = RequestMethod.POST)
     @JsonView(View.OrderOverview.class)
-    public ResponseEntity<?> createOrder(Authentication auth, @RequestBody @Validated TicketDTO ticketDTO) {
+    public ResponseEntity<?> createOrder(@RequestBody @Validated TicketDTO ticketDTO) {
         HttpHeaders headers = new HttpHeaders();
-        User user = (User) auth.getPrincipal();
 
         // You can't buy non-buyable Tickts for yourself, this should be done via the createAdminOrder() method.
         if (!ticketDTO.getType().isBuyable()) {
@@ -83,24 +79,10 @@ public class OrderRestController {
                     "Can't order tickets with type " + ticketDTO.getType().getText());
         }
 
-        Order order = orderService.create(user.getId(), ticketDTO);
+        Order order = orderService.create(ticketDTO);
 
         headers.setLocation(
                 ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(order.getId()).toUri());
-
-        return createResponseEntity(HttpStatus.CREATED, headers,
-                "Ticket available and order successfully created at " + headers.getLocation(), order);
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @JsonView(View.OrderOverview.class)
-    @RequestMapping(value = "/users/{userId}/orders", method = RequestMethod.POST)
-    public ResponseEntity<?> createAdminOrder(@PathVariable Long userId, @RequestBody @Validated TicketDTO ticketDTO) {
-        HttpHeaders headers = new HttpHeaders();
-        Order order = orderService.create(userId, ticketDTO);
-
-        headers.setLocation(ServletUriComponentsBuilder.fromCurrentContextPath().path("/orders/{id}").
-                buildAndExpand(order.getId()).toUri());
 
         return createResponseEntity(HttpStatus.CREATED, headers,
                 "Ticket available and order successfully created at " + headers.getLocation(), order);
@@ -154,6 +136,24 @@ public class OrderRestController {
     }
 
     /**
+     * Assign a User to a previously anonymous Order. The currently assigned user is assigned to the order specified in
+     * the path. This is required before an order can be paid.
+     *
+     * @param auth    The Spring Authentication object
+     * @param orderId Id of the Order to be assigned to the currently logged in user
+     *
+     * @return The assigned order
+     */
+    @PreAuthorize("isAuthenticated() and @currentUserServiceImpl.canAccessOrder(principal, #orderId)")
+    @PostMapping(value = "/orders/{orderId}/assign")
+    @JsonView(View.OrderOverview.class)
+    public ResponseEntity<?> assignOrderToUser(Authentication auth, @PathVariable Long orderId) {
+        Order attachedOrder = orderService.assignOrderToUser(orderId, auth.getName());
+        return createResponseEntity(HttpStatus.OK, "Order successfully attached to User", attachedOrder);
+    }
+
+
+    /**
      * This method requests payment of the order, locks the order and needs to return information on how to proceed.
      * Depending on PaymentService.
      *
@@ -198,7 +198,6 @@ public class OrderRestController {
      */
     @RequestMapping(value = "/orders/status", method = RequestMethod.POST)
     public ResponseEntity<?> updateOrderStatus(@RequestParam(name = "id") String orderReference) {
-        //TODO: Figure out how Mollie sends this request
         orderService.updateOrderStatus(orderReference);
         return createResponseEntity(HttpStatus.OK, "Status is being updated");
     }
