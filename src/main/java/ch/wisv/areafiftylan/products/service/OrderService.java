@@ -20,6 +20,7 @@ package ch.wisv.areafiftylan.products.service;
 import ch.wisv.areafiftylan.products.model.Order;
 import ch.wisv.areafiftylan.products.model.TicketDTO;
 import ch.wisv.areafiftylan.products.model.TicketInformationResponse;
+import ch.wisv.areafiftylan.users.model.User;
 
 import java.util.Collection;
 import java.util.List;
@@ -37,12 +38,11 @@ public interface OrderService {
     /**
      * Create an order with at least one Ticket.
      *
-     * @param userId    User which orders the ticket
      * @param ticketDTO The ticket that is being ordered
      *
      * @return The created order
      */
-    Order create(Long userId, TicketDTO ticketDTO);
+    Order create(TicketDTO ticketDTO);
 
     /**
      * Add a ticket to an order. Checks if a ticket is available first
@@ -53,6 +53,8 @@ public interface OrderService {
      * @return The updated Order
      */
     Order addTicketToOrder(Long orderId, TicketDTO ticketDTO);
+
+    Order assignOrderToUser(Long orderId, String username);
 
     /**
      * Removes a ticket with the given DTO from an order. Throws a NotFoundException when a ticket with such a DTO can't

@@ -15,8 +15,11 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.wisv.areafiftylan.products.model;
+package ch.wisv.areafiftylan.exception;
 
-public enum OrderStatus {
-    ANONYMOUS, ASSIGNED, PENDING, PAID, EXPIRED, CANCELLED
+public class UnassignedOrderException extends RuntimeException {
+
+    public UnassignedOrderException(Long orderId) {
+        super("Order " + orderId + " is not assigned yet");
+    }
 }

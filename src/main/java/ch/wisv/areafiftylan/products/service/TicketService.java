@@ -48,14 +48,13 @@ public interface TicketService {
      * TicketUnavailableException is thrown
      *
      * @param type          Type of the Ticket requested
-     * @param owner         User that wants the Ticket
      * @param pickupService If the Ticket includes the pickupService
      *
      * @return The requested ticket, if available
      *
      * @throws TicketUnavailableException If the requested ticket is sold out.
      */
-    Ticket requestTicketOfType(TicketType type, User owner, boolean pickupService, boolean chMember);
+    Ticket requestTicketOfType(TicketType type, boolean pickupService, boolean chMember);
 
     /**
      * Sets up the ticket for transfer
@@ -92,4 +91,6 @@ public interface TicketService {
     Collection<TicketTransferToken> getValidTicketTransferTokensByUser(String username);
 
     Collection<Ticket> getAllTicketsWithTransport();
+
+    Ticket assignTicketToUser(Long TicketId, String username);
 }

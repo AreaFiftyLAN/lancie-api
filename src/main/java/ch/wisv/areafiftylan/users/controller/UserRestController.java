@@ -127,7 +127,7 @@ public class UserRestController {
         if (auth != null) {
             // Get the currently logged in user from the autowired Authentication object.
             UserDetails currentUser = (UserDetails) auth.getPrincipal();
-            User user = userService.getUserByUsername(currentUser.getUsername()).get();
+            User user = userService.getUserByUsername(currentUser.getUsername());
             return new ResponseEntity<>(user, HttpStatus.OK);
         } else {
             return createResponseEntity(HttpStatus.OK, "Not logged in");

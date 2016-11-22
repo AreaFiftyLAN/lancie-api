@@ -122,7 +122,7 @@ public class AuthenticationController {
 
         log.log(Level.getLevel("A5L"), "Requesting password reset on email {}.", username);
 
-        User user = userService.getUserByUsername(username).orElseThrow(() -> new UserNotFoundException(username));
+        User user = userService.getUserByUsername(username);
 
         userService.requestResetPassword(user, request);
 

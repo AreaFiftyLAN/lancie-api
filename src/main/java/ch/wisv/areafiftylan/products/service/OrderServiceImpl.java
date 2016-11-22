@@ -20,6 +20,7 @@ package ch.wisv.areafiftylan.products.service;
 import ch.wisv.areafiftylan.exception.ImmutableOrderException;
 import ch.wisv.areafiftylan.exception.PaymentException;
 import ch.wisv.areafiftylan.exception.TicketNotFoundException;
+import ch.wisv.areafiftylan.exception.UnassignedOrderException;
 import ch.wisv.areafiftylan.products.model.*;
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.users.service.UserService;
@@ -76,26 +77,18 @@ public class OrderServiceImpl implements OrderService {
         Collection<Order> ordersByUsername = findOrdersByUsername(username);
 
         return ordersByUsername.stream().
-                filter(o -> o.getStatus().equals(OrderStatus.CREATING)).
                 collect(Collectors.toList());
     }
 
     @Override
-    public Order create(Long userId, TicketDTO ticketDTO) {
-        User user = userService.getUserById(userId);
-
-        for (Order order : orderRepository.findAllByUserUsernameIgnoreCase(user.getUsername())) {
-            if (order.getStatus().equals(OrderStatus.CREATING)) {
-                throw new IllegalStateException("User already created a new Order: " + order.getId());
-            }
-        }
+    public Order create(TicketDTO ticketDTO) {
 
         // Request a ticket to see if one is available. If a ticket is sold out, the method ends here due to the
         // exception thrown. Else, we'll get a new ticket to add to the order.
         Ticket ticket = ticketService
-                .requestTicketOfType(ticketDTO.getType(), user, ticketDTO.hasPickupService(), ticketDTO.isCHMember());
+                .requestTicketOfType(ticketDTO.getType(), ticketDTO.hasPickupService(), ticketDTO.isCHMember());
 
-        Order order = new Order(user);
+        Order order = new Order();
 
         order.addTicket(ticket);
 
@@ -104,10 +97,10 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Order addTicketToOrder(Long orderId, TicketDTO ticketDTO) {
-        Order order = orderRepository.getOne(orderId);
+        Order order = getOrderById(orderId);
 
         // Check Order status
-        if (!order.getStatus().equals(OrderStatus.CREATING)) {
+        if (!order.getStatus().equals(OrderStatus.ANONYMOUS)) {
             throw new ImmutableOrderException(orderId);
         }
 
@@ -116,21 +109,28 @@ public class OrderServiceImpl implements OrderService {
             throw new IllegalStateException("Order limit reached");
         }
 
-        User user = order.getUser();
-
         // Request a ticket to see if one is available. If a ticket is sold out, the method ends here due to the
         // exception thrown. Else, we'll get a new ticket to add to the order.
         Ticket ticket = ticketService
-                .requestTicketOfType(ticketDTO.getType(), user, ticketDTO.hasPickupService(), ticketDTO.isCHMember());
+                .requestTicketOfType(ticketDTO.getType(), ticketDTO.hasPickupService(), ticketDTO.isCHMember());
 
         order.addTicket(ticket);
         return orderRepository.save(order);
     }
 
     @Override
+    public Order assignOrderToUser(Long orderId, String username) {
+        Order order = getOrderById(orderId);
+        User user = userService.getUserByUsername(username);
+        order.setUser(user);
+        order.setStatus(OrderStatus.ASSIGNED);
+        return orderRepository.save(order);
+    }
+
+    @Override
     public Order removeTicketFromOrder(Long orderId, TicketDTO ticketDTO) {
-        Order order = orderRepository.getOne(orderId);
-        if (order.getStatus().equals(OrderStatus.CREATING)) {
+        Order order = getOrderById(orderId);
+        if (order.getStatus().equals(OrderStatus.ANONYMOUS)) {
 
             // Find a Ticket in the order, equal to the given DTO. Throw an exception when the ticket doesn't exist
             Ticket ticket = order.getTickets().stream().filter(isEqualToDTO(ticketDTO)).findFirst()
@@ -154,7 +154,11 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public String requestPayment(Long orderId) {
         Order order = getOrderById(orderId);
-        return paymentService.registerOrder(order);
+        if (order.getStatus() == OrderStatus.ASSIGNED) {
+            return paymentService.registerOrder(order);
+        } else {
+            throw new UnassignedOrderException(order.getId());
+        }
     }
 
     @Override
@@ -170,6 +174,7 @@ public class OrderServiceImpl implements OrderService {
     private void validateTicketsIfPaid(Order order) {
         if (order.getStatus().equals(OrderStatus.PAID)) {
             for (Ticket ticket : order.getTickets()) {
+                ticketService.assignTicketToUser(ticket.getId(), order.getUser().getUsername());
                 ticketService.validateTicket(ticket.getId());
             }
         }
