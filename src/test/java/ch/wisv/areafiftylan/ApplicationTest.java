@@ -61,7 +61,7 @@ public class ApplicationTest {
             @Override
             public String answer(InvocationOnMock invocation) throws Throwable {
                 Order order = (Order) invocation.getArguments()[0];
-                order.setStatus(OrderStatus.WAITING);
+                order.setStatus(OrderStatus.PENDING);
                 orderRepository.save(order);
                 return "http://paymentURL.com";
 
