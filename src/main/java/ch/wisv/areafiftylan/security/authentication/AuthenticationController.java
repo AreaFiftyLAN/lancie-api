@@ -43,7 +43,6 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
-import java.util.Optional;
 
 import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEntity;
 
@@ -67,8 +66,7 @@ public class AuthenticationController {
     @Autowired
     public AuthenticationController(UserService userService, AuthenticationService authenticationService,
                                     VerificationTokenRepository verificationTokenRepository,
-                                    PasswordResetTokenRepository passwordResetTokenRepository,
-                                    TokenRepository<AuthenticationToken> tokenRepository) {
+                                    PasswordResetTokenRepository passwordResetTokenRepository) {
         this.userService = userService;
         this.authenticationService = authenticationService;
 
@@ -106,21 +104,11 @@ public class AuthenticationController {
     }
 
     @PreAuthorize("isAuthenticated()")
-    @RequestMapping(value = "/token/logout", method = RequestMethod.GET)
+    @RequestMapping(value = "/logout", method = RequestMethod.GET)
     public ResponseEntity<?> removeSession(@RequestHeader("X-Auth-Token") String xAuth) {
-        if (!Strings.isNullOrEmpty(xAuth)) {
-            Optional<AuthenticationToken> tokenOptional = tokenRepository.findByToken(xAuth);
-            AuthenticationToken token = tokenOptional.orElseThrow(XAuthTokenNotFoundException::new);
-            if (!token.isValid()) {
-                throw new InvalidTokenException();
-            } else {
-                token.revoke();
-                tokenRepository.saveAndFlush(token);
-                return createResponseEntity(HttpStatus.OK, "Successfully logged out");
-            }
-        } else {
-            throw new IllegalArgumentException("No X-Auth-Token present");
-        }
+        authenticationService.removeAuthToken(xAuth);
+
+        return createResponseEntity(HttpStatus.OK, "Successfully logged out");
     }
 
 
