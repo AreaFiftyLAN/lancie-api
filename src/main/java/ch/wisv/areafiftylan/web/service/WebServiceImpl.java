@@ -19,19 +19,24 @@ public class WebServiceImpl implements WebService {
     }
 
     @Override
-    public List<CommitteeMember> getAllCommitteeMembers() {
-        return committeeMemberRepository.findAll();
-    }
-
-    @Override
     public void setAllCommitteeMembers(Collection<CommitteeMember> committeeMembers) {
         committeeMemberRepository.deleteAll();
         committeeMemberRepository.save(committeeMembers);
     }
 
     @Override
+    public List<CommitteeMember> getAllCommitteeMembers() {
+        return committeeMemberRepository.findAll();
+    }
+
+    @Override
     public void addCommitteeMember(CommitteeMember committeeMember) {
         committeeMemberRepository.save(committeeMember);
+    }
+
+    @Override
+    public void deleteAllCommitteeMembers() {
+        committeeMemberRepository.deleteAll();
     }
 
 }

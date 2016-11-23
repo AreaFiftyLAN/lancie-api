@@ -64,27 +64,34 @@ public class WebRestController {
         return eventService.getAllEvents();
     }
 
-    @GetMapping("/committee")
-    public Collection<CommitteeMember> getCommittee() {
-        return webService.getAllCommitteeMembers();
+    @RequestMapping("/sponsors")
+    public Collection<Sponsor> getSponspors() {
+        return sponsorService.getAllSponsors();
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/committee")
-    public ResponseEntity<?> setAllCommitteeMembers(@RequestBody List<CommitteeMember> committeeMembers) {
+    public ResponseEntity<?> createCommittee(@RequestBody List<CommitteeMember> committeeMembers) {
         webService.setAllCommitteeMembers(committeeMembers);
-        return ResponseEntityBuilder.createResponseEntity(HttpStatus.OK, "Committee members saved succesfully.");
+        return ResponseEntityBuilder.createResponseEntity(HttpStatus.CREATED, "Committee members saved successfully.", committeeMembers);
+    }
+
+    @GetMapping("/committee")
+    public Collection<CommitteeMember> readCommittee() {
+        return webService.getAllCommitteeMembers();
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/committee")
-    public ResponseEntity<?> addCommitteeMember(@RequestBody CommitteeMember committeeMember) {
+    public ResponseEntity<?> updateCommittee(@RequestBody CommitteeMember committeeMember) {
         webService.addCommitteeMember(committeeMember);
-        return ResponseEntityBuilder.createResponseEntity(HttpStatus.OK, "Committee member added succesfully.");
+        return ResponseEntityBuilder.createResponseEntity(HttpStatus.ACCEPTED, "Committee member added successfully.", committeeMember);
     }
 
-    @RequestMapping("/sponsors")
-    public Collection<Sponsor> getSponspors() {
-        return sponsorService.getAllSponsors();
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/committee")
+    public ResponseEntity<?> deleteCommittee() {
+        webService.deleteAllCommitteeMembers();
+        return ResponseEntityBuilder.createResponseEntity(HttpStatus.OK, "Committee members deleted successfully.");
     }
 }

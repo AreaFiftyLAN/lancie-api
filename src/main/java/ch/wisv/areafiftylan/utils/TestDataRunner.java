@@ -35,6 +35,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -112,21 +113,16 @@ public class TestDataRunner implements CommandLineRunner {
         }
         seatService.reserveSeatForTicket("A", 2, ticket.getId());
 
-        CommitteeMember committeeMember1 = new CommitteeMember("Lotte Bryan", "Chairman", "group", 1l);
-        CommitteeMember committeeMember2 = new CommitteeMember("Sterre Noorthoek", "Secretary", "male", 2l);
-        CommitteeMember committeeMember3 = new CommitteeMember("Francis Behnen", "Treasurer", "money", 3l);
-        CommitteeMember committeeMember4 = new CommitteeMember("Hilco van der Wilk", "Commissioner of Promo", "bullhorn", 4l);
-        CommitteeMember committeeMember5 = new CommitteeMember("Lotte Millen van Osch", "Commissioner of Logistics", "truck", 5l);
-        CommitteeMember committeeMember6 = new CommitteeMember("Matthijs Kok", "Commissioner of Systems", "cogs", 6l);
-        CommitteeMember committeeMember7 = new CommitteeMember("Beer van der Drift", "Qualitate Qua", "heart", 7l);
-        List<CommitteeMember> committeeMemberList = new ArrayList<>();
-        committeeMemberList.add(committeeMember1);
-        committeeMemberList.add(committeeMember2);
-        committeeMemberList.add(committeeMember3);
-        committeeMemberList.add(committeeMember4);
-        committeeMemberList.add(committeeMember5);
-        committeeMemberList.add(committeeMember6);
-        committeeMemberList.add(committeeMember7);
+        CommitteeMember committeeMember1 = new CommitteeMember(1L, "Lotte Bryan", "Chairman", "group");
+        CommitteeMember committeeMember2 = new CommitteeMember(2L, "Sterre Noorthoek", "Secretary", "male");
+        CommitteeMember committeeMember3 = new CommitteeMember(3L, "Francis Behnen", "Treasurer", "money");
+        CommitteeMember committeeMember4 = new CommitteeMember(4L, "Hilco van der Wilk", "Commissioner of Promo", "bullhorn");
+        CommitteeMember committeeMember5 = new CommitteeMember(5L, "Lotte Millen van Osch", "Commissioner of Logistics", "truck");
+        CommitteeMember committeeMember6 = new CommitteeMember(6L, "Matthijs Kok", "Commissioner of Systems", "cogs");
+        CommitteeMember committeeMember7 = new CommitteeMember(7L, "Beer van der Drift", "Qualitate Qua", "heart");
+        List<CommitteeMember> committeeMemberList = new ArrayList<>(Arrays.asList(
+                committeeMember1, committeeMember2, committeeMember3, committeeMember4,
+                committeeMember5, committeeMember6, committeeMember7));
         committeeMemberRepository.save(committeeMemberList);
     }
 }
