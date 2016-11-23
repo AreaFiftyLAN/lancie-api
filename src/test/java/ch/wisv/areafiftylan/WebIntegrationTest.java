@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import static com.jayway.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -32,7 +31,7 @@ public class WebIntegrationTest extends IntegrationTest {
     private CommitteeMember committeeMember5 = new CommitteeMember(5L, "Lotte Millen van Osch", "Commissioner of Logistics", "truck");
     private CommitteeMember committeeMember6 = new CommitteeMember(6L, "Matthijs Kok", "Commissioner of Systems", "cogs");
     private CommitteeMember committeeMember7 = new CommitteeMember(7L, "Beer van der Drift", "Qualitate Qua", "heart");
-    private List<CommitteeMember> committeeMemberList = new ArrayList<>(Arrays.asList(
+    private ArrayList<CommitteeMember> committeeMemberList = new ArrayList<>(Arrays.asList(
             committeeMember1, committeeMember2, committeeMember3, committeeMember4,
             committeeMember5, committeeMember6, committeeMember7));
 
@@ -47,7 +46,7 @@ public class WebIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void testSetCommitteeDataAsUser() {
+    public void testSetCommitteeAsUser() {
         SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
@@ -64,7 +63,7 @@ public class WebIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void testSetCommitteeDataAsAdmin() {
+    public void testSetCommitteeAsAdmin() {
         SessionData login = login(admin.getUsername(), adminCleartextPassword);
 
         //@formatter:off
@@ -76,42 +75,12 @@ public class WebIntegrationTest extends IntegrationTest {
             put("/web/committee").
         then().
             statusCode(HttpStatus.SC_CREATED).
-            body("message", equalTo("Committee members saved successfully."));
+            body("message", equalTo("Committee saved successfully."));
         //@formatter:on
     }
 
     @Test
-    public void testGetCommitteeDataAsUser() {
-        SessionData login = login(user.getUsername(), userCleartextPassword);
-
-        //@formatter:off
-        given().
-                filter(sessionFilter).
-                header(login.getCsrfHeader()).
-                when().
-                get("/web/committee").
-                then().
-                statusCode(HttpStatus.SC_OK);
-        //@formatter:on
-    }
-
-    @Test
-    public void testGetCommitteeDataAsAdmin() {
-        SessionData login = login(admin.getUsername(), adminCleartextPassword);
-
-        //@formatter:off
-        given().
-                filter(sessionFilter).
-                header(login.getCsrfHeader()).
-                when().
-                get("/web/committee").
-                then().
-                statusCode(HttpStatus.SC_OK);
-        //@formatter:on
-    }
-
-    @Test
-    public void testAddCommitteeDataAsUser() {
+    public void testGetCommitteeAsUser() {
         SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
@@ -119,16 +88,14 @@ public class WebIntegrationTest extends IntegrationTest {
             filter(sessionFilter).
             header(login.getCsrfHeader()).
         when().
-            content(committeeMember1).contentType(ContentType.JSON).
-            post("/web/committee").
+            get("/web/committee").
         then().
-            statusCode(HttpStatus.SC_FORBIDDEN).
-            body("message", equalTo("Access denied"));
+            statusCode(HttpStatus.SC_OK);
         //@formatter:on
     }
 
     @Test
-    public void testAddCommitteeDataAsAdmin() {
+    public void testGetCommitteeAsAdmin() {
         SessionData login = login(admin.getUsername(), adminCleartextPassword);
 
         //@formatter:off
@@ -136,15 +103,14 @@ public class WebIntegrationTest extends IntegrationTest {
             filter(sessionFilter).
             header(login.getCsrfHeader()).
         when().
-            content(committeeMember1).contentType(ContentType.JSON).
-            post("/web/committee").
+            get("/web/committee").
         then().
-            statusCode(HttpStatus.SC_ACCEPTED).
-            body("message", equalTo("Committee member added successfully."));
+            statusCode(HttpStatus.SC_OK);
         //@formatter:on
     }
+
     @Test
-    public void testDeleteCommitteeDataAsUser() {
+    public void testDeleteCommitteeAsUser() {
         SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
@@ -160,7 +126,7 @@ public class WebIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void testDeleteCommitteeDataAsAdmin() {
+    public void testDeleteCommitteeAsAdmin() {
         SessionData login = login(admin.getUsername(), adminCleartextPassword);
 
         //@formatter:off
@@ -171,7 +137,104 @@ public class WebIntegrationTest extends IntegrationTest {
             delete("/web/committee").
         then().
             statusCode(HttpStatus.SC_OK).
-            body("message", equalTo("Committee members deleted successfully."));
+            body("message", equalTo("Committee deleted successfully."));
         //@formatter:on
     }
+
+    @Test
+    public void testAddCommitteeMemberAsUser() {
+        SessionData login = login(user.getUsername(), userCleartextPassword);
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            content(committeeMember1).contentType(ContentType.JSON).
+            put("/web/committee/1").
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN).
+            body("message", equalTo("Access denied"));
+        //@formatter:on
+    }
+
+    @Test
+    public void testAddCommitteeMemberAsAdmin() {
+        SessionData login = login(admin.getUsername(), adminCleartextPassword);
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            content(committeeMember1).contentType(ContentType.JSON).
+            put("/web/committee/1").
+        then().
+            statusCode(HttpStatus.SC_ACCEPTED).
+            body("message", equalTo("Committee member added successfully."));
+        //@formatter:on
+    }
+
+    @Test
+    public void testGetCommitteeMemberAsUser() {
+        SessionData login = login(user.getUsername(), userCleartextPassword);
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            get("/web/committee/1").
+        then().
+            statusCode(HttpStatus.SC_OK);
+        //@formatter:on
+    }
+
+    @Test
+    public void testGetCommitteeMemberAsAdmin() {
+        SessionData login = login(admin.getUsername(), adminCleartextPassword);
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            get("/web/committee/1").
+        then().
+            statusCode(HttpStatus.SC_OK);
+        //@formatter:on
+    }
+
+    @Test
+    public void testDeleteCommitteeMemberAsUser() {
+        SessionData login = login(user.getUsername(), userCleartextPassword);
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            delete("/web/committee/1").
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN).
+            body("message", equalTo("Access denied"));
+        //@formatter:on
+    }
+
+    @Test
+    public void testDeleteCommitteeMemberAsAdmin() {
+        SessionData login = login(admin.getUsername(), adminCleartextPassword);
+
+        //@formatter:off
+        given().
+            filter(sessionFilter).
+            header(login.getCsrfHeader()).
+        when().
+            delete("/web/committee/1").
+        then().
+            statusCode(HttpStatus.SC_OK).
+            body("message", equalTo("Committee member deleted successfully."));
+        //@formatter:on
+    }
+
 }

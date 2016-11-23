@@ -36,7 +36,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * Created by Sille Kamoen on 24-3-16.
@@ -120,7 +119,7 @@ public class TestDataRunner implements CommandLineRunner {
         CommitteeMember committeeMember5 = new CommitteeMember(5L, "Lotte Millen van Osch", "Commissioner of Logistics", "truck");
         CommitteeMember committeeMember6 = new CommitteeMember(6L, "Matthijs Kok", "Commissioner of Systems", "cogs");
         CommitteeMember committeeMember7 = new CommitteeMember(7L, "Beer van der Drift", "Qualitate Qua", "heart");
-        List<CommitteeMember> committeeMemberList = new ArrayList<>(Arrays.asList(
+        ArrayList<CommitteeMember> committeeMemberList = new ArrayList<>(Arrays.asList(
                 committeeMember1, committeeMember2, committeeMember3, committeeMember4,
                 committeeMember5, committeeMember6, committeeMember7));
         committeeMemberRepository.save(committeeMemberList);

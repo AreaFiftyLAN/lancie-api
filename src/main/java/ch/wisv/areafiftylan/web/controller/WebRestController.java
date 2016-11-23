@@ -72,26 +72,38 @@ public class WebRestController {
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/committee")
     public ResponseEntity<?> createCommittee(@RequestBody List<CommitteeMember> committeeMembers) {
-        webService.setAllCommitteeMembers(committeeMembers);
-        return ResponseEntityBuilder.createResponseEntity(HttpStatus.CREATED, "Committee members saved successfully.", committeeMembers);
+        webService.setCommittee(committeeMembers);
+        return ResponseEntityBuilder.createResponseEntity(HttpStatus.CREATED, "Committee saved successfully.");
     }
 
     @GetMapping("/committee")
-    public Collection<CommitteeMember> readCommittee() {
-        return webService.getAllCommitteeMembers();
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/committee")
-    public ResponseEntity<?> updateCommittee(@RequestBody CommitteeMember committeeMember) {
-        webService.addCommitteeMember(committeeMember);
-        return ResponseEntityBuilder.createResponseEntity(HttpStatus.ACCEPTED, "Committee member added successfully.", committeeMember);
+    public Collection<CommitteeMember> getCommittee() {
+        return webService.getCommittee();
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/committee")
     public ResponseEntity<?> deleteCommittee() {
-        webService.deleteAllCommitteeMembers();
-        return ResponseEntityBuilder.createResponseEntity(HttpStatus.OK, "Committee members deleted successfully.");
+        webService.deleteCommittee();
+        return ResponseEntityBuilder.createResponseEntity(HttpStatus.OK, "Committee deleted successfully.");
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/committee/{memberID}")
+    public ResponseEntity<?> addCommitteeMember(@PathVariable Long memberID, @RequestBody CommitteeMember committeeMember) {
+        webService.addCommitteeMember(memberID, committeeMember);
+        return ResponseEntityBuilder.createResponseEntity(HttpStatus.ACCEPTED, "Committee member added successfully.");
+    }
+
+    @GetMapping("/committee/{memberID}")
+    public CommitteeMember getCommitteeMember(@PathVariable Long memberID) {
+        return webService.getCommitteeMember(memberID);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/committee/{memberID}")
+    public ResponseEntity<?> deleteCommitteeMember(@PathVariable Long memberID) {
+        webService.deleteCommitteeMember(memberID);
+        return ResponseEntityBuilder.createResponseEntity(HttpStatus.OK, "Committee member deleted successfully.");
     }
 }
