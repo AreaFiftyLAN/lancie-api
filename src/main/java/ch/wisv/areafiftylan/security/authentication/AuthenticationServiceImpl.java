@@ -17,10 +17,13 @@
 
 package ch.wisv.areafiftylan.security.authentication;
 
+import ch.wisv.areafiftylan.exception.InvalidTokenException;
+import ch.wisv.areafiftylan.exception.XAuthTokenNotFoundException;
 import ch.wisv.areafiftylan.security.token.AuthenticationToken;
 import ch.wisv.areafiftylan.security.token.repository.AuthenticationTokenRepository;
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.users.service.UserService;
+import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -53,6 +56,23 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
 
         throw new AuthenticationCredentialsNotFoundException("Incorrect credentials");
+    }
+
+    @Override
+    public void removeAuthToken(String xAuth) {
+        if (Strings.isNullOrEmpty(xAuth)) {
+            throw new IllegalArgumentException("No X-Auth-Token present");
+        }
+
+        AuthenticationToken token =
+                authenticationTokenRepository.findByToken(xAuth).orElseThrow(XAuthTokenNotFoundException::new);
+
+        if (!token.isValid()) {
+            throw new InvalidTokenException();
+        }
+
+        token.revoke();
+        authenticationTokenRepository.saveAndFlush(token);
     }
 
     private boolean correctCredentials(User user, String password) {

@@ -20,6 +20,6 @@ package ch.wisv.areafiftylan.exception;
 public class TokenNotFoundException extends RuntimeException {
 
     public TokenNotFoundException(String token) {
-        super("could not find token '" + token + "'.");
+        super("Could not find token " + token);
     }
 }

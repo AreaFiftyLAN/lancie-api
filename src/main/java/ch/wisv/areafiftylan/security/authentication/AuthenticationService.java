@@ -20,4 +20,6 @@ package ch.wisv.areafiftylan.security.authentication;
 public interface AuthenticationService {
 
     String createNewAuthToken(String username, String password);
+
+    void removeAuthToken(String xAuth);
 }
