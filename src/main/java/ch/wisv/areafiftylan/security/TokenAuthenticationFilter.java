@@ -36,7 +36,7 @@ import java.util.Optional;
 
 class TokenAuthenticationFilter extends GenericFilterBean {
 
-    private AuthenticationTokenRepository authenticationTokenRepository;
+    private final AuthenticationTokenRepository authenticationTokenRepository;
 
     TokenAuthenticationFilter(AuthenticationTokenRepository authenticationTokenRepository) {
         this.authenticationTokenRepository = authenticationTokenRepository;

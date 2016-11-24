@@ -54,11 +54,11 @@ import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEnt
 @PreAuthorize("isAuthenticated()")
 public class CurrentUserRestController {
 
-    private UserService userService;
-    private SeatService seatService;
-    private TeamService teamService;
-    private OrderService orderService;
-    private TicketService ticketService;
+    private final UserService userService;
+    private final SeatService seatService;
+    private final TeamService teamService;
+    private final OrderService orderService;
+    private final TicketService ticketService;
 
     @Autowired
     CurrentUserRestController(UserService userService, OrderService orderService, TicketService ticketService,

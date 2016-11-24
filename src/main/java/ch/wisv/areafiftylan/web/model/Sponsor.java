@@ -19,9 +19,9 @@ package ch.wisv.areafiftylan.web.model;
 
 public class Sponsor {
 
-    String name;
-    String imagePath;
-    String website;
+    private String name;
+    private String imagePath;
+    private String website;
 
     public Sponsor(String name, String imagePath, String website) {
         this.name = name;

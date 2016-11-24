@@ -41,8 +41,8 @@ import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEnt
 @RestController
 public class SeatRestController {
 
-    private SeatService seatService;
-    private UserService userService;
+    private final SeatService seatService;
+    private final UserService userService;
 
     @Autowired
     public SeatRestController(SeatService seatService, UserService userService) {

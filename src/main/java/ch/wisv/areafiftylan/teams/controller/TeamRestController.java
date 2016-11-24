@@ -45,7 +45,7 @@ import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEnt
 @RequestMapping("/teams")
 public class TeamRestController {
 
-    private TeamService teamService;
+    private final TeamService teamService;
 
     @Autowired
     public TeamRestController(TeamService teamService) {

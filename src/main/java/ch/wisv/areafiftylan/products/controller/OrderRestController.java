@@ -45,7 +45,7 @@ import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEnt
 @RestController
 public class OrderRestController {
 
-    private OrderService orderService;
+    private final OrderService orderService;
 
     @Autowired
     public OrderRestController(OrderService orderService) {

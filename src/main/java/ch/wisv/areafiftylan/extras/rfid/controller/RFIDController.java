@@ -34,10 +34,6 @@ import java.util.Collection;
 
 import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEntity;
 
-/**
- * Created by beer on 5-5-16.
- */
-
 @RestController
 @RequestMapping("/rfid")
 @PreAuthorize("hasRole('ADMIN')")

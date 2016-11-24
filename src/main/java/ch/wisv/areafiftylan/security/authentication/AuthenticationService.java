@@ -17,10 +17,7 @@
 
 package ch.wisv.areafiftylan.security.authentication;
 
-/**
- * Created by Sille Kamoen on 6-5-16.
- */
 public interface AuthenticationService {
 
-    public String createNewAuthToken(String username, String password);
+    String createNewAuthToken(String username, String password);
 }

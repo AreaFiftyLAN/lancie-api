@@ -31,9 +31,6 @@ import java.util.Collection;
 
 import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEntity;
 
-/**
- * Created by beer on 16-5-16.
- */
 @RestController
 @PreAuthorize("hasRole('ADMIN')")
 @RequestMapping(value = "/consumptions")

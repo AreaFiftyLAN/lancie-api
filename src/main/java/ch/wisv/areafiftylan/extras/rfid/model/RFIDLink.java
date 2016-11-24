@@ -22,9 +22,6 @@ import ch.wisv.areafiftylan.products.model.Ticket;
 
 import javax.persistence.*;
 
-/**
- * Created by beer on 5-5-16.
- */
 @Entity
 public class RFIDLink {
     @Id
@@ -41,7 +38,7 @@ public class RFIDLink {
     }
 
     public RFIDLink(String rfid, Ticket ticket) {
-        if (!isValidRFID(rfid)) {
+        if (isInvalidRFID(rfid)) {
             throw new InvalidRFIDException(rfid);
         }
 
@@ -58,9 +55,9 @@ public class RFIDLink {
     }
 
     //Static Content
-    public static final int RFID_CHAR_COUNT = 10;
+    private static final int RFID_CHAR_COUNT = 10;
 
-    public static boolean isValidRFID(String rfid) {
-        return rfid.length() == RFID_CHAR_COUNT;
+    public static boolean isInvalidRFID(String rfid) {
+        return rfid.length() != RFID_CHAR_COUNT;
     }
 }

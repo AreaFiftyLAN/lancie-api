@@ -19,9 +19,6 @@ package ch.wisv.areafiftylan.products.model;
 
 import lombok.Getter;
 
-/**
- * Created by sille on 10-1-16.
- */
 public class TicketInformationResponse {
     @Getter
     private String ticketType;

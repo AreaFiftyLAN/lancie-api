@@ -47,11 +47,11 @@ public class TaskScheduler {
 
     private final int USER_CLEANUP_CHECK_INTERVAL_MINUTES = 60;
 
-    private OrderRepository orderRepository;
-    private OrderService orderService;
+    private final OrderRepository orderRepository;
+    private final OrderService orderService;
 
-    private UserRepository userRepository;
-    private VerificationTokenRepository verificationTokenRepository;
+    private final UserRepository userRepository;
+    private final VerificationTokenRepository verificationTokenRepository;
 
     @Autowired
     public TaskScheduler(OrderRepository orderRepository, OrderService orderService,

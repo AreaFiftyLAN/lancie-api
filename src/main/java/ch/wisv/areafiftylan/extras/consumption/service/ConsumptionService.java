@@ -22,9 +22,6 @@ import ch.wisv.areafiftylan.extras.consumption.model.ConsumptionMap;
 
 import java.util.Collection;
 
-/**
- * Created by beer on 16-5-16.
- */
 public interface ConsumptionService {
     ConsumptionMap getByTicketIdIfValid(Long ticketId);
 

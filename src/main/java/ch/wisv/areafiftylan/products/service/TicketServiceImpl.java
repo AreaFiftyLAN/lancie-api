@@ -42,11 +42,11 @@ import java.util.stream.Collectors;
 
 @Service
 public class TicketServiceImpl implements TicketService {
-    private TicketRepository ticketRepository;
-    private UserService userService;
-    private TicketTransferTokenRepository tttRepository;
-    private MailService mailService;
-    private TeamService teamService;
+    private final TicketRepository ticketRepository;
+    private final UserService userService;
+    private final TicketTransferTokenRepository tttRepository;
+    private final MailService mailService;
+    private final TeamService teamService;
     private RFIDService rfidService;
 
     @Value("${a5l.user.acceptTransferUrl}")

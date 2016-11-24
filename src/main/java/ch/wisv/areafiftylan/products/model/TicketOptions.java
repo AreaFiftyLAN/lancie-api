@@ -17,13 +17,10 @@
 
 package ch.wisv.areafiftylan.products.model;
 
-/**
- * Created by sille on 28-12-15.
- */
 public enum TicketOptions {
     PICKUPSERVICE(2.50F), CHMEMBER(-5.00F);
 
-    float price;
+    final float price;
 
     TicketOptions(float price) {
         this.price = price;

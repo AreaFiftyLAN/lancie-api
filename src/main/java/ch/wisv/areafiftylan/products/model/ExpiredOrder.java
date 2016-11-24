@@ -28,15 +28,15 @@ import java.time.LocalDateTime;
 @Entity
 public class ExpiredOrder {
     @Id
-    Long id;
+    private Long id;
 
-    int numberOfTickets;
+    private int numberOfTickets;
 
-    String createdAt;
+    private String createdAt;
 
-    String expiredAt;
+    private String expiredAt;
 
-    String createdBy;
+    private String createdBy;
 
     public ExpiredOrder() {
         //JPA Only

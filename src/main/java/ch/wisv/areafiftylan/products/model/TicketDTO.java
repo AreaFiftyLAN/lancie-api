@@ -22,9 +22,6 @@ import lombok.Setter;
 
 import javax.validation.constraints.NotNull;
 
-/**
- * Created by sille on 22-12-15.
- */
 public class TicketDTO {
     @NotNull
     @Getter
@@ -33,7 +30,7 @@ public class TicketDTO {
 
     @NotNull
     @Setter
-    Boolean pickupService;
+    private Boolean pickupService;
 
     public boolean hasPickupService() {
         return pickupService;
@@ -41,7 +38,7 @@ public class TicketDTO {
 
     @NotNull
     @Setter
-    Boolean chMember;
+    private Boolean chMember;
 
     public Boolean isCHMember() {
         return chMember;

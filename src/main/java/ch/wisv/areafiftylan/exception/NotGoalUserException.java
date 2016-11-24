@@ -17,7 +17,7 @@
 
 package ch.wisv.areafiftylan.exception;
 
-public class NotGoalUserException extends RuntimeException {
+class NotGoalUserException extends RuntimeException {
     public NotGoalUserException() {
         super("You are not the goal user of this operation");
     }

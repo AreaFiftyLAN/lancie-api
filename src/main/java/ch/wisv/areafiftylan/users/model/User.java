@@ -40,11 +40,11 @@ public class User implements Serializable, UserDetails {
     @Column(nullable = false)
     @JsonView(View.NoProfile.class)
     @Email(message = "Username should be a valid Email!")
-    protected String username;
+    private String username;
 
     @OneToOne(targetEntity = Profile.class, cascade = CascadeType.ALL)
     @JsonView(View.Public.class)
-    protected Profile profile;
+    private Profile profile;
 
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Id
@@ -57,11 +57,11 @@ public class User implements Serializable, UserDetails {
     private Set<Role> roles;
 
     @JsonIgnore
-    private boolean accountNonExpired = true;
+    private final boolean accountNonExpired = true;
     @JsonIgnore
     private boolean accountNonLocked = true;
     @JsonIgnore
-    private boolean credentialsNonExpired = true;
+    private final boolean credentialsNonExpired = true;
     @JsonIgnore
     private boolean enabled = true;
 

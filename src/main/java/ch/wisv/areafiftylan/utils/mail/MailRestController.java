@@ -41,9 +41,9 @@ public class MailRestController {
         this.teamService = teamService;
     }
 
-    private MailService mailService;
-    private UserService userService;
-    private TeamService teamService;
+    private final MailService mailService;
+    private final UserService userService;
+    private final TeamService teamService;
 
     @RequestMapping(value = "/contact", method = RequestMethod.POST)
     ResponseEntity<?> sendContactForm(@Validated @RequestBody ContactMailDTO mailDTO) {

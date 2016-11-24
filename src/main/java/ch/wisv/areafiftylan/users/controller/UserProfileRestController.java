@@ -35,7 +35,7 @@ import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEnt
 @RequestMapping("/users")
 public class UserProfileRestController {
 
-    private UserService userService;
+    private final UserService userService;
 
     @Autowired
     UserProfileRestController(UserService userService) {

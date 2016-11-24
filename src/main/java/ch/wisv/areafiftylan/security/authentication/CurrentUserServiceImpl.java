@@ -39,12 +39,12 @@ import java.util.Collection;
 @Service
 public class CurrentUserServiceImpl implements CurrentUserService {
 
-    private TeamService teamService;
-    private OrderService orderService;
-    private TicketRepository ticketRepository;
-    private TicketService ticketService;
-    private TeamInviteTokenRepository teamInviteTokenRepository;
-    private TicketTransferTokenRepository tttRepository;
+    private final TeamService teamService;
+    private final OrderService orderService;
+    private final TicketRepository ticketRepository;
+    private final TicketService ticketService;
+    private final TeamInviteTokenRepository teamInviteTokenRepository;
+    private final TicketTransferTokenRepository tttRepository;
 
     @Autowired
     public CurrentUserServiceImpl(TeamService teamService, OrderService orderService, TicketRepository ticketRepository,

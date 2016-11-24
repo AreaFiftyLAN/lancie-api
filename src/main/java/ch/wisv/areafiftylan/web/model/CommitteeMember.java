@@ -19,9 +19,9 @@ package ch.wisv.areafiftylan.web.model;
 
 public class CommitteeMember {
 
-    String name;
-    String function;
-    String icon;
+    private String name;
+    private String function;
+    private String icon;
 
     public CommitteeMember(String name, String function, String icon) {
         this.name = name;

@@ -21,9 +21,6 @@ import ch.wisv.areafiftylan.extras.rfid.model.RFIDLink;
 
 import java.util.Collection;
 
-/**
- * Created by beer on 5-5-16.
- */
 public interface RFIDService {
     Collection<RFIDLink> getAllRFIDLinks();
 

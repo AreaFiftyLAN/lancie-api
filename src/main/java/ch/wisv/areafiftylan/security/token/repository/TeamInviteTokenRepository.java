@@ -22,9 +22,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
 
-/**
- * Created by Sille Kamoen on 9-3-16.
- */
 @Repository
 public interface TeamInviteTokenRepository extends TokenRepository<TeamInviteToken> {
 

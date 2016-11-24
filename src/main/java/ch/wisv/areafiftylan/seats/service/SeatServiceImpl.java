@@ -35,9 +35,9 @@ import java.util.stream.Collectors;
 @Service
 public class SeatServiceImpl implements SeatService {
 
-    private SeatRepository seatRepository;
-    private TicketRepository ticketRepository;
-    private TeamService teamService;
+    private final SeatRepository seatRepository;
+    private final TicketRepository ticketRepository;
+    private final TeamService teamService;
 
     private static final Object seatReservationLock = new Object();
 

@@ -23,9 +23,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
-/**
- * Created by beer on 20-5-16.
- */
 @Entity
 public class Consumption {
     @GeneratedValue
@@ -55,10 +52,7 @@ public class Consumption {
 
         Consumption that = (Consumption) o;
 
-        if (id != that.id) {
-            return false;
-        }
-        return name.equals(that.getName());
+        return id == that.id && name.equals(that.getName());
 
     }
 }

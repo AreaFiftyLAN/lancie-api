@@ -27,17 +27,14 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-/**
- * Created by Sille Kamoen on 6-5-16.
- */
 @Service
 public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Autowired
-    AuthenticationTokenRepository authenticationTokenRepository;
+    private AuthenticationTokenRepository authenticationTokenRepository;
 
     @Autowired
-    UserService userService;
+    private UserService userService;
 
     @Override
     public String createNewAuthToken(String username, String password) {

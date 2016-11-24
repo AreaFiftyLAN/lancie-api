@@ -38,9 +38,9 @@ import java.util.Locale;
 @Service
 public class MailServiceImpl implements MailService {
 
-    private JavaMailSender mailSender;
+    private final JavaMailSender mailSender;
 
-    private SpringTemplateEngine templateEngine;
+    private final SpringTemplateEngine templateEngine;
 
     @Value("${a5l.mail.sender}")
     String sender;

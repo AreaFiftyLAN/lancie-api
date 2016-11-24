@@ -17,10 +17,6 @@
 
 package ch.wisv.areafiftylan.exception;
 
-/**
- * Created by sille on 13-1-16.
- */
-
 public class TicketNotFoundException extends RuntimeException {
 
     public TicketNotFoundException() {

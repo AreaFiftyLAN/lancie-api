@@ -24,12 +24,12 @@ import java.util.LinkedList;
 
 public class Tournament extends Event {
 
-    Sponsor sponsor;
-    LinkedList<String> prizes;
-    Format format;
-    LocalDateTime startingDateTime;
-    String rulePath;
-    Collection<Platform> platform;
+    private Sponsor sponsor;
+    private LinkedList<String> prizes;
+    private Format format;
+    private LocalDateTime startingDateTime;
+    private String rulePath;
+    private Collection<Platform> platform;
 
     public Tournament(String title, String subtitle, String headerTitle, String description, String backgroundImagePath,
                       Sponsor sponsor, LinkedList<String> prizes, Format format, LocalDateTime startingDateTime,

@@ -25,9 +25,6 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 
-/**
- * Created by beer on 11-3-16.
- */
 @Entity
 public class TicketTransferToken extends Token {
     private static final int EXPIRATION = 0;

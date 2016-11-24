@@ -19,9 +19,6 @@ package ch.wisv.areafiftylan.products.service;
 
 import ch.wisv.areafiftylan.products.model.Order;
 
-/**
- * Created by sille on 25-12-15.
- */
 public interface PaymentService {
 
     /**
@@ -31,7 +28,7 @@ public interface PaymentService {
      *
      * @return The URL to make the payment
      */
-    public String registerOrder(Order order);
+    String registerOrder(Order order);
 
     /**
      * Update the status of an Order at the payment provider
@@ -40,5 +37,5 @@ public interface PaymentService {
      *
      * @return The updated Order
      */
-    public Order updateStatus(String orderReference);
+    Order updateStatus(String orderReference);
 }
