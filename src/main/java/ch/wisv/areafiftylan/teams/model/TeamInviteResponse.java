@@ -19,9 +19,6 @@ package ch.wisv.areafiftylan.teams.model;
 
 import lombok.Getter;
 
-/**
- * Created by Sille Kamoen on 9-3-16.
- */
 public class TeamInviteResponse {
     @Getter
     private Long teamId;

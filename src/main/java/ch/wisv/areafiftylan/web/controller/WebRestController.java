@@ -35,9 +35,9 @@ import java.util.Collection;
 @RequestMapping("/web")
 public class WebRestController {
 
-    TournamentServiceImpl tournamentService;
-    EventServiceImpl eventService;
-    SponsorServiceImpl sponsorService;
+    private final TournamentServiceImpl tournamentService;
+    private final EventServiceImpl eventService;
+    private final SponsorServiceImpl sponsorService;
 
     @Autowired
     public WebRestController(TournamentServiceImpl tournamentService, EventServiceImpl eventService,

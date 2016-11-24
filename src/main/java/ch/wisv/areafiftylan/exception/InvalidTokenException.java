@@ -17,10 +17,6 @@
 
 package ch.wisv.areafiftylan.exception;
 
-/**
- * Created by beer on 11-3-16.
- */
-
 public class InvalidTokenException extends RuntimeException {
     public InvalidTokenException() {
         super("Token is expired, has been already used or has been revoked.");

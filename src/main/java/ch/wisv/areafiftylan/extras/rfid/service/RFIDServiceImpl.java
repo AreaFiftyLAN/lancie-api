@@ -27,16 +27,17 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 
-/**
- * Created by beer on 5-5-16.
- */
 @Service
 public class RFIDServiceImpl implements RFIDService {
-    @Autowired
-    private RFIDLinkRepository rfidLinkRepository;
+
+    private final RFIDLinkRepository rfidLinkRepository;
+    private final TicketService ticketService;
 
     @Autowired
-    private TicketService ticketService;
+    public RFIDServiceImpl(RFIDLinkRepository rfidLinkRepository, TicketService ticketService) {
+        this.rfidLinkRepository = rfidLinkRepository;
+        this.ticketService = ticketService;
+    }
 
     @Override
     public Collection<RFIDLink> getAllRFIDLinks() {
@@ -97,15 +98,15 @@ public class RFIDServiceImpl implements RFIDService {
         return link;
     }
 
-    public RFIDLink getLinkByRFID(String rfid) {
-        if (!RFIDLink.isValidRFID(rfid)) {
+    private RFIDLink getLinkByRFID(String rfid) {
+        if (RFIDLink.isInvalidRFID(rfid)) {
             throw new InvalidRFIDException(rfid);
         }
 
-        return rfidLinkRepository.findByRfid(rfid).orElseThrow(() -> new RFIDNotFoundException());
+        return rfidLinkRepository.findByRfid(rfid).orElseThrow(RFIDNotFoundException::new);
     }
 
-    public RFIDLink getLinkByTicketId(Long ticketId) {
-        return rfidLinkRepository.findByTicketId(ticketId).orElseThrow(() -> new RFIDNotFoundException());
+    private RFIDLink getLinkByTicketId(Long ticketId) {
+        return rfidLinkRepository.findByTicketId(ticketId).orElseThrow(RFIDNotFoundException::new);
     }
 }

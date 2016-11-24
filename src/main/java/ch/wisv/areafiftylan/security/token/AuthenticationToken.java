@@ -21,9 +21,6 @@ import ch.wisv.areafiftylan.users.model.User;
 
 import javax.persistence.Entity;
 
-/**
- * Created by Sille Kamoen on 6-5-16.
- */
 @Entity
 public class AuthenticationToken extends Token {
 

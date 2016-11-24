@@ -24,9 +24,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
 
-/**
- * Created by sille on 22-12-15.
- */
 @Repository
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
 

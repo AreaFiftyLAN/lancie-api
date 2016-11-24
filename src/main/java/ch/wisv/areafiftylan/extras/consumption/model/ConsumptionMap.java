@@ -26,9 +26,6 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Collection;
 
-/**
- * Created by beer on 8-5-16.
- */
 @Entity
 public class ConsumptionMap {
     @Id

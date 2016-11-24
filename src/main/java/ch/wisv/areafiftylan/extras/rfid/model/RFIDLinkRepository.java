@@ -22,9 +22,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
-/**
- * Created by beer on 5-5-16.
- */
 @Repository
 public interface RFIDLinkRepository extends JpaRepository<RFIDLink, Long> {
     Optional<RFIDLink> findByRfid(String rfid);

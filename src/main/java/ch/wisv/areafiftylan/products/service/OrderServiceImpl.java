@@ -37,11 +37,11 @@ import java.util.stream.Collectors;
 @Service
 public class OrderServiceImpl implements OrderService {
 
-    private OrderRepository orderRepository;
-    private ExpiredOrderRepository expiredOrderRepository;
-    private TicketService ticketService;
-    private UserService userService;
-    private PaymentService paymentService;
+    private final OrderRepository orderRepository;
+    private final ExpiredOrderRepository expiredOrderRepository;
+    private final TicketService ticketService;
+    private final UserService userService;
+    private final PaymentService paymentService;
 
     @Value("${a5l.orderLimit}")
     private int ORDER_LIMIT;

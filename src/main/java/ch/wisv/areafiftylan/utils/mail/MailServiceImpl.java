@@ -35,12 +35,13 @@ import javax.mail.internet.MimeMessage;
 import java.util.Collection;
 import java.util.Locale;
 
+@SuppressWarnings("SpringJavaAutowiringInspection")
 @Service
 public class MailServiceImpl implements MailService {
 
-    private JavaMailSender mailSender;
+    private final JavaMailSender mailSender;
 
-    private SpringTemplateEngine templateEngine;
+    private final SpringTemplateEngine templateEngine;
 
     @Value("${a5l.mail.sender}")
     String sender;

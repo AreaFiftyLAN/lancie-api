@@ -17,11 +17,7 @@
 
 package ch.wisv.areafiftylan.exception;
 
-/**
- * Created by sille on 17-11-15.
- */
-
-public class SeatNotFoundException extends RuntimeException {
+class SeatNotFoundException extends RuntimeException {
     public SeatNotFoundException(String message) {
         super(message);
     }

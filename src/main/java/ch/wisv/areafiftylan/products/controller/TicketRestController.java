@@ -39,8 +39,8 @@ import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEnt
 @RestController
 @RequestMapping(value = "/tickets")
 public class TicketRestController {
-    private TicketService ticketService;
-    private OrderService orderService;
+    private final TicketService ticketService;
+    private final OrderService orderService;
 
     @Autowired
     public TicketRestController(TicketService ticketService, OrderService orderService) {

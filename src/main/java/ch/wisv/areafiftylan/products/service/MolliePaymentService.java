@@ -39,9 +39,9 @@ import java.util.Optional;
 @Service
 public class MolliePaymentService implements PaymentService {
 
-    private OrderRepository orderRepository;
+    private final OrderRepository orderRepository;
 
-    private Client mollie;
+    private final Client mollie;
 
     @Value("${a5l.molliekey:null}")
     String apiKey;

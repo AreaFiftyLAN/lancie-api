@@ -30,19 +30,19 @@ import java.time.LocalDate;
 public class Profile implements Serializable {
 
     public String firstName;
-    public String lastName;
+    private String lastName;
 
     @JsonView(View.Public.class)
-    public String displayName;
+    private String displayName;
 
-    public LocalDate birthday;
+    private LocalDate birthday;
 
-    public Gender gender;
-    public String address;
-    public String zipcode;
-    public String city;
-    public String phoneNumber;
-    public String notes;
+    private Gender gender;
+    private String address;
+    private String zipcode;
+    private String city;
+    private String phoneNumber;
+    private String notes;
 
     @Id
     @GeneratedValue
@@ -95,13 +95,9 @@ public class Profile implements Serializable {
         if (zipcode != null ? !zipcode.equals(profile.zipcode) : profile.zipcode != null) {
             return false;
         }
-        if (city != null ? !city.equals(profile.city) : profile.city != null) {
-            return false;
-        }
-        if (phoneNumber != null ? !phoneNumber.equals(profile.phoneNumber) : profile.phoneNumber != null) {
-            return false;
-        }
-        return !(notes != null ? !notes.equals(profile.notes) : profile.notes != null);
+        return (city != null ? city.equals(profile.city) : profile.city == null) &&
+                (phoneNumber != null ? phoneNumber.equals(profile.phoneNumber) : profile.phoneNumber == null) &&
+                !(notes != null ? !notes.equals(profile.notes) : profile.notes != null);
 
     }
 

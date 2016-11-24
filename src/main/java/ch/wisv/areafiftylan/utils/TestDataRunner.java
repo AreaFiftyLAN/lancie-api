@@ -32,13 +32,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.LocalDate;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
 
-/**
- * Created by Sille Kamoen on 24-3-16.
- */
 public class TestDataRunner implements CommandLineRunner {
     private final UserRepository accountRepository;
     private final TicketRepository ticketRepository;

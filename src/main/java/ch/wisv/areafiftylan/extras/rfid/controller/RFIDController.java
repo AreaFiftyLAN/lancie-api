@@ -23,7 +23,6 @@ import ch.wisv.areafiftylan.exception.RFIDTakenException;
 import ch.wisv.areafiftylan.extras.rfid.model.RFIDLink;
 import ch.wisv.areafiftylan.extras.rfid.model.RFIDLinkDTO;
 import ch.wisv.areafiftylan.extras.rfid.service.RFIDService;
-import ch.wisv.areafiftylan.products.service.TicketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,19 +33,17 @@ import java.util.Collection;
 
 import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEntity;
 
-/**
- * Created by beer on 5-5-16.
- */
-
 @RestController
 @RequestMapping("/rfid")
 @PreAuthorize("hasRole('ADMIN')")
 public class RFIDController {
-    @Autowired
-    private RFIDService rfidService;
+
+    private final RFIDService rfidService;
 
     @Autowired
-    private TicketService ticketService;
+    public RFIDController(RFIDService rfidService) {
+        this.rfidService = rfidService;
+    }
 
     @RequestMapping(method = RequestMethod.GET)
     public Collection<RFIDLink> getRFIDLinks() {

@@ -33,14 +33,11 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-/**
- * Created by beer on 16-5-16.
- */
 @Service
 public class ConsumptionServiceImpl implements ConsumptionService {
-    ConsumptionMapsRepository consumptionMapsRepository;
-    PossibleConsumptionsRepository possibleConsumptionsRepository;
-    TicketService ticketService;
+    private final ConsumptionMapsRepository consumptionMapsRepository;
+    private final PossibleConsumptionsRepository possibleConsumptionsRepository;
+    private final TicketService ticketService;
 
     @Autowired
     public ConsumptionServiceImpl(ConsumptionMapsRepository consumptionMapsRepository,
@@ -126,7 +123,7 @@ public class ConsumptionServiceImpl implements ConsumptionService {
 
     private void resetConsumptionEverywhere(Consumption consumption) {
         Collection<Ticket> allValidTickets =
-                ticketService.getAllTickets().stream().filter(t -> t.isValid()).collect(Collectors.toList());
+                ticketService.getAllTickets().stream().filter(Ticket::isValid).collect(Collectors.toList());
 
         allValidTickets.forEach(t -> reset(t.getId(), consumption.getId()));
     }

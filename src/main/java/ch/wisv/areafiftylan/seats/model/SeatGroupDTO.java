@@ -23,9 +23,6 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
 
-/**
- * Created by sille on 10-1-16.
- */
 public class SeatGroupDTO {
 
     @NotEmpty

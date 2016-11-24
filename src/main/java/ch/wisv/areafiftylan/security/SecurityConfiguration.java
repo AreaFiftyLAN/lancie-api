@@ -122,8 +122,8 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     }
 
     // We want to enable CSRF for State Changing methods. We don't want CSRF for requests with valid tokens.
-    private RequestMatcher csrfRequestMatcher = new RequestMatcher() {
-        private Pattern allowedMethods = Pattern.compile("^(GET|HEAD|TRACE|OPTIONS)$");
+    private final RequestMatcher csrfRequestMatcher = new RequestMatcher() {
+        private final Pattern allowedMethods = Pattern.compile("^(GET|HEAD|TRACE|OPTIONS)$");
 
         @Override
         public boolean matches(HttpServletRequest request) {

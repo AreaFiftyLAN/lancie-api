@@ -34,31 +34,31 @@ public class Order {
     @Id
     @GeneratedValue
     @JsonView(View.OrderOverview.class)
-    Long id;
+    private Long id;
 
     @OneToMany(cascade = CascadeType.MERGE, targetEntity = Ticket.class, fetch = FetchType.EAGER)
     @JsonView(View.OrderOverview.class)
-    Set<Ticket> tickets;
+    private Set<Ticket> tickets;
 
     @JsonView(View.OrderOverview.class)
-    OrderStatus status;
+    private OrderStatus status;
 
     @JsonView(View.OrderOverview.class)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
-    LocalDateTime creationDateTime;
+    private LocalDateTime creationDateTime;
 
     @JsonView(View.OrderOverview.class)
-    float amount;
+    private float amount;
 
     /**
      * This String can be used to store an external reference. Payment providers often have their own id.
      */
     @JsonView(View.OrderOverview.class)
-    String reference;
+    private String reference;
 
     @ManyToOne(cascade = CascadeType.MERGE)
     @JsonView(View.OrderOverview.class)
-    User user;
+    private User user;
 
     public Order(User user) {
         this.user = user;

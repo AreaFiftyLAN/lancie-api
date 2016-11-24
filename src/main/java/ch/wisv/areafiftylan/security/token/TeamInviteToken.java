@@ -25,9 +25,6 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 
-/**
- * Created by Sille Kamoen on 9-3-16.
- */
 @Entity
 public class TeamInviteToken extends Token {
 

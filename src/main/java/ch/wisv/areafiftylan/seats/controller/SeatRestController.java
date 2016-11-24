@@ -41,8 +41,8 @@ import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEnt
 @RestController
 public class SeatRestController {
 
-    private SeatService seatService;
-    private UserService userService;
+    private final SeatService seatService;
+    private final UserService userService;
 
     @Autowired
     public SeatRestController(SeatService seatService, UserService userService) {
@@ -113,8 +113,6 @@ public class SeatRestController {
      *
      * @param group    Group of the Seat
      * @param number   Number in the group of a Seat
-     * @param username Username of the User you want to reserve the Seat for.
-     *
      * @return Status message indicating the result.
      */
     @PreAuthorize("@currentUserServiceImpl.canReserveSeat(principal, #ticketId)")

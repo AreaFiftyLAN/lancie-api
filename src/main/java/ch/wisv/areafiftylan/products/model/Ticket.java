@@ -29,30 +29,30 @@ public class Ticket {
     @Id
     @GeneratedValue
     @JsonView(View.OrderOverview.class)
-    Long id;
+    private Long id;
 
     @ManyToOne(cascade = CascadeType.MERGE)
     @JsonView(View.Public.class)
-    User owner;
+    private User owner;
 
     @Enumerated(EnumType.STRING)
     @JsonView(View.OrderOverview.class)
-    TicketType type;
+    private TicketType type;
 
     @JsonView(View.OrderOverview.class)
-    String text;
+    private String text;
 
     @JsonView(View.OrderOverview.class)
-    boolean pickupService;
+    private boolean pickupService;
 
     @JsonView(View.OrderOverview.class)
-    boolean chMember;
+    private boolean chMember;
 
     @JsonView(View.OrderOverview.class)
-    boolean valid;
+    private boolean valid;
 
     @JsonView(View.OrderOverview.class)
-    float price;
+    private float price;
 
     public Ticket(User owner, TicketType type, Boolean pickupService, Boolean chMember) {
         this.owner = owner;

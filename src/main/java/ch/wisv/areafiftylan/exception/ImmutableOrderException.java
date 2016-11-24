@@ -17,9 +17,6 @@
 
 package ch.wisv.areafiftylan.exception;
 
-/**
- * Created by sille on 24-12-15.
- */
 public class ImmutableOrderException extends RuntimeException {
 
     public ImmutableOrderException(Long orderId) {

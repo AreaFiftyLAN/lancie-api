@@ -19,10 +19,6 @@ package ch.wisv.areafiftylan.exception;
 
 import ch.wisv.areafiftylan.products.model.TicketType;
 
-/**
- * Created by sille on 22-12-15.
- */
-
 public class TicketUnavailableException extends RuntimeException {
 
     public TicketUnavailableException(TicketType type) {

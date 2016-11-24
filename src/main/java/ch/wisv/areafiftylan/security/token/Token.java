@@ -18,7 +18,6 @@
 package ch.wisv.areafiftylan.security.token;
 
 import ch.wisv.areafiftylan.users.model.User;
-import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -44,9 +43,7 @@ public abstract class Token {
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
     private boolean expirable = true;
 
-    @Type(type = "ch.wisv.areafiftylan.utils.LocalDateTimeUserType")
     private LocalDateTime expiryDate;
-
 
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private boolean used = false;
@@ -54,14 +51,14 @@ public abstract class Token {
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private boolean revoked = false;
 
-    public Token() {
+    Token() {
     }
 
-    public Token(User user) {
+    Token(User user) {
         this(user, EXPIRATION);
     }
 
-    public Token(User user, int expiration) {
+    Token(User user, int expiration) {
         this.token = UUID.randomUUID().toString();
         this.user = user;
         this.expirable = expiration != 0;
@@ -101,7 +98,7 @@ public abstract class Token {
         this.revoked = true;
     }
 
-    public boolean isExpirable() {
+    private boolean isExpirable() {
         return expirable;
     }
 
@@ -111,11 +108,8 @@ public abstract class Token {
     }
 
     private boolean isExpired() {
-        if (!this.isExpirable()) {
-            return false;
-        }
+        return this.isExpirable() && LocalDateTime.now().compareTo(expiryDate) > 0;
 
-        return LocalDateTime.now().compareTo(expiryDate) > 0;
     }
 
     private boolean isRevoked() {
@@ -137,13 +131,8 @@ public abstract class Token {
 
         Token token1 = (Token) o;
 
-        if (!id.equals(token1.id)) {
-            return false;
-        }
-        if (!token.equals(token1.token)) {
-            return false;
-        }
-        return user != null ? user.equals(token1.user) : token1.user == null;
+        return id.equals(token1.id) && token.equals(token1.token) &&
+                (user != null ? user.equals(token1.user) : token1.user == null);
 
     }
 

@@ -52,11 +52,11 @@ import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEnt
 @Log4j2
 public class AuthenticationController {
 
-    private UserService userService;
-    private AuthenticationService authenticationService;
+    private final UserService userService;
+    private final AuthenticationService authenticationService;
 
-    private VerificationTokenRepository verificationTokenRepository;
-    private PasswordResetTokenRepository passwordResetTokenRepository;
+    private final VerificationTokenRepository verificationTokenRepository;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
 
     @Autowired
     public AuthenticationController(UserService userService, AuthenticationService authenticationService,

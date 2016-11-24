@@ -19,11 +19,11 @@ package ch.wisv.areafiftylan.web.model;
 
 public class Event {
 
-    String title;
-    String subtitle;
-    String headerTitle;
-    String description;
-    String backgroundImagePath;
+    private String title;
+    private String subtitle;
+    private String headerTitle;
+    private String description;
+    private String backgroundImagePath;
 
     public Event(String title, String subtitle, String headerTitle, String description, String backgroundImagePath) {
         this.title = title;

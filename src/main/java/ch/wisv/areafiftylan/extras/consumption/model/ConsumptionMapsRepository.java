@@ -22,9 +22,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
-/**
- * Created by beer on 16-5-16.
- */
 @Repository
 public interface ConsumptionMapsRepository extends JpaRepository<ConsumptionMap, Long> {
     Optional<ConsumptionMap> findByTicketId(Long ticketId);

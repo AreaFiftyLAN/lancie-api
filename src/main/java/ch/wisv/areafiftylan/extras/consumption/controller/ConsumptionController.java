@@ -31,15 +31,16 @@ import java.util.Collection;
 
 import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEntity;
 
-/**
- * Created by beer on 16-5-16.
- */
 @RestController
 @PreAuthorize("hasRole('ADMIN')")
 @RequestMapping(value = "/consumptions")
 public class ConsumptionController {
+    private final ConsumptionService consumptionService;
+
     @Autowired
-    private ConsumptionService consumptionService;
+    public ConsumptionController(ConsumptionService consumptionService) {
+        this.consumptionService = consumptionService;
+    }
 
     @RequestMapping(value = "/{ticketId}", method = RequestMethod.GET)
     public Collection<Consumption> consumptionsMade(@PathVariable Long ticketId) {
