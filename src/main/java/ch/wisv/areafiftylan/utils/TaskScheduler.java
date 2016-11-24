@@ -71,7 +71,7 @@ public class TaskScheduler {
 
         List<Order> expiredOrders = allOrdersBeforeDate.stream().filter(isExpired()).collect(Collectors.toList());
 
-        expiredOrders.forEach(o -> orderService.expireOrder(o));
+        expiredOrders.forEach(orderService::expireOrder);
     }
 
     @Scheduled(fixedRate = USER_CLEANUP_CHECK_INTERVAL_MINUTES * 60 * 1000)

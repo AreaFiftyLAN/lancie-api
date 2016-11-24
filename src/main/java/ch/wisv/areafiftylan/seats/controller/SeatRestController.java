@@ -113,8 +113,6 @@ public class SeatRestController {
      *
      * @param group    Group of the Seat
      * @param number   Number in the group of a Seat
-     * @param username Username of the User you want to reserve the Seat for.
-     *
      * @return Status message indicating the result.
      */
     @PreAuthorize("@currentUserServiceImpl.canReserveSeat(principal, #ticketId)")

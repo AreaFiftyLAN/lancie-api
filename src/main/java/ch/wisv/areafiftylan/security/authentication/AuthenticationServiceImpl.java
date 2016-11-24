@@ -30,11 +30,16 @@ import org.springframework.stereotype.Service;
 @Service
 public class AuthenticationServiceImpl implements AuthenticationService {
 
-    @Autowired
-    private AuthenticationTokenRepository authenticationTokenRepository;
+    private final AuthenticationTokenRepository authenticationTokenRepository;
+
+    private final UserService userService;
 
     @Autowired
-    private UserService userService;
+    public AuthenticationServiceImpl(AuthenticationTokenRepository authenticationTokenRepository,
+                                     UserService userService) {
+        this.authenticationTokenRepository = authenticationTokenRepository;
+        this.userService = userService;
+    }
 
     @Override
     public String createNewAuthToken(String username, String password) {
@@ -42,8 +47,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         if (correctCredentials(user, password)) {
             // Delete the old Token
-            authenticationTokenRepository.findByUserUsername(username)
-                    .ifPresent(t -> authenticationTokenRepository.delete(t));
+            authenticationTokenRepository.findByUserUsername(username).ifPresent(authenticationTokenRepository::delete);
 
             return authenticationTokenRepository.save(new AuthenticationToken(user)).getToken();
         }

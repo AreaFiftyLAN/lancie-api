@@ -29,11 +29,15 @@ import java.util.Collection;
 
 @Service
 public class RFIDServiceImpl implements RFIDService {
-    @Autowired
-    private RFIDLinkRepository rfidLinkRepository;
+
+    private final RFIDLinkRepository rfidLinkRepository;
+    private final TicketService ticketService;
 
     @Autowired
-    private TicketService ticketService;
+    public RFIDServiceImpl(RFIDLinkRepository rfidLinkRepository, TicketService ticketService) {
+        this.rfidLinkRepository = rfidLinkRepository;
+        this.ticketService = ticketService;
+    }
 
     @Override
     public Collection<RFIDLink> getAllRFIDLinks() {

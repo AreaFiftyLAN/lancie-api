@@ -18,7 +18,6 @@
 package ch.wisv.areafiftylan.security.token;
 
 import ch.wisv.areafiftylan.users.model.User;
-import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -132,10 +131,8 @@ public abstract class Token {
 
         Token token1 = (Token) o;
 
-        if (!id.equals(token1.id)) {
-            return false;
-        }
-        return token.equals(token1.token) && (user != null ? user.equals(token1.user) : token1.user == null);
+        return id.equals(token1.id) && token.equals(token1.token) &&
+                (user != null ? user.equals(token1.user) : token1.user == null);
 
     }
 

@@ -95,10 +95,8 @@ public class Profile implements Serializable {
         if (zipcode != null ? !zipcode.equals(profile.zipcode) : profile.zipcode != null) {
             return false;
         }
-        if (city != null ? !city.equals(profile.city) : profile.city != null) {
-            return false;
-        }
-        return (phoneNumber != null ? phoneNumber.equals(profile.phoneNumber) : profile.phoneNumber == null) &&
+        return (city != null ? city.equals(profile.city) : profile.city == null) &&
+                (phoneNumber != null ? phoneNumber.equals(profile.phoneNumber) : profile.phoneNumber == null) &&
                 !(notes != null ? !notes.equals(profile.notes) : profile.notes != null);
 
     }

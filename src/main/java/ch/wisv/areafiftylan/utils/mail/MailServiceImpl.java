@@ -35,6 +35,7 @@ import javax.mail.internet.MimeMessage;
 import java.util.Collection;
 import java.util.Locale;
 
+@SuppressWarnings("SpringJavaAutowiringInspection")
 @Service
 public class MailServiceImpl implements MailService {
 
