@@ -30,8 +30,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Service
 public class AuthenticationServiceImpl implements AuthenticationService {
 
@@ -66,8 +64,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new IllegalArgumentException("No X-Auth-Token present");
         }
 
-        Optional<AuthenticationToken> tokenOptional = authenticationTokenRepository.findByToken(xAuth);
-        AuthenticationToken token = tokenOptional.orElseThrow(XAuthTokenNotFoundException::new);
+        AuthenticationToken token =
+                authenticationTokenRepository.findByToken(xAuth).orElseThrow(XAuthTokenNotFoundException::new);
 
         if (!token.isValid()) {
             throw new InvalidTokenException();
