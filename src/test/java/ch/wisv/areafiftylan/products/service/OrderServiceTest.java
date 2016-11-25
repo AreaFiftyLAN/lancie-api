@@ -18,9 +18,12 @@
 package ch.wisv.areafiftylan.products.service;
 
 import ch.wisv.areafiftylan.ApplicationTest;
+import ch.wisv.areafiftylan.exception.ImmutableOrderException;
 import ch.wisv.areafiftylan.exception.OrderNotFoundException;
 import ch.wisv.areafiftylan.products.model.Order;
 import ch.wisv.areafiftylan.products.model.OrderStatus;
+import ch.wisv.areafiftylan.products.model.Ticket;
+import ch.wisv.areafiftylan.products.model.TicketType;
 import ch.wisv.areafiftylan.users.model.Gender;
 import ch.wisv.areafiftylan.users.model.User;
 import org.junit.After;
@@ -30,22 +33,23 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.thymeleaf.spring4.SpringTemplateEngine;
 
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = ApplicationTest.class)
@@ -60,9 +64,13 @@ public class OrderServiceTest {
 
     @Autowired
     private OrderService orderService;
-
     @Autowired
     private TestEntityManager testEntityManager;
+    @Autowired
+    private OrderRepository orderRepository;
+
+    @Value("${a5l.orderLimit}")
+    private int ORDER_LIMIT;
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -168,15 +176,15 @@ public class OrderServiceTest {
     }
 
     @Test
-    public void getOpenOrders() {
+    public void getOpenOrdersOneOpen() {
         User user = persistUser();
 
         Order order = new Order();
         order.setUser(user);
         testEntityManager.persist(order);
         Order order2 = new Order();
-        order.setUser(user);
-        order.setStatus(OrderStatus.PAID);
+        order2.setUser(user);
+        order2.setStatus(OrderStatus.PAID);
         testEntityManager.persist(order2);
 
         List<Order> openOrders = orderService.getOpenOrders(user.getUsername());
@@ -185,53 +193,279 @@ public class OrderServiceTest {
     }
 
     @Test
-    public void create() {
+    public void getOpenOrdersZeroOpen() {
+        User user = persistUser();
 
+        Order order = new Order();
+        order.setUser(user);
+        order.setStatus(OrderStatus.PAID);
+        testEntityManager.persist(order);
+        Order order2 = new Order();
+        order2.setUser(user);
+        order2.setStatus(OrderStatus.CANCELLED);
+        testEntityManager.persist(order2);
+
+        List<Order> openOrders = orderService.getOpenOrders(user.getUsername());
+
+        assertEquals(0, openOrders.size());
     }
 
     @Test
-    public void addTicketToOrder() {
+    public void getOpenOrdersNoOrders() {
+        User user = persistUser();
 
+        List<Order> openOrders = orderService.getOpenOrders(user.getUsername());
+
+        assertEquals(0, openOrders.size());
+    }
+
+    @Test
+    public void create() {
+        Order order = orderService.create(TicketType.TEST, true, true);
+
+        assertEquals(1, order.getTickets().size());
+        assertNull(order.getUser());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void createNullType() {
+        orderService.create(null, true, true);
+        assertEquals(0, orderRepository.findAll().size());
+    }
+
+    @Test
+    public void addTicketToOrderAnonymous() {
+        Order order = new Order();
+        Ticket ticket = testEntityManager.persist(new Ticket(TicketType.TEST, true, true));
+        order.addTicket(ticket);
+        Long id = testEntityManager.persistAndGetId(order, Long.class);
+
+        order = orderService.addTicketToOrder(id, TicketType.TEST, false, false);
+
+        assertEquals(2, order.getTickets().size());
+        assertTrue(order.getTickets().stream().noneMatch(Ticket::isValid));
+        assertTrue(order.getTickets().stream().allMatch(t -> t.getOwner() == null));
+    }
+
+    @Test
+    public void addTicketToOrderAssigned() {
+        User user = persistUser();
+        Order order = new Order(user);
+        Ticket ticket = testEntityManager.persist(new Ticket(user, TicketType.TEST, true, true));
+        order.addTicket(ticket);
+        Long id = testEntityManager.persistAndGetId(order, Long.class);
+
+        order = orderService.addTicketToOrder(id, TicketType.TEST, false, false);
+
+        assertEquals(2, order.getTickets().size());
+        assertTrue(order.getTickets().stream().noneMatch(Ticket::isValid));
+        assertTrue(order.getTickets().stream().allMatch(t -> t.getOwner().equals(user)));
+    }
+
+    @Test
+    public void addTicketToOrderPending() {
+        thrown.expect(ImmutableOrderException.class);
+
+        User user = persistUser();
+        Ticket ticket = testEntityManager.persist(new Ticket(TicketType.TEST, true, true));
+        Order order = new Order(user);
+        order.setStatus(OrderStatus.PENDING);
+        order.addTicket(ticket);
+        Long id = testEntityManager.persistAndGetId(order, Long.class);
+
+        orderService.addTicketToOrder(id, TicketType.TEST, false, false);
+    }
+
+    @Test
+    public void addTicketToOrderPaid() {
+        thrown.expect(ImmutableOrderException.class);
+
+        User user = persistUser();
+        Ticket ticket = testEntityManager.persist(new Ticket(TicketType.TEST, true, true));
+        Order order = new Order(user);
+        order.setStatus(OrderStatus.PAID);
+        order.addTicket(ticket);
+        Long id = testEntityManager.persistAndGetId(order, Long.class);
+
+        orderService.addTicketToOrder(id, TicketType.TEST, false, false);
+    }
+
+    @Test
+    public void addTicketToOrderCancelled() {
+        thrown.expect(ImmutableOrderException.class);
+
+        User user = persistUser();
+        Ticket ticket = testEntityManager.persist(new Ticket(TicketType.TEST, true, true));
+        Order order = new Order(user);
+        order.setStatus(OrderStatus.CANCELLED);
+        order.addTicket(ticket);
+        Long id = testEntityManager.persistAndGetId(order, Long.class);
+
+        orderService.addTicketToOrder(id, TicketType.TEST, false, false);
+    }
+
+    @Test
+    public void addTicketToOrderExpired() {
+        thrown.expect(ImmutableOrderException.class);
+
+        User user = persistUser();
+        Ticket ticket = testEntityManager.persist(new Ticket(TicketType.TEST, true, true));
+        Order order = new Order(user);
+        order.setStatus(OrderStatus.EXPIRED);
+        order.addTicket(ticket);
+        Long id = testEntityManager.persistAndGetId(order, Long.class);
+
+        orderService.addTicketToOrder(id, TicketType.TEST, false, false);
+    }
+
+    @Test
+    public void addTicketToOrderLimit() {
+        User user = persistUser();
+        Order order = new Order(user);
+        // Fill the order
+        for (int i = 0; i < ORDER_LIMIT; i++) {
+            order.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
+        }
+        Long id = testEntityManager.persistAndGetId(order, Long.class);
+
+        try {
+            orderService.addTicketToOrder(id, TicketType.TEST, false, false);
+        } catch (IllegalStateException e) {
+            assertEquals("Order limit reached", e.getMessage());
+            assertEquals(ORDER_LIMIT, testEntityManager.find(Order.class, id).getTickets().size());
+        }
     }
 
     @Test
     public void assignOrderToUser() {
+        User user = persistUser();
+        Order order = new Order();
+        order.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
+
+        Long id = testEntityManager.persistAndGetId(order, Long.class);
+
+        orderService.assignOrderToUser(id, user.getUsername());
+
+        assertEquals(user, testEntityManager.find(Order.class, id).getUser());
 
     }
 
     @Test
-    public void removeTicketFromOrder() {
+    public void assignOrderToUserOrderNotFound() {
+        thrown.expect(OrderNotFoundException.class);
 
+        User user = persistUser();
+
+        orderService.assignOrderToUser(9999L, user.getUsername());
     }
 
     @Test
-    public void requestPayment() {
+    public void assignOrderToUserUsernameNotFound() {
+        thrown.expect(UsernameNotFoundException.class);
 
+        Long id = testEntityManager.persistAndGetId(new Order(), Long.class);
+
+        orderService.assignOrderToUser(id, "nouser@mail.com");
     }
 
     @Test
-    public void updateOrderStatus() {
+    public void assignOrderToUserPending() {
+        thrown.expect(ImmutableOrderException.class);
 
+        User user = persistUser();
+        Order order = new Order();
+        order.setStatus(OrderStatus.PENDING);
+        testEntityManager.persist(order);
+
+        orderService.assignOrderToUser(order.getId(), user.getUsername());
     }
 
     @Test
-    public void updateOrderStatus1() {
+    public void assignOrderToUserCancelled() {
+        thrown.expect(ImmutableOrderException.class);
 
+        User user = persistUser();
+        Order order = new Order();
+        order.setStatus(OrderStatus.CANCELLED);
+        testEntityManager.persist(order);
+
+        orderService.assignOrderToUser(order.getId(), user.getUsername());
     }
 
     @Test
-    public void adminApproveOrder() {
+    public void assignOrderToUserPaid() {
+        thrown.expect(ImmutableOrderException.class);
 
+        User user = persistUser();
+        Order order = new Order();
+        order.setStatus(OrderStatus.PAID);
+        testEntityManager.persist(order);
+
+        orderService.assignOrderToUser(order.getId(), user.getUsername());
     }
 
     @Test
-    public void expireOrder() {
+    public void assignOrderToUserExpired() {
+        thrown.expect(ImmutableOrderException.class);
 
+        User user = persistUser();
+        Order order = new Order();
+        order.setStatus(OrderStatus.EXPIRED);
+        testEntityManager.persist(order);
+
+        orderService.assignOrderToUser(order.getId(), user.getUsername());
     }
 
     @Test
-    public void getAvailableTickets() {
+    public void assignOrderToUserAlreadyAssigned() {
+        thrown.expect(ImmutableOrderException.class);
+        thrown.expectMessage("Order already assigned!");
 
+        User user = persistUser();
+        User user2 =
+                testEntityManager.persist(new User("user2@mail.com", new BCryptPasswordEncoder().encode("password")));
+        Order order = new Order(user);
+        order.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
+        Long id = testEntityManager.persistAndGetId(order, Long.class);
+
+        orderService.assignOrderToUser(id, user2.getUsername());
+
+        assertEquals(user, testEntityManager.find(Order.class, id).getUser());
     }
+
+    //    @Test
+    //    public void removeTicketFromOrder() {
+    //
+    //    }
+    //
+    //    @Test
+    //    public void requestPayment() {
+    //
+    //    }
+    //
+    //    @Test
+    //    public void updateOrderStatus() {
+    //
+    //    }
+    //
+    //    @Test
+    //    public void updateOrderStatus1() {
+    //
+    //    }
+    //
+    //    @Test
+    //    public void adminApproveOrder() {
+    //
+    //    }
+    //
+    //    @Test
+    //    public void expireOrder() {
+    //
+    //    }
+    //
+    //    @Test
+    //    public void getAvailableTickets() {
+    //
+    //    }
 
 }
