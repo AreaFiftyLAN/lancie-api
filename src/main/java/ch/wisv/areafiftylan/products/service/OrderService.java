@@ -20,7 +20,7 @@ package ch.wisv.areafiftylan.products.service;
 import ch.wisv.areafiftylan.products.model.Order;
 import ch.wisv.areafiftylan.products.model.TicketDTO;
 import ch.wisv.areafiftylan.products.model.TicketInformationResponse;
-import ch.wisv.areafiftylan.users.model.User;
+import ch.wisv.areafiftylan.products.model.TicketType;
 
 import java.util.Collection;
 import java.util.List;
@@ -36,23 +36,27 @@ public interface OrderService {
     List<Order> getOpenOrders(String username);
 
     /**
-     * Create an order with at least one Ticket.
+     * Create a new Order containing a single ticket
      *
-     * @param ticketDTO The ticket that is being ordered
+     * @param type          Ticket Type
+     * @param pickupService Ticket includes pickup service
+     * @param chMember      Ticket includes chMember
      *
-     * @return The created order
+     * @return The newly created order
      */
-    Order create(TicketDTO ticketDTO);
+    Order create(TicketType type, boolean pickupService, boolean chMember);
 
     /**
      * Add a ticket to an order. Checks if a ticket is available first
      *
-     * @param orderId   Order to which the ticket should be added
-     * @param ticketDTO DTO of the ticket to be added
+     * @param orderId
+     * @param type          Ticket Type
+     * @param pickupService Ticket includes pickup service
+     * @param chMember      Ticket includes chMember
      *
-     * @return The updated Order
+     * @return The order including the newly added ticket
      */
-    Order addTicketToOrder(Long orderId, TicketDTO ticketDTO);
+    Order addTicketToOrder(Long orderId, TicketType type, boolean pickupService, boolean chMember);
 
     Order assignOrderToUser(Long orderId, String username);
 

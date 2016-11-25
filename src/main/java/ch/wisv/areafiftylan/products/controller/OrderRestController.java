@@ -79,7 +79,7 @@ public class OrderRestController {
                     "Can't order tickets with type " + ticketDTO.getType().getText());
         }
 
-        Order order = orderService.create(ticketDTO);
+        Order order = orderService.create(ticketDTO.getType(), ticketDTO.hasPickupService(), ticketDTO.isCHMember());
 
         headers.setLocation(
                 ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(order.getId()).toUri());
@@ -115,7 +115,8 @@ public class OrderRestController {
     @RequestMapping(value = "/orders/{orderId}", method = RequestMethod.POST)
     @JsonView(View.OrderOverview.class)
     public ResponseEntity<?> addToOrder(@PathVariable Long orderId, @RequestBody @Validated TicketDTO ticketDTO) {
-        Order modifiedOrder = orderService.addTicketToOrder(orderId, ticketDTO);
+        Order modifiedOrder = orderService
+                .addTicketToOrder(orderId, ticketDTO.getType(), ticketDTO.hasPickupService(), ticketDTO.isCHMember());
         return createResponseEntity(HttpStatus.OK, "Ticket successfully added to your order", modifiedOrder);
     }
 

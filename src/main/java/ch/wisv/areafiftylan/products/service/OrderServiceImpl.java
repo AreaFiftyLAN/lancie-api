@@ -80,12 +80,15 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Order create(TicketDTO ticketDTO) {
+    public Order create(TicketType type, boolean pickupService, boolean chMember) {
+
+        if (type == null) {
+            throw new IllegalArgumentException("TicketType can't be null!");
+        }
 
         // Request a ticket to see if one is available. If a ticket is sold out, the method ends here due to the
         // exception thrown. Else, we'll get a new ticket to add to the order.
-        Ticket ticket = ticketService
-                .requestTicketOfType(ticketDTO.getType(), ticketDTO.hasPickupService(), ticketDTO.isCHMember());
+        Ticket ticket = ticketService.requestTicketOfType(type, pickupService, chMember);
 
         Order order = new Order();
 
@@ -95,7 +98,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Order addTicketToOrder(Long orderId, TicketDTO ticketDTO) {
+    public Order addTicketToOrder(Long orderId, TicketType type, boolean pickupService, boolean chMember) {
         Order order = getOrderById(orderId);
 
         // Check Order status
@@ -110,8 +113,7 @@ public class OrderServiceImpl implements OrderService {
 
         // Request a ticket to see if one is available. If a ticket is sold out, the method ends here due to the
         // exception thrown. Else, we'll get a new ticket to add to the order.
-        Ticket ticket = ticketService
-                .requestTicketOfType(ticketDTO.getType(), ticketDTO.hasPickupService(), ticketDTO.isCHMember());
+        Ticket ticket = ticketService.requestTicketOfType(type, pickupService, chMember);
 
         order.addTicket(ticket);
         return orderRepository.save(order);
