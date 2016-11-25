@@ -84,4 +84,3 @@ a5l.orderLimit=5
 a5l.ticketLimit=200
 # API key for Google Maps
 a5l.googleMapsAPIkey=[CHANGE ME]
-
