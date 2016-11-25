@@ -22,4 +22,8 @@ public class ImmutableOrderException extends RuntimeException {
     public ImmutableOrderException(Long orderId) {
         super("No more tickets can be added to Order " + orderId);
     }
+
+    public ImmutableOrderException(String message) {
+        super(message);
+    }
 }

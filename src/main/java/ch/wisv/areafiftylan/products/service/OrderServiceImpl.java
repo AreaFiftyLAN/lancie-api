@@ -113,8 +113,12 @@ public class OrderServiceImpl implements OrderService {
 
         // Request a ticket to see if one is available. If a ticket is sold out, the method ends here due to the
         // exception thrown. Else, we'll get a new ticket to add to the order.
-        Ticket ticket = ticketService.requestTicketOfType(type, pickupService, chMember);
-
+        Ticket ticket;
+        if (order.getUser() != null) {
+            ticket = ticketService.requestTicketOfType(order.getUser(), type, pickupService, chMember);
+        } else {
+            ticket = ticketService.requestTicketOfType(type, pickupService, chMember);
+        }
         order.addTicket(ticket);
         return orderRepository.save(order);
     }
@@ -123,6 +127,11 @@ public class OrderServiceImpl implements OrderService {
     public Order assignOrderToUser(Long orderId, String username) {
         Order order = getOrderById(orderId);
         User user = userService.getUserByUsername(username);
+
+        if (order.getStatus() != OrderStatus.ANONYMOUS) {
+            throw new ImmutableOrderException("Order already assigned!");
+        }
+
         order.setUser(user);
         order.setStatus(OrderStatus.ASSIGNED);
         return orderRepository.save(order);
