@@ -17,10 +17,7 @@
 
 package ch.wisv.areafiftylan.products.service;
 
-import ch.wisv.areafiftylan.exception.ImmutableOrderException;
-import ch.wisv.areafiftylan.exception.PaymentException;
-import ch.wisv.areafiftylan.exception.TicketNotFoundException;
-import ch.wisv.areafiftylan.exception.UnassignedOrderException;
+import ch.wisv.areafiftylan.exception.*;
 import ch.wisv.areafiftylan.products.model.*;
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.users.service.UserService;
@@ -59,7 +56,8 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Order getOrderById(Long id) {
-        return orderRepository.findOne(id);
+        return orderRepository.findById(id)
+                .orElseThrow(() -> new OrderNotFoundException("Order with id: " + id + " not found"));
     }
 
     @Override
@@ -77,6 +75,7 @@ public class OrderServiceImpl implements OrderService {
         Collection<Order> ordersByUsername = findOrdersByUsername(username);
 
         return ordersByUsername.stream().
+                filter(o -> o.getStatus().equals(OrderStatus.ASSIGNED)).
                 collect(Collectors.toList());
     }
 
@@ -182,7 +181,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Order updateOrderStatus(Long orderId) {
-        Order order = orderRepository.findOne(orderId);
+        Order order = getOrderById(orderId);
         if (!Strings.isNullOrEmpty(order.getReference())) {
             return paymentService.updateStatus(order.getReference());
         } else {
@@ -192,7 +191,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public void adminApproveOrder(Long orderId) {
-        Order order = orderRepository.findOne(orderId);
+        Order order = getOrderById(orderId);
         order.setStatus(OrderStatus.PAID);
         validateTicketsIfPaid(order);
         orderRepository.save(order);
