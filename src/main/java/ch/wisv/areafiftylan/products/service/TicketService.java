@@ -55,6 +55,7 @@ public interface TicketService {
      * @throws TicketUnavailableException If the requested ticket is sold out.
      */
     Ticket requestTicketOfType(TicketType type, boolean pickupService, boolean chMember);
+    Ticket requestTicketOfType(User user, TicketType type, boolean pickupService, boolean chMember);
 
     /**
      * Sets up the ticket for transfer
