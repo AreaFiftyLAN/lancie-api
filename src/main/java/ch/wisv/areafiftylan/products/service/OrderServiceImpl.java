@@ -102,7 +102,7 @@ public class OrderServiceImpl implements OrderService {
         Order order = getOrderById(orderId);
 
         // Check Order status
-        if (!order.getStatus().equals(OrderStatus.ANONYMOUS)) {
+        if (!order.getStatus().equals(OrderStatus.ANONYMOUS) && !order.getStatus().equals(OrderStatus.ASSIGNED)) {
             throw new ImmutableOrderException(orderId);
         }
 
