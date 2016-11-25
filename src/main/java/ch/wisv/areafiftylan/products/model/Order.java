@@ -65,13 +65,18 @@ public class Order {
     @ManyToOne(cascade = CascadeType.MERGE)
     @JsonView(View.OrderOverview.class)
     @Getter
-    @Setter
     private User user = null;
 
     public Order() {
         status = OrderStatus.ANONYMOUS;
         creationDateTime = LocalDateTime.now();
         this.tickets = new HashSet<>();
+    }
+
+    public Order(User user) {
+        this();
+        this.user = user;
+        this.status = OrderStatus.ASSIGNED;
     }
 
     public boolean addTicket(Ticket ticket) {
@@ -89,5 +94,14 @@ public class Order {
             price += ticket.getPrice();
         }
         return price;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+        if (user != null) {
+            this.status = OrderStatus.ASSIGNED;
+        } else {
+            this.status = OrderStatus.ANONYMOUS;
+        }
     }
 }
