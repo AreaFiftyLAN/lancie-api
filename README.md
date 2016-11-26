@@ -25,6 +25,9 @@ Copy the contents from this file into a `application.properties`.
 This file is gitignored because it contains private information such as possible database credentials and API keys.
 The sample proprties assume a working PostgreSQL installation running in the background.
 
+#### Mailcatcher
+Before you can start the server you should start mailcatcher. This should work by just launching `mailcatcher` from your terminal.
+
 #### Spring Boot
 Go to the Run/Debug Configuration window via Run -> Edit Configurations, and add a new Spring Boot configuration.
 It needs only two settings to run.
