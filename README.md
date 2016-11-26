@@ -25,13 +25,17 @@ Copy the contents from this file into a `application-dev.properties`.
 This file is gitignored because it contains private information such as possible database credentials and API keys.
 The sample proprties assume a working PostgreSQL installation running in the background.
 
-#### Spring Boot
+#### Running with Spring Boot
 Go to the Run/Debug Configuration window via Run -> Edit Configurations, and add a new Spring Boot configuration.
 It needs only two settings to run.
 The *Main class* should be set to **ch.wisv.areafiftylan.Application** and the *Use classpath of module* should be set to your project module.
 Finally, enable the dev profile by entering `dev` in the `Active Profiles` box.
 
 That's it! Select your new Spring Boot configuration and click Run!. This should launch the application on localhost:9000
+
+#### Running with Gradle
+It is also possible to run the application directly from the command line.
+This is done by running the command `./gradlew bootRunDev`, the application will now start just as usual.
 
 ## Deploying
 If you want to run the API on your server, you probably don't want to run it from the IDE.

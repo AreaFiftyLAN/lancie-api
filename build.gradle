@@ -1,3 +1,5 @@
+import org.springframework.boot.gradle.run.BootRunTask
+
 buildscript {
     ext {
         springBootVersion = '1.4.2.RELEASE'
@@ -77,4 +79,13 @@ eclipse {
 
 task wrapper(type: Wrapper) {
     gradleVersion = '2.11'
+}
+
+task bootRunDev(type: org.springframework.boot.gradle.run.BootRunTask) {
+    group = 'Application'
+    doFirst() {
+        main = project.mainClassName
+        classpath = sourceSets.main.runtimeClasspath
+        systemProperty 'spring.profiles.active', 'dev'
+    }
 }
