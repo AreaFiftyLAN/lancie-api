@@ -21,9 +21,12 @@ IntelliJ has some neat functionality to make running the application very easy.
 #### Set the properties
 The API has a number of properties that need to be set before the applicaiton can run.
 There's a template in `resources/config/application.properties.sample`.
-Copy the contents from this file into a `application-dev.properties`.
+Copy the contents from this file into a `application.properties`.
 This file is gitignored because it contains private information such as possible database credentials and API keys.
 The sample proprties assume a working PostgreSQL installation running in the background.
+
+#### Mailcatcher
+Before you can start the server you should start mailcatcher. This should work by just launching `mailcatcher` from your terminal.
 
 #### Spring Boot
 Go to the Run/Debug Configuration window via Run -> Edit Configurations, and add a new Spring Boot configuration.
@@ -49,8 +52,8 @@ In the `/config` directory, a folder `/templates` should contain the templates `
 ## Contributing
 If you want to contribute, awesome! First, pick an issue and self-assign it. Make your changes in a new branch, with the following naming convention:
 
-* Fixing a bug? > git checkout -b "**fix-**description-of-bug"
-* Implementing a new feature? > git checkout -b "**feature-**description-of-feature"
+* Fixing a bug? > git checkout -b "**fix-**description_of_bug"
+* Implementing a new feature? > git checkout -b "**feature-**description_of_feature"
 
 Once you're satisfied with your changes, create a pull request and give it the label "Ready for merge". 
 You can assign someone in specific or wait for someone to pick it up. 
