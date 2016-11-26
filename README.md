@@ -21,7 +21,7 @@ IntelliJ has some neat functionality to make running the application very easy.
 #### Set the properties
 The API has a number of properties that need to be set before the applicaiton can run.
 There's a template in `resources/config/application.properties.sample`.
-Copy the contents from this file into a `application-dev.properties`.
+Copy the contents from this file into a `application.properties`.
 This file is gitignored because it contains private information such as possible database credentials and API keys.
 The sample proprties assume a working PostgreSQL installation running in the background.
 
