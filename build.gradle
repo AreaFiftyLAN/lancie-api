@@ -78,3 +78,7 @@ eclipse {
 task wrapper(type: Wrapper) {
     gradleVersion = '2.11'
 }
+
+bootRun {
+    environment SPRING_PROFILES_ACTIVE: "dev"
+}
