@@ -52,8 +52,8 @@ In the `/config` directory, a folder `/templates` should contain the templates `
 ## Contributing
 If you want to contribute, awesome! First, pick an issue and self-assign it. Make your changes in a new branch, with the following naming convention:
 
-* Fixing a bug? > git checkout -b "**fix-**description-of-bug"
-* Implementing a new feature? > git checkout -b "**feature-**description-of-feature"
+* Fixing a bug? > git checkout -b "**fix-**description_of_bug"
+* Implementing a new feature? > git checkout -b "**feature-**description_of_feature"
 
 Once you're satisfied with your changes, create a pull request and give it the label "Ready for merge". 
 You can assign someone in specific or wait for someone to pick it up. 
