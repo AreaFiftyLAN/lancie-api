@@ -18,7 +18,6 @@
 package ch.wisv.areafiftylan.products.service;
 
 import ch.wisv.areafiftylan.products.model.Order;
-import ch.wisv.areafiftylan.products.model.TicketDTO;
 import ch.wisv.areafiftylan.products.model.TicketInformationResponse;
 import ch.wisv.areafiftylan.products.model.TicketType;
 
@@ -69,7 +68,7 @@ public interface OrderService {
      *
      * @return The modified Order
      */
-    Order removeTicketFromOrder(Long orderId, TicketDTO ticketDTO);
+    Order removeTicketFromOrder(Long orderId, TicketType type, boolean pickupService, boolean chMember);
 
     /**
      * Register the order with the payment provider
