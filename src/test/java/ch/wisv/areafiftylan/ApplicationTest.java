@@ -25,8 +25,6 @@ import ch.wisv.areafiftylan.products.service.OrderRepository;
 import ch.wisv.areafiftylan.products.service.PaymentService;
 import ch.wisv.areafiftylan.utils.mail.MailService;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -57,15 +55,12 @@ public class ApplicationTest {
     public PaymentService paymentService(OrderRepository orderRepository) {
         MolliePaymentService mockMolliePaymentService = Mockito.mock(MolliePaymentService.class);
 
-        Mockito.when(mockMolliePaymentService.registerOrder(Mockito.any(Order.class))).then(new Answer<String>() {
-            @Override
-            public String answer(InvocationOnMock invocation) throws Throwable {
-                Order order = (Order) invocation.getArguments()[0];
-                order.setStatus(OrderStatus.PENDING);
-                orderRepository.save(order);
-                return "http://paymentURL.com";
+        Mockito.when(mockMolliePaymentService.registerOrder(Mockito.any(Order.class))).then(invocation -> {
+            Order order = (Order) invocation.getArguments()[0];
+            order.setStatus(OrderStatus.PENDING);
+            orderRepository.save(order);
+            return "http://paymentURL.com";
 
-            }
         });
         return mockMolliePaymentService;
     }
