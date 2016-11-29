@@ -20,6 +20,8 @@ package ch.wisv.areafiftylan.products.service;
 import ch.wisv.areafiftylan.ApplicationTest;
 import ch.wisv.areafiftylan.exception.ImmutableOrderException;
 import ch.wisv.areafiftylan.exception.OrderNotFoundException;
+import ch.wisv.areafiftylan.exception.TicketNotFoundException;
+import ch.wisv.areafiftylan.exception.UnassignedOrderException;
 import ch.wisv.areafiftylan.products.model.Order;
 import ch.wisv.areafiftylan.products.model.OrderStatus;
 import ch.wisv.areafiftylan.products.model.Ticket;
@@ -32,6 +34,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -50,6 +53,8 @@ import java.util.Collection;
 import java.util.List;
 
 import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = ApplicationTest.class)
@@ -64,6 +69,8 @@ public class OrderServiceTest {
 
     @Autowired
     private OrderService orderService;
+    @Autowired
+    private PaymentService paymentSerivce;
     @Autowired
     private TestEntityManager testEntityManager;
     @Autowired
@@ -85,7 +92,6 @@ public class OrderServiceTest {
 
     @Before
     public void setUp() {
-
     }
 
     @After
@@ -347,7 +353,6 @@ public class OrderServiceTest {
         orderService.assignOrderToUser(id, user.getUsername());
 
         assertEquals(user, testEntityManager.find(Order.class, id).getUser());
-
     }
 
     @Test
@@ -360,12 +365,32 @@ public class OrderServiceTest {
     }
 
     @Test
+    public void assignOrderToUserOrderIdNull() {
+        thrown.expect(OrderNotFoundException.class);
+
+        User user = persistUser();
+        Order order = new Order();
+        testEntityManager.persistAndGetId(order, Long.class);
+
+        orderService.assignOrderToUser(null, user.getUsername());
+    }
+
+    @Test
     public void assignOrderToUserUsernameNotFound() {
         thrown.expect(UsernameNotFoundException.class);
 
         Long id = testEntityManager.persistAndGetId(new Order(), Long.class);
 
         orderService.assignOrderToUser(id, "nouser@mail.com");
+    }
+
+    @Test
+    public void assignOrderToUserUsernameNull() {
+        thrown.expect(UsernameNotFoundException.class);
+
+        Long id = testEntityManager.persistAndGetId(new Order(), Long.class);
+
+        orderService.assignOrderToUser(id, null);
     }
 
     @Test
@@ -433,21 +458,181 @@ public class OrderServiceTest {
         assertEquals(user, testEntityManager.find(Order.class, id).getUser());
     }
 
-    //    @Test
-    //    public void removeTicketFromOrder() {
-    //
-    //    }
-    //
-    //    @Test
-    //    public void requestPayment() {
-    //
-    //    }
-    //
-    //    @Test
-    //    public void updateOrderStatus() {
-    //
-    //    }
-    //
+    @Test
+    public void removeTicketFromOrder() {
+        Order order = new Order();
+        order.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
+
+        Long id = testEntityManager.persistAndGetId(order, Long.class);
+
+        orderService.removeTicketFromOrder(id, TicketType.TEST, true, true);
+
+        assertEquals(0, testEntityManager.find(Order.class, id).getTickets().size());
+    }
+
+    @Test
+    public void removeTicketFromOrderNoTickets() {
+        thrown.expect(TicketNotFoundException.class);
+        Order order = new Order();
+        Long id = testEntityManager.persistAndGetId(order, Long.class);
+
+        orderService.removeTicketFromOrder(id, TicketType.TEST, true, true);
+    }
+
+    @Test
+    public void removeTicketFromOrderTicketNotFound() {
+        Order order = new Order();
+        order.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
+
+        Long id = testEntityManager.persistAndGetId(order, Long.class);
+
+        assertEquals(1, testEntityManager.find(Order.class, id).getTickets().size());
+
+        try {
+            orderService.removeTicketFromOrder(id, TicketType.TEST, false, true);
+        } catch (TicketNotFoundException e) {
+            assertEquals(1, testEntityManager.find(Order.class, id).getTickets().size());
+        }
+    }
+
+    @Test
+    public void removeTicketFromOrderTypeNull() {
+        Order order = new Order();
+        order.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
+
+        Long id = testEntityManager.persistAndGetId(order, Long.class);
+
+        assertEquals(1, testEntityManager.find(Order.class, id).getTickets().size());
+
+        try {
+            orderService.removeTicketFromOrder(id, null, false, true);
+        } catch (TicketNotFoundException e) {
+            assertEquals(1, testEntityManager.find(Order.class, id).getTickets().size());
+        }
+    }
+
+    @Test
+    public void removeTicketFromOrderTwoMatchingTickets() {
+        Order order = new Order();
+        order.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
+        order.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
+
+        Long id = testEntityManager.persistAndGetId(order, Long.class);
+
+        assertEquals(2, testEntityManager.find(Order.class, id).getTickets().size());
+        orderService.removeTicketFromOrder(id, TicketType.TEST, true, true);
+        assertEquals(1, testEntityManager.find(Order.class, id).getTickets().size());
+    }
+
+    @Test
+    public void removeTicketFromOrderTwoMatchingTicketsDeleteTwice() {
+        Order order = new Order();
+        order.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
+        order.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
+
+        Long id = testEntityManager.persistAndGetId(order, Long.class);
+
+        assertEquals(2, testEntityManager.find(Order.class, id).getTickets().size());
+        orderService.removeTicketFromOrder(id, TicketType.TEST, true, true);
+        assertEquals(1, testEntityManager.find(Order.class, id).getTickets().size());
+        orderService.removeTicketFromOrder(id, TicketType.TEST, true, true);
+        assertEquals(0, testEntityManager.find(Order.class, id).getTickets().size());
+    }
+
+
+    @Test
+    public void removeTicketFromOrderOrderNotFound() {
+        thrown.expect(OrderNotFoundException.class);
+
+        Order order = new Order();
+        order.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
+        Long id = testEntityManager.persistAndGetId(order, Long.class);
+
+        orderService.removeTicketFromOrder(9999L, TicketType.TEST, true, true);
+    }
+
+    @Test
+    public void removeTicketFromOrderOrderIdNull() {
+        thrown.expect(OrderNotFoundException.class);
+
+        Order order = new Order();
+        order.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
+        Long id = testEntityManager.persistAndGetId(order, Long.class);
+
+        orderService.removeTicketFromOrder(null, TicketType.TEST, true, true);
+    }
+
+    @Test
+    public void requestPayment() {
+        User user = persistUser();
+        Order order = new Order(user);
+        order.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
+
+        Long id = testEntityManager.persistAndGetId(order, Long.class);
+        String payment = orderService.requestPayment(id);
+        verify(paymentSerivce, times(1)).registerOrder(Mockito.any(Order.class));
+        reset(paymentSerivce);
+    }
+
+    @Test
+    public void requestPaymentEmptyOrder() {
+        User user = persistUser();
+        Order order = new Order(user);
+
+        Long id = testEntityManager.persistAndGetId(order, Long.class);
+        try {
+            String payment = orderService.requestPayment(id);
+        } catch (IllegalStateException e) {
+            assertEquals("Order can not be empty", e.getMessage());
+            verify(paymentSerivce, never()).registerOrder(Mockito.any(Order.class));
+        } finally {
+            reset(paymentSerivce);
+        }
+
+    }
+
+    @Test
+    public void requestPaymentOrderUnassigned() {
+        Order order = new Order();
+        order.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
+
+        Long id = testEntityManager.persistAndGetId(order, Long.class);
+        try {
+            String payment = orderService.requestPayment(id);
+        } catch (UnassignedOrderException e) {
+            verify(paymentSerivce, never()).registerOrder(Mockito.any(Order.class));
+        } finally {
+            reset(paymentSerivce);
+        }
+    }
+
+    @Test
+    public void requestPaymentOrderIdNull() {
+        User user = persistUser();
+        Order order = new Order(user);
+        order.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
+
+        Long id = testEntityManager.persistAndGetId(order, Long.class);
+        try {
+            String payment = orderService.requestPayment(null);
+        } catch (OrderNotFoundException e) {
+            verify(paymentSerivce, never()).registerOrder(Mockito.any(Order.class));
+        } finally {
+            reset(paymentSerivce);
+        }
+    }
+
+    @Test
+    public void updateOrderStatus() {
+
+        Order order = new Order();
+
+        given(paymentSerivce.updateStatus(Mockito.anyString())).willReturn(order);
+        verify(paymentSerivce, atLeastOnce()).updateStatus(Mockito.anyString());
+
+        reset(paymentSerivce);
+    }
+
     //    @Test
     //    public void updateOrderStatus1() {
     //
