@@ -138,13 +138,14 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Order removeTicketFromOrder(Long orderId, TicketDTO ticketDTO) {
+    public Order removeTicketFromOrder(Long orderId, TicketType type, boolean pickupService, boolean chMember) {
         Order order = getOrderById(orderId);
         if (order.getStatus().equals(OrderStatus.ANONYMOUS)) {
 
             // Find a Ticket in the order, equal to the given DTO. Throw an exception when the ticket doesn't exist
-            Ticket ticket = order.getTickets().stream().filter(isEqualToDTO(ticketDTO)).findFirst()
-                    .orElseThrow(TicketNotFoundException::new);
+            Ticket ticket =
+                    order.getTickets().stream().filter(isEqualToInput(type, pickupService, chMember)).findFirst()
+                            .orElseThrow(TicketNotFoundException::new);
 
             order.getTickets().remove(ticket);
             ticketService.removeTicket(ticket.getId());
@@ -156,19 +157,21 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
-    private static Predicate<Ticket> isEqualToDTO(TicketDTO ticketDTO) {
-        return t -> (t.getType() == ticketDTO.getType()) && (t.isChMember() == ticketDTO.isCHMember()) &&
-                (t.hasPickupService() == ticketDTO.hasPickupService());
+    private static Predicate<Ticket> isEqualToInput(TicketType type, boolean pickupService, boolean chMember) {
+        return t -> (t.getType() == type) && (t.isChMember() == chMember) && (t.hasPickupService() == pickupService);
     }
 
     @Override
     public String requestPayment(Long orderId) {
         Order order = getOrderById(orderId);
-        if (order.getStatus() == OrderStatus.ASSIGNED) {
-            return paymentService.registerOrder(order);
-        } else {
+        if (order.getAmount() == 0) {
+            throw new IllegalStateException("Order can not be empty");
+        }
+        if (order.getStatus() != OrderStatus.ASSIGNED) {
             throw new UnassignedOrderException(order.getId());
         }
+
+        return paymentService.registerOrder(order);
     }
 
     @Override

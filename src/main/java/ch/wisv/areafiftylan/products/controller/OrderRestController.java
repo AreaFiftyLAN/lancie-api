@@ -132,7 +132,9 @@ public class OrderRestController {
     @RequestMapping(value = "/orders/{orderId}", method = RequestMethod.DELETE)
     @JsonView(View.OrderOverview.class)
     public ResponseEntity<?> removeFromOrder(@PathVariable Long orderId, @RequestBody @Validated TicketDTO ticketDTO) {
-        Order modifiedOrder = orderService.removeTicketFromOrder(orderId, ticketDTO);
+        Order modifiedOrder = orderService
+                .removeTicketFromOrder(orderId, ticketDTO.getType(), ticketDTO.hasPickupService(),
+                        ticketDTO.isCHMember());
         return createResponseEntity(HttpStatus.OK, "Ticket successfully removed from Order", modifiedOrder);
     }
 
