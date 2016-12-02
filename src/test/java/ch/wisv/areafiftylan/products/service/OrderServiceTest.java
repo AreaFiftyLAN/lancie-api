@@ -623,34 +623,104 @@ public class OrderServiceTest {
     }
 
     @Test
-    public void updateOrderStatus() {
-
+    public void updateOrderStatusByReference() {
         Order order = new Order();
-
+        order.setUser(persistUser());
         given(paymentSerivce.updateStatus(Mockito.anyString())).willReturn(order);
-        verify(paymentSerivce, atLeastOnce()).updateStatus(Mockito.anyString());
+
+        orderService.updateOrderStatusByReference("Reference");
+
+        verify(paymentSerivce, times(1)).updateStatus(Mockito.anyString());
 
         reset(paymentSerivce);
     }
 
-    //    @Test
-    //    public void updateOrderStatus1() {
-    //
-    //    }
-    //
-    //    @Test
-    //    public void adminApproveOrder() {
-    //
-    //    }
-    //
-    //    @Test
-    //    public void expireOrder() {
-    //
-    //    }
-    //
-    //    @Test
-    //    public void getAvailableTickets() {
-    //
-    //    }
+    @Test
+    public void updateOrderStatusByReferenceOrderStatusPaid() {
+        Order order = new Order();
+        User user = persistUser();
 
+        order.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
+        order.setUser(user);
+        order.setStatus(OrderStatus.PAID);
+        order = testEntityManager.persist(order);
+        given(paymentSerivce.updateStatus(Mockito.anyString())).willReturn(order);
+
+        orderService.updateOrderStatusByReference("Reference");
+
+        assertTrue(order.getTickets().stream().allMatch(Ticket::isValid));
+        assertTrue(order.getTickets().stream().allMatch(t -> t.getOwner().equals(user)));
+
+        reset(paymentSerivce);
+    }
+
+    @Test
+    public void updateOrderStatusByReferenceOrderStatusAssigned() {
+        Order order = new Order();
+        User user = persistUser();
+
+        order.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
+        order.setUser(user);
+        order = testEntityManager.persist(order);
+        given(paymentSerivce.updateStatus(Mockito.anyString())).willReturn(order);
+
+        orderService.updateOrderStatusByReference("Reference");
+
+        assertTrue(order.getTickets().stream().noneMatch(Ticket::isValid));
+        assertTrue(order.getTickets().stream().allMatch(t -> t.getOwner() == null));
+
+        reset(paymentSerivce);
+    }
+
+    @Test
+    public void updateOrderStatusByReferenceOrderStatusAnonymous() {
+        Order order = new Order();
+        thrown.expect(UnassignedOrderException.class);
+
+        order.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
+        order = testEntityManager.persist(order);
+        given(paymentSerivce.updateStatus(Mockito.anyString())).willReturn(order);
+
+        orderService.updateOrderStatusByReference("Reference");
+
+        assertTrue(order.getTickets().stream().noneMatch(Ticket::isValid));
+        assertTrue(order.getTickets().stream().allMatch(t -> t.getOwner() == null));
+
+        reset(paymentSerivce);
+    }
+
+    @Test
+    public void updateOrderStatusByReferenceOrderStatusPending() {
+        Order order = new Order();
+        User user = persistUser();
+
+        order.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
+        order = testEntityManager.persist(order);
+        order.setUser(user);
+        order.setStatus(OrderStatus.PENDING);
+        given(paymentSerivce.updateStatus(Mockito.anyString())).willReturn(order);
+
+        orderService.updateOrderStatusByReference("Reference");
+
+        assertTrue(order.getTickets().stream().noneMatch(Ticket::isValid));
+        assertTrue(order.getTickets().stream().allMatch(t -> t.getOwner() == null));
+
+        reset(paymentSerivce);
+    }
+
+    @Test
+    public void updateOrderStatusByReferenceUnassignedOrder() {
+        Order order = new Order();
+        thrown.expect(UnassignedOrderException.class);
+
+        order.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
+        order = testEntityManager.persist(order);
+        given(paymentSerivce.updateStatus(Mockito.anyString())).willReturn(order);
+
+        orderService.updateOrderStatusByReference("Reference");
+
+        assertTrue(order.getTickets().stream().noneMatch(Ticket::isValid));
+
+        reset(paymentSerivce);
+    }
 }
