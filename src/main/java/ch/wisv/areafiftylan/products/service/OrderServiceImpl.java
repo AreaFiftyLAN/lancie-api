@@ -175,7 +175,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Order updateOrderStatus(String orderReference) {
+    public Order updateOrderStatusByReference(String orderReference) {
 
         Order order = paymentService.updateStatus(orderReference);
 
@@ -185,6 +185,10 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private void validateTicketsIfPaid(Order order) {
+        if (order.getUser() == null) {
+            throw new UnassignedOrderException(order.getId());
+        }
+
         if (order.getStatus().equals(OrderStatus.PAID)) {
             for (Ticket ticket : order.getTickets()) {
                 ticketService.assignTicketToUser(ticket.getId(), order.getUser().getUsername());
@@ -194,7 +198,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Order updateOrderStatus(Long orderId) {
+    public Order updateOrderStatusByOrderId(Long orderId) {
         Order order = getOrderById(orderId);
         if (!Strings.isNullOrEmpty(order.getReference())) {
             return paymentService.updateStatus(order.getReference());
@@ -206,9 +210,13 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void adminApproveOrder(Long orderId) {
         Order order = getOrderById(orderId);
-        order.setStatus(OrderStatus.PAID);
-        validateTicketsIfPaid(order);
-        orderRepository.save(order);
+        if (order.getUser() != null) {
+            order.setStatus(OrderStatus.PAID);
+            validateTicketsIfPaid(order);
+            orderRepository.save(order);
+        } else {
+            throw new UnassignedOrderException(orderId);
+        }
     }
 
     @Override

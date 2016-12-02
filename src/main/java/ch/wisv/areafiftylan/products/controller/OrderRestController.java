@@ -201,7 +201,7 @@ public class OrderRestController {
      */
     @RequestMapping(value = "/orders/status", method = RequestMethod.POST)
     public ResponseEntity<?> updateOrderStatus(@RequestParam(name = "id") String orderReference) {
-        orderService.updateOrderStatus(orderReference);
+        orderService.updateOrderStatusByReference(orderReference);
         return createResponseEntity(HttpStatus.OK, "Status is being updated");
     }
 
@@ -223,7 +223,7 @@ public class OrderRestController {
     @JsonView(View.OrderOverview.class)
     @RequestMapping(value = "/orders/{orderId}/status", method = RequestMethod.GET)
     public ResponseEntity<?> updateOrderStatusManual(@PathVariable long orderId) {
-        Order order = orderService.updateOrderStatus(orderId);
+        Order order = orderService.updateOrderStatusByOrderId(orderId);
         return createResponseEntity(HttpStatus.OK, "Order status updated", order);
     }
 
