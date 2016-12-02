@@ -140,7 +140,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Order removeTicketFromOrder(Long orderId, TicketType type, boolean pickupService, boolean chMember) {
         Order order = getOrderById(orderId);
-        if (order.getStatus().equals(OrderStatus.ANONYMOUS)) {
+        if (order.getStatus().equals(OrderStatus.ANONYMOUS) || order.getStatus().equals(OrderStatus.ASSIGNED)) {
 
             // Find a Ticket in the order, equal to the given DTO. Throw an exception when the ticket doesn't exist
             Ticket ticket =
