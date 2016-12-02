@@ -151,8 +151,8 @@ public class OrderRestController {
     @PostMapping(value = "/orders/{orderId}/assign")
     @JsonView(View.OrderOverview.class)
     public ResponseEntity<?> assignOrderToUser(Authentication auth, @PathVariable Long orderId) {
-        Order attachedOrder = orderService.assignOrderToUser(orderId, auth.getName());
-        return createResponseEntity(HttpStatus.OK, "Order successfully attached to User", attachedOrder);
+        Order assignedOrder = orderService.assignOrderToUser(orderId, auth.getName());
+        return createResponseEntity(HttpStatus.OK, "Order successfully attached to User", assignedOrder);
     }
 
 
