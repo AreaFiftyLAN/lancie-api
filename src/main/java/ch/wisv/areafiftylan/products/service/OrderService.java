@@ -63,10 +63,12 @@ public interface OrderService {
      * Removes a ticket with the given DTO from an order. Throws a NotFoundException when a ticket with such a DTO can't
      * be found
      *
-     * @param orderId   Order from which the Ticket should be removed
-     * @param ticketDTO Ticket which should be removed from the Order
+     * @param orderId       The Id of the Order from which the tickets have to be removed
+     * @param type          The Type of the ticket to be removed
+     * @param pickupService The pickupservice bool of the ticket to be removed
+     * @param chMember      The chMember bool of the ticket to be removed
      *
-     * @return The modified Order
+     * @return The updated Order
      */
     Order removeTicketFromOrder(Long orderId, TicketType type, boolean pickupService, boolean chMember);
 
@@ -79,9 +81,9 @@ public interface OrderService {
      */
     String requestPayment(Long orderId);
 
-    Order updateOrderStatus(String orderReference);
+    Order updateOrderStatusByReference(String orderReference);
 
-    Order updateOrderStatus(Long orderId);
+    Order updateOrderStatusByOrderId(Long orderId);
 
     /**
      * Manually approve an order, without going through the paymentprovider. This method sets the Orderstatus to PAID
