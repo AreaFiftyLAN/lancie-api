@@ -46,7 +46,7 @@ public class User implements Serializable, UserDetails {
     @JsonView(View.Public.class)
     private Profile profile;
 
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue
     @Id
     private Long id;
 

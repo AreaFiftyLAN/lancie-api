@@ -22,7 +22,7 @@ import ch.wisv.areafiftylan.extras.rfid.model.RFIDLink;
 import ch.wisv.areafiftylan.extras.rfid.model.RFIDLinkRepository;
 import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.model.TicketType;
-import ch.wisv.areafiftylan.products.service.TicketRepository;
+import ch.wisv.areafiftylan.products.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.utils.SessionData;
 import com.jayway.restassured.http.ContentType;
 import org.apache.http.HttpStatus;

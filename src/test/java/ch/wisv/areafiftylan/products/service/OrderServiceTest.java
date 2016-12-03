@@ -22,10 +22,11 @@ import ch.wisv.areafiftylan.exception.ImmutableOrderException;
 import ch.wisv.areafiftylan.exception.OrderNotFoundException;
 import ch.wisv.areafiftylan.exception.TicketNotFoundException;
 import ch.wisv.areafiftylan.exception.UnassignedOrderException;
-import ch.wisv.areafiftylan.products.model.Order;
-import ch.wisv.areafiftylan.products.model.OrderStatus;
 import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.model.TicketType;
+import ch.wisv.areafiftylan.products.model.order.Order;
+import ch.wisv.areafiftylan.products.model.order.OrderStatus;
+import ch.wisv.areafiftylan.products.service.repository.OrderRepository;
 import ch.wisv.areafiftylan.users.model.Gender;
 import ch.wisv.areafiftylan.users.model.User;
 import org.junit.After;
@@ -337,7 +338,7 @@ public class OrderServiceTest {
         try {
             orderService.addTicketToOrder(id, TicketType.TEST, false, false);
         } catch (IllegalStateException e) {
-            assertEquals("Order limit reached", e.getMessage());
+            assertEquals("Order numberAvailable reached", e.getMessage());
             assertEquals(ORDER_LIMIT, testEntityManager.find(Order.class, id).getTickets().size());
         }
     }

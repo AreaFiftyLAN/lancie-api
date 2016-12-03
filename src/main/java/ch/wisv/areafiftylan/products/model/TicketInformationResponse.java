@@ -45,13 +45,11 @@ public class TicketInformationResponse {
     private String deadline;
 
     public TicketInformationResponse(TicketType type, int numberSold) {
-        this.ticketType = type.name();
-        this.limit = type.getLimit();
+        this.ticketType = type.getName();
+        this.limit = type.getNumberAvailable();
         this.numberSold = numberSold;
         this.price = type.getPrice();
         this.text = type.getText();
-        this.chMemberDiscountPrice = TicketOptions.CHMEMBER.getPrice();
-        this.pickupServicePrice = TicketOptions.PICKUPSERVICE.getPrice();
         this.deadline = type.getDeadline().toString();
     }
 }

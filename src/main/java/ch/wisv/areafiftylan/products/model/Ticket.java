@@ -24,6 +24,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.Collection;
+import java.util.HashSet;
 
 @Entity
 public class Ticket {
@@ -40,43 +42,36 @@ public class Ticket {
     @Setter
     private User owner;
 
-    @Enumerated(EnumType.STRING)
     @JsonView(View.OrderOverview.class)
+    @ManyToOne(cascade = CascadeType.MERGE)
     @Getter
     private TicketType type;
 
-    @JsonView(View.OrderOverview.class)
-    @Getter
-    @Setter
-    private String text;
 
     @JsonView(View.OrderOverview.class)
     @Getter
-    @Setter
-    private boolean pickupService;
-
-    @JsonView(View.OrderOverview.class)
-    @Getter
-    @Setter
-    private boolean chMember;
+    @ManyToMany(cascade = CascadeType.MERGE)
+    private Collection<TicketOption> enabledOptions;
 
     @JsonView(View.OrderOverview.class)
     @Getter
     @Setter
     private boolean valid;
 
-    public Ticket(User owner, TicketType type, Boolean pickupService, Boolean chMember) {
-        this(type, pickupService, chMember);
+    public Ticket(User owner, TicketType type) {
+        this(type);
         this.owner = owner;
     }
 
-    public Ticket(TicketType type, Boolean pickupService, Boolean chMember) {
+    public Ticket(TicketType type) {
         this.owner = null;
         this.type = type;
-        this.text = type.getText();
-        this.pickupService = pickupService;
-        this.chMember = chMember;
         this.valid = false;
+        this.enabledOptions = new HashSet<>();
+    }
+
+    public boolean addOption(TicketOption option) {
+        return type.getPossibleOptions().contains(option) && enabledOptions.add(option);
     }
 
     public Ticket() {
@@ -87,14 +82,10 @@ public class Ticket {
     public float getPrice() {
         float finalPrice = type.getPrice();
 
-        finalPrice += pickupService ? TicketOptions.PICKUPSERVICE.getPrice() : 0;
-
-        finalPrice += chMember ? TicketOptions.CHMEMBER.getPrice() : 0;
+        for (TicketOption ticketOption : enabledOptions) {
+            finalPrice += ticketOption.getPrice();
+        }
 
         return finalPrice;
-    }
-
-    public boolean hasPickupService() {
-        return pickupService;
     }
 }

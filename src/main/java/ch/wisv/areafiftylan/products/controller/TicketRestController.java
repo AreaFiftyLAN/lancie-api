@@ -20,6 +20,8 @@ package ch.wisv.areafiftylan.products.controller;
 import ch.wisv.areafiftylan.exception.DuplicateTicketTransferTokenException;
 import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.model.TicketInformationResponse;
+import ch.wisv.areafiftylan.products.model.TicketOption;
+import ch.wisv.areafiftylan.products.model.TicketType;
 import ch.wisv.areafiftylan.products.service.OrderService;
 import ch.wisv.areafiftylan.products.service.TicketService;
 import ch.wisv.areafiftylan.security.token.TicketTransferToken;
@@ -30,6 +32,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
@@ -110,6 +113,24 @@ public class TicketRestController {
     @RequestMapping(value = "/transport", method = RequestMethod.GET)
     public Collection<Ticket> getAllTicketsWithTransport() {
         return ticketService.getAllTicketsWithTransport();
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/types")
+    public ResponseEntity<?> addTicketType(@RequestBody @Validated TicketType type) {
+
+        TicketType ticketType = ticketService.addTicketType(type);
+
+        return createResponseEntity(HttpStatus.CREATED, "TicketType successfully added", ticketType);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/options")
+    public ResponseEntity<?> addTicketOption(@RequestBody @Validated TicketOption option) {
+
+        TicketOption ticketOption = ticketService.addTicketOption(option);
+
+        return createResponseEntity(HttpStatus.CREATED, "TicketOption successfully added", ticketOption);
     }
 
     @ExceptionHandler(DuplicateTicketTransferTokenException.class)

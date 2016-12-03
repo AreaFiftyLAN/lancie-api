@@ -20,8 +20,8 @@ package ch.wisv.areafiftylan.products.controller;
 import ch.wisv.areafiftylan.exception.ImmutableOrderException;
 import ch.wisv.areafiftylan.exception.TicketNotFoundException;
 import ch.wisv.areafiftylan.exception.TicketUnavailableException;
-import ch.wisv.areafiftylan.products.model.Order;
 import ch.wisv.areafiftylan.products.model.TicketDTO;
+import ch.wisv.areafiftylan.products.model.order.Order;
 import ch.wisv.areafiftylan.products.service.OrderService;
 import ch.wisv.areafiftylan.utils.view.View;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -73,13 +73,7 @@ public class OrderRestController {
     public ResponseEntity<?> createOrder(@RequestBody @Validated TicketDTO ticketDTO) {
         HttpHeaders headers = new HttpHeaders();
 
-        // You can't buy non-buyable Tickts for yourself, this should be done via the createAdminOrder() method.
-        if (!ticketDTO.getType().isBuyable()) {
-            return createResponseEntity(HttpStatus.FORBIDDEN,
-                    "Can't order tickets with type " + ticketDTO.getType().getText());
-        }
-
-        Order order = orderService.create(ticketDTO.getType(), ticketDTO.hasPickupService(), ticketDTO.isCHMember());
+        Order order = orderService.create(ticketDTO.getType(), ticketDTO.getOptions());
 
         headers.setLocation(
                 ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(order.getId()).toUri());
@@ -115,8 +109,7 @@ public class OrderRestController {
     @RequestMapping(value = "/orders/{orderId}", method = RequestMethod.POST)
     @JsonView(View.OrderOverview.class)
     public ResponseEntity<?> addToOrder(@PathVariable Long orderId, @RequestBody @Validated TicketDTO ticketDTO) {
-        Order modifiedOrder = orderService
-                .addTicketToOrder(orderId, ticketDTO.getType(), ticketDTO.hasPickupService(), ticketDTO.isCHMember());
+        Order modifiedOrder = orderService.addTicketToOrder(orderId, ticketDTO.getType(), ticketDTO.getOptions());
         return createResponseEntity(HttpStatus.OK, "Ticket successfully added to your order", modifiedOrder);
     }
 
@@ -132,9 +125,7 @@ public class OrderRestController {
     @RequestMapping(value = "/orders/{orderId}", method = RequestMethod.DELETE)
     @JsonView(View.OrderOverview.class)
     public ResponseEntity<?> removeFromOrder(@PathVariable Long orderId, @RequestBody @Validated TicketDTO ticketDTO) {
-        Order modifiedOrder = orderService
-                .removeTicketFromOrder(orderId, ticketDTO.getType(), ticketDTO.hasPickupService(),
-                        ticketDTO.isCHMember());
+        Order modifiedOrder = orderService.removeTicketFromOrder(orderId, ticketDTO.getType(), ticketDTO.getOptions());
         return createResponseEntity(HttpStatus.OK, "Ticket successfully removed from Order", modifiedOrder);
     }
 

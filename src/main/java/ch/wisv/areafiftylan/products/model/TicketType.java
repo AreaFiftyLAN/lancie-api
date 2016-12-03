@@ -17,46 +17,62 @@
 
 package ch.wisv.areafiftylan.products.model;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.HashSet;
 
-public enum TicketType {
-    EARLY_FULL("Early Bird", 37.50F, 50, LocalDateTime.of(2016, 6, 3, 0, 0), true),
-    REGULAR_FULL("Regular", 40.00F, 0, LocalDateTime.of(2016, 5, 28, 23, 59), true),
-    LAST_MINUTE("Last Minute", 42.50F, 0, LocalDateTime.of(2016, 6, 5, 23, 59), true),
-    TEST("Test Ticket", 999.0F, 0, LocalDateTime.MAX, true),
-    FREE("Free", 0F, 0, LocalDateTime.MAX, false);
+@Entity
+@NoArgsConstructor
+public class TicketType {
+    //    EARLY_FULL("Early Bird", 37.50F, 50, LocalDateTime.of(2016, 6, 3, 0, 0), true),
+    //    REGULAR_FULL("Regular", 40.00F, 0, LocalDateTime.of(2016, 5, 28, 23, 59), true),
+    //    LAST_MINUTE("Last Minute", 42.50F, 0, LocalDateTime.of(2016, 6, 5, 23, 59), true),
+    //    TEST("Test Ticket", 999.0F, 0, LocalDateTime.MAX, true),
+    //    FREE("Free", 0F, 0, LocalDateTime.MAX, false);
 
-    private final float price;
-    private final int limit;
-    private final String text;
-    private final LocalDateTime deadline;
-    private final boolean buyable;
+    @Id
+    @GeneratedValue
+    @Getter
+    private Long id;
+    @Getter
+    @Setter
+    private String name;
+    @Getter
+    @Setter
+    private float price;
+    @Getter
+    @Setter
+    private int numberAvailable;
+    @Getter
+    @Setter
+    private String text;
+    @Getter
+    @Setter
+    private LocalDateTime deadline;
+    @Getter
+    @Setter
+    private boolean buyable;
+    @OneToMany(cascade = CascadeType.MERGE)
+    @Getter
+    Collection<TicketOption> possibleOptions;
 
-    TicketType(String text, float price, int limit, LocalDateTime deadline, boolean buyable) {
+    public TicketType(String name, String text, float price, int numberAvailable, LocalDateTime deadline,
+                      boolean buyable) {
+        this.name = name;
         this.text = text;
         this.price = price;
-        this.limit = limit;
+        this.numberAvailable = numberAvailable;
         this.deadline = deadline;
         this.buyable = buyable;
+        this.possibleOptions = new HashSet<>();
     }
 
-    public float getPrice() {
-        return price;
-    }
-
-    public int getLimit() {
-        return limit;
-    }
-
-    public String getText() {
-        return text;
-    }
-
-    public LocalDateTime getDeadline() {
-        return deadline;
-    }
-
-    public boolean isBuyable() {
-        return buyable;
+    public void addPossibleOption(TicketOption option) {
+        this.possibleOptions.add(option);
     }
 }

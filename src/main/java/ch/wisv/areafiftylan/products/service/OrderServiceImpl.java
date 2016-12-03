@@ -18,7 +18,15 @@
 package ch.wisv.areafiftylan.products.service;
 
 import ch.wisv.areafiftylan.exception.*;
-import ch.wisv.areafiftylan.products.model.*;
+import ch.wisv.areafiftylan.products.model.Ticket;
+import ch.wisv.areafiftylan.products.model.TicketInformationResponse;
+import ch.wisv.areafiftylan.products.model.TicketOption;
+import ch.wisv.areafiftylan.products.model.TicketType;
+import ch.wisv.areafiftylan.products.model.order.ExpiredOrder;
+import ch.wisv.areafiftylan.products.model.order.Order;
+import ch.wisv.areafiftylan.products.model.order.OrderStatus;
+import ch.wisv.areafiftylan.products.service.repository.ExpiredOrderRepository;
+import ch.wisv.areafiftylan.products.service.repository.OrderRepository;
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.users.service.UserService;
 import com.google.common.base.Strings;
@@ -80,7 +88,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Order create(TicketType type, boolean pickupService, boolean chMember) {
+    public Order create(String type, List<String> options) {
 
         if (type == null) {
             throw new IllegalArgumentException("TicketType can't be null!");
@@ -88,7 +96,7 @@ public class OrderServiceImpl implements OrderService {
 
         // Request a ticket to see if one is available. If a ticket is sold out, the method ends here due to the
         // exception thrown. Else, we'll get a new ticket to add to the order.
-        Ticket ticket = ticketService.requestTicketOfType(type, pickupService, chMember);
+        Ticket ticket = ticketService.requestTicketOfType(type, options);
 
         Order order = new Order();
 
@@ -98,7 +106,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Order addTicketToOrder(Long orderId, TicketType type, boolean pickupService, boolean chMember) {
+    public Order addTicketToOrder(Long orderId, String type, List<String> options) {
         Order order = getOrderById(orderId);
 
         // Check Order status
@@ -108,16 +116,16 @@ public class OrderServiceImpl implements OrderService {
 
         // Check amount of Tickets already in Order
         if (order.getTickets().size() >= ORDER_LIMIT) {
-            throw new IllegalStateException("Order limit reached");
+            throw new IllegalStateException("Order numberAvailable reached");
         }
 
         // Request a ticket to see if one is available. If a ticket is sold out, the method ends here due to the
         // exception thrown. Else, we'll get a new ticket to add to the order.
         Ticket ticket;
         if (order.getUser() != null) {
-            ticket = ticketService.requestTicketOfType(order.getUser(), type, pickupService, chMember);
+            ticket = ticketService.requestTicketOfType(order.getUser(), type, options);
         } else {
-            ticket = ticketService.requestTicketOfType(type, pickupService, chMember);
+            ticket = ticketService.requestTicketOfType(type, options);
         }
         order.addTicket(ticket);
         return orderRepository.save(order);
@@ -138,14 +146,14 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Order removeTicketFromOrder(Long orderId, TicketType type, boolean pickupService, boolean chMember) {
+    public Order removeTicketFromOrder(Long orderId, String type, List<String> options) {
         Order order = getOrderById(orderId);
         if (order.getStatus().equals(OrderStatus.ANONYMOUS) || order.getStatus().equals(OrderStatus.ASSIGNED)) {
 
             // Find a Ticket in the order, equal to the given DTO. Throw an exception when the ticket doesn't exist
-            Ticket ticket =
-                    order.getTickets().stream().filter(isEqualToInput(type, pickupService, chMember)).findFirst()
-                            .orElseThrow(TicketNotFoundException::new);
+            Ticket ticket = order.getTickets().stream().
+                    filter(isEqualToInput(type, options)).
+                    findFirst().orElseThrow(TicketNotFoundException::new);
 
             order.getTickets().remove(ticket);
             ticketService.removeTicket(ticket.getId());
@@ -157,8 +165,12 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
-    private static Predicate<Ticket> isEqualToInput(TicketType type, boolean pickupService, boolean chMember) {
-        return t -> (t.getType() == type) && (t.isChMember() == chMember) && (t.hasPickupService() == pickupService);
+    private static Predicate<Ticket> isEqualToInput(String type, List<String> options) {
+
+        return t -> (t.getType().getName().equals(type) && t.getEnabledOptions().stream().
+                map(TicketOption::getName).
+                collect(Collectors.toList()).
+                containsAll(options));
     }
 
     @Override
@@ -231,8 +243,8 @@ public class OrderServiceImpl implements OrderService {
     public Collection<TicketInformationResponse> getAvailableTickets() {
         Collection<TicketInformationResponse> ticketInfo = new ArrayList<>();
 
-        for (TicketType ticketType : TicketType.values()) {
-            if (ticketType.isBuyable() && ticketType != TicketType.TEST) {
+        for (TicketType ticketType : ticketService.getAllTicketTypes()) {
+            if (ticketType.isBuyable()) {
                 Integer typeSold = ticketService.getNumberSoldOfType(ticketType);
                 ticketInfo.add(new TicketInformationResponse(ticketType, typeSold));
             }

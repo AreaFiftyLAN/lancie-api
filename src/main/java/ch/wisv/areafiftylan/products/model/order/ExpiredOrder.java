@@ -15,7 +15,7 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.wisv.areafiftylan.products.model;
+package ch.wisv.areafiftylan.products.model.order;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;

@@ -19,11 +19,13 @@ package ch.wisv.areafiftylan.products.service;
 
 import ch.wisv.areafiftylan.exception.TicketUnavailableException;
 import ch.wisv.areafiftylan.products.model.Ticket;
+import ch.wisv.areafiftylan.products.model.TicketOption;
 import ch.wisv.areafiftylan.products.model.TicketType;
 import ch.wisv.areafiftylan.security.token.TicketTransferToken;
 import ch.wisv.areafiftylan.users.model.User;
 
 import java.util.Collection;
+import java.util.List;
 
 public interface TicketService {
     Ticket getTicketById(Long ticketId);
@@ -54,8 +56,13 @@ public interface TicketService {
      *
      * @throws TicketUnavailableException If the requested ticket is sold out.
      */
-    Ticket requestTicketOfType(TicketType type, boolean pickupService, boolean chMember);
-    Ticket requestTicketOfType(User user, TicketType type, boolean pickupService, boolean chMember);
+    default Ticket requestTicketOfType(String type, List<String> options) {
+        return requestTicketOfType(null, type, options);
+    }
+
+    Ticket requestTicketOfType(User user, String type, List<String> options);
+
+    Ticket requestTicketOfType(User user, TicketType type, List<TicketOption> options);
 
     /**
      * Sets up the ticket for transfer
@@ -94,4 +101,10 @@ public interface TicketService {
     Collection<Ticket> getAllTicketsWithTransport();
 
     Ticket assignTicketToUser(Long TicketId, String username);
+
+    TicketType addTicketType(TicketType type);
+
+    Collection<TicketType> getAllTicketTypes();
+
+    TicketOption addTicketOption(TicketOption option);
 }

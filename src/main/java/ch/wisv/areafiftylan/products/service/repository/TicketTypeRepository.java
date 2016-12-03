@@ -15,16 +15,15 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.wisv.areafiftylan.products.service;
+package ch.wisv.areafiftylan.products.service.repository;
 
-import ch.wisv.areafiftylan.products.model.ExpiredOrder;
+import ch.wisv.areafiftylan.products.model.TicketType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.Collection;
+import java.util.Optional;
 
 @Repository
-public interface ExpiredOrderRepository extends JpaRepository<ExpiredOrder, Long> {
-    Collection<ExpiredOrder> findAllBycreatedByIgnoreCase(String username);
-
+public interface TicketTypeRepository extends JpaRepository<TicketType, Long> {
+    Optional<TicketType> findByName(String name);
 }

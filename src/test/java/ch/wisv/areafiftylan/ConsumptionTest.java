@@ -24,7 +24,7 @@ import ch.wisv.areafiftylan.extras.consumption.model.PossibleConsumptionsReposit
 import ch.wisv.areafiftylan.extras.consumption.service.ConsumptionService;
 import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.model.TicketType;
-import ch.wisv.areafiftylan.products.service.TicketRepository;
+import ch.wisv.areafiftylan.products.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.utils.SessionData;
 import com.jayway.restassured.http.ContentType;
 import org.apache.http.HttpStatus;
