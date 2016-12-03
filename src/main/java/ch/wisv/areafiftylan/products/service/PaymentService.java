@@ -17,7 +17,7 @@
 
 package ch.wisv.areafiftylan.products.service;
 
-import ch.wisv.areafiftylan.products.model.Order;
+import ch.wisv.areafiftylan.products.model.order.Order;
 
 public interface PaymentService {
 

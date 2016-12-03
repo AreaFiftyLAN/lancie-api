@@ -18,8 +18,8 @@
 package ch.wisv.areafiftylan.users.controller;
 
 
-import ch.wisv.areafiftylan.products.model.Order;
 import ch.wisv.areafiftylan.products.model.Ticket;
+import ch.wisv.areafiftylan.products.model.order.Order;
 import ch.wisv.areafiftylan.products.service.OrderService;
 import ch.wisv.areafiftylan.products.service.TicketService;
 import ch.wisv.areafiftylan.seats.model.Seat;

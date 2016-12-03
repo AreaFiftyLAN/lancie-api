@@ -17,9 +17,13 @@
 
 package ch.wisv.areafiftylan;
 
-import ch.wisv.areafiftylan.products.model.*;
-import ch.wisv.areafiftylan.products.service.OrderRepository;
-import ch.wisv.areafiftylan.products.service.TicketRepository;
+import ch.wisv.areafiftylan.products.model.Ticket;
+import ch.wisv.areafiftylan.products.model.TicketOption;
+import ch.wisv.areafiftylan.products.model.TicketType;
+import ch.wisv.areafiftylan.products.model.order.Order;
+import ch.wisv.areafiftylan.products.model.order.OrderStatus;
+import ch.wisv.areafiftylan.products.service.repository.OrderRepository;
+import ch.wisv.areafiftylan.products.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.utils.SessionData;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Response;
@@ -154,7 +158,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             body("object.tickets", hasSize(1)).
             body("object.tickets.pickupService", hasItem(true)).
             body("object.tickets.type", hasItem(is(TicketType.TEST.toString()))).
-            body("object.amount",equalTo(TicketType.TEST.getPrice() + TicketOptions.PICKUPSERVICE.getPrice()));
+            body("object.amount",equalTo(TicketType.TEST.getPrice() + TicketOption.PICKUPSERVICE.getPrice()));
         //@formatter:on
     }
 
@@ -180,7 +184,7 @@ public class OrderRestIntegrationTest extends IntegrationTest {
             body("object.tickets", hasSize(1)).
             body("object.tickets.pickupService", hasItem(false)).
             body("object.tickets.type", hasItem(is(TicketType.TEST.toString()))).
-            body("object.amount", equalTo(TicketType.TEST.getPrice() + TicketOptions.CHMEMBER.getPrice()));
+            body("object.amount", equalTo(TicketType.TEST.getPrice() + TicketOption.CHMEMBER.getPrice()));
         //@formatter:on
     }
 

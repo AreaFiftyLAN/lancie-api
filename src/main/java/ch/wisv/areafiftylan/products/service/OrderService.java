@@ -17,9 +17,8 @@
 
 package ch.wisv.areafiftylan.products.service;
 
-import ch.wisv.areafiftylan.products.model.Order;
 import ch.wisv.areafiftylan.products.model.TicketInformationResponse;
-import ch.wisv.areafiftylan.products.model.TicketType;
+import ch.wisv.areafiftylan.products.model.order.Order;
 
 import java.util.Collection;
 import java.util.List;
@@ -36,46 +35,24 @@ public interface OrderService {
 
     /**
      * Create a new Order containing a single ticket
-     *
-     * @param type          Ticket Type
-     * @param pickupService Ticket includes pickup service
-     * @param chMember      Ticket includes chMember
-     *
-     * @return The newly created order
      */
-    Order create(TicketType type, boolean pickupService, boolean chMember);
+    Order create(String type, List<String> options);
 
     /**
      * Add a ticket to an order. Checks if a ticket is available first
-     *
-     * @param orderId
-     * @param type          Ticket Type
-     * @param pickupService Ticket includes pickup service
-     * @param chMember      Ticket includes chMember
-     *
-     * @return The order including the newly added ticket
      */
-    Order addTicketToOrder(Long orderId, TicketType type, boolean pickupService, boolean chMember);
+    Order addTicketToOrder(Long orderId, String type, List<String> options);
 
     Order assignOrderToUser(Long orderId, String username);
 
     /**
      * Removes a ticket with the given DTO from an order. Throws a NotFoundException when a ticket with such a DTO can't
      * be found
-     *
-     * @param orderId       The Id of the Order from which the tickets have to be removed
-     * @param type          The Type of the ticket to be removed
-     * @param pickupService The pickupservice bool of the ticket to be removed
-     * @param chMember      The chMember bool of the ticket to be removed
-     *
-     * @return The updated Order where ticket has been removed if present
      */
-    Order removeTicketFromOrder(Long orderId, TicketType type, boolean pickupService, boolean chMember);
+    Order removeTicketFromOrder(Long orderId, String type, List<String> options);
 
     /**
      * Register the order with the payment provider
-     *
-     * @param orderId The order to be checked out
      *
      * @return The URL for payment
      */
@@ -88,16 +65,12 @@ public interface OrderService {
     /**
      * Manually approve an order, without going through the paymentprovider. This method sets the Orderstatus to PAID
      * and validates all the tickets
-     *
-     * @param orderId Order to be approved
      */
     void adminApproveOrder(Long orderId);
 
     /**
      * Expire an order which will remove the order from the orders table and enter a relevant entry in the expired
      * orders table
-     *
-     * @param o The order to expire
      */
     void expireOrder(Order o);
 

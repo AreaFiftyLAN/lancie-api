@@ -18,11 +18,11 @@
 package ch.wisv.areafiftylan.security.authentication;
 
 import ch.wisv.areafiftylan.exception.TokenNotFoundException;
-import ch.wisv.areafiftylan.products.model.Order;
 import ch.wisv.areafiftylan.products.model.Ticket;
+import ch.wisv.areafiftylan.products.model.order.Order;
 import ch.wisv.areafiftylan.products.service.OrderService;
-import ch.wisv.areafiftylan.products.service.TicketRepository;
 import ch.wisv.areafiftylan.products.service.TicketService;
+import ch.wisv.areafiftylan.products.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.security.token.TeamInviteToken;
 import ch.wisv.areafiftylan.security.token.TicketTransferToken;
 import ch.wisv.areafiftylan.security.token.repository.TeamInviteTokenRepository;

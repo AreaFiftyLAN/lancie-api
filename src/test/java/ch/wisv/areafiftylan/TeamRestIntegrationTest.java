@@ -19,7 +19,7 @@ package ch.wisv.areafiftylan;
 
 import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.model.TicketType;
-import ch.wisv.areafiftylan.products.service.TicketRepository;
+import ch.wisv.areafiftylan.products.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.security.token.TeamInviteToken;
 import ch.wisv.areafiftylan.security.token.repository.TeamInviteTokenRepository;
 import ch.wisv.areafiftylan.teams.model.Team;

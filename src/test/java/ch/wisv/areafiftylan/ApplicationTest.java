@@ -18,11 +18,11 @@
 package ch.wisv.areafiftylan;
 
 
-import ch.wisv.areafiftylan.products.model.Order;
-import ch.wisv.areafiftylan.products.model.OrderStatus;
+import ch.wisv.areafiftylan.products.model.order.Order;
+import ch.wisv.areafiftylan.products.model.order.OrderStatus;
 import ch.wisv.areafiftylan.products.service.MolliePaymentService;
-import ch.wisv.areafiftylan.products.service.OrderRepository;
 import ch.wisv.areafiftylan.products.service.PaymentService;
+import ch.wisv.areafiftylan.products.service.repository.OrderRepository;
 import ch.wisv.areafiftylan.utils.mail.MailService;
 import org.mockito.Mockito;
 import org.springframework.boot.SpringApplication;

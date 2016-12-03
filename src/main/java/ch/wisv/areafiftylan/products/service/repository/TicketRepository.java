@@ -15,22 +15,22 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.wisv.areafiftylan.products.model;
+package ch.wisv.areafiftylan.products.service.repository;
 
-import lombok.Getter;
-import lombok.Setter;
+import ch.wisv.areafiftylan.products.model.Ticket;
+import ch.wisv.areafiftylan.products.model.TicketType;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-import javax.validation.constraints.NotNull;
-import java.util.List;
+import java.util.Collection;
 
-public class TicketDTO {
-    @NotNull
-    @Getter
-    @Setter
-    String type;
+@Repository
+public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
-    @NotNull
-    @Getter
-    @Setter
-    List<String> options;
+    //FIXME: Build a new query using options.contains or something
+    //    Collection<Ticket> findByPickupService_True();
+
+    Integer countByType(TicketType type);
+
+    Collection<Ticket> findAllByOwnerUsernameIgnoreCase(String username);
 }
