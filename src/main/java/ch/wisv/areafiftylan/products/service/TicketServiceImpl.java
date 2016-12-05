@@ -41,6 +41,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -122,6 +123,9 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public Ticket requestTicketOfType(User user, String type, List<String> options) {
+        if (options == null) {
+            options = Collections.emptyList();
+        }
         TicketType ticketType =
                 ticketTypeRepository.findByName(type).orElseThrow(() -> new TicketTypeNotFoundException(type));
         List<TicketOption> ticketOptions =
@@ -132,6 +136,9 @@ public class TicketServiceImpl implements TicketService {
     @Override
     @Synchronized
     public Ticket requestTicketOfType(User user, TicketType type, List<TicketOption> options) {
+        if (options == null) {
+            options = Collections.emptyList();
+        }
         // Check if the TicketType has a numberAvailable and if the numberAvailable is reached
         if (!isTicketAvailable(type)) {
             throw new TicketUnavailableException(type);
