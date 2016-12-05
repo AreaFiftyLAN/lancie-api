@@ -13,7 +13,8 @@
  *
  *     You should have received a copy of the GNU General Public License
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+ *//*
+
 
 package ch.wisv.areafiftylan;
 
@@ -45,9 +46,11 @@ import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.RestAssured.when;
 import static org.hamcrest.Matchers.*;
 
+*/
 /**
  * Created by beer on 5-1-16.
- */
+ *//*
+
 public class TicketRestIntegrationTest extends IntegrationTest {
     private final String TICKETS_ENDPOINT = "/tickets";
     private final String TRANSFER_ENDPOINT = TICKETS_ENDPOINT + "/transfer";
@@ -578,3 +581,4 @@ public class TicketRestIntegrationTest extends IntegrationTest {
         //@formatter:on
     }
 }
+*/

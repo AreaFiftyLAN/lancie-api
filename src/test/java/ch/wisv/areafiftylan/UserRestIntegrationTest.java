@@ -65,7 +65,7 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
 
     @After
     public void cleanupUserIntegrationTest() {
-        userRepository.deleteAll();
+        //        userRepository.deleteAll();
     }
 
     // CHECK AVAILABILITY
@@ -320,8 +320,9 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void createUserTakenUsername() {
+        User user = createUser();
         Map<String, String> userDTO = new HashMap<>();
-        userDTO.put("username", "user@mail.com");
+        userDTO.put("username", user.getUsername());
         userDTO.put("password", cleartextPassword);
 
         //@formatter:off
@@ -336,8 +337,9 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void createUserTakenUsernameDifferentCase() {
+        User user = createUser();
         Map<String, String> userDTO = new HashMap<>();
-        userDTO.put("username", "uSeR@mail.com");
+        userDTO.put("username", user.getUsername().toUpperCase());
         userDTO.put("password", cleartextPassword);
 
         //@formatter:off
@@ -357,7 +359,7 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         user = userRepository.save(user);
 
         Map<String, String> profileDTO = getProfileDTO();
-
+        profileDTO.put("displayName", "TestdisplayName" + user.getId());
 
         //@formatter:off
         given().
@@ -377,7 +379,7 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
             body("object.notes", equalTo("Testnotes")).
             body("object.firstName", equalTo("TestfirstName")).
             body("object.lastName", equalTo("TestlastName")).
-            body("object.displayName", equalTo("TestdisplayName"));
+            body("object.displayName", equalTo("TestdisplayName" + user.getId()));
         //@formatter:on
     }
 
@@ -420,6 +422,7 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         User admin = createUser(true);
 
         Map<String, String> profileDTO = getProfileDTO();
+        profileDTO.put("displayName", "TestdisplayName" + user.getId());
 
 
         //@formatter:off
@@ -440,7 +443,7 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
             body("object.notes", equalTo("Testnotes")).
             body("object.firstName", equalTo("TestfirstName")).
             body("object.lastName", equalTo("TestlastName")).
-            body("object.displayName", equalTo("TestdisplayName"));
+            body("object.displayName", equalTo("TestdisplayName" + user.getId()));
         //@formatter:on
     }
 

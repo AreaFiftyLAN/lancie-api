@@ -28,6 +28,7 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -86,7 +87,7 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         // should have been authenticated.
         http.exceptionHandling().authenticationEntryPoint(authenticationEntryPoint);
 
-        //@formatter:off
+/*        //@formatter:off
         http.formLogin()
                 .loginProcessingUrl("/login")
                 .successHandler(authenticationSuccessHandler)
@@ -94,18 +95,11 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             .and()
                 .logout()
                 .logoutUrl("/logout");
-        //@formatter:on
+        //@formatter:on*/
 
-        http.csrf().
-                // This is used for the Mollie webhook, so it shouldn't be protected by CSRF
-                        ignoringAntMatchers("/orders/status").
-                // Don't require CSRF on requests with valid Tokens
-                        requireCsrfProtectionMatcher(csrfRequestMatcher).
-                // We also ignore this for Token requests
-                        ignoringAntMatchers("/token").
-                // Ignore the route to request a password reset, no CSRF protection is needed
-                        ignoringAntMatchers("/requestResetPassword");
-        //@formatter:on
+        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+
+        http.csrf().disable();
 
         // This is the filter that adds the CSRF Token to the header. CSRF is enabled by default in Spring, this just
         // copies the content to the X-CSRF-TOKEN header field.

@@ -18,12 +18,15 @@
 package ch.wisv.areafiftylan;
 
 import ch.wisv.areafiftylan.security.authentication.AuthenticationService;
+import ch.wisv.areafiftylan.security.token.repository.AuthenticationTokenRepository;
 import ch.wisv.areafiftylan.users.model.Gender;
+import ch.wisv.areafiftylan.users.model.Role;
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.users.service.UserRepository;
 import io.restassured.RestAssured;
 import io.restassured.config.RedirectConfig;
 import io.restassured.http.Header;
+import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,7 +34,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 
@@ -39,8 +41,8 @@ import java.time.LocalDate;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = ApplicationTest.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-@Transactional
 public abstract class XAuthIntegrationTest {
+
     @Value("${local.server.port}")
     int port;
 
@@ -50,9 +52,14 @@ public abstract class XAuthIntegrationTest {
     protected UserRepository userRepository;
 
     @Autowired
+    protected AuthenticationTokenRepository authenticationTokenRepository;
+
+    @Autowired
     private AuthenticationService authenticationService;
 
-    public XAuthIntegrationTest() {
+
+    @Before
+    public void setXAuthIntegrationTest() {
         RestAssured.port = port;
         RestAssured.config().redirect(RedirectConfig.redirectConfig().followRedirects(false));
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
@@ -69,6 +76,9 @@ public abstract class XAuthIntegrationTest {
     protected User createUser(int age, boolean admin) {
         long count = userRepository.count();
         User user = new User(count + "@mail.com", new BCryptPasswordEncoder().encode(cleartextPassword));
+        if (admin) {
+            user.addRole(Role.ROLE_ADMIN);
+        }
         user.getProfile()
                 .setAllFields("User", String.valueOf(count), "DisplayName" + count, LocalDate.now().minusYears(age),
                         Gender.MALE, "Mekelweg" + count, "2826CD", "Delft", "0906-0666", null);
