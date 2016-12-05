@@ -19,12 +19,11 @@ package ch.wisv.areafiftylan;
 
 import ch.wisv.areafiftylan.security.token.AuthenticationToken;
 import ch.wisv.areafiftylan.security.token.repository.AuthenticationTokenRepository;
-import ch.wisv.areafiftylan.utils.SessionData;
-import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.response.Header;
-import com.jayway.restassured.response.Response;
+import ch.wisv.areafiftylan.users.model.User;
+import io.restassured.http.ContentType;
+import io.restassured.http.Header;
+import io.restassured.response.Response;
 import org.apache.http.HttpStatus;
-import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
@@ -34,15 +33,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.jayway.restassured.RestAssured.given;
+import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 
-/**
- * Created by Sille Kamoen on 6-5-16.
- */
-public class TokenAuthenticationTest extends IntegrationTest {
+public class TokenAuthenticationTest extends XAuthIntegrationTest {
 
     @Autowired
     AuthenticationTokenRepository authenticationTokenRepository;
@@ -54,34 +49,17 @@ public class TokenAuthenticationTest extends IntegrationTest {
         authenticationTokenRepository.deleteAll();
     }
 
-    private Header getTokenHeader(String username, String password) {
-        Map<String, String> userDTO = new HashMap<>();
-        userDTO.put("username", username);
-        userDTO.put("password", password);
-
-        //@formatter:off
-        String token =
-            given().
-            when().
-                content(userDTO).contentType(ContentType.JSON).
-                post("/token").
-            then().
-                extract().path("object");
-        //@formatter:on
-
-        return new Header(AUTH_HEADER, token);
-    }
-
     @Test
     public void testRequestToken() {
+        User user = createUser();
         Map<String, String> userDTO = new HashMap<>();
         userDTO.put("username", user.getUsername());
-        userDTO.put("password", userCleartextPassword);
+        userDTO.put("password", cleartextPassword);
 
         //@formatter:off
         Response response = given().
         when().
-            content(userDTO).contentType(ContentType.JSON).
+            body(userDTO).contentType(ContentType.JSON).
             post("/token");
 
         Optional<AuthenticationToken> authenticationToken =
@@ -95,14 +73,15 @@ public class TokenAuthenticationTest extends IntegrationTest {
 
     @Test
     public void testRequestTokenRenew() {
+        User user = createUser();
         Map<String, String> userDTO = new HashMap<>();
         userDTO.put("username", user.getUsername());
-        userDTO.put("password", userCleartextPassword);
+        userDTO.put("password", cleartextPassword);
 
         //@formatter:off
         given().
         when().
-            content(userDTO).contentType(ContentType.JSON).
+            body(userDTO).contentType(ContentType.JSON).
             post("/token").
         then().
             statusCode(HttpStatus.SC_OK);
@@ -114,7 +93,7 @@ public class TokenAuthenticationTest extends IntegrationTest {
         //@formatter:off
         given().
         when().
-            content(userDTO).contentType(ContentType.JSON).
+            body(userDTO).contentType(ContentType.JSON).
             post("/token").
         then().
             statusCode(HttpStatus.SC_OK);
@@ -128,11 +107,10 @@ public class TokenAuthenticationTest extends IntegrationTest {
 
     @Test
     public void testVerifyValidToken() {
-        Header header = getTokenHeader(user.getUsername(), userCleartextPassword);
-
+        User user = createUser();
         //@formatter:off
         given().
-            header(header).
+            header(getXAuthTokenHeaderForUser(user)).
         when().
             get("/token/verify").
         then().
@@ -170,11 +148,11 @@ public class TokenAuthenticationTest extends IntegrationTest {
 
     @Test
     public void testGetCurrentUserWithToken() {
-        Header header = getTokenHeader(user.getUsername(), userCleartextPassword);
+        User user = createUser();
 
         //@formatter:off
         given().
-            header(header).
+            header(getXAuthTokenHeaderForUser(user)).
         when().
             get("/users/current").
         then().
@@ -184,61 +162,15 @@ public class TokenAuthenticationTest extends IntegrationTest {
     }
 
     @Test
-    public void testPostRequestWithToken() {
-        Header header = getTokenHeader(user.getUsername(), userCleartextPassword);
-
-        //@formatter:off
-        given().
-            header(header).
-        when().
-            content(UserRestIntegrationTest.getProfileDTO()).
-            contentType(ContentType.JSON).
-            post("/users/current/profile").
-        then().
-            statusCode(HttpStatus.SC_OK).
-            body("object.gender", is("MALE")).
-            body("object.address", Matchers.equalTo("Testaddress")).
-            body("object.zipcode", Matchers.equalTo("Testzipcode")).
-            body("object.city", Matchers.equalTo("Testcity")).
-            body("object.phoneNumber", Matchers.equalTo("TestphoneNumber")).
-            body("object.notes", Matchers.equalTo("Testnotes")).
-            body("object.firstName", Matchers.equalTo("TestfirstName")).
-            body("object.lastName", Matchers.equalTo("TestlastName")).
-            body("object.displayName", Matchers.equalTo("TestdisplayName"));
-        //@formatter:on
-    }
-
-    @Test
     public void testForbiddenRequestWithToken() {
-        Header header = getTokenHeader(user.getUsername(), userCleartextPassword);
-
+        User user = createUser();
         //@formatter:off
         given().
-            header(header).
+            header(getXAuthTokenHeaderForUser(user)).
         when().
             get("/users/").
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
-    }
-
-    @Test
-    public void testEvadeCSRFWithTokenHeader() {
-        SessionData login = login(user.getUsername(), userCleartextPassword);
-
-        Header header = new Header(AUTH_HEADER, "hack");
-
-        //@formatter:off
-        given().
-            filter(sessionFilter).
-            header(header).
-        when().
-            content(UserRestIntegrationTest.getProfileDTO()).
-            contentType(ContentType.JSON).
-            post("/users/current/profile").
-        then().
-            statusCode(HttpStatus.SC_UNAUTHORIZED);
-        //@formatter:on
-
     }
 }
