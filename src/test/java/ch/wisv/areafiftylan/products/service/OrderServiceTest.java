@@ -263,7 +263,7 @@ public class OrderServiceTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void createNullType() {
-        Order order = orderService.create(TEST_TICKET, Arrays.asList(CH_MEMBER, PICKUP_SERVICE));
+        Order order = orderService.create(null, Arrays.asList(CH_MEMBER, PICKUP_SERVICE));
         assertEquals(0, orderRepository.findAll().size());
     }
 
