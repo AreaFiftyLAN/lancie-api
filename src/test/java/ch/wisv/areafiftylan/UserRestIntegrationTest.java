@@ -17,71 +17,36 @@
 
 package ch.wisv.areafiftylan;
 
-import ch.wisv.areafiftylan.security.token.VerificationToken;
 import ch.wisv.areafiftylan.security.token.repository.VerificationTokenRepository;
 import ch.wisv.areafiftylan.users.model.User;
-import ch.wisv.areafiftylan.utils.SessionData;
 import ch.wisv.areafiftylan.utils.TaskScheduler;
-import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.response.Response;
+import io.restassured.http.ContentType;
+import io.restassured.http.Header;
 import org.apache.http.HttpStatus;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.jayway.restassured.RestAssured.given;
-import static com.jayway.restassured.RestAssured.when;
+import static io.restassured.RestAssured.given;
+import static io.restassured.RestAssured.when;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.IsCollectionContaining.hasItem;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
+import static org.junit.Assert.assertFalse;
 
-public class UserRestIntegrationTest extends IntegrationTest {
+public class UserRestIntegrationTest extends XAuthIntegrationTest {
 
     @Autowired
-    VerificationTokenRepository verificationTokenRepository;
+    private VerificationTokenRepository verificationTokenRepository;
 
-    protected User testUser;
-    protected final String testUserCleartextPassword = "password";
     @Autowired
-    TaskScheduler taskScheduler;
-
-    @After
-    public void cleanupUserTest() {
-        testUser = null;
-        verificationTokenRepository.deleteAll();
-    }
-
-    private String createEnabledTestUser() {
-        Map<String, String> userDTO = new HashMap<>();
-        userDTO.put("username", "testUser@mail.com");
-        userDTO.put("password", testUserCleartextPassword);
-
-        //@formatter:off
-        Response response =
-            given().
-                header(getCSRFHeader()).
-                filter(sessionFilter).
-            when().
-                content(userDTO).contentType(ContentType.JSON).
-                post("/users").
-            then().
-                extract().response();
-        //@formatter:on
-
-        testUser = userRepository.findOneByUsernameIgnoreCase("testUser@mail.com").get();
-        testUser.setEnabled(true);
-        userRepository.saveAndFlush(testUser);
-
-        return response.getHeader("Location");
-    }
+    private TaskScheduler taskScheduler;
 
     static Map<String, String> getProfileDTO() {
         Map<String, String> profileDTO = new HashMap<>();
@@ -98,11 +63,17 @@ public class UserRestIntegrationTest extends IntegrationTest {
         return profileDTO;
     }
 
+    @After
+    public void cleanupUserIntegrationTest() {
+        userRepository.deleteAll();
+    }
+
     // CHECK AVAILABILITY
     @Test
     public void testUsernameTaken() {
+        User user = createUser();
 
-        when().get("/users/checkUsername?username=user@mail.com").then().body(equalTo("false"));
+        when().get("/users/checkUsername?username=" + user.getUsername()).then().body(equalTo("false"));
     }
 
     @Test
@@ -122,12 +93,11 @@ public class UserRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testGetAllUsersAsUser() {
-        SessionData login = login(user.getUsername(), userCleartextPassword);
+        User user = createUser();
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(user)).
         when().
             get("/users").
         then().
@@ -138,12 +108,12 @@ public class UserRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testGetAllUsersAsAdmin() {
-        SessionData login = login(admin.getUsername(), adminCleartextPassword);
+        User user = createUser();
+        User admin = createUser(true);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(admin)).
         when().
             get("/users").
         then().
@@ -169,12 +139,10 @@ public class UserRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testGetCurrentUserAsUser() {
-        SessionData login = login(user.getUsername(), userCleartextPassword);
-
+        User user = createUser();
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(user)).
         when().
             get("/users/current").
         then().statusCode(HttpStatus.SC_OK).
@@ -185,12 +153,11 @@ public class UserRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testGetCurrentUserAsAdmin() {
-        SessionData login = login(admin.getUsername(), adminCleartextPassword);
+        User admin = createUser(true);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(admin)).
         when().
             get("/users/current").
         then().statusCode(HttpStatus.SC_OK).
@@ -211,14 +178,13 @@ public class UserRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testGetOtherUserAsUser() {
+        User user = createUser();
         long id = user.getId();
         id++;
-        SessionData login = login(user.getUsername(), userCleartextPassword);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+                header(getXAuthTokenHeaderForUser(user)).
         when().get("/users/" + id).
             then().statusCode(HttpStatus.SC_FORBIDDEN).body("message", equalTo("Access denied"));
         //@formatter:on
@@ -226,13 +192,13 @@ public class UserRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testGetOtherUserAsAdmin() {
+        User user = createUser();
         long userId = user.getId();
-        SessionData login = login(admin.getUsername(), adminCleartextPassword);
+        User admin = createUser(true);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(admin)).
         when().
             get("/users/" + userId).
         then().statusCode(HttpStatus.SC_OK).
@@ -242,12 +208,11 @@ public class UserRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testGetOwnUserId() {
-        SessionData login = login(user.getUsername(), userCleartextPassword);
+        User user = createUser();
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(user)).
         when().
             get("/users/" + user.getId()).
         then().statusCode(HttpStatus.SC_OK).
@@ -258,17 +223,15 @@ public class UserRestIntegrationTest extends IntegrationTest {
 
     // USER POST
     @Test
-    public void createUser() {
+    public void testCreateUser() {
         Map<String, String> userDTO = new HashMap<>();
         userDTO.put("username", "test@mail.com");
-        userDTO.put("password", testUserCleartextPassword);
+        userDTO.put("password", cleartextPassword);
 
         //@formatter:off
         given().
-            header(getCSRFHeader()).
-            filter(sessionFilter).
         when().
-            content(userDTO).contentType(ContentType.JSON).
+            body(userDTO).contentType(ContentType.JSON).
             post("/users").
         then().
             statusCode(HttpStatus.SC_CREATED).
@@ -281,17 +244,15 @@ public class UserRestIntegrationTest extends IntegrationTest {
     public void createUserNoEmail() {
         Map<String, String> userDTO = new HashMap<>();
         userDTO.put("username", "user");
-        userDTO.put("password", userCleartextPassword);
+        userDTO.put("password", cleartextPassword);
 
         //@formatter:off
         given().
-                header(getCSRFHeader()).
-                filter(sessionFilter).
-                when().
-                content(userDTO).contentType(ContentType.JSON).
-                post("/users").
-                then().
-                statusCode(HttpStatus.SC_BAD_REQUEST);
+        when().
+            body(userDTO).contentType(ContentType.JSON).
+            post("/users").
+        then().
+            statusCode(HttpStatus.SC_BAD_REQUEST);
         //@formatter:on
     }
 
@@ -302,10 +263,8 @@ public class UserRestIntegrationTest extends IntegrationTest {
 
         //@formatter:off
         given().
-            header(getCSRFHeader()).
-            filter(sessionFilter).
         when().
-            content(userDTO).contentType(ContentType.JSON).
+            body(userDTO).contentType(ContentType.JSON).
             post("/users").
         then().
             statusCode(HttpStatus.SC_BAD_REQUEST);
@@ -320,10 +279,8 @@ public class UserRestIntegrationTest extends IntegrationTest {
 
         //@formatter:off
         given().
-            header(getCSRFHeader()).
-            filter(sessionFilter).
         when().
-            content(userDTO).contentType(ContentType.JSON).
+            body(userDTO).contentType(ContentType.JSON).
             post("/users").
         then().
             statusCode(HttpStatus.SC_BAD_REQUEST);
@@ -337,10 +294,8 @@ public class UserRestIntegrationTest extends IntegrationTest {
 
         //@formatter:off
         given().
-            header(getCSRFHeader()).
-            filter(sessionFilter).
         when().
-            content(userDTO).contentType(ContentType.JSON).
+            body(userDTO).contentType(ContentType.JSON).
             post("/users").
         then().
             statusCode(HttpStatus.SC_BAD_REQUEST);
@@ -355,10 +310,8 @@ public class UserRestIntegrationTest extends IntegrationTest {
 
         //@formatter:off
         given().
-            header(getCSRFHeader()).
-            filter(sessionFilter).
         when().
-            content(userDTO).contentType(ContentType.JSON).
+            body(userDTO).contentType(ContentType.JSON).
             post("/users").
         then().
             statusCode(HttpStatus.SC_BAD_REQUEST);
@@ -369,14 +322,12 @@ public class UserRestIntegrationTest extends IntegrationTest {
     public void createUserTakenUsername() {
         Map<String, String> userDTO = new HashMap<>();
         userDTO.put("username", "user@mail.com");
-        userDTO.put("password", userCleartextPassword);
+        userDTO.put("password", cleartextPassword);
 
         //@formatter:off
         given().
-            header(getCSRFHeader()).
-            filter(sessionFilter).
         when().
-            content(userDTO).contentType(ContentType.JSON).
+            body(userDTO).contentType(ContentType.JSON).
             post("/users").
         then().
             statusCode(HttpStatus.SC_CONFLICT);
@@ -387,14 +338,12 @@ public class UserRestIntegrationTest extends IntegrationTest {
     public void createUserTakenUsernameDifferentCase() {
         Map<String, String> userDTO = new HashMap<>();
         userDTO.put("username", "uSeR@mail.com");
-        userDTO.put("password", userCleartextPassword);
+        userDTO.put("password", cleartextPassword);
 
         //@formatter:off
         given().
-            header(getCSRFHeader()).
-            filter(sessionFilter).
         when().
-            content(userDTO).contentType(ContentType.JSON).
+            body(userDTO).contentType(ContentType.JSON).
             post("/users").
         then().
             statusCode(HttpStatus.SC_CONFLICT);
@@ -403,18 +352,18 @@ public class UserRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void createProfileAsCurrentUser() {
-        createEnabledTestUser();
+        User user = createUser();
+        user.resetProfile();
+        user = userRepository.save(user);
 
         Map<String, String> profileDTO = getProfileDTO();
 
-        SessionData login = login(testUser.getUsername(), testUserCleartextPassword);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(user)).
         when().
-            content(profileDTO).
+            body(profileDTO).
             contentType(ContentType.JSON).
             post("/users/current/profile").
         then().
@@ -434,20 +383,19 @@ public class UserRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void createProfileAsUser() {
-        String location = createEnabledTestUser();
+        User user = createUser();
+        user.resetProfile();
+        user = userRepository.save(user);
 
         Map<String, String> profileDTO = getProfileDTO();
 
-        SessionData login = login(testUser.getUsername(), testUserCleartextPassword);
-
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(user)).
         when().
-            content(profileDTO).
+            body(profileDTO).
             contentType(ContentType.JSON).
-            post(location + "/profile").
+            post("/users/" + user.getId() + "/profile").
         then().
             statusCode(HttpStatus.SC_OK).
             body("object.birthday", equalTo("2000-01-02")).
@@ -465,20 +413,22 @@ public class UserRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void createProfileAsAdmin() {
-        String location = createEnabledTestUser();
+        User user = createUser();
+        user.resetProfile();
+        user = userRepository.save(user);
+
+        User admin = createUser(true);
 
         Map<String, String> profileDTO = getProfileDTO();
 
-        SessionData login = login(admin.getUsername(), adminCleartextPassword);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(admin)).
         when().
-            content(profileDTO).
+            body(profileDTO).
             contentType(ContentType.JSON).
-            post(location + "/profile").
+            post("/users/" + user.getId() + "/profile").
         then().
             statusCode(HttpStatus.SC_OK).
             body("object.birthday", equalTo("2000-01-02")).
@@ -496,20 +446,21 @@ public class UserRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void createProfileAsOtherUser() {
-        String location = createEnabledTestUser();
+        User user = createUser();
+        user.resetProfile();
+        user = userRepository.save(user);
+
+        User user2 = createUser();
 
         Map<String, String> profileDTO = getProfileDTO();
 
-        SessionData login = login(user.getUsername(), userCleartextPassword);
-
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(user2)).
         when().
-            content(profileDTO).
+            body(profileDTO).
             contentType(ContentType.JSON).
-            post(location + "/profile").
+            post("/users/" + user.getId() + "/profile").
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
@@ -517,19 +468,18 @@ public class UserRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void createProfileMissingField() {
-        createEnabledTestUser();
+        User user = createUser();
+        user.resetProfile();
+        user = userRepository.save(user);
 
         Map<String, String> profileDTO = getProfileDTO();
         profileDTO.remove("city");
 
-        SessionData login = login(testUser.getUsername(), testUserCleartextPassword);
-
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(user)).
         when().
-            content(profileDTO).
+            body(profileDTO).
             contentType(ContentType.JSON).
             post("/users/current/profile").
         then().
@@ -538,20 +488,19 @@ public class UserRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void createProfileNoBirthday() {
-        createEnabledTestUser();
+    public void createProfileInvalidField() {
+        User user = createUser();
+        user.resetProfile();
+        user = userRepository.save(user);
 
         Map<String, String> profileDTO = getProfileDTO();
         profileDTO.put("birthday", "unknown");
 
-        SessionData login = login(testUser.getUsername(), testUserCleartextPassword);
-
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(user)).
         when().
-            content(profileDTO).
+            body(profileDTO).
             contentType(ContentType.JSON).
             post("/users/current/profile").
         then().
@@ -560,42 +509,19 @@ public class UserRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void createProfileInvalidGender() {
-        createEnabledTestUser();
-
-        Map<String, String> profileDTO = getProfileDTO();
-        profileDTO.put("gender", "unknown");
-
-        SessionData login = login(testUser.getUsername(), testUserCleartextPassword);
-
-        //@formatter:off
-        given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
-        when().
-            content(profileDTO).
-            contentType(ContentType.JSON).
-            post("/users/current/profile").
-        then().
-            statusCode(HttpStatus.SC_BAD_REQUEST);
-        //@formatter:on
-    }
-
-    @Test
-    public void createProfileEmptyDisplayName() {
-        createEnabledTestUser();
+    public void createProfileEmptyField() {
+        User user = createUser();
+        user.resetProfile();
+        user = userRepository.save(user);
 
         Map<String, String> profileDTO = getProfileDTO();
         profileDTO.put("displayName", "");
 
-        SessionData login = login(testUser.getUsername(), testUserCleartextPassword);
-
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(user)).
         when().
-            content(profileDTO).
+            body(profileDTO).
             contentType(ContentType.JSON).
             post("/users/current/profile").
         then().
@@ -605,19 +531,20 @@ public class UserRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void createProfileDuplicateDisplayName() {
-        createEnabledTestUser();
+        User user = createUser();
+        user.resetProfile();
+        user = userRepository.save(user);
+
+        User user2 = createUser();
 
         Map<String, String> profileDTO = getProfileDTO();
-        profileDTO.put("displayName", user.getProfile().getDisplayName().toUpperCase());
-
-        SessionData login = login(testUser.getUsername(), testUserCleartextPassword);
+        profileDTO.put("displayName", user2.getProfile().getDisplayName().toUpperCase());
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(user)).
         when().
-            content(profileDTO).
+            body(profileDTO).
             contentType(ContentType.JSON).
             post("/users/current/profile").
         then().
@@ -627,76 +554,34 @@ public class UserRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void createProfileEmptyNotes() {
-        createEnabledTestUser();
-
-        Map<String, String> profileDTO = getProfileDTO();
-        profileDTO.remove("notes");
-
-        SessionData login = login(testUser.getUsername(), testUserCleartextPassword);
-
-        //@formatter:off
-        given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
-        when().
-            content(profileDTO).
-            contentType(ContentType.JSON).
-            post("/users/current/profile").
-        then().
-        statusCode(HttpStatus.SC_OK).
-            body("object.birthday", equalTo("2000-01-02")).
-            body("object.gender", is("MALE")).
-            body("object.address", equalTo("Testaddress")).
-            body("object.zipcode", equalTo("Testzipcode")).
-            body("object.city", equalTo("Testcity")).
-            body("object.phoneNumber", equalTo("TestphoneNumber")).
-            body("object.notes", equalTo("")).
-            body("object.firstName", equalTo("TestfirstName")).
-            body("object.lastName", equalTo("TestlastName")).
-            body("object.displayName", equalTo("TestdisplayName"));
-        //@formatter:on
-    }
-
-    @Test
     public void deleteUserAsAdmin() {
-        createEnabledTestUser();
-
-        User testuser = userRepository.findOneByUsernameIgnoreCase(this.testUser.getUsername()).get();
-        long userId = testuser.getId();
-
-        SessionData login = login(admin.getUsername(), adminCleartextPassword);
+        User user = createUser();
+        User admin = createUser(true);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(admin)).
         when().
-            delete("/users/" + userId).
+            delete("/users/" + user.getId()).
         then().
             statusCode(HttpStatus.SC_OK).
             body("message", equalTo("User disabled"));
         //@formatter:on
 
-        testuser = userRepository.findOneByUsernameIgnoreCase(testuser.getUsername()).get();
-        assert (!testuser.isAccountNonLocked());
+        User disabledUser = userRepository.findOneByUsernameIgnoreCase(user.getUsername()).orElse(user);
+        assertFalse("User is disabled", disabledUser.isAccountNonLocked());
     }
 
     @Test
     public void deleteUserAsUser() {
-        createEnabledTestUser();
-
-        User testuser = userRepository.findOneByUsernameIgnoreCase(this.testUser.getUsername()).get();
-        long userId = testuser.getId();
-
-        SessionData login = login(testuser.getUsername(), testUserCleartextPassword);
+        User user = createUser();
+        User user2 = createUser();
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(user)).
         when().
-            delete("/users/" + userId).
+            delete("/users/" + user2.getId()).
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
@@ -705,14 +590,11 @@ public class UserRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void deleteUserAsAnon() {
-        createEnabledTestUser();
-
-        User testuser = userRepository.findOneByUsernameIgnoreCase(this.testUser.getUsername()).get();
-        long userId = testuser.getId();
+        User user = createUser();
 
         //@formatter:off
         when().
-            delete("/users/" + userId).
+            delete("/users/" + user.getId()).
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
@@ -720,33 +602,32 @@ public class UserRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testChangePassword() {
+        //TODO: Move to new AuthenticationTest
+        User user = createUser();
+
         String newPassword = "newPassword";
         Map<String, String> passwordDTO = new HashMap<>();
-        passwordDTO.put("oldPassword", userCleartextPassword);
+        passwordDTO.put("oldPassword", cleartextPassword);
         passwordDTO.put("newPassword", newPassword);
 
-        SessionData login = login(user.getUsername(), userCleartextPassword);
-
         //@formatter:off
+        Header xAuthTokenHeader = getXAuthTokenHeaderForUser(user);
+
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(xAuthTokenHeader).
         when().
-            content(passwordDTO).
+            body(passwordDTO).
             contentType(ContentType.JSON).
             put("/users/current/password").
         then().
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
 
-        logout();
-
-        SessionData login2 = login(user.getUsername(), newPassword);
+        removeXAuthToken(xAuthTokenHeader);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login2.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(user, newPassword)).
         when().
             get("/users/current").
         then().statusCode(HttpStatus.SC_OK).
@@ -757,18 +638,18 @@ public class UserRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testChangePasswordWrongOldPassword() {
+        //TODO: Move to new AuthenticationTest
+        User user = createUser();
+
         Map<String, String> passwordDTO = new HashMap<>();
         passwordDTO.put("oldPassword", "wrongPassword");
         passwordDTO.put("newPassword", "newPassword");
 
-        SessionData login = login(user.getUsername(), userCleartextPassword);
-
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(user)).
         when().
-            content(passwordDTO).
+            body(passwordDTO).
             contentType(ContentType.JSON).
             put("/users/current/password").
         then().
@@ -778,18 +659,17 @@ public class UserRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testChangePasswordMissingOldPassword() {
+        //TODO: Move to new AuthenticationTest
 
+        User user = createUser();
         Map<String, String> passwordDTO = new HashMap<>();
         passwordDTO.put("newPassword", "newPassword");
 
-        SessionData login = login(user.getUsername(), userCleartextPassword);
-
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(user)).
         when().
-            content(passwordDTO).
+            body(passwordDTO).
             contentType(ContentType.JSON).
             put("/users/current/password").
         then().
@@ -797,38 +677,15 @@ public class UserRestIntegrationTest extends IntegrationTest {
         //@formatter:on
     }
 
-    private void makeTempUser(String appendix) {
-        Map<String, String> userDTO = new HashMap<>();
-        userDTO.put("username", "tempUser" + appendix + "@mail.com");
-        userDTO.put("password", "password");
 
-        //@formatter:off
-        given().
-                header(getCSRFHeader()).
-                filter(sessionFilter).
-        when().
-                content(userDTO).contentType(ContentType.JSON).
-                post("/users").
-        then().
-                statusCode(HttpStatus.SC_CREATED);
-    }
-
-    private User getTempUser(String appendix){
-        return userRepository.findOneByUsernameIgnoreCase("tempUser" + appendix + "@mail.com").orElse(null);
-    }
-
-    private User makeAndGetTempUser(String appendix){
-        makeTempUser(appendix);
-        return getTempUser(appendix);
-    }
-
-    @Test
+    //TODO: Move to SchedulerTest
+/*    @Test
     public void testExpiredUsersNoneExpired() {
         User tempUser = makeAndGetTempUser("");
 
         taskScheduler.CleanUpUsers();
 
-        Assert.assertTrue(verificationTokenRepository.findByUser(tempUser).isPresent());
+        assertTrue(verificationTokenRepository.findByUser(tempUser).isPresent());
     }
 
     @Test
@@ -866,16 +723,15 @@ public class UserRestIntegrationTest extends IntegrationTest {
 
         Assert.assertFalse(verificationTokenRepository.findByUser(tempUser1).isPresent());
         Assert.assertFalse(verificationTokenRepository.findByUser(tempUser2).isPresent());
-    }
+    }*/
 
     @Test
-    public void testWrongCaseLogin(){
-        SessionData login = login(user.getUsername().toUpperCase(), userCleartextPassword);
-
+    public void testWrongCaseLogin() {
+        //TODO: Move to AuthenticationTest
+        User user = createUser();
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(user.getUsername().toUpperCase(), cleartextPassword)).
         when().
             get("/users/current").
         then().statusCode(HttpStatus.SC_OK).

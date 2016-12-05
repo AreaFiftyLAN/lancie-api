@@ -126,6 +126,7 @@ public abstract class IntegrationTest {
     }
 
 
+    @Deprecated
     protected Header getCSRFHeader() {
         //@formatter:off
         Response getLoginResponse =
@@ -140,6 +141,7 @@ public abstract class IntegrationTest {
         return new Header("X-CSRF-TOKEN", getLoginResponse.header("X-CSRF-TOKEN"));
     }
 
+    @Deprecated
     protected SessionData login(String username, String password) {
         //@formatter:off
         Response getLoginResponse =
@@ -174,6 +176,7 @@ public abstract class IntegrationTest {
         return new SessionData(tokenResponse.header("X-CSRF-TOKEN"), sessionFilter.getSessionId());
     }
 
+    @Deprecated
     protected void logout() {
         //@formatter:off
         Response getLoginResponse =

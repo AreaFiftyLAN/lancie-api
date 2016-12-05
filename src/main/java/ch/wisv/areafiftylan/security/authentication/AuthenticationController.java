@@ -19,7 +19,6 @@ package ch.wisv.areafiftylan.security.authentication;
 
 import ch.wisv.areafiftylan.exception.InvalidTokenException;
 import ch.wisv.areafiftylan.exception.TokenNotFoundException;
-import ch.wisv.areafiftylan.exception.UserNotFoundException;
 import ch.wisv.areafiftylan.security.token.PasswordResetToken;
 import ch.wisv.areafiftylan.security.token.VerificationToken;
 import ch.wisv.areafiftylan.security.token.repository.PasswordResetTokenRepository;
@@ -27,6 +26,7 @@ import ch.wisv.areafiftylan.security.token.repository.VerificationTokenRepositor
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.users.model.UserDTO;
 import ch.wisv.areafiftylan.users.service.UserService;
+import com.google.common.base.Strings;
 import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.Level;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -141,7 +141,8 @@ public class AuthenticationController {
      */
     @RequestMapping(value = "/resetPassword", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> body) throws InvalidTokenException {
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> body,
+                                           @RequestHeader("X-Auth-Token") String xAuth) throws InvalidTokenException {
         String token = body.get("token");
         String password = body.get("password");
 
@@ -160,6 +161,11 @@ public class AuthenticationController {
         // Disable the token for future use.
         passwordResetToken.use();
         passwordResetTokenRepository.saveAndFlush(passwordResetToken);
+
+        // Remove the Auth token for this password
+        if (!Strings.isNullOrEmpty(xAuth)) {
+            authenticationService.removeAuthToken(xAuth);
+        }
 
         return createResponseEntity(HttpStatus.OK, "Password set!");
     }
