@@ -13,7 +13,8 @@
  *
  *     You should have received a copy of the GNU General Public License
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+ *//*
+
 
 package ch.wisv.areafiftylan;
 
@@ -38,9 +39,11 @@ import static com.jayway.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 
+*/
 /**
  * Created by beer on 20-5-16.
- */
+ *//*
+
 public class ConsumptionTest extends IntegrationTest {
     private final String CONSUMPTION_ENDPOINT = "/consumptions";
     @Autowired
@@ -456,3 +459,4 @@ public class ConsumptionTest extends IntegrationTest {
         return id;
     }
 }
+*/

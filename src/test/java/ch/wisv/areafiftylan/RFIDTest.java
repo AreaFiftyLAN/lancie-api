@@ -13,7 +13,8 @@
  *
  *     You should have received a copy of the GNU General Public License
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+ *//*
+
 
 package ch.wisv.areafiftylan;
 
@@ -39,9 +40,11 @@ import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.RestAssured.when;
 import static org.hamcrest.Matchers.*;
 
+*/
 /**
  * Created by beer on 7-5-16.
- */
+ *//*
+
 public class RFIDTest extends IntegrationTest {
     private final String RFID_ENDPOINT = "/rfid";
     private final String RFID_TICKET_ENDPOINT = RFID_ENDPOINT + "/tickets";
@@ -410,3 +413,4 @@ public class RFIDTest extends IntegrationTest {
         return unusedTicketId;
     }
 }
+*/
