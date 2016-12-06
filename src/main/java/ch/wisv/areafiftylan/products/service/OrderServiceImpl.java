@@ -128,6 +128,9 @@ public class OrderServiceImpl implements OrderService {
         Order order = getOrderById(orderId);
         User user = userService.getUserByUsername(username);
 
+        // Expire all other open orders for this user
+        getOpenOrders(username).forEach(this::expireOrder);
+
         if (order.getStatus() != OrderStatus.ANONYMOUS) {
             throw new ImmutableOrderException(order.getId());
         }
