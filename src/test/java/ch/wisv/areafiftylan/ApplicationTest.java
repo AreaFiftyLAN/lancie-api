@@ -18,20 +18,29 @@
 package ch.wisv.areafiftylan;
 
 
+import ch.wisv.areafiftylan.products.model.TicketOption;
+import ch.wisv.areafiftylan.products.model.TicketType;
 import ch.wisv.areafiftylan.products.model.order.Order;
 import ch.wisv.areafiftylan.products.model.order.OrderStatus;
 import ch.wisv.areafiftylan.products.service.MolliePaymentService;
 import ch.wisv.areafiftylan.products.service.PaymentService;
 import ch.wisv.areafiftylan.products.service.repository.OrderRepository;
+import ch.wisv.areafiftylan.products.service.repository.TicketOptionRepository;
+import ch.wisv.areafiftylan.products.service.repository.TicketTypeRepository;
 import ch.wisv.areafiftylan.utils.mail.MailService;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Component;
 import org.springframework.test.context.ActiveProfiles;
+
+import java.time.LocalDateTime;
 
 @Configuration
 @ComponentScan
@@ -63,5 +72,32 @@ public class ApplicationTest {
 
         });
         return mockMolliePaymentService;
+    }
+
+    @Component
+    public class TestRunner implements CommandLineRunner {
+
+
+        private final TicketOptionRepository ticketOptionRepository;
+        private final TicketTypeRepository ticketTypeRepository;
+
+        @Autowired
+        public TestRunner(TicketOptionRepository ticketOptionRepository, TicketTypeRepository ticketTypeRepository) {
+            this.ticketOptionRepository = ticketOptionRepository;
+            this.ticketTypeRepository = ticketTypeRepository;
+        }
+
+        @Override
+        public void run(String... evt) throws Exception {
+            TicketOption chMember = ticketOptionRepository.save(new TicketOption("chMember", -5F));
+            TicketOption pickupSerivce = ticketOptionRepository.save(new TicketOption("pickupService", 2.5F));
+            TicketOption extraOption = ticketOptionRepository.save(new TicketOption("extraOption", 10F));
+
+            TicketType ticketType =
+                    new TicketType("test", "Testing Ticket", 30F, 0, LocalDateTime.now().plusDays(1), true);
+            ticketType.addPossibleOption(chMember);
+            ticketType.addPossibleOption(pickupSerivce);
+            ticketTypeRepository.save(ticketType);
+        }
     }
 }
