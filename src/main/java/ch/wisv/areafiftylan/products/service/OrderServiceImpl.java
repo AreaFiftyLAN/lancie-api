@@ -129,7 +129,7 @@ public class OrderServiceImpl implements OrderService {
         User user = userService.getUserByUsername(username);
 
         if (order.getStatus() != OrderStatus.ANONYMOUS) {
-            throw new ImmutableOrderException("Order already assigned!");
+            throw new ImmutableOrderException(order.getId());
         }
 
         order.setUser(user);

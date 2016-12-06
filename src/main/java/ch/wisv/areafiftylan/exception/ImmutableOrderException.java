@@ -20,10 +20,6 @@ package ch.wisv.areafiftylan.exception;
 public class ImmutableOrderException extends RuntimeException {
 
     public ImmutableOrderException(Long orderId) {
-        super("No more tickets can be added to Order " + orderId);
-    }
-
-    public ImmutableOrderException(String message) {
-        super(message);
+        super("Operation on Order " + orderId + " not permitted");
     }
 }

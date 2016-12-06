@@ -444,7 +444,6 @@ public class OrderServiceTest {
     @Test
     public void assignOrderToUserAlreadyAssigned() {
         thrown.expect(ImmutableOrderException.class);
-        thrown.expectMessage("Order already assigned!");
 
         User user = persistUser();
         User user2 =
