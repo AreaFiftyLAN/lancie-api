@@ -102,7 +102,7 @@ public class OrderServiceImpl implements OrderService {
         Order order = getOrderById(orderId);
 
         // Check Order status
-        if (!order.getStatus().equals(OrderStatus.ANONYMOUS) && !order.getStatus().equals(OrderStatus.ASSIGNED)) {
+        if (!(order.getStatus().equals(OrderStatus.ANONYMOUS) || order.getStatus().equals(OrderStatus.ASSIGNED))) {
             throw new ImmutableOrderException(orderId);
         }
 
@@ -143,9 +143,10 @@ public class OrderServiceImpl implements OrderService {
         if (order.getStatus().equals(OrderStatus.ANONYMOUS) || order.getStatus().equals(OrderStatus.ASSIGNED)) {
 
             // Find a Ticket in the order, equal to the given DTO. Throw an exception when the ticket doesn't exist
-            Ticket ticket =
-                    order.getTickets().stream().filter(isEqualToInput(type, pickupService, chMember)).findFirst()
-                            .orElseThrow(TicketNotFoundException::new);
+            Ticket ticket = order.getTickets().
+                    stream().
+                    filter(isEqualToInput(type, pickupService, chMember)).
+                    findFirst().orElseThrow(TicketNotFoundException::new);
 
             order.getTickets().remove(ticket);
             ticketService.removeTicket(ticket.getId());

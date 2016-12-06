@@ -68,7 +68,7 @@ public interface OrderService {
      * @param pickupService The pickupservice bool of the ticket to be removed
      * @param chMember      The chMember bool of the ticket to be removed
      *
-     * @return The updated Order
+     * @return The updated Order where ticket has been removed if present
      */
     Order removeTicketFromOrder(Long orderId, TicketType type, boolean pickupService, boolean chMember);
 
