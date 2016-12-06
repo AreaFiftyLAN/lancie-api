@@ -23,8 +23,6 @@ import ch.wisv.areafiftylan.exception.OrderNotFoundException;
 import ch.wisv.areafiftylan.exception.TicketNotFoundException;
 import ch.wisv.areafiftylan.exception.UnassignedOrderException;
 import ch.wisv.areafiftylan.products.model.Ticket;
-import ch.wisv.areafiftylan.products.model.TicketOption;
-import ch.wisv.areafiftylan.products.model.TicketType;
 import ch.wisv.areafiftylan.products.model.order.Order;
 import ch.wisv.areafiftylan.products.model.order.OrderStatus;
 import ch.wisv.areafiftylan.products.service.repository.OrderRepository;
@@ -51,7 +49,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.thymeleaf.spring4.SpringTemplateEngine;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -77,6 +74,8 @@ public class OrderServiceTest {
     @Autowired
     private PaymentService paymentSerivce;
     @Autowired
+    private TicketService ticketService;
+    @Autowired
     private TestEntityManager testEntityManager;
     @Autowired
     private OrderRepository orderRepository;
@@ -85,7 +84,7 @@ public class OrderServiceTest {
     private int ORDER_LIMIT;
 
     private final String CH_MEMBER = "chMember";
-    private final String PICKUP_SERVICE = "pickup";
+    private final String PICKUP_SERVICE = "pickupService";
     private final String TEST_TICKET = "test";
 
     @Rule
@@ -100,24 +99,12 @@ public class OrderServiceTest {
     }
 
     private Ticket persistTicket() {
-        TicketOption chMember = testEntityManager.persist(new TicketOption(CH_MEMBER, -5F));
-        TicketOption pickupService = testEntityManager.persist(new TicketOption(PICKUP_SERVICE, 2.5F));
-
-        TicketType ticketType =
-                new TicketType(TEST_TICKET, "TestTicket", 30F, 0, LocalDateTime.now().plusDays(1L), true);
-        ticketType.addPossibleOption(chMember);
-        ticketType.addPossibleOption(pickupService);
-
-        ticketType = testEntityManager.persist(ticketType);
-        Ticket ticket = testEntityManager.persist(new Ticket(ticketType));
-        ticket.addOption(chMember);
-        ticket.addOption(pickupService);
-        return testEntityManager.persist(ticket);
+        return ticketService.requestTicketOfType(TEST_TICKET, Arrays.asList(CH_MEMBER, PICKUP_SERVICE));
     }
 
     @Before
     public void setUp() {
-
+        testEntityManager.clear();
     }
 
 

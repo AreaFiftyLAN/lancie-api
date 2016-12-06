@@ -17,8 +17,16 @@
 
 package ch.wisv.areafiftylan;
 
+import ch.wisv.areafiftylan.exception.TicketOptionNotFoundException;
+import ch.wisv.areafiftylan.products.model.Ticket;
+import ch.wisv.areafiftylan.products.model.TicketOption;
+import ch.wisv.areafiftylan.products.service.repository.TicketOptionRepository;
+import ch.wisv.areafiftylan.products.service.repository.TicketRepository;
+import ch.wisv.areafiftylan.products.service.repository.TicketTypeRepository;
 import ch.wisv.areafiftylan.security.authentication.AuthenticationService;
 import ch.wisv.areafiftylan.security.token.repository.AuthenticationTokenRepository;
+import ch.wisv.areafiftylan.teams.model.Team;
+import ch.wisv.areafiftylan.teams.service.TeamRepository;
 import ch.wisv.areafiftylan.users.model.Gender;
 import ch.wisv.areafiftylan.users.model.Role;
 import ch.wisv.areafiftylan.users.model.User;
@@ -36,6 +44,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDate;
+import java.util.Collections;
+import java.util.List;
 
 
 @RunWith(SpringRunner.class)
@@ -50,12 +60,24 @@ public abstract class XAuthIntegrationTest {
 
     @Autowired
     protected UserRepository userRepository;
-
     @Autowired
     protected AuthenticationTokenRepository authenticationTokenRepository;
 
     @Autowired
     private AuthenticationService authenticationService;
+
+    @Autowired
+    private TicketTypeRepository ticketTypeRepository;
+    @Autowired
+    private TicketOptionRepository ticketOptionRepository;
+    @Autowired
+    private TicketRepository ticketRepository;
+    @Autowired
+    private TeamRepository teamRepository;
+
+    protected final String CH_MEMBER = "chMember";
+    protected final String PICKUP_SERVICE = "pickup";
+    protected final String TEST_TICKET = "test";
 
 
     @Before
@@ -63,6 +85,12 @@ public abstract class XAuthIntegrationTest {
         RestAssured.port = port;
         RestAssured.config().redirect(RedirectConfig.redirectConfig().followRedirects(false));
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+    }
+
+    protected User createUserWithTicket() {
+        User user = createUser();
+        createTicketForUser(user);
+        return user;
     }
 
     protected User createUser() {
@@ -84,6 +112,33 @@ public abstract class XAuthIntegrationTest {
                         Gender.MALE, "Mekelweg" + count, "2826CD", "Delft", "0906-0666", null);
 
         return userRepository.save(user);
+    }
+
+    protected Ticket createTicket(User user, List<String> options) {
+        Ticket ticket = new Ticket(user,
+                ticketTypeRepository.findByName(TEST_TICKET).orElseThrow(IllegalArgumentException::new));
+        options.forEach(o -> ticket.addOption(getTicketOption(o)));
+        ticket.setValid(true);
+
+        return ticketRepository.save(ticket);
+    }
+
+    protected Ticket createTicketForUser(User user) {
+        return createTicket(user, Collections.emptyList());
+    }
+
+    private TicketOption getTicketOption(String option) {
+        return ticketOptionRepository.findByName(option).orElseThrow(TicketOptionNotFoundException::new);
+    }
+
+    protected Team createTeamWithCaptain(User captain) {
+        Team team = new Team("Team " + captain.getId(), captain);
+        return teamRepository.save(team);
+    }
+
+    protected Team addMemberToTeam(Team team, User user) {
+        team.addMember(user);
+        return teamRepository.save(team);
     }
 
     protected Header getXAuthTokenHeaderForUser(User user) {
