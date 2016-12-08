@@ -7,40 +7,27 @@ import java.util.Collection;
 public interface WebService {
 
     /**
-     * Deletes all existing CommitteeMembers from the Repository,
-     * and adds the List of CommitteeMembers to the Repository.
-     * @param committeeMembers the List<CommitteeMember> to add.
+     * Add a CommitteeMember to the Repository.
+     * @param committeeMember the CommitteeMember to add.
      */
-    void setCommittee(Collection<CommitteeMember> committeeMembers);
+    void addCommitteeMember(CommitteeMember committeeMember);
 
     /**
      * Gets a List of all CommitteeMembers from the Repository.
-     * @return a List<CommitteeMember>
+     * @return a List<CommitteeMember>.
      */
     Collection<CommitteeMember> getCommittee();
 
     /**
-     * Deletes all existing CommitteeMembers from the Repository.
+     * Update the CommitteeMember with the given ID, with the given values.
+     * @param id The given id.
+     * @param committeeMember The new values of the CommitteeMember.
      */
-    void deleteCommittee();
-
-    /**
-     * Add a CommitteeMember to the Repository.
-     * @param committeeMember the CommitteeMember to add.
-     */
-    void addCommitteeMember(Long id, CommitteeMember committeeMember);
-
-    /**
-     * Get a CommitteeMember from the Repository.
-     * @param id The ID of the CommitteeMember.
-     * @return The CommitteeMember.
-     */
-    CommitteeMember getCommitteeMember(Long id);
+    void updateCommitteeMember(Long id, CommitteeMember committeeMember);
 
     /**
      * Delete a CommitteeMember from the Repository if it exists.
      * @param id The ID of the CommitteeMember.
      */
     void deleteCommitteeMember(Long id);
-
 }

@@ -33,7 +33,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
-import java.util.List;
 
 @RestController
 @RequestMapping("/web")
@@ -69,41 +68,56 @@ public class WebRestController {
         return sponsorService.getAllSponsors();
     }
 
+
+    /**
+     * Create a new CommitteeMember. Only available as admin.
+     *
+     * @param committeeMember The CommitteeMember to add.
+     * @return The status of the addition.
+     */
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/committee")
-    public ResponseEntity<?> createCommittee(@RequestBody List<CommitteeMember> committeeMembers) {
-        webService.setCommittee(committeeMembers);
-        return ResponseEntityBuilder.createResponseEntity(HttpStatus.CREATED, "Committee saved successfully.");
+    @PostMapping("/committee")
+    public ResponseEntity<?> addCommitteeMember(@RequestBody CommitteeMember committeeMember) {
+        webService.addCommitteeMember(committeeMember);
+        return ResponseEntityBuilder.createResponseEntity(HttpStatus.CREATED, "Committee member added successfully.");
     }
 
+    /**
+     * Retrieve all CommitteeMembers.
+     *
+     * @return All CommitteeMembers.
+     */
     @GetMapping("/committee")
-    public Collection<CommitteeMember> getCommittee() {
-        return webService.getCommittee();
+    public ResponseEntity<?> readCommittee() {
+        Collection<CommitteeMember> committeeMembers = webService.getCommittee();
+        return ResponseEntityBuilder.createResponseEntity(HttpStatus.OK, "Committee members retrieved successfully.", committeeMembers);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/committee")
-    public ResponseEntity<?> deleteCommittee() {
-        webService.deleteCommittee();
-        return ResponseEntityBuilder.createResponseEntity(HttpStatus.OK, "Committee deleted successfully.");
-    }
-
+    /**
+     * Update the CommitteeMember at the given id with the given values.
+     * Only available as admin.
+     *
+     * @param id The id at which to update the CommitteeMember.
+     * @param committeeMember The new Values for the CommitteeMember.
+     * @return The status of the update.
+     */
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/committee/{memberID}")
-    public ResponseEntity<?> addCommitteeMember(@PathVariable Long memberID, @RequestBody CommitteeMember committeeMember) {
-        webService.addCommitteeMember(memberID, committeeMember);
-        return ResponseEntityBuilder.createResponseEntity(HttpStatus.ACCEPTED, "Committee member added successfully.");
+    public ResponseEntity<?> addCommitteeMember(@PathVariable Long id, @RequestBody CommitteeMember committeeMember) {
+        webService.updateCommitteeMember(id, committeeMember);
+        return ResponseEntityBuilder.createResponseEntity(HttpStatus.ACCEPTED, "Committee member updated successfully.");
     }
 
-    @GetMapping("/committee/{memberID}")
-    public CommitteeMember getCommitteeMember(@PathVariable Long memberID) {
-        return webService.getCommitteeMember(memberID);
-    }
-
+    /**
+     * Delete a CommitteeMember. Only available as admin.
+     *
+     * @param id the id of the CommitteeMember to be deleted.
+     * @return The status of the deletion.
+     */
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/committee/{memberID}")
-    public ResponseEntity<?> deleteCommitteeMember(@PathVariable Long memberID) {
-        webService.deleteCommitteeMember(memberID);
+    public ResponseEntity<?> deleteCommitteeMember(@PathVariable Long id) {
+        webService.deleteCommitteeMember(id);
         return ResponseEntityBuilder.createResponseEntity(HttpStatus.OK, "Committee member deleted successfully.");
     }
 }

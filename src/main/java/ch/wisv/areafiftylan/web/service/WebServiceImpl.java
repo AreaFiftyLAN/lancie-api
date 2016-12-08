@@ -4,7 +4,6 @@ import ch.wisv.areafiftylan.web.model.CommitteeMember;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
 import java.util.List;
 
 @Service
@@ -19,9 +18,8 @@ public class WebServiceImpl implements WebService {
     }
 
     @Override
-    public void setCommittee(Collection<CommitteeMember> committeeMembers) {
-        committeeMemberRepository.deleteAll();
-        committeeMemberRepository.save(committeeMembers);
+    public void addCommitteeMember(CommitteeMember committeeMember) {
+        committeeMemberRepository.saveAndFlush(committeeMember);
     }
 
     @Override
@@ -30,25 +28,17 @@ public class WebServiceImpl implements WebService {
     }
 
     @Override
-    public void deleteCommittee() {
-        committeeMemberRepository.deleteAll();
-    }
-
-    @Override
-    public void addCommitteeMember(Long id, CommitteeMember committeeMember) {
-        committeeMember.setId(id);
-        committeeMemberRepository.delete(id);
-        committeeMemberRepository.save(committeeMember);
-    }
-
-    @Override
-    public CommitteeMember getCommitteeMember(Long id) {
-        return committeeMemberRepository.findOne(id);
+    public void updateCommitteeMember(Long id, CommitteeMember committeeMember) {
+        CommitteeMember oldCommitteeMember = committeeMemberRepository.getOne(id);
+        oldCommitteeMember.setOrder(committeeMember.getOrder());
+        oldCommitteeMember.setName(committeeMember.getName());
+        oldCommitteeMember.setFunction(committeeMember.getFunction());
+        oldCommitteeMember.setIcon(committeeMember.getIcon());
+        committeeMemberRepository.saveAndFlush(committeeMember);
     }
 
     @Override
     public void deleteCommitteeMember(Long id) {
         committeeMemberRepository.delete(id);
     }
-
 }
