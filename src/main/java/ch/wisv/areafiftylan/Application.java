@@ -23,7 +23,7 @@ import ch.wisv.areafiftylan.seats.service.SeatService;
 import ch.wisv.areafiftylan.teams.service.TeamRepository;
 import ch.wisv.areafiftylan.users.service.UserRepository;
 import ch.wisv.areafiftylan.utils.TestDataRunner;
-import ch.wisv.areafiftylan.web.service.CommitteeMemberRepository;
+import ch.wisv.areafiftylan.web.committee.service.CommitteeMemberRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;

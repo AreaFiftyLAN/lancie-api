@@ -15,7 +15,7 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.wisv.areafiftylan.web.model;
+package ch.wisv.areafiftylan.web.committee.model;
 
 public class CommitteeMember {
 

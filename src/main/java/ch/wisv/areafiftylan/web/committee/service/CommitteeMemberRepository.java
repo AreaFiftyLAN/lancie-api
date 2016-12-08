@@ -1,6 +1,6 @@
-package ch.wisv.areafiftylan.web.service;
+package ch.wisv.areafiftylan.web.committee.service;
 
-import ch.wisv.areafiftylan.web.model.CommitteeMember;
+import ch.wisv.areafiftylan.web.committee.model.CommitteeMember;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

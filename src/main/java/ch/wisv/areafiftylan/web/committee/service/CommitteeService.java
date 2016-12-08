@@ -1,10 +1,10 @@
-package ch.wisv.areafiftylan.web.service;
+package ch.wisv.areafiftylan.web.committee.service;
 
-import ch.wisv.areafiftylan.web.model.CommitteeMember;
+import ch.wisv.areafiftylan.web.committee.model.CommitteeMember;
 
 import java.util.Collection;
 
-public interface WebService {
+public interface CommitteeService {
 
     /**
      * Add a CommitteeMember to the Repository.

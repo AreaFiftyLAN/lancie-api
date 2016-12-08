@@ -1,19 +1,19 @@
-package ch.wisv.areafiftylan.web.service;
+package ch.wisv.areafiftylan.web.committee.service;
 
-import ch.wisv.areafiftylan.web.model.CommitteeMember;
+import ch.wisv.areafiftylan.web.committee.model.CommitteeMember;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-public class WebServiceImpl implements WebService {
+public class CommitteeServiceImpl implements CommitteeService {
 
 
     private CommitteeMemberRepository committeeMemberRepository;
 
     @Autowired
-    public WebServiceImpl(CommitteeMemberRepository committeeMemberRepository) {
+    public CommitteeServiceImpl(CommitteeMemberRepository committeeMemberRepository) {
         this.committeeMemberRepository = committeeMemberRepository;
     }
 

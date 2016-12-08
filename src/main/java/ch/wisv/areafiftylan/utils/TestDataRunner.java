@@ -28,8 +28,8 @@ import ch.wisv.areafiftylan.users.model.Gender;
 import ch.wisv.areafiftylan.users.model.Role;
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.users.service.UserRepository;
-import ch.wisv.areafiftylan.web.model.CommitteeMember;
-import ch.wisv.areafiftylan.web.service.CommitteeMemberRepository;
+import ch.wisv.areafiftylan.web.committee.model.CommitteeMember;
+import ch.wisv.areafiftylan.web.committee.service.CommitteeMemberRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 

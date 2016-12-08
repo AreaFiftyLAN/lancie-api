@@ -1,8 +1,8 @@
 package ch.wisv.areafiftylan;
 
 import ch.wisv.areafiftylan.utils.SessionData;
-import ch.wisv.areafiftylan.web.model.CommitteeMember;
-import ch.wisv.areafiftylan.web.service.CommitteeMemberRepository;
+import ch.wisv.areafiftylan.web.committee.model.CommitteeMember;
+import ch.wisv.areafiftylan.web.committee.service.CommitteeMemberRepository;
 import com.jayway.restassured.http.ContentType;
 import org.apache.http.HttpStatus;
 import org.junit.After;
