@@ -56,7 +56,7 @@ public class CommitteeRestController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{memberID}")
-    public ResponseEntity<?> addCommitteeMember(@PathVariable Long id, @RequestBody CommitteeMember committeeMember) {
+    public ResponseEntity<?> updateCommitteeMember(@PathVariable Long id, @RequestBody CommitteeMember committeeMember) {
         committeeService.updateCommitteeMember(id, committeeMember);
         return ResponseEntityBuilder.createResponseEntity(HttpStatus.ACCEPTED, "Committee member updated successfully.");
     }
