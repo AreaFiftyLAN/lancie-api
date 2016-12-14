@@ -471,7 +471,7 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         createTicketForUser(teammate);
 
         Team team = createTeamWithCaptain(user);
-        team.addMember(teammate);
+        addMemberToTeam(team, teammate);
 
         //@formatter:off
         given().
@@ -491,7 +491,7 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         createTicketForUser(teammate);
 
         Team team = createTeamWithCaptain(user);
-        team.addMember(teammate);
+        addMemberToTeam(team, teammate);
 
         //@formatter:off
         given().
@@ -540,7 +540,7 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
             get(TRANSPORT_ENDPOINT).
         then().
             statusCode(HttpStatus.SC_OK).
-            body("pickupService", contains(true));
+            body("enabledOptions[0].name", containsInAnyOrder(PICKUP_SERVICE));
         //@formatter:on
     }
 }
