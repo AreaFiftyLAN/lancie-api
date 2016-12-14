@@ -23,8 +23,8 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @NoArgsConstructor
@@ -57,9 +57,9 @@ public class TicketType {
     @Getter
     @Setter
     private boolean buyable;
-    @OneToMany(cascade = CascadeType.MERGE)
+    @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @Getter
-    Collection<TicketOption> possibleOptions;
+    Set<TicketOption> possibleOptions;
 
     public TicketType(String name, String text, float price, int numberAvailable, LocalDateTime deadline,
                       boolean buyable) {
