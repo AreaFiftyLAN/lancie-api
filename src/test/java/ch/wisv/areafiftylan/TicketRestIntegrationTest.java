@@ -531,7 +531,7 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
     @Test
     public void testGetAllTicketsForTransportAsAdmin() {
         User admin = createUser(true);
-        createTicket(admin, Collections.singletonList("pickupService"));
+        createTicket(admin, Collections.singletonList(PICKUP_SERVICE));
 
         //@formatter:off
         given().

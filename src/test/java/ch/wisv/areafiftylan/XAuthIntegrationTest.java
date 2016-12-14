@@ -76,7 +76,7 @@ public abstract class XAuthIntegrationTest {
     private TeamRepository teamRepository;
 
     protected final String CH_MEMBER = "chMember";
-    protected final String PICKUP_SERVICE = "pickup";
+    protected final String PICKUP_SERVICE = "pickupService";
     protected final String TEST_TICKET = "test";
 
 

@@ -24,8 +24,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 public class Ticket {
@@ -50,8 +50,8 @@ public class Ticket {
 
     @JsonView(View.OrderOverview.class)
     @Getter
-    @ManyToMany(cascade = CascadeType.MERGE)
-    private Collection<TicketOption> enabledOptions;
+    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    private Set<TicketOption> enabledOptions;
 
     @JsonView(View.OrderOverview.class)
     @Getter

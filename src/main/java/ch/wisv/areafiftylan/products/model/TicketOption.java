@@ -17,6 +17,7 @@
 
 package ch.wisv.areafiftylan.products.model;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -27,6 +28,7 @@ import javax.persistence.Id;
 
 @Entity
 @NoArgsConstructor
+@EqualsAndHashCode
 public class TicketOption {
 
     @Id
