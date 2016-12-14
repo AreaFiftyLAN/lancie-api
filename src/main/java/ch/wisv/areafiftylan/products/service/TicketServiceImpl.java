@@ -229,9 +229,13 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public Collection<Ticket> getAllTicketsWithTransport() {
-        //FIXME: Use the new method for this
-        return ticketRepository.findAll();
+    public List<Ticket> getAllTicketsWithTransport() {
+        TicketOption pickupServiceOption = getTicketOptionByName("pickupService");
+
+        return ticketRepository.findAll().
+                stream().
+                filter(ticket -> ticket.getEnabledOptions().contains(pickupServiceOption)).
+                collect(Collectors.toList());
     }
 
     @Override

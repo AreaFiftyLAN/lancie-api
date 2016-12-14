@@ -90,13 +90,13 @@ public class ApplicationTest {
         @Override
         public void run(String... evt) throws Exception {
             TicketOption chMember = ticketOptionRepository.save(new TicketOption("chMember", -5F));
-            TicketOption pickupSerivce = ticketOptionRepository.save(new TicketOption("pickupService", 2.5F));
+            TicketOption pickupService = ticketOptionRepository.save(new TicketOption("pickupService", 2.5F));
             TicketOption extraOption = ticketOptionRepository.save(new TicketOption("extraOption", 10F));
 
             TicketType ticketType =
                     new TicketType("test", "Testing Ticket", 30F, 0, LocalDateTime.now().plusDays(1), true);
             ticketType.addPossibleOption(chMember);
-            ticketType.addPossibleOption(pickupSerivce);
+            ticketType.addPossibleOption(pickupService);
             ticketTypeRepository.save(ticketType);
         }
     }
