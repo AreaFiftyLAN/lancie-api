@@ -15,24 +15,12 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.wisv.areafiftylan.products.service;
+package ch.wisv.areafiftylan.exception;
 
-import ch.wisv.areafiftylan.products.model.Order;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import ch.wisv.areafiftylan.products.model.TicketOption;
 
-import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.Optional;
-
-@Repository
-public interface OrderRepository extends JpaRepository<Order, Long> {
-
-    Optional<Order> findById(Long orderId);
-
-    Collection<Order> findAllByCreationDateTimeBefore(LocalDateTime creationDate);
-
-    Collection<Order> findAllByUserUsernameIgnoreCase(String username);
-
-    Optional<Order> findByReference(String reference);
+public class TicketOptionNotSupportedException extends RuntimeException {
+    public TicketOptionNotSupportedException(TicketOption ticketOption) {
+        super("Ticket option " + ticketOption.getName() + " is not available for this ticket");
+    }
 }

@@ -68,6 +68,7 @@ dependencies {
 
     testCompile("org.springframework.boot:spring-boot-starter-test")
     testCompile("com.jayway.restassured:rest-assured:2.8.0")
+    testCompile 'io.rest-assured:rest-assured:3.0.1'
 }
 
 eclipse {

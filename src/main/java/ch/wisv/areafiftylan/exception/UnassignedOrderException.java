@@ -15,22 +15,11 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.wisv.areafiftylan.products.model;
+package ch.wisv.areafiftylan.exception;
 
-import lombok.Getter;
-import lombok.Setter;
+public class UnassignedOrderException extends RuntimeException {
 
-import javax.validation.constraints.NotNull;
-import java.util.List;
-
-public class TicketDTO {
-    @NotNull
-    @Getter
-    @Setter
-    String type;
-
-    @NotNull
-    @Getter
-    @Setter
-    List<String> options;
+    public UnassignedOrderException(Long orderId) {
+        super("Order " + orderId + " is not assigned yet");
+    }
 }

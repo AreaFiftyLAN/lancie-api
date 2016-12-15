@@ -19,7 +19,7 @@ package ch.wisv.areafiftylan.seats.service;
 
 import ch.wisv.areafiftylan.exception.InvalidTicketException;
 import ch.wisv.areafiftylan.products.model.Ticket;
-import ch.wisv.areafiftylan.products.service.TicketRepository;
+import ch.wisv.areafiftylan.products.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.seats.model.Seat;
 import ch.wisv.areafiftylan.seats.model.SeatGroupDTO;
 import ch.wisv.areafiftylan.seats.model.SeatmapResponse;

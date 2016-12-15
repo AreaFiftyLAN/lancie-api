@@ -31,7 +31,6 @@ import ch.wisv.areafiftylan.users.service.UserService;
 import ch.wisv.areafiftylan.utils.mail.MailService;
 import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -56,8 +55,7 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public Team create(String username, String teamname) {
-        User captain =
-                userService.getUserByUsername(username).orElseThrow(() -> new UsernameNotFoundException(username));
+        User captain = userService.getUserByUsername(username);
         Team team = new Team(teamname, captain);
 
         return teamRepository.saveAndFlush(team);
@@ -106,8 +104,7 @@ public class TeamServiceImpl implements TeamService {
         // If the Captain username is set and different from the current captain, change the Captain
         String captainUsername = input.getCaptainUsername();
         if (!Strings.isNullOrEmpty(captainUsername) && !captainUsername.equals(current.getCaptain().getUsername())) {
-            User captain = userService.getUserByUsername(captainUsername)
-                    .orElseThrow(() -> new UserNotFoundException(captainUsername));
+            User captain = userService.getUserByUsername(captainUsername);
             current.setCaptain(captain);
         }
 
@@ -123,7 +120,7 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public TeamInviteToken inviteMember(Long teamId, String username) {
-        User user = userService.getUserByUsername(username).orElseThrow(() -> new UsernameNotFoundException(username));
+        User user = userService.getUserByUsername(username);
         Team team = getTeamById(teamId);
 
         // Check if the member isn't already part of the team
@@ -194,7 +191,7 @@ public class TeamServiceImpl implements TeamService {
     @Override
     public void addMember(Long teamId, String username) {
         Team team = teamRepository.getOne(teamId);
-        User user = userService.getUserByUsername(username).orElseThrow(() -> new UserNotFoundException(username));
+        User user = userService.getUserByUsername(username);
         if (team.addMember(user)) {
             teamRepository.saveAndFlush(team);
         } else {
@@ -205,7 +202,7 @@ public class TeamServiceImpl implements TeamService {
     @Override
     public boolean removeMember(Long teamId, String username) {
         Team team = getTeamById(teamId);
-        User user = userService.getUserByUsername(username).orElseThrow(() -> new UserNotFoundException(username));
+        User user = userService.getUserByUsername(username);
         if (team.getCaptain().equals(user)) {
             return false;
         }

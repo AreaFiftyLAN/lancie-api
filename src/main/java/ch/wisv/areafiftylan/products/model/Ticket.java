@@ -20,8 +20,12 @@ package ch.wisv.areafiftylan.products.model;
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.utils.view.View;
 import com.fasterxml.jackson.annotation.JsonView;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.Collection;
+import java.util.HashSet;
 
 @Entity
 public class Ticket {
@@ -29,94 +33,59 @@ public class Ticket {
     @Id
     @GeneratedValue
     @JsonView(View.OrderOverview.class)
+    @Getter
     private Long id;
 
     @ManyToOne(cascade = CascadeType.MERGE)
     @JsonView(View.Public.class)
+    @Getter
+    @Setter
     private User owner;
 
-    @Enumerated(EnumType.STRING)
     @JsonView(View.OrderOverview.class)
+    @ManyToOne(cascade = CascadeType.MERGE)
+    @Getter
     private TicketType type;
 
-    @JsonView(View.OrderOverview.class)
-    private String text;
 
     @JsonView(View.OrderOverview.class)
-    private boolean pickupService;
+    @Getter
+    @ManyToMany(cascade = CascadeType.MERGE)
+    private Collection<TicketOption> enabledOptions;
 
     @JsonView(View.OrderOverview.class)
-    private boolean chMember;
-
-    @JsonView(View.OrderOverview.class)
+    @Getter
+    @Setter
     private boolean valid;
 
-    @JsonView(View.OrderOverview.class)
-    private float price;
-
-    public Ticket(User owner, TicketType type, Boolean pickupService, Boolean chMember) {
+    public Ticket(User owner, TicketType type) {
+        this(type);
         this.owner = owner;
-        this.type = type;
-        this.text = type.getText();
-        this.pickupService = pickupService;
-        this.chMember = chMember;
-        this.valid = false;
+    }
 
-        price = getPrice();
+    public Ticket(TicketType type) {
+        this.owner = null;
+        this.type = type;
+        this.valid = false;
+        this.enabledOptions = new HashSet<>();
+    }
+
+    public boolean addOption(TicketOption option) {
+        return type.getPossibleOptions().contains(option) && enabledOptions.add(option);
     }
 
     public Ticket() {
         //JPA Only
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public boolean isPickupService() {
-        return pickupService;
-    }
-
-    public void setPickupService(boolean pickupService) {
-        this.pickupService = pickupService;
-        price = getPrice();
-    }
-
-    public boolean isChMember() {
-        return chMember;
-    }
-
-    public User getOwner() {
-        return owner;
-    }
-
-    public void setOwner(User owner) {
-        this.owner = owner;
-    }
-
-    public TicketType getType() {
-        return type;
-    }
-
+    @JsonView(View.OrderOverview.class)
     public float getPrice() {
         float finalPrice = type.getPrice();
 
-        finalPrice += pickupService ? TicketOptions.PICKUPSERVICE.getPrice() : 0;
-
-        finalPrice += chMember ? TicketOptions.CHMEMBER.getPrice() : 0;
+        for (TicketOption ticketOption : enabledOptions) {
+            finalPrice += ticketOption.getPrice();
+        }
 
         return finalPrice;
-    }
-
-    public boolean hasPickupService() {
-        return pickupService;
-    }
-
-    public boolean isValid() {
-        return valid;
-    }
-
-    public void setValid(boolean valid) {
-        this.valid = valid;
     }
 }

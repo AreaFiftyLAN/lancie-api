@@ -15,12 +15,15 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.wisv.areafiftylan.products.model;
+package ch.wisv.areafiftylan.products.model.order;
 
+import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.utils.view.View;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonView;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -34,53 +37,50 @@ public class Order {
     @Id
     @GeneratedValue
     @JsonView(View.OrderOverview.class)
+    @Getter
     private Long id;
 
     @OneToMany(cascade = CascadeType.MERGE, targetEntity = Ticket.class, fetch = FetchType.EAGER)
     @JsonView(View.OrderOverview.class)
+    @Getter
     private Set<Ticket> tickets;
 
     @JsonView(View.OrderOverview.class)
+    @Getter
+    @Setter
     private OrderStatus status;
 
     @JsonView(View.OrderOverview.class)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+    @Getter
     private LocalDateTime creationDateTime;
-
-    @JsonView(View.OrderOverview.class)
-    private float amount;
 
     /**
      * This String can be used to store an external reference. Payment providers often have their own id.
      */
     @JsonView(View.OrderOverview.class)
+    @Getter
+    @Setter
     private String reference;
 
     @ManyToOne(cascade = CascadeType.MERGE)
     @JsonView(View.OrderOverview.class)
-    private User user;
+    @Getter
+    private User user = null;
 
-    public Order(User user) {
-        this.user = user;
-        status = OrderStatus.CREATING;
+    public Order() {
+        status = OrderStatus.ANONYMOUS;
         creationDateTime = LocalDateTime.now();
         this.tickets = new HashSet<>();
     }
 
-    public Order() {
-        //JPA only
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public Set<Ticket> getTickets() {
-        return tickets;
+    public Order(User user) {
+        this();
+        this.user = user;
+        this.status = OrderStatus.ASSIGNED;
     }
 
     public boolean addTicket(Ticket ticket) {
-        amount += ticket.getPrice();
         return tickets.add(ticket);
     }
 
@@ -88,35 +88,21 @@ public class Order {
         tickets.clear();
     }
 
-    public OrderStatus getStatus() {
-        return status;
-    }
-
-    public LocalDateTime getCreationDateTime() {
-        return creationDateTime;
-    }
-
-    public String getReference() {
-        return reference;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setStatus(OrderStatus status) {
-        this.status = status;
-    }
-
-    public void setReference(String reference) {
-        this.reference = reference;
-    }
-
+    @JsonView(View.OrderOverview.class)
     public float getAmount() {
         float price = 0F;
         for (Ticket ticket : this.tickets) {
             price += ticket.getPrice();
         }
         return price;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+        if (user != null) {
+            this.status = OrderStatus.ASSIGNED;
+        } else {
+            this.status = OrderStatus.ANONYMOUS;
+        }
     }
 }

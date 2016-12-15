@@ -42,7 +42,7 @@ public class Seat {
     public Ticket ticket;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue
     private Long Id;
 
     @Getter

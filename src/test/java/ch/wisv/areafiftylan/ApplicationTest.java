@@ -18,22 +18,29 @@
 package ch.wisv.areafiftylan;
 
 
-import ch.wisv.areafiftylan.products.model.Order;
-import ch.wisv.areafiftylan.products.model.OrderStatus;
+import ch.wisv.areafiftylan.products.model.TicketOption;
+import ch.wisv.areafiftylan.products.model.TicketType;
+import ch.wisv.areafiftylan.products.model.order.Order;
+import ch.wisv.areafiftylan.products.model.order.OrderStatus;
 import ch.wisv.areafiftylan.products.service.MolliePaymentService;
-import ch.wisv.areafiftylan.products.service.OrderRepository;
 import ch.wisv.areafiftylan.products.service.PaymentService;
+import ch.wisv.areafiftylan.products.service.repository.OrderRepository;
+import ch.wisv.areafiftylan.products.service.repository.TicketOptionRepository;
+import ch.wisv.areafiftylan.products.service.repository.TicketTypeRepository;
 import ch.wisv.areafiftylan.utils.mail.MailService;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Component;
 import org.springframework.test.context.ActiveProfiles;
+
+import java.time.LocalDateTime;
 
 @Configuration
 @ComponentScan
@@ -57,16 +64,40 @@ public class ApplicationTest {
     public PaymentService paymentService(OrderRepository orderRepository) {
         MolliePaymentService mockMolliePaymentService = Mockito.mock(MolliePaymentService.class);
 
-        Mockito.when(mockMolliePaymentService.registerOrder(Mockito.any(Order.class))).then(new Answer<String>() {
-            @Override
-            public String answer(InvocationOnMock invocation) throws Throwable {
-                Order order = (Order) invocation.getArguments()[0];
-                order.setStatus(OrderStatus.WAITING);
-                orderRepository.save(order);
-                return "http://paymentURL.com";
+        Mockito.when(mockMolliePaymentService.registerOrder(Mockito.any(Order.class))).then(invocation -> {
+            Order order = (Order) invocation.getArguments()[0];
+            order.setStatus(OrderStatus.PENDING);
+            orderRepository.save(order);
+            return "http://paymentURL.com";
 
-            }
         });
         return mockMolliePaymentService;
+    }
+
+    @Component
+    public class TestRunner implements CommandLineRunner {
+
+
+        private final TicketOptionRepository ticketOptionRepository;
+        private final TicketTypeRepository ticketTypeRepository;
+
+        @Autowired
+        public TestRunner(TicketOptionRepository ticketOptionRepository, TicketTypeRepository ticketTypeRepository) {
+            this.ticketOptionRepository = ticketOptionRepository;
+            this.ticketTypeRepository = ticketTypeRepository;
+        }
+
+        @Override
+        public void run(String... evt) throws Exception {
+            TicketOption chMember = ticketOptionRepository.save(new TicketOption("chMember", -5F));
+            TicketOption pickupService = ticketOptionRepository.save(new TicketOption("pickupService", 2.5F));
+            TicketOption extraOption = ticketOptionRepository.save(new TicketOption("extraOption", 10F));
+
+            TicketType ticketType =
+                    new TicketType("test", "Testing Ticket", 30F, 0, LocalDateTime.now().plusDays(1), true);
+            ticketType.addPossibleOption(chMember);
+            ticketType.addPossibleOption(pickupService);
+            ticketTypeRepository.save(ticketType);
+        }
     }
 }

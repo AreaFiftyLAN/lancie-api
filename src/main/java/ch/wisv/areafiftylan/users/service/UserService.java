@@ -26,12 +26,11 @@ import org.springframework.dao.DataIntegrityViolationException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
-import java.util.Optional;
 
 public interface UserService {
     User getUserById(long id);
 
-    Optional<User> getUserByUsername(String username);
+    User getUserByUsername(String username);
 
     Collection<User> getAllUsers();
 

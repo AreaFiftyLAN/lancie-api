@@ -19,9 +19,10 @@ package ch.wisv.areafiftylan.security.authentication;
 
 import ch.wisv.areafiftylan.exception.TokenNotFoundException;
 import ch.wisv.areafiftylan.products.model.Ticket;
+import ch.wisv.areafiftylan.products.model.order.Order;
 import ch.wisv.areafiftylan.products.service.OrderService;
-import ch.wisv.areafiftylan.products.service.TicketRepository;
 import ch.wisv.areafiftylan.products.service.TicketService;
+import ch.wisv.areafiftylan.products.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.security.token.TeamInviteToken;
 import ch.wisv.areafiftylan.security.token.TicketTransferToken;
 import ch.wisv.areafiftylan.security.token.repository.TeamInviteTokenRepository;
@@ -116,10 +117,17 @@ public class CurrentUserServiceImpl implements CurrentUserService {
 
     @Override
     public boolean canAccessOrder(Object principal, Long orderId) {
+        Order order = orderService.getOrderById(orderId);
+
+        if (order.getUser() == null) {
+            // If the order is anonymous, allow access
+            return true;
+        }
+
         if (principal instanceof UserDetails) {
             User user = (User) principal;
-            // Check for each of the teammembers if the username matches the requester
-            return orderService.getOrderById(orderId).getUser().getUsername().equals(user.getUsername()) ||
+            // Return true if the order is owned by the user, or the user is an admin
+            return order.getUser().getUsername().equals(user.getUsername()) ||
                     user.getAuthorities().contains(Role.ROLE_ADMIN);
         } else {
             return false;

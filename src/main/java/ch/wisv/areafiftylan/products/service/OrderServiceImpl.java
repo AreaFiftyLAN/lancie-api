@@ -17,10 +17,16 @@
 
 package ch.wisv.areafiftylan.products.service;
 
-import ch.wisv.areafiftylan.exception.ImmutableOrderException;
-import ch.wisv.areafiftylan.exception.PaymentException;
-import ch.wisv.areafiftylan.exception.TicketNotFoundException;
-import ch.wisv.areafiftylan.products.model.*;
+import ch.wisv.areafiftylan.exception.*;
+import ch.wisv.areafiftylan.products.model.Ticket;
+import ch.wisv.areafiftylan.products.model.TicketInformationResponse;
+import ch.wisv.areafiftylan.products.model.TicketOption;
+import ch.wisv.areafiftylan.products.model.TicketType;
+import ch.wisv.areafiftylan.products.model.order.ExpiredOrder;
+import ch.wisv.areafiftylan.products.model.order.Order;
+import ch.wisv.areafiftylan.products.model.order.OrderStatus;
+import ch.wisv.areafiftylan.products.service.repository.ExpiredOrderRepository;
+import ch.wisv.areafiftylan.products.service.repository.OrderRepository;
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.users.service.UserService;
 import com.google.common.base.Strings;
@@ -58,7 +64,8 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Order getOrderById(Long id) {
-        return orderRepository.findOne(id);
+        return orderRepository.findById(id)
+                .orElseThrow(() -> new OrderNotFoundException("Order with id: " + id + " not found"));
     }
 
     @Override
@@ -76,26 +83,22 @@ public class OrderServiceImpl implements OrderService {
         Collection<Order> ordersByUsername = findOrdersByUsername(username);
 
         return ordersByUsername.stream().
-                filter(o -> o.getStatus().equals(OrderStatus.CREATING)).
+                filter(o -> o.getStatus().equals(OrderStatus.ASSIGNED)).
                 collect(Collectors.toList());
     }
 
     @Override
-    public Order create(Long userId, TicketDTO ticketDTO) {
-        User user = userService.getUserById(userId);
+    public Order create(String type, List<String> options) {
 
-        for (Order order : orderRepository.findAllByUserUsernameIgnoreCase(user.getUsername())) {
-            if (order.getStatus().equals(OrderStatus.CREATING)) {
-                throw new IllegalStateException("User already created a new Order: " + order.getId());
-            }
+        if (type == null) {
+            throw new IllegalArgumentException("TicketType can't be null!");
         }
 
         // Request a ticket to see if one is available. If a ticket is sold out, the method ends here due to the
         // exception thrown. Else, we'll get a new ticket to add to the order.
-        Ticket ticket = ticketService
-                .requestTicketOfType(ticketDTO.getType(), user, ticketDTO.hasPickupService(), ticketDTO.isCHMember());
+        Ticket ticket = ticketService.requestTicketOfType(type, options);
 
-        Order order = new Order(user);
+        Order order = new Order();
 
         order.addTicket(ticket);
 
@@ -103,38 +106,54 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Order addTicketToOrder(Long orderId, TicketDTO ticketDTO) {
-        Order order = orderRepository.getOne(orderId);
+    public Order addTicketToOrder(Long orderId, String type, List<String> options) {
+        Order order = getOrderById(orderId);
 
         // Check Order status
-        if (!order.getStatus().equals(OrderStatus.CREATING)) {
+        if (!order.getStatus().equals(OrderStatus.ANONYMOUS) && !order.getStatus().equals(OrderStatus.ASSIGNED)) {
             throw new ImmutableOrderException(orderId);
         }
 
         // Check amount of Tickets already in Order
         if (order.getTickets().size() >= ORDER_LIMIT) {
-            throw new IllegalStateException("Order limit reached");
+            throw new IllegalStateException("Order numberAvailable reached");
         }
-
-        User user = order.getUser();
 
         // Request a ticket to see if one is available. If a ticket is sold out, the method ends here due to the
         // exception thrown. Else, we'll get a new ticket to add to the order.
-        Ticket ticket = ticketService
-                .requestTicketOfType(ticketDTO.getType(), user, ticketDTO.hasPickupService(), ticketDTO.isCHMember());
-
+        Ticket ticket;
+        if (order.getUser() != null) {
+            ticket = ticketService.requestTicketOfType(order.getUser(), type, options);
+        } else {
+            ticket = ticketService.requestTicketOfType(type, options);
+        }
         order.addTicket(ticket);
         return orderRepository.save(order);
     }
 
     @Override
-    public Order removeTicketFromOrder(Long orderId, TicketDTO ticketDTO) {
-        Order order = orderRepository.getOne(orderId);
-        if (order.getStatus().equals(OrderStatus.CREATING)) {
+    public Order assignOrderToUser(Long orderId, String username) {
+        Order order = getOrderById(orderId);
+        User user = userService.getUserByUsername(username);
+
+        if (order.getStatus() != OrderStatus.ANONYMOUS) {
+            throw new ImmutableOrderException("Order already assigned!");
+        }
+
+        order.setUser(user);
+        order.setStatus(OrderStatus.ASSIGNED);
+        return orderRepository.save(order);
+    }
+
+    @Override
+    public Order removeTicketFromOrder(Long orderId, String type, List<String> options) {
+        Order order = getOrderById(orderId);
+        if (order.getStatus().equals(OrderStatus.ANONYMOUS) || order.getStatus().equals(OrderStatus.ASSIGNED)) {
 
             // Find a Ticket in the order, equal to the given DTO. Throw an exception when the ticket doesn't exist
-            Ticket ticket = order.getTickets().stream().filter(isEqualToDTO(ticketDTO)).findFirst()
-                    .orElseThrow(TicketNotFoundException::new);
+            Ticket ticket = order.getTickets().stream().
+                    filter(isEqualToInput(type, options)).
+                    findFirst().orElseThrow(TicketNotFoundException::new);
 
             order.getTickets().remove(ticket);
             ticketService.removeTicket(ticket.getId());
@@ -146,19 +165,29 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
-    private static Predicate<Ticket> isEqualToDTO(TicketDTO ticketDTO) {
-        return t -> (t.getType() == ticketDTO.getType()) && (t.isChMember() == ticketDTO.isCHMember()) &&
-                (t.hasPickupService() == ticketDTO.hasPickupService());
+    private static Predicate<Ticket> isEqualToInput(String type, List<String> options) {
+
+        return t -> (t.getType().getName().equals(type) && t.getEnabledOptions().stream().
+                map(TicketOption::getName).
+                collect(Collectors.toList()).
+                containsAll(options));
     }
 
     @Override
     public String requestPayment(Long orderId) {
         Order order = getOrderById(orderId);
+        if (order.getAmount() == 0) {
+            throw new IllegalStateException("Order can not be empty");
+        }
+        if (order.getStatus() != OrderStatus.ASSIGNED) {
+            throw new UnassignedOrderException(order.getId());
+        }
+
         return paymentService.registerOrder(order);
     }
 
     @Override
-    public Order updateOrderStatus(String orderReference) {
+    public Order updateOrderStatusByReference(String orderReference) {
 
         Order order = paymentService.updateStatus(orderReference);
 
@@ -168,16 +197,21 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private void validateTicketsIfPaid(Order order) {
+        if (order.getUser() == null) {
+            throw new UnassignedOrderException(order.getId());
+        }
+
         if (order.getStatus().equals(OrderStatus.PAID)) {
             for (Ticket ticket : order.getTickets()) {
+                ticketService.assignTicketToUser(ticket.getId(), order.getUser().getUsername());
                 ticketService.validateTicket(ticket.getId());
             }
         }
     }
 
     @Override
-    public Order updateOrderStatus(Long orderId) {
-        Order order = orderRepository.findOne(orderId);
+    public Order updateOrderStatusByOrderId(Long orderId) {
+        Order order = getOrderById(orderId);
         if (!Strings.isNullOrEmpty(order.getReference())) {
             return paymentService.updateStatus(order.getReference());
         } else {
@@ -187,10 +221,14 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public void adminApproveOrder(Long orderId) {
-        Order order = orderRepository.findOne(orderId);
-        order.setStatus(OrderStatus.PAID);
-        validateTicketsIfPaid(order);
-        orderRepository.save(order);
+        Order order = getOrderById(orderId);
+        if (order.getUser() != null) {
+            order.setStatus(OrderStatus.PAID);
+            validateTicketsIfPaid(order);
+            orderRepository.save(order);
+        } else {
+            throw new UnassignedOrderException(orderId);
+        }
     }
 
     @Override
@@ -205,8 +243,8 @@ public class OrderServiceImpl implements OrderService {
     public Collection<TicketInformationResponse> getAvailableTickets() {
         Collection<TicketInformationResponse> ticketInfo = new ArrayList<>();
 
-        for (TicketType ticketType : TicketType.values()) {
-            if (ticketType.isBuyable() && ticketType != TicketType.TEST) {
+        for (TicketType ticketType : ticketService.getAllTicketTypes()) {
+            if (ticketType.isBuyable()) {
                 Integer typeSold = ticketService.getNumberSoldOfType(ticketType);
                 ticketInfo.add(new TicketInformationResponse(ticketType, typeSold));
             }

@@ -15,21 +15,13 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.wisv.areafiftylan.products.service;
+package ch.wisv.areafiftylan.products.service.repository;
 
-import ch.wisv.areafiftylan.products.model.Ticket;
-import ch.wisv.areafiftylan.products.model.TicketType;
+import ch.wisv.areafiftylan.products.model.TicketOption;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
-import java.util.Collection;
+import java.util.Optional;
 
-@Repository
-public interface TicketRepository extends JpaRepository<Ticket, Long> {
-
-    Collection<Ticket> findByPickupService_True();
-
-    Integer countByType(TicketType type);
-
-    Collection<Ticket> findAllByOwnerUsernameIgnoreCase(String username);
+public interface TicketOptionRepository extends JpaRepository<TicketOption, Long> {
+    Optional<TicketOption> findByName(String name);
 }

@@ -13,13 +13,14 @@
  *
  *     You should have received a copy of the GNU General Public License
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+ *//*
+
 
 package ch.wisv.areafiftylan;
 
 import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.model.TicketType;
-import ch.wisv.areafiftylan.products.service.TicketRepository;
+import ch.wisv.areafiftylan.products.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.seats.model.Seat;
 import ch.wisv.areafiftylan.seats.service.SeatRepository;
 import ch.wisv.areafiftylan.teams.model.Team;
@@ -45,9 +46,11 @@ import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.RestAssured.when;
 import static org.hamcrest.Matchers.*;
 
+*/
 /**
  * Created by Sille Kamoen on 17-11-15.
- */
+ *//*
+
 public class SeatRestIntegrationTest extends IntegrationTest {
 
     @Autowired
@@ -674,3 +677,4 @@ public class SeatRestIntegrationTest extends IntegrationTest {
         Assert.assertNull(seat.getTicket());
     }
 }
+*/

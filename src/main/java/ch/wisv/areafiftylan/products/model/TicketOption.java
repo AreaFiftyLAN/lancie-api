@@ -18,19 +18,32 @@
 package ch.wisv.areafiftylan.products.model;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.validation.constraints.NotNull;
-import java.util.List;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 
-public class TicketDTO {
-    @NotNull
+@Entity
+@NoArgsConstructor
+public class TicketOption {
+
+    @Id
+    @GeneratedValue
+    @Getter
+    private Long id;
     @Getter
     @Setter
-    String type;
-
-    @NotNull
+    private float price;
     @Getter
     @Setter
-    List<String> options;
+    private String name;
+
+
+    public TicketOption(String name, float price) {
+        this.name = name;
+        this.price = price;
+    }
+
 }

@@ -15,18 +15,16 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.wisv.areafiftylan.products.model;
+package ch.wisv.areafiftylan.products.service.repository;
 
-public enum TicketOptions {
-    PICKUPSERVICE(2.50F), CHMEMBER(-5.00F);
+import ch.wisv.areafiftylan.products.model.order.ExpiredOrder;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-    final float price;
+import java.util.Collection;
 
-    TicketOptions(float price) {
-        this.price = price;
-    }
+@Repository
+public interface ExpiredOrderRepository extends JpaRepository<ExpiredOrder, Long> {
+    Collection<ExpiredOrder> findAllBycreatedByIgnoreCase(String username);
 
-    public float getPrice() {
-        return price;
-    }
 }
