@@ -21,8 +21,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.validator.constraints.NotEmpty;
 
-import javax.validation.constraints.NotNull;
-
 public class UserDTO {
 
     @NotEmpty
@@ -35,8 +33,7 @@ public class UserDTO {
     @Setter
     private String password = "";
 
-    @NotNull
     @Getter
     @Setter
-    private Role role = Role.ROLE_USER;
+    private Long orderId;
 }

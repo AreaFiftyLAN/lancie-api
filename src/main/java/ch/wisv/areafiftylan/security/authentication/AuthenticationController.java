@@ -19,7 +19,7 @@ package ch.wisv.areafiftylan.security.authentication;
 
 import ch.wisv.areafiftylan.exception.InvalidTokenException;
 import ch.wisv.areafiftylan.exception.TokenNotFoundException;
-import ch.wisv.areafiftylan.exception.UserNotFoundException;
+import ch.wisv.areafiftylan.products.service.OrderService;
 import ch.wisv.areafiftylan.security.token.PasswordResetToken;
 import ch.wisv.areafiftylan.security.token.VerificationToken;
 import ch.wisv.areafiftylan.security.token.repository.PasswordResetTokenRepository;
@@ -39,6 +39,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
+import java.util.Optional;
 
 import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEntity;
 
@@ -54,16 +55,18 @@ public class AuthenticationController {
 
     private final UserService userService;
     private final AuthenticationService authenticationService;
+    private final OrderService orderService;
 
     private final VerificationTokenRepository verificationTokenRepository;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
 
     @Autowired
     public AuthenticationController(UserService userService, AuthenticationService authenticationService,
-                                    VerificationTokenRepository verificationTokenRepository,
+                                    OrderService orderService, VerificationTokenRepository verificationTokenRepository,
                                     PasswordResetTokenRepository passwordResetTokenRepository) {
         this.userService = userService;
         this.authenticationService = authenticationService;
+        this.orderService = orderService;
 
         this.verificationTokenRepository = verificationTokenRepository;
         this.passwordResetTokenRepository = passwordResetTokenRepository;
@@ -178,7 +181,8 @@ public class AuthenticationController {
      * @throws TokenNotFoundException if the token can't be found
      */
     @RequestMapping(value = "/confirmRegistration", method = RequestMethod.GET)
-    public ResponseEntity<?> confirmRegistration(@RequestParam("token") String token)
+    public ResponseEntity<?> confirmRegistration(@RequestParam("token") String token,
+                                                 @RequestParam("orderId") Optional<Long> orderId)
             throws TokenNotFoundException, InvalidTokenException {
 
         VerificationToken verificationToken =
@@ -195,6 +199,9 @@ public class AuthenticationController {
 
         //Disable the token for future use.
         verificationTokenRepository.saveAndFlush(verificationToken);
+
+        //Bind the order to the user
+        orderId.ifPresent(id -> orderService.assignOrderToUser(id, user.getUsername()));
 
         return createResponseEntity(HttpStatus.OK, "Succesfully verified");
     }

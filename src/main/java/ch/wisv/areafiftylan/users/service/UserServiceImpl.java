@@ -86,14 +86,13 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         // Hash the plain password coming from the DTO
         String passwordHash = getPasswordHash(userDTO.getPassword());
         User user = new User(userDTO.getUsername(), passwordHash);
-        user.addRole(userDTO.getRole());
         // All users that register through the service have to be verified
         user.setEnabled(false);
 
         // Save the user so the verificationToken can be stored.
         user = userRepository.saveAndFlush(user);
 
-        generateAndSendToken(request, user);
+        generateAndSendToken(request, user, userDTO.getOrderId());
 
         return user;
     }
@@ -105,13 +104,16 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         });
     }
 
-    private void generateAndSendToken(HttpServletRequest request, User user) {
+    private void generateAndSendToken(HttpServletRequest request, User user, Long orderId) {
         // Create a new Verificationcode with this UUID, and link it to the user
         VerificationToken verificationToken = new VerificationToken(user);
         verificationTokenRepository.saveAndFlush(verificationToken);
 
         // Build the URL and send this to the mailservice for sending.
         String confirmUrl = requestUrl + "?token=" + verificationToken.getToken();
+        if (orderId != null) {
+            confirmUrl += "?orderId=" + orderId;
+        }
         mailService.sendVerificationmail(user, confirmUrl);
     }
 
@@ -148,7 +150,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public User addProfile(Long userId, ProfileDTO profileDTO) throws DataIntegrityViolationException {
         /*
-            No two identical displayNames are allowed. If the displayName already exists in the database we check whether
+            No two identical displayNames are allowed. If the displayName already exists in the database we check
+            whether
             this is a different user. If this is the case, we throw an exception, if not, we can continue.
          */
         userRepository.findOneByProfileDisplayNameIgnoreCase(profileDTO.getDisplayName()).ifPresent(u -> {
