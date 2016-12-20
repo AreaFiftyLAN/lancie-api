@@ -145,7 +145,7 @@ public class OrderServiceTest {
 
         Order order = new Order();
         order.setUser(user);
-        order = testEntityManager.persist(order);
+        testEntityManager.persist(order);
 
         Collection<Order> ordersByUsername = orderService.findOrdersByUsername(user.getUsername());
 
@@ -158,12 +158,11 @@ public class OrderServiceTest {
 
         Order order = new Order();
         order.setUser(user);
-        order = testEntityManager.persist(order);
+        testEntityManager.persist(order);
 
         Collection<Order> ordersByUsername = orderService.findOrdersByUsername(user.getUsername().toUpperCase());
 
         assertEquals(1, ordersByUsername.size());
-
     }
 
     @Test
@@ -370,24 +369,6 @@ public class OrderServiceTest {
         orderService.assignOrderToUser(id, user.getUsername());
 
         assertEquals(user, testEntityManager.find(Order.class, id).getUser());
-    }
-
-    @Test
-    public void assignOrderToUserWithOpenOrder() {
-        User user = persistUser();
-        Order order = new Order();
-        Order order2 = new Order();
-        order.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
-        order2.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
-
-        Long id = testEntityManager.persistAndGetId(order, Long.class);
-        Long id2 = testEntityManager.persistAndGetId(order2, Long.class);
-
-        orderService.assignOrderToUser(id, user.getUsername());
-        orderService.assignOrderToUser(id2, user.getUsername());
-
-        assertEquals(user, testEntityManager.find(Order.class, id2).getUser());
-        assertNull(testEntityManager.find(Order.class, id));
     }
 
     @Test

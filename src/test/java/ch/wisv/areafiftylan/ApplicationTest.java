@@ -27,6 +27,8 @@ import ch.wisv.areafiftylan.products.service.PaymentService;
 import ch.wisv.areafiftylan.products.service.repository.OrderRepository;
 import ch.wisv.areafiftylan.products.service.repository.TicketOptionRepository;
 import ch.wisv.areafiftylan.products.service.repository.TicketTypeRepository;
+import ch.wisv.areafiftylan.seats.model.Seat;
+import ch.wisv.areafiftylan.seats.service.SeatRepository;
 import ch.wisv.areafiftylan.utils.mail.MailService;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,11 +82,14 @@ public class ApplicationTest {
 
         private final TicketOptionRepository ticketOptionRepository;
         private final TicketTypeRepository ticketTypeRepository;
+        private final SeatRepository seatRepository;
 
         @Autowired
-        public TestRunner(TicketOptionRepository ticketOptionRepository, TicketTypeRepository ticketTypeRepository) {
+        public TestRunner(TicketOptionRepository ticketOptionRepository, TicketTypeRepository ticketTypeRepository,
+                          SeatRepository seatRepository) {
             this.ticketOptionRepository = ticketOptionRepository;
             this.ticketTypeRepository = ticketTypeRepository;
+            this.seatRepository = seatRepository;
         }
 
         @Override
@@ -98,6 +103,10 @@ public class ApplicationTest {
             ticketType.addPossibleOption(chMember);
             ticketType.addPossibleOption(pickupService);
             ticketTypeRepository.save(ticketType);
+
+            for (int i = 1; i <= 5; i++) {
+                seatRepository.save(new Seat("A", i));
+            }
         }
     }
 }
