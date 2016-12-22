@@ -13,39 +13,31 @@
  *
  *     You should have received a copy of the GNU General Public License
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *//*
+ */
 
 
 package ch.wisv.areafiftylan;
 
-import ch.wisv.areafiftylan.exception.*;
+import ch.wisv.areafiftylan.exception.RFIDNotFoundException;
 import ch.wisv.areafiftylan.extras.rfid.model.RFIDLink;
 import ch.wisv.areafiftylan.extras.rfid.model.RFIDLinkRepository;
 import ch.wisv.areafiftylan.products.model.Ticket;
-import ch.wisv.areafiftylan.products.model.TicketType;
 import ch.wisv.areafiftylan.products.service.repository.TicketRepository;
-import ch.wisv.areafiftylan.utils.SessionData;
-import com.jayway.restassured.http.ContentType;
+import ch.wisv.areafiftylan.users.model.User;
+import io.restassured.http.ContentType;
 import org.apache.http.HttpStatus;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashMap;
 import java.util.Optional;
 
-import static com.jayway.restassured.RestAssured.given;
-import static com.jayway.restassured.RestAssured.when;
+import static io.restassured.RestAssured.given;
+import static io.restassured.RestAssured.when;
 import static org.hamcrest.Matchers.*;
 
-*/
-/**
- * Created by beer on 7-5-16.
- *//*
-
-public class RFIDTest extends IntegrationTest {
+public class RFIDTest extends XAuthIntegrationTest {
     private final String RFID_ENDPOINT = "/rfid";
     private final String RFID_TICKET_ENDPOINT = RFID_ENDPOINT + "/tickets";
 
@@ -55,362 +47,353 @@ public class RFIDTest extends IntegrationTest {
     @Autowired
     private TicketRepository ticketRepository;
 
-    private final String LINK_RFID = "0123456789";
-    private final String UNUSED_RFID = "1212121212";
-    private final String INVALID_RFID = "607";
-
-    private RFIDLink link;
-    private Ticket ticket;
-    private Ticket otherTicket;
-
-    @Before
-    public void RFIDTestInit(){
-        ticket = makeTicket();
-        otherTicket = makeTicket();
-        link = makeRFIDLink();
-    }
-
-    private Ticket makeTicket(){
-        Ticket t = new Ticket(user, TicketType.EARLY_FULL, false, false);
-        t.setValid(true);
-        t = ticketRepository.saveAndFlush(t);
-        return t;
-    }
-
-    private RFIDLink makeRFIDLink(){
-        RFIDLink l = new RFIDLink(LINK_RFID, ticket);
+    private RFIDLink createRfidLink(Ticket ticket) {
+        long rfid = (long) Math.floor(Math.random() * 9_000_000_000L) + 1_000_000_000L;
+        RFIDLink l = new RFIDLink(String.valueOf(rfid), ticket);
         l = rfidLinkRepository.saveAndFlush(l);
-
         return l;
     }
 
-    @After
-    public void RFIDTestCleanup(){
-        rfidLinkRepository.deleteAll();
-        ticketRepository.deleteAll();
-    }
-
     @Test
-    public void testGetRFIDLinks_Anon(){
+    public void testGetRFIDLinks_Anon() {
+        //@formatter:off
         when()
-                .get(RFID_ENDPOINT)
+            .get(RFID_ENDPOINT)
         .then()
-                .statusCode(HttpStatus.SC_FORBIDDEN);
+            .statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
     }
 
     @Test
-    public void testGetRFIDLinks_User(){
-        SessionData session = login(user.getUsername(), userCleartextPassword);
+    public void testGetRFIDLinksAsUser() {
+        User user = createUser();
 
-        given()
-                .filter(sessionFilter)
-                .header(session.getCsrfHeader())
-        .when()
-                .get(RFID_ENDPOINT)
-        .then()
-                .statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+        when()
+            .get(RFID_ENDPOINT).
+        then()
+            .statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
     }
 
     @Test
-    public void testGetRFIDLinksNone_Admin(){
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
+    public void testGetRFIDLinksNoneAsAdmin() {
+        User user = createUser(true);
 
-        rfidLinkRepository.delete(link);
-
-        given()
-                .filter(sessionFilter)
-                .header(session.getCsrfHeader())
-        .when()
-                .get(RFID_ENDPOINT)
-        .then()
-                .statusCode(HttpStatus.SC_OK)
-                .body("$",  hasSize(0));
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+        when()
+            .get(RFID_ENDPOINT).
+        then()
+            .statusCode(HttpStatus.SC_OK)
+            .body("$",  hasSize(Long.valueOf(rfidLinkRepository.count()).intValue()));
+        //@formatter:on
     }
 
     @Test
-    public void testGetRFIDLinksSingle_Admin(){
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
+    public void testGetRFIDLinksSingleAsAdmin() {
+        User admin = createUser(true);
+        Ticket ticket = createTicketForUser(admin);
+        RFIDLink rfidLink = createRfidLink(ticket);
 
-        given()
-                .filter(sessionFilter)
-                .header(session.getCsrfHeader())
-        .when()
-                .get(RFID_ENDPOINT)
-        .then()
-                .statusCode(HttpStatus.SC_OK)
-                .body("$", hasSize(1))
-                .body("ticket.id", containsInAnyOrder(link.getTicket().getId().intValue()));
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(admin)).
+        when()
+            .get(RFID_ENDPOINT).
+        then()
+            .statusCode(HttpStatus.SC_OK)
+            .body("$", hasSize(Long.valueOf(rfidLinkRepository.count()).intValue()))
+            .body("ticket.id", hasItems(rfidLink.getTicket().getId().intValue()));
+        //@formatter:on
     }
 
     @Test
-    public void testGetRFIDLinksMultiple_Admin(){
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
+    public void testGetRFIDLinksMultipleAsAdmin() {
+        User admin = createUser(true);
+        User user = createUser();
 
-        RFIDLink link2 = new RFIDLink("1234567890", otherTicket);
-        link2 = rfidLinkRepository.saveAndFlush(link2);
+        Ticket ticket1 = createTicketForUser(admin);
+        Ticket ticket2 = createTicketForUser(user);
 
-        given()
-                .filter(sessionFilter)
-                .header(session.getCsrfHeader())
-        .when()
-                .get(RFID_ENDPOINT)
-        .then()
-                .statusCode(HttpStatus.SC_OK)
-                .body("$", hasSize(2))
-                .body("ticket.id", hasItems(link.getTicket().getId().intValue(), link2.getTicket().getId().intValue()));
+        RFIDLink link = createRfidLink(ticket1);
+        RFIDLink link2 = createRfidLink(ticket2);
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(admin)).
+        when()
+            .get(RFID_ENDPOINT).
+        then()
+            .statusCode(HttpStatus.SC_OK)
+            .body("$", hasSize(Long.valueOf(rfidLinkRepository.count()).intValue()))
+            .body("ticket.id", hasItems(link.getTicket().getId().intValue(), link2.getTicket().getId().intValue()));
+        //@formatter:on
     }
 
     @Test
-    public void testGetTicketIdByRFID_Admin(){
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
+    public void testGetTicketIdByRFIDAsAdmin() {
+        User user = createUser(true);
+        Ticket ticket = createTicketForUser(user);
+        RFIDLink link = createRfidLink(ticket);
 
-        given()
-                .filter(sessionFilter)
-                .header(session.getCsrfHeader())
-        .when()
-                .get(RFID_ENDPOINT + "/" + LINK_RFID + "/ticketId")
-        .then()
-                .statusCode(HttpStatus.SC_OK)
-                .body(equalTo(ticket.getId().toString()));
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+        when()
+            .get(RFID_ENDPOINT + "/" + link.getRFID() + "/ticketId").
+        then()
+            .statusCode(HttpStatus.SC_OK)
+            .body(equalTo(ticket.getId().toString()));
+        //@formatter:on
     }
 
     @Test
-    public void testGetTicketId_InvalidRFID_Admin(){
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
+    public void testGetTicketIdInvalidRFIDAsAdmin() {
+        User user = createUser(true);
 
-        InvalidRFIDException e = new InvalidRFIDException(INVALID_RFID);
-
-        given()
-                .filter(sessionFilter)
-                .header(session.getCsrfHeader())
-        .when()
-                .get(RFID_ENDPOINT + "/" + INVALID_RFID + "/ticketId")
-        .then()
-                .statusCode(HttpStatus.SC_BAD_REQUEST)
-                .body(containsString(e.getMessage()));
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+        when()
+            .get(RFID_ENDPOINT + "/123" + "/ticketId").
+        then()
+            .statusCode(HttpStatus.SC_BAD_REQUEST);
+        //@formatter:on
     }
 
     @Test
-    public void testGetTicketId_UnusedRFID_Admin(){
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
+    public void testGetTicketIdUnusedRFIDAsAdmin() {
+        User user = createUser(true);
+        Ticket ticket = createTicketForUser(user);
+        RFIDLink link = createRfidLink(ticket);
+        String unused = String.valueOf(Long.valueOf(link.getRFID()) + 1);
 
-        RFIDNotFoundException e = new RFIDNotFoundException();
-
-        given()
-                .filter(sessionFilter)
-                .header(session.getCsrfHeader())
-        .when()
-                .get(RFID_ENDPOINT + "/" + UNUSED_RFID + "/ticketId")
-        .then()
-                .statusCode(HttpStatus.SC_NOT_FOUND)
-                .body(containsString(e.getMessage()));
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+        when()
+            .get(RFID_ENDPOINT + "/" + unused + "/ticketId").
+        then()
+            .statusCode(HttpStatus.SC_NOT_FOUND);
+        //@formatter:on
     }
 
     @Test
-    public void testAddRFIDLink_Admin(){
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
+    public void testAddRFIDLinkAsAdmin() {
+        User user = createUser(true);
+        Ticket ticket = createTicketForUser(user);
+        HashMap<String, String> rfidLinkDTO = makeRFIDLinkDTO(ticket);
 
-        given()
-                .filter(sessionFilter)
-                .header(session.getCsrfHeader())
-        .when()
-                .content(makeRFIDLinkDTO(UNUSED_RFID, otherTicket.getId()))
-                .contentType(ContentType.JSON)
-                .post(RFID_ENDPOINT)
-        .then()
-                .statusCode(HttpStatus.SC_OK);
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+        when()
+            .body(rfidLinkDTO)
+            .contentType(ContentType.JSON)
+            .post(RFID_ENDPOINT).
+        then()
+            .statusCode(HttpStatus.SC_OK);
+        //@formatter:on
 
-        Optional<RFIDLink> queryResult = rfidLinkRepository.findByRfid(UNUSED_RFID);
+        Optional<RFIDLink> queryResult = rfidLinkRepository.findByRfid(rfidLinkDTO.get("rfid"));
+        Assert.assertEquals(queryResult.orElseThrow(RFIDNotFoundException::new).
+                getTicket().getId(), ticket.getId());
+    }
+
+    @Test
+    public void testAddRFIDLinkInvalidRFIDAsAdmin() {
+        User user = createUser(true);
+        Ticket ticket = createTicketForUser(user);
+        String invalid = "1234";
+
+        HashMap<String, String> rfidLinkDTO = makeRFIDLinkDTO(ticket);
+        rfidLinkDTO.put("rfid", invalid);
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+        when()
+            .body(rfidLinkDTO)
+            .contentType(ContentType.JSON)
+            .post(RFID_ENDPOINT).
+        then()
+            .statusCode(HttpStatus.SC_BAD_REQUEST);
+        //@formatter:on
+
+        Assert.assertFalse(rfidLinkRepository.findByRfid(invalid).isPresent());
+    }
+
+    @Test
+    public void testAddRFIDLinkRFIDTakenAsAdmin() {
+        User admin = createUser(true);
+        User user = createUser();
+        Ticket ticket1 = createTicketForUser(admin);
+        Ticket ticket2 = createTicketForUser(user);
+        RFIDLink rfidLink = createRfidLink(ticket1);
+        HashMap<String, String> rfidLinkDTO = makeRFIDLinkDTO(ticket2);
+        rfidLinkDTO.put("rfid", rfidLink.getRFID());
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(admin)).
+        when()
+            .body(rfidLinkDTO)
+            .contentType(ContentType.JSON)
+            .post(RFID_ENDPOINT).
+        then()
+            .statusCode(HttpStatus.SC_CONFLICT);
+        //@formatter:on
+
+        Optional<RFIDLink> queryResult = rfidLinkRepository.findByRfid(rfidLink.getRFID());
         Assert.assertTrue(queryResult.isPresent());
-        Assert.assertEquals(queryResult.get().getTicket().getId(), otherTicket.getId());
+        Assert.assertEquals(queryResult.get().getTicket().getId(), ticket1.getId());
     }
 
     @Test
-    public void testAddRFIDLink_InvalidRFID_Admin(){
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
+    public void testAddRFIDLinkTicketTakenAsAdmin() {
+        User user = createUser(true);
+        Ticket ticket = createTicketForUser(user);
+        createRfidLink(ticket);
+        HashMap<String, String> rfidLinkDTO = makeRFIDLinkDTO(ticket);
 
-        InvalidRFIDException e = new InvalidRFIDException(INVALID_RFID);
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+        when()
+            .body(rfidLinkDTO)
+            .contentType(ContentType.JSON)
+            .post(RFID_ENDPOINT).
+        then()
+            .statusCode(HttpStatus.SC_CONFLICT);
+        //@formatter:on
 
-        given()
-                .filter(sessionFilter)
-                .header(session.getCsrfHeader())
-        .when()
-                .content(makeRFIDLinkDTO(INVALID_RFID, otherTicket.getId()))
-                .contentType(ContentType.JSON)
-                .post(RFID_ENDPOINT)
-        .then()
-                .statusCode(HttpStatus.SC_BAD_REQUEST)
-                .body(containsString(e.getMessage()));
-
-        Assert.assertFalse(rfidLinkRepository.findByRfid(INVALID_RFID).isPresent());
+        Assert.assertFalse(rfidLinkRepository.findByRfid(rfidLinkDTO.get("rfid")).isPresent());
     }
 
     @Test
-    public void testAddRFIDLink_RFIDTaken_Admin(){
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
+    public void testAddRFIDLinkTicketInvalidAsAdmin() {
+        User admin = createUser(true);
+        Ticket ticket = createTicketForUser(admin);
 
-        RFIDTakenException e = new RFIDTakenException(LINK_RFID);
+        ticket.setValid(false);
+        ticketRepository.saveAndFlush(ticket);
 
-        given()
-                .filter(sessionFilter)
-                .header(session.getCsrfHeader())
-        .when()
-                .content(makeRFIDLinkDTO(LINK_RFID, otherTicket.getId()))
-                .contentType(ContentType.JSON)
-                .post(RFID_ENDPOINT)
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(admin)).
+        when()
+            .body(makeRFIDLinkDTO(ticket))
+            .contentType(ContentType.JSON)
+            .post(RFID_ENDPOINT)
         .then()
-                .statusCode(HttpStatus.SC_CONFLICT)
-                .body(containsString(e.getMessage()));
-
-        Optional<RFIDLink> queryResult = rfidLinkRepository.findByRfid(LINK_RFID);
-        Assert.assertTrue(queryResult.isPresent());
-        Assert.assertEquals(queryResult.get().getTicket().getId(), ticket.getId());
+            .statusCode(HttpStatus.SC_BAD_REQUEST);
+        //@formatter:on
     }
 
     @Test
-    public void testAddRFIDLink_TicketTaken_Admin(){
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
+    public void testAddRFIDLinkTicketDoesntExistAsAdmin() {
+        User user = createUser(true);
+        Ticket ticket = createTicketForUser(user);
 
-        TicketAlreadyLinkedException e = new TicketAlreadyLinkedException();
+        HashMap<String, String> rfidLinkDTO = makeRFIDLinkDTO(ticket);
+        rfidLinkDTO.put("ticketId", user.getId().toString());
 
-        given()
-                .filter(sessionFilter)
-                .header(session.getCsrfHeader())
-        .when()
-                .content(makeRFIDLinkDTO(UNUSED_RFID, ticket.getId()))
-                .contentType(ContentType.JSON)
-                .post(RFID_ENDPOINT)
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+        when()
+            .body(rfidLinkDTO)
+            .contentType(ContentType.JSON)
+            .post(RFID_ENDPOINT)
         .then()
-                .statusCode(HttpStatus.SC_CONFLICT)
-                .body(containsString(e.getMessage()));
+            .statusCode(HttpStatus.SC_NOT_FOUND);
+        //@formatter:on
 
-        Assert.assertFalse(rfidLinkRepository.findByRfid(UNUSED_RFID).isPresent());
-    }
-
-
-
-    @Test
-    public void testAddRFIDLink_TicketInvalid_Admin(){
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
-
-        otherTicket.setValid(false);
-        ticketRepository.saveAndFlush(otherTicket);
-
-        given()
-                .filter(sessionFilter)
-                .header(session.getCsrfHeader())
-        .when()
-                .content(makeRFIDLinkDTO(UNUSED_RFID, otherTicket.getId()))
-                .contentType(ContentType.JSON)
-                .post(RFID_ENDPOINT)
-        .then()
-                .statusCode(HttpStatus.SC_BAD_REQUEST);
-
-        Assert.assertFalse(rfidLinkRepository.findByRfid(UNUSED_RFID).isPresent());
+        Assert.assertFalse(rfidLinkRepository.findByRfid(rfidLinkDTO.get("rfid")).isPresent());
     }
 
     @Test
-    public void testAddRFIDLink_TicketDoesntExist_Admin(){
-        Long unusedTicketId = getUnusedTicketId();
+    public void testRemoveRFIDLinkByRFIDAsAdmin() {
+        User user = createUser(true);
+        Ticket ticket = createTicketForUser(user);
+        RFIDLink link = createRfidLink(ticket);
 
-        TicketNotFoundException e = new TicketNotFoundException();
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+        when()
+            .delete(RFID_ENDPOINT + "/" + link.getRFID()).
+        then()
+            .statusCode(HttpStatus.SC_OK)
+            .body("ticket.id", equalTo(ticket.getId().intValue()));
+        //@formatter:on
 
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
-
-        given()
-                .filter(sessionFilter)
-                .header(session.getCsrfHeader())
-        .when()
-                .content(makeRFIDLinkDTO(UNUSED_RFID, unusedTicketId))
-                .contentType(ContentType.JSON)
-                .post(RFID_ENDPOINT)
-        .then()
-                .statusCode(HttpStatus.SC_NOT_FOUND)
-                .body(containsString(e.getMessage()));
-
-        Assert.assertFalse(rfidLinkRepository.findByRfid(UNUSED_RFID).isPresent());
+        Assert.assertFalse(rfidLinkRepository.findByRfid(link.getRFID()).isPresent());
     }
 
     @Test
-    public void testRemoveRFIDLinkByRFID_Admin(){
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
+    public void testRemoveRFIDLinkByTicketIdAsAdmin() {
+        User user = createUser(true);
+        Ticket ticket = createTicketForUser(user);
+        RFIDLink rfidLink = createRfidLink(ticket);
 
-        given()
-                .filter(sessionFilter)
-                .header(session.getCsrfHeader())
-        .when()
-                .delete(RFID_ENDPOINT + "/" + LINK_RFID)
-        .then()
-                .statusCode(HttpStatus.SC_OK)
-                .body("ticket.id", equalTo(ticket.getId().intValue()));
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+        when()
+            .delete(RFID_TICKET_ENDPOINT + "/" + ticket.getId()).
+        then()
+            .statusCode(HttpStatus.SC_OK)
+            .body("ticket.id", equalTo(ticket.getId().intValue()));
+        //@formatter:on
 
-        Assert.assertFalse(rfidLinkRepository.findByRfid(LINK_RFID).isPresent());
+        Assert.assertFalse(rfidLinkRepository.findByRfid(rfidLink.getRFID()).isPresent());
     }
 
     @Test
-    public void testRemoveRFIDLinkByTicketId_Admin(){
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
+    public void testRemoveRFIDLinkLinkNotFoundAsAdmin() {
+        User user = createUser(true);
+        Ticket ticket = createTicketForUser(user);
+        RFIDLink link = createRfidLink(ticket);
+        String unused = String.valueOf(Long.valueOf(link.getRFID()) + 1);
 
-        given()
-                .filter(sessionFilter)
-                .header(session.getCsrfHeader())
-        .when()
-                .delete(RFID_TICKET_ENDPOINT + "/" + ticket.getId())
-        .then()
-                .statusCode(HttpStatus.SC_OK)
-                .body("ticket.id", equalTo(ticket.getId().intValue()));
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+        when()
+            .delete(RFID_ENDPOINT + "/" + unused).
+        then()
+            .statusCode(HttpStatus.SC_NOT_FOUND);
+        //@formatter:on
 
-        Assert.assertFalse(rfidLinkRepository.findByRfid(LINK_RFID).isPresent());
+        Assert.assertTrue(rfidLinkRepository.findByRfid(link.getRFID()).isPresent());
     }
 
     @Test
-    public void testRemoveRFIDLink_LinkNotFound_Admin(){
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
+    public void testRemoveRFIDLinkInvalidRFIDAsAdmin() {
+        User user = createUser(true);
 
-        given()
-                .filter(sessionFilter)
-                .header(session.getCsrfHeader())
-        .when()
-                .delete(RFID_ENDPOINT + "/" + UNUSED_RFID)
-        .then()
-                .statusCode(HttpStatus.SC_NOT_FOUND);
-
-        Assert.assertTrue(rfidLinkRepository.findByRfid(LINK_RFID).isPresent());
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+        when()
+            .delete(RFID_ENDPOINT + "/" + "123").
+        then()
+            .statusCode(HttpStatus.SC_BAD_REQUEST);
+        //@formatter:on
     }
 
-    @Test
-    public void testRemoveRFIDLink_InvalidRFID_Admin(){
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
+    private HashMap<String, String> makeRFIDLinkDTO(Ticket ticket) {
+        long rfid = (long) Math.floor(Math.random() * 9_000_000_000L) + 1_000_000_000L;
 
-        InvalidRFIDException e = new InvalidRFIDException(INVALID_RFID);
-
-        given()
-                .filter(sessionFilter)
-                .header(session.getCsrfHeader())
-        .when()
-                .delete(RFID_ENDPOINT + "/" + INVALID_RFID)
-        .then()
-                .statusCode(HttpStatus.SC_BAD_REQUEST)
-                .body(containsString(e.getMessage()));
-    }
-
-    private HashMap<String, String> makeRFIDLinkDTO(String rfid, Long ticketId){
         HashMap<String, String> rfidLinkDTO = new HashMap<>();
-        rfidLinkDTO.put("rfid", rfid);
-        rfidLinkDTO.put("ticketId", ticketId.toString());
+        rfidLinkDTO.put("rfid", String.valueOf(rfid));
+        rfidLinkDTO.put("ticketId", ticket.getId().toString());
 
         return rfidLinkDTO;
     }
-
-    private Long getUnusedTicketId(){
-        Long unusedTicketId = 1260L;
-
-        //Just to make sure the id is truly unused
-        while(unusedTicketId == ticket.getId() || unusedTicketId == otherTicket.getId()){
-            unusedTicketId += 1;
-        }
-
-        return unusedTicketId;
-    }
 }
-*/
