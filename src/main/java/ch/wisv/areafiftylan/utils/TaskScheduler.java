@@ -83,8 +83,8 @@ public class TaskScheduler {
     }
 
     private static Predicate<Order> isExpired() {
-        return o -> o.getStatus().equals(OrderStatus.CREATING) || o.getStatus().equals(OrderStatus.EXPIRED) ||
-                o.getStatus().equals(OrderStatus.CANCELLED);
+        return o -> o.getStatus().equals(OrderStatus.ANONYMOUS) || o.getStatus().equals(OrderStatus.ASSIGNED) ||
+                o.getStatus().equals(OrderStatus.EXPIRED) || o.getStatus().equals(OrderStatus.CANCELLED);
     }
 
     private void handleExpiredVerificationToken(VerificationToken verificationToken) {

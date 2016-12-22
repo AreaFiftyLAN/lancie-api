@@ -31,7 +31,6 @@ import ch.wisv.areafiftylan.users.service.UserService;
 import ch.wisv.areafiftylan.utils.mail.MailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -108,13 +107,19 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public synchronized Ticket requestTicketOfType(TicketType type, User owner, boolean pickupService,
+    public Ticket requestTicketOfType(TicketType type, boolean pickupService, boolean chMember) {
+        return requestTicketOfType(null, type, pickupService, chMember);
+
+    }
+
+    @Override
+    public synchronized Ticket requestTicketOfType(User user, TicketType type, boolean pickupService,
                                                    boolean chMember) {
         // Check if the TicketType has a limit and if the limit is reached
         if (!isTicketAvailable(type)) {
             throw new TicketUnavailableException(type);
         } else {
-            Ticket ticket = new Ticket(owner, type, pickupService, chMember);
+            Ticket ticket = new Ticket(user, type, pickupService, chMember);
             return ticketRepository.save(ticket);
         }
     }
@@ -130,8 +135,7 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public TicketTransferToken setupForTransfer(Long ticketId, String goalUserName) {
-        User u = userService.getUserByUsername(goalUserName)
-                .orElseThrow(() -> new UsernameNotFoundException("User " + goalUserName + " not found."));
+        User u = userService.getUserByUsername(goalUserName);
         Ticket t = getTicketById(ticketId);
 
         List<TicketTransferToken> ticketTransferTokens =
@@ -197,6 +201,15 @@ public class TicketServiceImpl implements TicketService {
     public Collection<Ticket> getAllTicketsWithTransport() {
         return ticketRepository.findByPickupService_True();
     }
+
+    @Override
+    public Ticket assignTicketToUser(Long ticketId, String username) {
+        Ticket ticket = getTicketById(ticketId);
+        User user = userService.getUserByUsername(username);
+        ticket.setOwner(user);
+        return ticketRepository.save(ticket);
+    }
+
 
     private TicketTransferToken getTicketTransferTokenIfValid(String token) {
         TicketTransferToken ttt = tttRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));

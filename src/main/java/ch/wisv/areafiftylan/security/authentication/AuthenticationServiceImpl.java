@@ -46,7 +46,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public String createNewAuthToken(String username, String password) {
-        User user = userService.getUserByUsername(username).orElseThrow(() -> new UsernameNotFoundException(username));
+        User user = userService.getUserByUsername(username);
 
         if (correctCredentials(user, password)) {
             // Delete the old Token

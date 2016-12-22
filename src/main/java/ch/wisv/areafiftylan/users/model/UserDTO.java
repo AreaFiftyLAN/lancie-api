@@ -18,25 +18,18 @@
 package ch.wisv.areafiftylan.users.model;
 
 import lombok.Getter;
-import lombok.Setter;
 import org.hibernate.validator.constraints.NotEmpty;
-
-import javax.validation.constraints.NotNull;
 
 public class UserDTO {
 
     @NotEmpty
     @Getter
-    @Setter
     private String username = "";
 
     @NotEmpty
     @Getter
-    @Setter
     private String password = "";
 
-    @NotNull
     @Getter
-    @Setter
-    private Role role = Role.ROLE_USER;
+    private Long orderId;
 }

@@ -17,9 +17,9 @@
 
 package ch.wisv.areafiftylan.exception;
 
-public class ImmutableOrderException extends RuntimeException {
+public class UnassignedOrderException extends RuntimeException {
 
-    public ImmutableOrderException(Long orderId) {
-        super("Operation on Order " + orderId + " not permitted");
+    public UnassignedOrderException(Long orderId) {
+        super("Order " + orderId + " is not assigned yet");
     }
 }

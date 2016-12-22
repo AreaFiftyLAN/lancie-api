@@ -23,7 +23,6 @@ import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.utils.SessionData;
 import ch.wisv.areafiftylan.utils.TaskScheduler;
 import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.response.Header;
 import com.jayway.restassured.response.Response;
 import org.apache.http.HttpStatus;
 import org.junit.After;
@@ -58,20 +57,6 @@ public class UserRestIntegrationTest extends IntegrationTest {
     public void cleanupUserTest() {
         testUser = null;
         verificationTokenRepository.deleteAll();
-    }
-
-    private Header getCSRFHeader() {
-        //@formatter:off
-        Response getLoginResponse =
-            given().
-                filter(sessionFilter).
-            when().
-                get("/login").
-            then().
-                extract().response();
-        //@formatter:on
-
-        return new Header("X-CSRF-TOKEN", getLoginResponse.header("X-CSRF-TOKEN"));
     }
 
     private String createEnabledTestUser() {

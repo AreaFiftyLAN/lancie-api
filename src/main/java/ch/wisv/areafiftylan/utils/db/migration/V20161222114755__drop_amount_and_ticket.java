@@ -15,11 +15,14 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.wisv.areafiftylan.exception;
+package ch.wisv.areafiftylan.utils.db.migration;
 
-public class ImmutableOrderException extends RuntimeException {
+import org.flywaydb.core.api.migration.spring.SpringJdbcMigration;
+import org.springframework.jdbc.core.JdbcTemplate;
 
-    public ImmutableOrderException(Long orderId) {
-        super("Operation on Order " + orderId + " not permitted");
+class V20161222114755__drop_amount_and_ticket implements SpringJdbcMigration {
+    @Override
+    public void migrate(JdbcTemplate jdbcTemplate) throws Exception {
+        jdbcTemplate.execute("ALTER TABLE \"order\" DROP COLUMN amount; DROP TABLE \"ticket\";");
     }
 }

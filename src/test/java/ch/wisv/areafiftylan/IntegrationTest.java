@@ -24,6 +24,7 @@ import ch.wisv.areafiftylan.users.service.UserRepository;
 import ch.wisv.areafiftylan.utils.SessionData;
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.filter.session.SessionFilter;
+import com.jayway.restassured.response.Header;
 import com.jayway.restassured.response.Response;
 import org.junit.After;
 import org.junit.Before;
@@ -36,9 +37,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDate;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
 
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.config.RedirectConfig.redirectConfig;
@@ -92,30 +90,30 @@ public abstract class IntegrationTest {
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
     }
 
-    private User makeUser(){
+    private User makeUser() {
         User user = new User("user@mail.com", new BCryptPasswordEncoder().encode(userCleartextPassword));
         user.getProfile()
-                .setAllFields("Jan", "de Groot", "MonsterKiller9001", localDate, Gender.MALE, "Mekelweg 4", "2826CD", "Delft",
-                        "0906-0666", null);
+                .setAllFields("Jan", "de Groot", "MonsterKiller9001", localDate, Gender.MALE, "Mekelweg 4", "2826CD",
+                        "Delft", "0906-0666", null);
 
         return user;
     }
 
-    private User makeAdmin(){
+    private User makeAdmin() {
         User admin = new User("admin@mail.com", new BCryptPasswordEncoder().encode(adminCleartextPassword));
         admin.addRole(Role.ROLE_ADMIN);
         admin.getProfile()
-                .setAllFields("Bert", "Kleijn", "ILoveZombies", localDate, Gender.OTHER, "Mekelweg 20", "2826CD", "Amsterdam",
-                        "0611", null);
+                .setAllFields("Bert", "Kleijn", "ILoveZombies", localDate, Gender.OTHER, "Mekelweg 20", "2826CD",
+                        "Amsterdam", "0611", null);
 
         return admin;
     }
 
-    private User makeOutsider(){
+    private User makeOutsider() {
         User outsider = new User("outsider@gmail.com", new BCryptPasswordEncoder().encode("password"));
         outsider.getProfile()
-                .setAllFields("Nottin", "Todoeo Witit", "Lookinin", localDate, Gender.FEMALE, "LoserStreet 1", "2826GJ", "China",
-                        "0906-3928", null);
+                .setAllFields("Nottin", "Todoeo Witit", "Lookinin", localDate, Gender.FEMALE, "LoserStreet 1", "2826GJ",
+                        "China", "0906-3928", null);
 
         return userRepository.saveAndFlush(outsider);
     }
@@ -125,6 +123,21 @@ public abstract class IntegrationTest {
         logout();
         userRepository.deleteAll();
         RestAssured.reset();
+    }
+
+
+    protected Header getCSRFHeader() {
+        //@formatter:off
+        Response getLoginResponse =
+            given().
+                filter(sessionFilter).
+            when().
+                get("/login").
+            then().
+                extract().response();
+        //@formatter:on
+
+        return new Header("X-CSRF-TOKEN", getLoginResponse.header("X-CSRF-TOKEN"));
     }
 
     protected SessionData login(String username, String password) {
