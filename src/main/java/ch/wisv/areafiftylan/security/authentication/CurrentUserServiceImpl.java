@@ -119,8 +119,8 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     public boolean canAccessOrder(Object principal, Long orderId) {
         Order order = orderService.getOrderById(orderId);
 
+        // If the order is anonymous, allow access
         if (order.getUser() == null) {
-            // If the order is anonymous, allow access
             return true;
         }
 

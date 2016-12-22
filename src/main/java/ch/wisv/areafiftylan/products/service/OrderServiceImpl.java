@@ -146,8 +146,7 @@ public class OrderServiceImpl implements OrderService {
         if (order.getStatus().equals(OrderStatus.ANONYMOUS) || order.getStatus().equals(OrderStatus.ASSIGNED)) {
 
             // Find a Ticket in the order, equal to the given DTO. Throw an exception when the ticket doesn't exist
-            Ticket ticket = order.getTickets().
-                    stream().
+            Ticket ticket = order.getTickets().stream().
                     filter(isEqualToInput(type, pickupService, chMember)).
                     findFirst().orElseThrow(TicketNotFoundException::new);
 

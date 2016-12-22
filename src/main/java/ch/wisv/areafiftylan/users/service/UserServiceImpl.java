@@ -151,8 +151,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public User addProfile(Long userId, ProfileDTO profileDTO) throws DataIntegrityViolationException {
         /*
             No two identical displayNames are allowed. If the displayName already exists in the database we check
-            whether
-            this is a different user. If this is the case, we throw an exception, if not, we can continue.
+            whether this is a different user. If this is the case, we throw an exception, if not, we can continue.
          */
         userRepository.findOneByProfileDisplayNameIgnoreCase(profileDTO.getDisplayName()).ifPresent(u -> {
             if (u.getId() != userId) {
