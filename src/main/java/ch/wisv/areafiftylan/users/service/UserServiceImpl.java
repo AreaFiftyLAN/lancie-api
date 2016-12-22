@@ -54,7 +54,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     String requestUrl;
     @Value("${a5l.user.resetUrl}")
     String resetUrl;
-    @Value("${a51.user.alcoholage}")
+    @Value("${a51.user.alcoholage : 18}")
     Long ALCOHOL_AGE;
 
     @Autowired
@@ -242,7 +242,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public Boolean checkIsUserOfAge(Long userId) {
+    public Boolean alcoholCheck(Long userId) {
         User user = userRepository.findOne(userId);
         return user.getProfile().getBirthday().isBefore(LocalDate.now().minusYears(ALCOHOL_AGE));
     }

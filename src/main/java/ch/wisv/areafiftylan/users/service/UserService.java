@@ -67,5 +67,5 @@ public interface UserService {
      * @param userId The ID of the user to check.
      * @return A boolean indicating wether a user is old enough.
      */
-    Boolean checkIsUserOfAge(Long userId);
+    Boolean alcoholCheck(Long userId);
 }

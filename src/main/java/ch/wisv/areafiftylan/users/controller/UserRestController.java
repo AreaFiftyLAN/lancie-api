@@ -149,10 +149,10 @@ public class UserRestController {
         return createResponseEntity(HttpStatus.OK, "User disabled");
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/{userID}/agecheck")
-    public ResponseEntity<?> ageCheck(@PathVariable Long userId) {
-        boolean oldEnough = userService.checkIsUserOfAge(userId);
+    @PreAuthorize("hasRole('ADMIN') OR hasRole('COMMITTEE')")
+    @GetMapping("/{userId}/alcoholcheck")
+    public ResponseEntity<?> alcoholCheck(@PathVariable Long userId) {
+        boolean oldEnough = userService.alcoholCheck(userId);
         return ResponseEntityBuilder.createResponseEntity(HttpStatus.OK, "Age checked!", oldEnough);
     }
 
