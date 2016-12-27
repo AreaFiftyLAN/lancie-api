@@ -87,10 +87,8 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public Ticket removeTicket(Long ticketId) {
-        Ticket ticket = getTicketById(ticketId);
-        ticketRepository.delete(ticket);
-        return ticket;
+    public void removeTicket(Long ticketId) {
+        ticketRepository.delete(ticketId);
     }
 
     @Override

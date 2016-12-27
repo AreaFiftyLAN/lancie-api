@@ -149,13 +149,13 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Order removeTicketFromOrder(Long orderId, String type, List<String> options) {
+    public Order removeTicketFromOrder(Long orderId, Long ticketId) {
         Order order = getOrderById(orderId);
         if (order.getStatus().equals(OrderStatus.ANONYMOUS) || order.getStatus().equals(OrderStatus.ASSIGNED)) {
 
             // Find a Ticket in the order, equal to the given DTO. Throw an exception when the ticket doesn't exist
             Ticket ticket = order.getTickets().stream().
-                    filter(isEqualToInput(type, options)).
+                    filter(t -> t.getId() == ticketId).
                     findFirst().orElseThrow(TicketNotFoundException::new);
 
             order.getTickets().remove(ticket);
@@ -166,14 +166,6 @@ public class OrderServiceImpl implements OrderService {
         } else {
             throw new ImmutableOrderException(orderId);
         }
-    }
-
-    private static Predicate<Ticket> isEqualToInput(String type, List<String> options) {
-
-        return t -> (t.getType().getName().equals(type) && t.getEnabledOptions().stream().
-                map(TicketOption::getName).
-                collect(Collectors.toList()).
-                containsAll(options));
     }
 
     @Override

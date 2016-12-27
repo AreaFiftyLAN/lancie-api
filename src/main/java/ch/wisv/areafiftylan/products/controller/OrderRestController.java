@@ -122,10 +122,11 @@ public class OrderRestController {
      * @return Message about the result of the request
      */
     @PreAuthorize("@currentUserServiceImpl.canAccessOrder(principal, #orderId)")
-    @RequestMapping(value = "/orders/{orderId}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/orders/{orderId}/{ticketId}", method = RequestMethod.DELETE)
     @JsonView(View.OrderOverview.class)
-    public ResponseEntity<?> removeFromOrder(@PathVariable Long orderId, @RequestBody @Validated TicketDTO ticketDTO) {
-        Order modifiedOrder = orderService.removeTicketFromOrder(orderId, ticketDTO.getType(), ticketDTO.getOptions());
+    public ResponseEntity<?> removeFromOrder(@PathVariable Long orderId, @PathVariable Long ticketId) {
+        Order modifiedOrder = orderService
+                .removeTicketFromOrder(orderId, ticketId);
         return createResponseEntity(HttpStatus.OK, "Ticket successfully removed from Order", modifiedOrder);
     }
 

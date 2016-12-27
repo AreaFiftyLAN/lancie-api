@@ -30,7 +30,7 @@ import java.util.List;
 public interface TicketService {
     Ticket getTicketById(Long ticketId);
 
-    Ticket removeTicket(Long ticketId);
+    void removeTicket(Long ticketId);
 
     Integer getNumberSoldOfType(TicketType type);
 
