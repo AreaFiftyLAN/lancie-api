@@ -257,6 +257,11 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
+    public Collection<TicketOption> getAllTicketOptions() {
+        return ticketOptionRepository.findAll();
+    }
+
+    @Override
     public TicketOption addTicketOption(TicketOption option) {
         return ticketOptionRepository.save(option);
     }
