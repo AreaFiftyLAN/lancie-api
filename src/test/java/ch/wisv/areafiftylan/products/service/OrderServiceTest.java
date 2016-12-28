@@ -17,7 +17,6 @@
 
 package ch.wisv.areafiftylan.products.service;
 
-import ch.wisv.areafiftylan.ApplicationTest;
 import ch.wisv.areafiftylan.exception.ImmutableOrderException;
 import ch.wisv.areafiftylan.exception.OrderNotFoundException;
 import ch.wisv.areafiftylan.exception.TicketNotFoundException;
@@ -25,30 +24,12 @@ import ch.wisv.areafiftylan.exception.UnassignedOrderException;
 import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.model.order.Order;
 import ch.wisv.areafiftylan.products.model.order.OrderStatus;
-import ch.wisv.areafiftylan.products.service.repository.OrderRepository;
-import ch.wisv.areafiftylan.users.model.Gender;
 import ch.wisv.areafiftylan.users.model.User;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.thymeleaf.spring4.SpringTemplateEngine;
 
-import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -58,60 +39,7 @@ import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = ApplicationTest.class)
-@ActiveProfiles("test")
-@DataJpaTest
-public class OrderServiceTest {
-
-    @MockBean
-    SpringTemplateEngine springTemplateEngine;
-    @MockBean
-    JavaMailSender javaMailSender;
-
-    @Autowired
-    private OrderService orderService;
-    @Autowired
-    private PaymentService paymentSerivce;
-    @Autowired
-    private TicketService ticketService;
-    @Autowired
-    private TestEntityManager testEntityManager;
-    @Autowired
-    private OrderRepository orderRepository;
-
-    @Value("${a5l.orderLimit}")
-    private int ORDER_LIMIT;
-
-    private final String CH_MEMBER = "chMember";
-    private final String PICKUP_SERVICE = "pickupService";
-    private final String TEST_TICKET = "test";
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
-    private User persistUser() {
-        User user = new User("user@mail.com", new BCryptPasswordEncoder().encode("password"));
-        user.getProfile()
-                .setAllFields("first", "last", "display", LocalDate.now(), Gender.MALE, "address", "1234AB", "Delft",
-                        "0612345678", null);
-        return testEntityManager.persist(user);
-    }
-
-    private Ticket persistTicket() {
-        return ticketService.requestTicketOfType(TEST_TICKET, Arrays.asList(CH_MEMBER, PICKUP_SERVICE));
-    }
-
-    @Before
-    public void setUp() {
-        testEntityManager.clear();
-    }
-
-
-    @After
-    public void tearDown() {
-
-    }
+public class OrderServiceTest extends ServiceTest {
 
     @Test
     public void getOrderById() {
@@ -585,8 +513,8 @@ public class OrderServiceTest {
 
         Long id = testEntityManager.persistAndGetId(order, Long.class);
         String payment = orderService.requestPayment(id);
-        verify(paymentSerivce, times(1)).registerOrder(Mockito.any(Order.class));
-        reset(paymentSerivce);
+        verify(paymentService, times(1)).registerOrder(Mockito.any(Order.class));
+        reset(paymentService);
     }
 
     @Test
@@ -599,9 +527,9 @@ public class OrderServiceTest {
             String payment = orderService.requestPayment(id);
         } catch (IllegalStateException e) {
             assertEquals("Order can not be empty", e.getMessage());
-            verify(paymentSerivce, never()).registerOrder(Mockito.any(Order.class));
+            verify(paymentService, never()).registerOrder(Mockito.any(Order.class));
         } finally {
-            reset(paymentSerivce);
+            reset(paymentService);
         }
 
     }
@@ -615,9 +543,9 @@ public class OrderServiceTest {
         try {
             String payment = orderService.requestPayment(id);
         } catch (UnassignedOrderException e) {
-            verify(paymentSerivce, never()).registerOrder(Mockito.any(Order.class));
+            verify(paymentService, never()).registerOrder(Mockito.any(Order.class));
         } finally {
-            reset(paymentSerivce);
+            reset(paymentService);
         }
     }
 
@@ -631,9 +559,9 @@ public class OrderServiceTest {
         try {
             String payment = orderService.requestPayment(null);
         } catch (OrderNotFoundException e) {
-            verify(paymentSerivce, never()).registerOrder(Mockito.any(Order.class));
+            verify(paymentService, never()).registerOrder(Mockito.any(Order.class));
         } finally {
-            reset(paymentSerivce);
+            reset(paymentService);
         }
     }
 
@@ -641,13 +569,13 @@ public class OrderServiceTest {
     public void updateOrderStatusByReference() {
         Order order = new Order();
         order.setUser(persistUser());
-        given(paymentSerivce.updateStatus(Mockito.anyString())).willReturn(order);
+        given(paymentService.updateStatus(Mockito.anyString())).willReturn(order);
 
         orderService.updateOrderStatusByReference("Reference");
 
-        verify(paymentSerivce, times(1)).updateStatus(Mockito.anyString());
+        verify(paymentService, times(1)).updateStatus(Mockito.anyString());
 
-        reset(paymentSerivce);
+        reset(paymentService);
     }
 
     @Test
@@ -659,14 +587,14 @@ public class OrderServiceTest {
         order.setUser(user);
         order.setStatus(OrderStatus.PAID);
         order = testEntityManager.persist(order);
-        given(paymentSerivce.updateStatus(Mockito.anyString())).willReturn(order);
+        given(paymentService.updateStatus(Mockito.anyString())).willReturn(order);
 
         orderService.updateOrderStatusByReference("Reference");
 
         assertTrue(order.getTickets().stream().allMatch(Ticket::isValid));
         assertTrue(order.getTickets().stream().allMatch(t -> t.getOwner().equals(user)));
 
-        reset(paymentSerivce);
+        reset(paymentService);
     }
 
     @Test
@@ -677,14 +605,14 @@ public class OrderServiceTest {
         order.addTicket(persistTicket());
         order.setUser(user);
         order = testEntityManager.persist(order);
-        given(paymentSerivce.updateStatus(Mockito.anyString())).willReturn(order);
+        given(paymentService.updateStatus(Mockito.anyString())).willReturn(order);
 
         orderService.updateOrderStatusByReference("Reference");
 
         assertTrue(order.getTickets().stream().noneMatch(Ticket::isValid));
         assertTrue(order.getTickets().stream().allMatch(t -> t.getOwner() == null));
 
-        reset(paymentSerivce);
+        reset(paymentService);
     }
 
     @Test
@@ -694,14 +622,14 @@ public class OrderServiceTest {
 
         order.addTicket(persistTicket());
         order = testEntityManager.persist(order);
-        given(paymentSerivce.updateStatus(Mockito.anyString())).willReturn(order);
+        given(paymentService.updateStatus(Mockito.anyString())).willReturn(order);
 
         orderService.updateOrderStatusByReference("Reference");
 
         assertTrue(order.getTickets().stream().noneMatch(Ticket::isValid));
         assertTrue(order.getTickets().stream().allMatch(t -> t.getOwner() == null));
 
-        reset(paymentSerivce);
+        reset(paymentService);
     }
 
     @Test
@@ -713,14 +641,14 @@ public class OrderServiceTest {
         order = testEntityManager.persist(order);
         order.setUser(user);
         order.setStatus(OrderStatus.PENDING);
-        given(paymentSerivce.updateStatus(Mockito.anyString())).willReturn(order);
+        given(paymentService.updateStatus(Mockito.anyString())).willReturn(order);
 
         orderService.updateOrderStatusByReference("Reference");
 
         assertTrue(order.getTickets().stream().noneMatch(Ticket::isValid));
         assertTrue(order.getTickets().stream().allMatch(t -> t.getOwner() == null));
 
-        reset(paymentSerivce);
+        reset(paymentService);
     }
 
     @Test
@@ -730,12 +658,12 @@ public class OrderServiceTest {
 
         order.addTicket(persistTicket());
         order = testEntityManager.persist(order);
-        given(paymentSerivce.updateStatus(Mockito.anyString())).willReturn(order);
+        given(paymentService.updateStatus(Mockito.anyString())).willReturn(order);
 
         orderService.updateOrderStatusByReference("Reference");
 
         assertTrue(order.getTickets().stream().noneMatch(Ticket::isValid));
 
-        reset(paymentSerivce);
+        reset(paymentService);
     }
 }
