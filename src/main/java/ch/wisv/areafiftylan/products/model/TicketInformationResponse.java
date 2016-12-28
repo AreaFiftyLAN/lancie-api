@@ -54,7 +54,9 @@ public class TicketInformationResponse {
         this.deadline = type.getDeadline().toString();
 
         for (TicketOption option : options) {
-            this.options.put(option.getName(), option.getPrice());
+            if (type.getPossibleOptions().contains(option)) {
+                this.options.put(option.getName(), option.getPrice());
+            }
         }
     }
 }
