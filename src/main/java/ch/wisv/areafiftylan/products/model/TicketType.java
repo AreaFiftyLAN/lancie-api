@@ -39,24 +39,39 @@ public class TicketType {
     @GeneratedValue
     @Getter
     private Long id;
+
     @Getter
     @Setter
     private String name;
+
     @Getter
     @Setter
     private float price;
+
+    /**
+     * The maximum amount of tickets of this type that can be sold.
+     * Will be 0 if no maximum amount is set.
+     */
     @Getter
     @Setter
     private int numberAvailable;
+
     @Getter
     @Setter
     private String text;
+
+    /**
+     * A time after which no more tickets of this type can be sold.
+     * Will be null if no deadline is set.
+     */
     @Getter
     @Setter
     private LocalDateTime deadline;
+
     @Getter
     @Setter
     private boolean buyable;
+    
     @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @Getter
     Set<TicketOption> possibleOptions;
