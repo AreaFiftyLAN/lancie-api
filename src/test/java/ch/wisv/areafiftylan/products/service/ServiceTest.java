@@ -41,7 +41,7 @@ public abstract class ServiceTest {
     @Autowired
     protected PaymentService paymentService;
     @Autowired
-    private TicketService ticketService;
+    protected TicketService ticketService;
     @Autowired
     protected TestEntityManager testEntityManager;
     @Autowired
@@ -66,7 +66,8 @@ public abstract class ServiceTest {
     }
 
     protected Ticket persistTicket() {
-        return ticketService.requestTicketOfType(TEST_TICKET, Arrays.asList(CH_MEMBER, PICKUP_SERVICE));
+        Ticket ticket = ticketService.requestTicketOfType(TEST_TICKET, Arrays.asList(CH_MEMBER, PICKUP_SERVICE));
+        return testEntityManager.persist(ticket);
     }
 
     @Before
