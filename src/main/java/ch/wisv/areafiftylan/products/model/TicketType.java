@@ -17,6 +17,8 @@
 
 package ch.wisv.areafiftylan.products.model;
 
+import ch.wisv.areafiftylan.utils.view.View;
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -42,6 +44,7 @@ public class TicketType {
 
     @Getter
     @Setter
+    @JsonView(View.OrderOverview.class)
     private String name;
 
     @Getter
@@ -58,6 +61,7 @@ public class TicketType {
 
     @Getter
     @Setter
+    @JsonView(View.OrderOverview.class)
     private String text;
 
     /**

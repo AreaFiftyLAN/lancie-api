@@ -17,6 +17,8 @@
 
 package ch.wisv.areafiftylan.products.model;
 
+import ch.wisv.areafiftylan.utils.view.View;
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -35,11 +37,15 @@ public class TicketOption {
     @GeneratedValue
     @Getter
     private Long id;
+
     @Getter
     @Setter
+    @JsonView(View.OrderOverview.class)
     private float price;
+
     @Getter
     @Setter
+    @JsonView(View.OrderOverview.class)
     private String name;
 
 
