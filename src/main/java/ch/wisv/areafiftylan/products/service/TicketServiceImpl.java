@@ -83,13 +83,8 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public Ticket getTicketById(Long ticketId) {
-        Ticket t = ticketRepository.findOne(ticketId);
-
-        if (t == null) {
-            throw new TicketNotFoundException();
-        }
-
-        return t;
+        return ticketRepository.findById(ticketId)
+                .orElseThrow(TicketNotFoundException::new);
     }
 
     @Override
