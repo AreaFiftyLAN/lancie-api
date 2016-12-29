@@ -83,8 +83,8 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public Ticket getTicketById(Long ticketId) {
-        return ticketRepository.findById(ticketId)
-                .orElseThrow(TicketNotFoundException::new);
+        return ticketRepository.findById(ticketId).
+                orElseThrow(TicketNotFoundException::new);
     }
 
     @Override
@@ -101,8 +101,10 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public Collection<Ticket> findValidTicketsByOwnerUsername(String username) {
-        return ticketRepository.findAllByOwnerUsernameIgnoreCase(username).stream().filter(Ticket::isValid)
-                .collect(Collectors.toList());
+        return ticketRepository.findAllByOwnerUsernameIgnoreCase(username).
+                stream().
+                filter(Ticket::isValid).
+                collect(Collectors.toList());
     }
 
     @Override
@@ -113,7 +115,8 @@ public class TicketServiceImpl implements TicketService {
     }
 
     private TicketOption getTicketOptionByName(String name) {
-        return ticketOptionRepository.findByName(name).orElseThrow(TicketOptionNotFoundException::new);
+        return ticketOptionRepository.findByName(name).
+                orElseThrow(TicketOptionNotFoundException::new);
     }
 
     @Override
@@ -121,10 +124,12 @@ public class TicketServiceImpl implements TicketService {
         if (options == null) {
             options = Collections.emptyList();
         }
-        TicketType ticketType =
-                ticketTypeRepository.findByName(type).orElseThrow(() -> new TicketTypeNotFoundException(type));
-        List<TicketOption> ticketOptions =
-                options.stream().map(this::getTicketOptionByName).collect(Collectors.toList());
+        TicketType ticketType = ticketTypeRepository.findByName(type).
+                orElseThrow(() -> new TicketTypeNotFoundException(type));
+        List<TicketOption> ticketOptions = options.
+                stream().
+                map(this::getTicketOptionByName).
+                collect(Collectors.toList());
         return requestTicketOfType(user, ticketType, ticketOptions);
     }
 
@@ -150,8 +155,8 @@ public class TicketServiceImpl implements TicketService {
     }
 
     private boolean isTicketAvailable(TicketType type) {
-        boolean typeLimitReached =
-                type.getNumberAvailable() != 0 && ticketRepository.countByType(type) >= type.getNumberAvailable();
+        boolean typeLimitReached = type.getNumberAvailable() != 0 &&
+                ticketRepository.countByType(type) >= type.getNumberAvailable();
         boolean eventLimitReached = ticketRepository.count() >= TICKET_LIMIT;
         boolean deadlineExceeded = type.getDeadline().isBefore(LocalDateTime.now());
 
@@ -164,8 +169,10 @@ public class TicketServiceImpl implements TicketService {
         User u = userService.getUserByUsername(goalUserName);
         Ticket t = getTicketById(ticketId);
 
-        List<TicketTransferToken> ticketTransferTokens =
-                tttRepository.findAllByTicketId(ticketId).stream().filter(Token::isValid).collect(Collectors.toList());
+        List<TicketTransferToken> ticketTransferTokens = tttRepository.findAllByTicketId(ticketId).
+                stream().
+                filter(Token::isValid).
+                collect(Collectors.toList());
 
         if (!ticketTransferTokens.isEmpty()) {
             throw new DuplicateTicketTransferTokenException(ticketId);
@@ -214,8 +221,10 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public Collection<TicketTransferToken> getValidTicketTransferTokensByUser(String username) {
-        return tttRepository.findAllByTicketOwnerUsernameIgnoreCase(username).stream()
-                .filter(TicketTransferToken::isValid).collect(Collectors.toList());
+        return tttRepository.findAllByTicketOwnerUsernameIgnoreCase(username).
+                stream().
+                filter(TicketTransferToken::isValid).
+                collect(Collectors.toList());
     }
 
     @Override
@@ -270,11 +279,12 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public Collection<Ticket> getOwnedTicketsAndFromTeamMembers(User u) {
-        Collection<Ticket> ownedTickets =
-                ticketRepository.findAllByOwnerUsernameIgnoreCase(u.getUsername()).stream().filter(Ticket::isValid)
-                        .collect(Collectors.toList());
-        Collection<Ticket> captainedTickets = getCaptainedTickets(u);
+        Collection<Ticket> ownedTickets = ticketRepository.findAllByOwnerUsernameIgnoreCase(u.getUsername()).
+                stream().
+                filter(Ticket::isValid).
+                collect(Collectors.toList());
 
+        Collection<Ticket> captainedTickets = getCaptainedTickets(u);
         Collection<Ticket> ticketsInControl = new ArrayList<>();
         ticketsInControl.addAll(ownedTickets);
         ticketsInControl.addAll(captainedTickets);
@@ -285,8 +295,13 @@ public class TicketServiceImpl implements TicketService {
     private Collection<Ticket> getCaptainedTickets(User u) {
         Collection<Team> captainedTeams = teamService.getTeamByCaptainId(u.getId());
 
-        return captainedTeams.stream().flatMap(t -> t.getMembers().stream()).filter(m -> !m.equals(u)).flatMap(
-                m -> ticketRepository.findAllByOwnerUsernameIgnoreCase(m.getUsername()).stream()
-                        .filter(Ticket::isValid)).collect(Collectors.toList());
+        return captainedTeams.
+                stream().
+                flatMap(t -> t.getMembers().stream()).
+                filter(m -> !m.equals(u)).
+                flatMap(m -> ticketRepository.findAllByOwnerUsernameIgnoreCase(m.getUsername()).
+                        stream().
+                        filter(Ticket::isValid)).
+                collect(Collectors.toList());
     }
 }
