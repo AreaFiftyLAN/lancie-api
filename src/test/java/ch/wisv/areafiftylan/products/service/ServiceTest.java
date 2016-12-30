@@ -5,8 +5,10 @@ import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.service.repository.OrderRepository;
 import ch.wisv.areafiftylan.products.service.repository.TicketOptionRepository;
 import ch.wisv.areafiftylan.products.service.repository.TicketTypeRepository;
+import ch.wisv.areafiftylan.teams.model.Team;
 import ch.wisv.areafiftylan.users.model.Gender;
 import ch.wisv.areafiftylan.users.model.User;
+import ch.wisv.areafiftylan.users.service.UserRepository;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -26,6 +28,8 @@ import org.thymeleaf.spring4.SpringTemplateEngine;
 
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = ApplicationTest.class)
@@ -52,6 +56,8 @@ public abstract class ServiceTest {
     protected TicketOptionRepository ticketOptionRepository;
     @Autowired
     protected TicketTypeRepository ticketTypeRepository;
+    @Autowired
+    protected UserRepository userRepository;
 
     @Value("${a5l.orderLimit}")
     protected int ORDER_LIMIT;
@@ -65,16 +71,35 @@ public abstract class ServiceTest {
     public ExpectedException thrown = ExpectedException.none();
 
     protected User persistUser() {
-        User user = new User("user@mail.com", new BCryptPasswordEncoder().encode("password"));
+        long count = userRepository.count();
+        User user = new User(count + "@mail.com", new BCryptPasswordEncoder().encode("password"));
         user.getProfile()
-                .setAllFields("first", "last", "display", LocalDate.now(), Gender.MALE, "address", "1234AB", "Delft",
-                        "0612345678", null);
+                .setAllFields("User", String.valueOf(count), "DisplayName" + count, LocalDate.now().minusYears(19),
+                        Gender.MALE, "Mekelweg" + count, "2826CD", "Delft", "0906-0666", null);
+
         return testEntityManager.persist(user);
     }
 
     protected Ticket persistTicket() {
         Ticket ticket = ticketService.requestTicketOfType(TEST_TICKET, Arrays.asList(CH_MEMBER_OPTION, PICKUP_SERVICE_OPTION));
+        ticket.setValid(true);
         return testEntityManager.persist(ticket);
+    }
+
+    protected Ticket persistTicketForUser(User user) {
+        Ticket ticket = ticketService.requestTicketOfType(user, TEST_TICKET, Arrays.asList(CH_MEMBER_OPTION, PICKUP_SERVICE_OPTION));
+        ticket.setValid(true);
+        return testEntityManager.persist(ticket);
+    }
+
+    protected Team persistTeamWithCaptain(String teamName, User captain) {
+        return persistTeamWithCaptainAndMembers(teamName, captain, Collections.emptyList());
+    }
+
+    protected Team persistTeamWithCaptainAndMembers(String teamName, User captain, List<User> members) {
+        Team team = new Team(teamName, captain);
+        members.forEach(team::addMember);
+        return testEntityManager.persist(team);
     }
 
     @Before

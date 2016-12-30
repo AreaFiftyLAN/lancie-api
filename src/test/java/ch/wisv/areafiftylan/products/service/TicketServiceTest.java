@@ -12,7 +12,7 @@ import org.junit.Test;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 public class TicketServiceTest extends ServiceTest {
 
@@ -104,7 +104,8 @@ public class TicketServiceTest extends ServiceTest {
         //TODO I can't get this method to do my bidding...
         /*
         User user = persistUser();
-        Ticket ticket = ticketService.requestTicketOfType(user, TEST_TICKET, Arrays.asList(CH_MEMBER_OPTION, PICKUP_SERVICE_OPTION));
+        Ticket ticket = ticketService.requestTicketOfType(
+        user, TEST_TICKET, Arrays.asList(CH_MEMBER_OPTION, PICKUP_SERVICE_OPTION));
         testEntityManager.persist(ticket);
         Collection<Ticket> tickets = ticketService.findValidTicketsByOwnerUsername(user.getUsername());
         assertEquals(Collections.singleton(ticket), tickets);
@@ -370,47 +371,294 @@ public class TicketServiceTest extends ServiceTest {
         ticketService.transferTicket(token);
 
         assertEquals(goalUser, ticket.getOwner());
+        assertFalse(ttt.isUnused());
+    }
 
+    @Test
+    public void transferTicketTokenNotFound() {
+        thrown.expect(TokenNotFoundException.class);
+        thrown.expectMessage("Could not find token ");
+
+        ticketService.transferTicket("invalid_token");
+    }
+
+    @Test
+    public void transferTicketTokenNull() {
+        thrown.expect(TokenNotFoundException.class);
+        thrown.expectMessage("Could not find token ");
+
+        ticketService.transferTicket(null);
+    }
+
+    @Test
+    public void transferTicketTokenInvalid() {
+        User goalUser = persistUser();
+        String goalUsername = goalUser.getUsername();
+        Ticket ticket = persistTicket();
+        Long ticketId = ticket.getId();
+        TicketTransferToken ttt = ticketService.setupForTransfer(ticketId, goalUsername);
+        String token = ttt.getToken();
+
+        ttt.use();
+
+        thrown.expect(InvalidTokenException.class);
+        thrown.expectMessage("Token is expired, has been already used or has been revoked.");
+
+        ticketService.transferTicket(token);
+    }
+
+    @Test
+    public void transferTicketTicketAlreadyLinked() {
+        User goalUser = persistUser();
+        String goalUsername = goalUser.getUsername();
+        Ticket ticket = persistTicket();
+        Long ticketId = ticket.getId();
+        TicketTransferToken ttt = ticketService.setupForTransfer(ticketId, goalUsername);
+        String token = ttt.getToken();
+
+        // Creating the RFIDLink needs to happen after setupForTransfer.
+        testEntityManager.persist(new RFIDLink("1234567890", ticket));
+
+        thrown.expect(TicketAlreadyLinkedException.class);
+        thrown.expectMessage("Ticket has already been linked to a RFID");
+
+        ticketService.transferTicket(token);
     }
 
     @Test
     public void cancelTicketTransfer() {
+        User goalUser = persistUser();
+        String goalUsername = goalUser.getUsername();
+        Ticket ticket = persistTicket();
+        Long ticketId = ticket.getId();
+        TicketTransferToken ttt = ticketService.setupForTransfer(ticketId, goalUsername);
+        String token = ttt.getToken();
 
+        ticketService.cancelTicketTransfer(token);
+
+        assertFalse(ttt.isValid());
+        assertTrue(ttt.isUnused());
+        assertNotEquals(goalUser, ticket.getOwner());
     }
 
     @Test
-    public void getOwnedTicketsAndFromTeamMembers() {
+    public void cancelTicketTransferTokenNotFound() {
+        thrown.expect(TokenNotFoundException.class);
+        thrown.expectMessage("Could not find token ");
 
+        ticketService.cancelTicketTransfer("invalid_token");
+    }
+
+    @Test
+    public void cancelTicketTransferTokenNull() {
+        thrown.expect(TokenNotFoundException.class);
+        thrown.expectMessage("Could not find token ");
+
+        ticketService.cancelTicketTransfer(null);
+    }
+
+    @Test
+    public void cancelTicketTransferTokenInvalid() {
+        User goalUser = persistUser();
+        String goalUsername = goalUser.getUsername();
+        Ticket ticket = persistTicket();
+        Long ticketId = ticket.getId();
+        TicketTransferToken ttt = ticketService.setupForTransfer(ticketId, goalUsername);
+        String token = ttt.getToken();
+
+        ttt.use();
+
+        thrown.expect(InvalidTokenException.class);
+        thrown.expectMessage("Token is expired, has been already used or has been revoked.");
+
+        ticketService.cancelTicketTransfer(token);
+    }
+
+    @Test
+    public void getOwnedTicketsAndFromTeamMembersFull() {
+        User captain = persistUser();
+        Ticket captainTicket = persistTicketForUser(captain);
+        User member1Team1 = persistUser();
+        Ticket member1Team1Ticket = persistTicketForUser(member1Team1);
+        User member2Team1 = persistUser();
+        Ticket member2Team1Ticket = persistTicketForUser(member2Team1);
+        User member1Team2 = persistUser();
+        Ticket member1Team2Ticket = persistTicketForUser(member1Team2);
+        User member2Team2 = persistUser();
+        Ticket member2Team2Ticket = persistTicketForUser(member2Team2);
+        persistTeamWithCaptainAndMembers("Team1", captain, Arrays.asList(member1Team1, member2Team1));
+        persistTeamWithCaptainAndMembers("Team2", captain, Arrays.asList(member1Team2, member2Team2));
+
+        Collection<Ticket> tickets = ticketService.getOwnedTicketsAndFromTeamMembers(captain);
+
+        assertEquals(tickets, Arrays.asList(captainTicket, member1Team1Ticket,
+                member2Team1Ticket, member1Team2Ticket, member2Team2Ticket));
+    }
+
+    @Test
+    public void getOwnedTicketsAndFromTeamMembersOnlyCaptainInTeams() {
+        User captain = persistUser();
+        Ticket captainTicket = persistTicketForUser(captain);
+        persistTeamWithCaptain("Team1", captain);
+        persistTeamWithCaptain("Team2", captain);
+
+        Collection<Ticket> tickets = ticketService.getOwnedTicketsAndFromTeamMembers(captain);
+
+        assertEquals(tickets, Collections.singletonList(captainTicket));
+    }
+
+    @Test
+    public void getOwnedTicketsAndFromTeamMembersOnlyCaptainNoTeams() {
+        User captain = persistUser();
+        Ticket captainTicket = persistTicketForUser(captain);
+
+        Collection<Ticket> tickets = ticketService.getOwnedTicketsAndFromTeamMembers(captain);
+
+        assertEquals(tickets, Collections.singletonList(captainTicket));
+    }
+
+    @Test
+    public void getOwnedTicketsAndFromTeamMembersNull() {
+        thrown.expect(UserNotFoundException.class);
+        thrown.expectMessage("could not find user 'null'.");
+
+        ticketService.getOwnedTicketsAndFromTeamMembers(null);
     }
 
     @Test
     public void getValidTicketTransferTokensByUser() {
+        User owner = persistUser();
+        User goalUser = persistUser();
+        Ticket ticket1 = persistTicketForUser(owner);
+        Ticket ticket2 = persistTicketForUser(owner);
+        Ticket ticket3 = persistTicketForUser(goalUser);
+        TicketTransferToken ttt1 = ticketService.setupForTransfer(ticket1.getId(), goalUser.getUsername());
+        TicketTransferToken ttt2 = ticketService.setupForTransfer(ticket2.getId(), goalUser.getUsername());
+        TicketTransferToken ttt3 = ticketService.setupForTransfer(ticket3.getId(), owner.getUsername());
+        ttt1.use();
+        testEntityManager.persist(ttt1);
 
+        Collection<TicketTransferToken> tttc = ticketService.getValidTicketTransferTokensByUser(owner.getUsername());
+
+        assertEquals(tttc, Collections.singletonList(ttt2));
+    }
+
+    @Test
+    public void getValidTicketTransferTokensByUserNotFound() {
+        Collection<TicketTransferToken> tttc = ticketService.getValidTicketTransferTokensByUser("doesnt_exist");
+        assertTrue(tttc.isEmpty());
+    }
+
+    @Test
+    public void getValidTicketTransferTokensByUserNull() {
+        Collection<TicketTransferToken> tttc = ticketService.getValidTicketTransferTokensByUser(null);
+        assertTrue(tttc.isEmpty());
     }
 
     @Test
     public void getAllTicketsWithTransport() {
+        Ticket ticketWithPickup = persistTicket();
+        Ticket ticketWithPickup2 = persistTicket();
+        Ticket ticketWithoutPickup =
+                ticketService.requestTicketOfType(TEST_TICKET, Collections.singletonList(CH_MEMBER_OPTION));
+        ticketWithoutPickup.setValid(true);
+        testEntityManager.persist(ticketWithoutPickup);
 
+        Collection<Ticket> tickets = ticketService.getAllTicketsWithTransport();
+
+        assertEquals(tickets, Arrays.asList(ticketWithPickup, ticketWithPickup2));
     }
 
     @Test
-    public void assignTicketToUser() {
+    public void getAllTicketsWithTransportZero() {
+        Ticket ticketWithoutPickup =
+                ticketService.requestTicketOfType(TEST_TICKET, Collections.singletonList(CH_MEMBER_OPTION));
+        ticketWithoutPickup.setValid(true);
+        testEntityManager.persist(ticketWithoutPickup);
 
+        Collection<Ticket> tickets = ticketService.getAllTicketsWithTransport();
+
+        assertEquals(tickets, Collections.emptyList());
     }
 
     @Test
-    public void addTicketType() {
-
+    public void assignTicketToUserAnonymous() {
+        User user = persistUser();
+        Ticket ticket = persistTicket();
+        Ticket result = ticketService.assignTicketToUser(ticket.getId(), user.getUsername());
+        assertEquals(user, result.getOwner());
     }
 
     @Test
-    public void getAllTicketTypes() {
-
+    public void assignTicketToUserFromOtherUser() {
+        User user = persistUser();
+        User owner = persistUser();
+        Ticket ticket = persistTicketForUser(owner);
+        assertEquals(owner, ticket.getOwner());
+        Ticket result = ticketService.assignTicketToUser(ticket.getId(), user.getUsername());
+        assertEquals(user, result.getOwner());
     }
 
     @Test
-    public void addTicketOption() {
-
+    public void addTicketTypeOne() {
+        long countBefore = ticketTypeRepository.count();
+        TicketType ticketType = new TicketType("type1", "text", 5F, 0, LocalDateTime.now(), true);
+        ticketService.addTicketType(ticketType);
+        assertEquals(countBefore + 1, ticketTypeRepository.count());
     }
 
+    @Test
+    public void addTicketTypeTwo() {
+        long countBefore = ticketTypeRepository.count();
+        TicketType ticketType1 = new TicketType("type1", "text", 5F, 0, LocalDateTime.now(), true);
+        ticketService.addTicketType(ticketType1);
+        TicketType ticketType2 = new TicketType("type2", "text", 6F, 0, LocalDateTime.now(), true);
+        ticketService.addTicketType(ticketType2);
+        assertEquals(countBefore + 2, ticketTypeRepository.count());
+    }
+
+    @Test
+    public void getAllTicketTypesZeroExtra() {
+        long countBefore = ticketTypeRepository.count();
+        Collection<TicketType> types = ticketService.getAllTicketTypes();
+        assertEquals(countBefore, types.size());
+    }
+
+    @Test
+    public void getAllTicketTypesOneExtra() {
+        long countBefore = ticketTypeRepository.count();
+        TicketType ticketType1 = new TicketType("type1", "text", 5F, 0, LocalDateTime.now(), true);
+        ticketService.addTicketType(ticketType1);
+        Collection<TicketType> types = ticketService.getAllTicketTypes();
+        assertEquals(countBefore + 1, types.size());
+    }
+
+    @Test
+    public void getAllTicketTypesTwoExtra() {
+        long countBefore = ticketTypeRepository.count();
+        TicketType ticketType1 = new TicketType("type1", "text", 5F, 0, LocalDateTime.now(), true);
+        ticketService.addTicketType(ticketType1);
+        TicketType ticketType2 = new TicketType("type2", "text", 6F, 0, LocalDateTime.now(), true);
+        ticketService.addTicketType(ticketType2);
+        Collection<TicketType> types = ticketService.getAllTicketTypes();
+        assertEquals(countBefore + 2, types.size());
+    }
+
+    @Test
+    public void addTicketOptionOne() {
+        long countBefore = ticketOptionRepository.count();
+        TicketOption option = new TicketOption("option1", 2.5F);
+        ticketService.addTicketOption(option);
+        assertEquals(countBefore + 1, ticketOptionRepository.count());
+    }
+
+    @Test
+    public void addTicketOptionTwo() {
+        long countBefore = ticketOptionRepository.count();
+        TicketOption option1 = new TicketOption("option1", 2.5F);
+        ticketService.addTicketOption(option1);
+        TicketOption option2 = new TicketOption("option1", 2.5F);
+        ticketService.addTicketOption(option2);
+        assertEquals(countBefore + 2, ticketOptionRepository.count());
+    }
 }
