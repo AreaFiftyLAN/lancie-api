@@ -76,7 +76,7 @@ public class TicketType {
     @Setter
     private boolean buyable;
     
-    @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @Getter
     Set<TicketOption> possibleOptions;
 
