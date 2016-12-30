@@ -19,6 +19,9 @@ package ch.wisv.areafiftylan.products.model;
 
 import lombok.Getter;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class TicketInformationResponse {
     @Getter
     private String ticketType;
@@ -36,10 +39,7 @@ public class TicketInformationResponse {
     private String text;
 
     @Getter
-    private double chMemberDiscountPrice;
-
-    @Getter
-    private double pickupServicePrice;
+    private Map<String, Float> possibleOptions;
 
     @Getter
     private String deadline;
@@ -51,5 +51,10 @@ public class TicketInformationResponse {
         this.price = type.getPrice();
         this.text = type.getText();
         this.deadline = type.getDeadline().toString();
+
+        this.possibleOptions = new HashMap<>(type.getPossibleOptions().size());
+        for (TicketOption option : type.getPossibleOptions()) {
+            this.possibleOptions.put(option.getName(), option.getPrice());
+        }
     }
 }
