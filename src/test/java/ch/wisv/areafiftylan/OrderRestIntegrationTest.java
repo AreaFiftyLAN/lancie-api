@@ -13,40 +13,33 @@
  *
  *     You should have received a copy of the GNU General Public License
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *//*
+ */
 
 
 package ch.wisv.areafiftylan;
 
 import ch.wisv.areafiftylan.products.model.Ticket;
-import ch.wisv.areafiftylan.products.model.TicketOption;
-import ch.wisv.areafiftylan.products.model.TicketType;
 import ch.wisv.areafiftylan.products.model.order.Order;
-import ch.wisv.areafiftylan.products.model.order.OrderStatus;
 import ch.wisv.areafiftylan.products.service.repository.OrderRepository;
 import ch.wisv.areafiftylan.products.service.repository.TicketRepository;
-import ch.wisv.areafiftylan.utils.SessionData;
-import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.response.Response;
+import ch.wisv.areafiftylan.users.model.User;
+import io.restassured.http.ContentType;
 import org.apache.http.HttpStatus;
-import org.junit.After;
-import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import static com.jayway.restassured.RestAssured.given;
-import static com.jayway.restassured.RestAssured.when;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static io.restassured.RestAssured.given;
+import static io.restassured.RestAssured.when;
 import static org.hamcrest.Matchers.*;
 
 
-public class OrderRestIntegrationTest extends IntegrationTest {
+public class OrderRestIntegrationTest extends XAuthIntegrationTest {
 
     @Autowired
     protected OrderRepository orderRepository;
@@ -57,57 +50,30 @@ public class OrderRestIntegrationTest extends IntegrationTest {
     @Value("${a5l.ticketLimit}")
     private int TICKET_LIMIT;
 
-    private final String ORDER_ENDPOINT = "/orders";
+    private final String ORDER_ENDPOINT = "/orders/";
 
-    private void insertTestOrders() {
-        Order order1 = new Order();
-        order1.setUser(user);
-        Order order2 = new Order();
-        order2.setUser(admin);
+    private Order addOrderForUser(User user) {
+        Ticket ticket = ticketRepository.save(new Ticket(
+                ticketTypeRepository.findByName(TEST_TICKET).orElseThrow(IllegalArgumentException::new)));
+        Order order = new Order(user);
+        order.addTicket(ticket);
+        return orderRepository.save(order);
 
-        Ticket earlyAndPickup = new Ticket(user, TicketType.EARLY_FULL, true, false);
-        Ticket earlyNoPickup = new Ticket(user, TicketType.EARLY_FULL, false, false);
-        Ticket regularNoPickup = new Ticket(user, TicketType.REGULAR_FULL, false, false);
-
-        earlyAndPickup = ticketRepository.save(earlyAndPickup);
-        earlyNoPickup = ticketRepository.save(earlyNoPickup);
-        regularNoPickup = ticketRepository.save(regularNoPickup);
-
-        order1.addTicket(earlyAndPickup);
-        order1.addTicket(earlyNoPickup);
-
-        order2.addTicket(regularNoPickup);
-
-        orderRepository.save(order1);
-        orderRepository.save(order2);
     }
 
-    @After
-    public void orderTestCleanup() {
-        orderRepository.findAll().forEach((order) -> {
-            order.clearTickets();
-            orderRepository.save(order);
-        });
-        orderRepository.deleteAll();
-        ticketRepository.deleteAll();
-    }
-
-
-    //     @RequestMapping(value = "/orders", method = RequestMethod.GET)
-    @Test
-    public void testViewAllOrders_Anon() {
-        when().get(ORDER_ENDPOINT).
-                then().statusCode(HttpStatus.SC_FORBIDDEN);
+    private Order insertAnonOrder() {
+        Order order = new Order();
+        Ticket ticket = ticketRepository.save(new Ticket(
+                ticketTypeRepository.findByName(TEST_TICKET).orElseThrow(IllegalArgumentException::new)));
+        order.addTicket(ticket);
+        return orderRepository.save(order);
     }
 
     @Test
-    public void testViewAllOrders_User() {
-        SessionData login = login(user.getUsername(), userCleartextPassword);
+    public void testGetAllOrdersAnon() {
+        insertAnonOrder();
 
         //@formatter:off
-        given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
         when().
             get(ORDER_ENDPOINT).
         then().
@@ -116,959 +82,411 @@ public class OrderRestIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void testViewAllOrders_Admin() {
-        insertTestOrders();
+    public void testGetAllOrdersAsUser() {
+        insertAnonOrder();
 
-        SessionData login = login(admin.getUsername(), adminCleartextPassword);
+        User user = createUser();
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(user)).
+        when().
+            get(ORDER_ENDPOINT).
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN).body("message", containsString("denied"));
+        //@formatter:on
+    }
+
+    @Test
+    public void testGetAllOrdersAsAdmin() {
+        insertAnonOrder();
+
+        User admin = createUser(true);
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(admin)).
         when().
             get(ORDER_ENDPOINT).
         then().
             statusCode(HttpStatus.SC_OK).
-            body("$", hasSize(2)).
-            body("user.username", containsInAnyOrder(admin.getUsername(), user.getUsername())).
-            body("status", hasItems("ASSIGNED", "ASSIGNED"));
-        //formatter:on
+            body("$", hasSize(Long.valueOf(orderRepository.count()).intValue()));
+        //@formatter:on
     }
 
-    //     @RequestMapping(value = "/orders", method = RequestMethod.POST)
-
     @Test
-    public void testCreateSingleOrder_User() {
-        Map<String, String> order = new HashMap<>();
-        order.put("pickupService", "true");
-        order.put("type", TicketType.TEST.toString());
-        order.put("chMember", "false");
-        SessionData login = login(user.getUsername(), userCleartextPassword);
+    public void testCreateAnonOrder() {
+        Map<String, Object> order = new HashMap<>();
+        List<String> options = Arrays.asList(CH_MEMBER, PICKUP_SERVICE);
+        order.put("type", TEST_TICKET);
+        order.put("options", options);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
         when().
-            content(order).contentType(ContentType.JSON).
+            body(order).contentType(ContentType.JSON).
             post(ORDER_ENDPOINT)
         .then().
             statusCode(HttpStatus.SC_CREATED).
             body("object.user", is(nullValue())).
             body("object.status", is("ANONYMOUS")).
             body("object.tickets", hasSize(1)).
-            body("object.tickets.pickupService", hasItem(true)).
-            body("object.tickets.type", hasItem(is(TicketType.TEST.toString()))).
-            body("object.amount",equalTo(TicketType.TEST.getPrice() + TicketOption.PICKUPSERVICE.getPrice()));
+            body("object.tickets.type.name", hasItem(is(TEST_TICKET))).
+            body("object.tickets.type.text", anything()).
+            body("object.tickets.enabledOptions.name", hasItem(hasItems(CH_MEMBER, PICKUP_SERVICE))).
+            body("object.amount",equalTo(27.5F));
         //@formatter:on
     }
 
     @Test
-    public void testCreateSingleOrder_UserCHMember() {
-        Map<String, String> order = new HashMap<>();
-        order.put("pickupService", "false");
-        order.put("chMember", "true");
-        order.put("type", TicketType.TEST.toString());
-        SessionData login = login(user.getUsername(), userCleartextPassword);
+    public void testCreateOrderAsUser() {
+        Map<String, Object> order = new HashMap<>();
+        List<String> options = Arrays.asList(CH_MEMBER, PICKUP_SERVICE);
+        order.put("type", TEST_TICKET);
+        order.put("options", options);
+        User user = createUser();
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(user)).
         when().
-            content(order).contentType(ContentType.JSON).
+            body(order).contentType(ContentType.JSON).
             post(ORDER_ENDPOINT)
         .then().
             statusCode(HttpStatus.SC_CREATED).
             body("object.user", is(nullValue())).
             body("object.status", is("ANONYMOUS")).
             body("object.tickets", hasSize(1)).
-            body("object.tickets.pickupService", hasItem(false)).
-            body("object.tickets.type", hasItem(is(TicketType.TEST.toString()))).
-            body("object.amount", equalTo(TicketType.TEST.getPrice() + TicketOption.CHMEMBER.getPrice()));
+            body("object.tickets.type.name", hasItem(is(TEST_TICKET))).
+            body("object.tickets.type.text", anything()).
+            body("object.tickets.enabledOptions.name", hasItem(hasItems(CH_MEMBER, PICKUP_SERVICE))).
+            body("object.amount",equalTo(27.5F));
         //@formatter:on
     }
 
     @Test
-    public void testCreateSingleOrder_Anon() {
-        Map<String, String> order = new HashMap<>();
-        order.put("pickupService", "false");
-        order.put("type", TicketType.EARLY_FULL.toString());
+    public void testAddTicketToAnonOrder() {
+        Order order = insertAnonOrder();
+
+        Map<String, Object> orderDTO = new HashMap<>();
+        List<String> options = Arrays.asList(CH_MEMBER, PICKUP_SERVICE);
+        orderDTO.put("type", TEST_TICKET);
+        orderDTO.put("options", options);
 
         //@formatter:off
         given().
         when().
-            content(order).contentType(ContentType.JSON).
-            post(ORDER_ENDPOINT).
-        then().
-            statusCode(HttpStatus.SC_FORBIDDEN).
-            body("message", containsString("CSRF"));
-        //@formatter:on
-    }
-
-    @Test
-    public void testCreateSingleOrderAnonymous() {
-        Map<String, String> order = new HashMap<>();
-        order.put("pickupService", "false");
-        order.put("chMember", "false");
-        order.put("type", TicketType.TEST.toString());
-
-        //@formatter:off
-        given().
-            filter(sessionFilter).
-            header(getCSRFHeader()).
-        when().
-            content(order).contentType(ContentType.JSON).
-            post(ORDER_ENDPOINT).
-        then().
-            statusCode(HttpStatus.SC_CREATED).
-            body("message", containsString("Ticket available and order successfully created at"));
-        //@formatter:on
-    }
-
-    @Test
-    public void testCreateSingleOrderMissingPickupParameter() {
-        Map<String, String> order = new HashMap<>();
-        order.put("type", TicketType.EARLY_FULL.toString());
-        order.put("chMember", "false");
-        SessionData login = login(user.getUsername(), userCleartextPassword);
-
-        //@formatter:off
-        given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
-        when().
-            content(order).contentType(ContentType.JSON).
-            post(ORDER_ENDPOINT)
-        .then().statusCode(HttpStatus.SC_BAD_REQUEST);
-        //@formatter:on
-    }
-
-    @Test
-    public void testCreateSingleOrderMissingTypeParameter() {
-        Map<String, String> order = new HashMap<>();
-        order.put("pickupService", "true");
-        order.put("chMember", "false");
-        SessionData login = login(user.getUsername(), userCleartextPassword);
-
-        //@formatter:off
-        given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
-        when().
-            content(order).contentType(ContentType.JSON).
-            post(ORDER_ENDPOINT)
-        .then().statusCode(HttpStatus.SC_BAD_REQUEST);
-        //@formatter:on
-    }
-
-    @Test
-    public void testCreateSingleOrderMissingChParameter() {
-        Map<String, String> order = new HashMap<>();
-        order.put("type", TicketType.EARLY_FULL.toString());
-        order.put("pickupService", "true");
-        SessionData login = login(user.getUsername(), userCleartextPassword);
-
-        //@formatter:off
-        given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
-        when().
-            content(order).contentType(ContentType.JSON).
-            post(ORDER_ENDPOINT)
-        .then().statusCode(HttpStatus.SC_BAD_REQUEST);
-        //@formatter:on
-    }
-
-    @Test
-    public void testCreateSingleOrderUnknownType() {
-        Map<String, String> order = new HashMap<>();
-        order.put("pickupService", "true");
-        order.put("chMember", "false");
-        order.put("type", "UNKNOWN");
-
-        SessionData login = login(user.getUsername(), userCleartextPassword);
-
-        //@formatter:off
-        given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
-        when().
-            content(order).contentType(ContentType.JSON).
-            post(ORDER_ENDPOINT)
-        .then().statusCode(HttpStatus.SC_BAD_REQUEST);
-        //@formatter:on
-    }
-
-    @Test
-    public void testCreateSingleOrderSoldOutType() {
-        for (int i = 0; i < TicketType.EARLY_FULL.getLimit(); i++) {
-            ticketRepository.save(new Ticket(user, TicketType.EARLY_FULL, false, false));
-        }
-
-        Map<String, String> order = new HashMap<>();
-        order.put("pickupService", "true");
-        order.put("type", TicketType.EARLY_FULL.toString());
-        order.put("chMember", "false");
-        SessionData login = login(user.getUsername(), userCleartextPassword);
-
-        //@formatter:off
-        given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
-        when().
-            content(order).contentType(ContentType.JSON).
-            post(ORDER_ENDPOINT)
+            body(orderDTO).contentType(ContentType.JSON).
+            post(ORDER_ENDPOINT + order.getId())
         .then().
-            statusCode(HttpStatus.SC_GONE);
+            statusCode(HttpStatus.SC_OK).
+            body("object.user", is(nullValue())).
+            body("object.status", is("ANONYMOUS")).
+            body("object.tickets", hasSize(2)).
+            body("object.tickets.type.name", hasItems(TEST_TICKET, TEST_TICKET)).
+            body("object.tickets.enabledOptions.name", hasItem(hasItems(CH_MEMBER, PICKUP_SERVICE))).
+            body("object.amount",equalTo(57.5F));
         //@formatter:on
     }
 
     @Test
-    public void testCreateSingleOrderGlobalLimit() {
-        for (int i = 0; i < TICKET_LIMIT; i++) {
-            ticketRepository.save(new Ticket(user, TicketType.REGULAR_FULL, false, false));
-        }
+    public void testAddTicketToAssignedOrderAnon() {
+        User user = createUser();
+        Order order = addOrderForUser(user);
 
-        Map<String, String> order = new HashMap<>();
-        order.put("pickupService", "true");
-        order.put("type", TicketType.LAST_MINUTE.toString());
-        order.put("chMember", "false");
-        SessionData login = login(user.getUsername(), userCleartextPassword);
+        Map<String, Object> orderDTO = new HashMap<>();
+        List<String> options = Arrays.asList(CH_MEMBER, PICKUP_SERVICE);
+        orderDTO.put("type", TEST_TICKET);
+        orderDTO.put("options", options);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
         when().
-            content(order).contentType(ContentType.JSON).
-            post(ORDER_ENDPOINT)
+            body(orderDTO).contentType(ContentType.JSON).
+            post(ORDER_ENDPOINT + order.getId())
         .then().
-            statusCode(HttpStatus.SC_GONE);
+            statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
-    }
-
-
-    protected String createOrderAndReturnLocation() {
-        Map<String, String> order = new HashMap<>();
-        order.put("pickupService", "false");
-        order.put("type", TicketType.TEST.toString());
-        order.put("chMember", "false");
-
-        //@formatter:off
-        Response response = given().
-                filter(sessionFilter).
-                header(getCSRFHeader()).
-            when().
-                content(order).contentType(ContentType.JSON).
-                post("/orders");
-
-
-            String location = response.then().extract().header("Location");
-        //@formatter:on
-
-        return location;
-    }
-
-    protected void assignOrder(String location, String username, String clearTextPassword) {
-        SessionData login = login(username, clearTextPassword);
-
-        //@formatter:off
-        given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
-        when().
-            post(location + "/assign");
-        //@formatter:on
-
     }
 
     @Test
-    public void testGetOrder() {
-        String location = createOrderAndReturnLocation();
+    public void testAddTicketToAssignedOrderAsUser() {
+        User user = createUser();
+        Order order = addOrderForUser(user);
+
+        Map<String, Object> orderDTO = new HashMap<>();
+        List<String> options = Arrays.asList(CH_MEMBER, PICKUP_SERVICE);
+        orderDTO.put("type", TEST_TICKET);
+        orderDTO.put("options", options);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(getCSRFHeader()).
+            header(getXAuthTokenHeaderForUser(user)).
         when().
-            get(location).
-        then().
+            body(orderDTO).contentType(ContentType.JSON).
+            post(ORDER_ENDPOINT + order.getId())
+        .then().
             statusCode(HttpStatus.SC_OK).
-            body("status", is("ANONYMOUS")).
-            body("reference", is(nullValue())).
-            body("user", is(nullValue())).
-            body("tickets", hasSize(1)).
-            body("tickets.type", hasItem(is(TicketType.TEST.toString()))).
-            body("tickets.pickupService", hasItem(is(false))).
-            body("amount",equalTo(TicketType.TEST.getPrice()));
-        //@formatter:on
-    }
-
-    @Test
-    public void testAssignOrder() {
-        String location = createOrderAndReturnLocation();
-
-        login(user.getUsername(), userCleartextPassword);
-
-        //@formatter:off
-        given().
-            filter(sessionFilter).
-            header(getCSRFHeader()).
-        when().
-            post(location + "/assign").
-        then().
-            statusCode(HttpStatus.SC_OK).
-            body("object.user.username", is(user.getUsername()));
-        //@formatter:on
-    }
-
-    @Test
-    public void testGetOrderCurrentUser() {
-        assignOrder(createOrderAndReturnLocation(), user.getUsername(), userCleartextPassword);
-
-        SessionData login = login(user.getUsername(), userCleartextPassword);
-
-        //@formatter:off
-        given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
-        when().
-            get("/users/current/orders").
-        then().
-            statusCode(HttpStatus.SC_OK).
-            body("[0].status", equalTo("ASSIGNED")).
-            body("[0].reference", is(nullValue())).
-            body("[0].user.username", is("user@mail.com")).
-            body("[0].tickets", hasSize(1)).
-            body("[0].tickets.type", hasItem(is(TicketType.TEST.toString()))).
-            body("[0].tickets.pickupService", hasItem(is(false))).
-            body("[0].amount",equalTo(TicketType.TEST.getPrice()));
-        //@formatter:on
-    }
-
-    @Test
-    public void testGetOpenOrderCurrentUser() {
-        assignOrder(createOrderAndReturnLocation(), user.getUsername(), userCleartextPassword);
-        logout();
-
-        SessionData login = login(user.getUsername(), userCleartextPassword);
-
-        //@formatter:off
-        given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
-        when().
-            get("/users/current/orders/open").
-        then().
-            statusCode(HttpStatus.SC_OK).
-            body("status", hasItem(equalTo("ASSIGNED"))).
-            body("reference", hasItem(is(nullValue()))).
-            body("user.username", hasItem(is("user@mail.com"))).
-            body("tickets", hasSize(1)).
-            body("tickets.type", hasItem(hasItem(is(TicketType.TEST.toString())))).
-            body("tickets.pickupService", hasItem(hasItem(is(false)))).
-            body("amount",hasItem(equalTo(TicketType.TEST.getPrice())));
-        //@formatter:on
-    }
-
-    @Test
-    public void testGetOpenOrderCurrentUserNotFound() {
-        SessionData login = login(user.getUsername(), userCleartextPassword);
-
-        //@formatter:off
-        given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
-        when().
-            get("/users/current/orders/open").
-        then().
-            statusCode(HttpStatus.SC_OK).
-            body("$", hasSize(0));
-        //@formatter:on
-    }
-
-    @Test
-    public void testGetOrder_OtherUser() {
-        String location = createOrderAndReturnLocation();
-        assignOrder(location, user.getUsername(), userCleartextPassword);
-        logout();
-
-        SessionData login = login(outsider.getUsername(), outsiderCleartextPassword);
-
-        //@formatter:off
-        given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
-        when().
-            get(location).
-        then().
-            statusCode(HttpStatus.SC_FORBIDDEN).
-            body("object", is(nullValue()));
-        //@formatter:on
-
-    }
-
-    @Test
-    public void testGetOrder_Admin() {
-        String location = createOrderAndReturnLocation();
-        logout();
-
-        SessionData login = login(admin.getUsername(), adminCleartextPassword);
-
-        //@formatter:off
-        given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
-        when().
-            get(location).
-        then().
-            statusCode(HttpStatus.SC_OK).
-            body("status", is("ANONYMOUS")).
-            body("reference", is(nullValue())).
-            body("user", is(nullValue())).
-            body("tickets.type", hasItem(is(TicketType.TEST.toString()))).
-            body("tickets.pickupService", hasItem(is(false))).
-            body("amount",equalTo(TicketType.TEST.getPrice()));
-        //@formatter:on
-    }
-
-
-    //     @RequestMapping(value = "/orders/{orderId}", method = RequestMethod.POST)
-
-    @Test
-    public void testAddToOrder_Anon() {
-        Map<String, String> ticket = new HashMap<>(2);
-        ticket.put("pickupService", "true");
-        ticket.put("type", TicketType.REGULAR_FULL.toString());
-        ticket.put("chMember", "false");
-
-        String location = createOrderAndReturnLocation();
-        logout();
-
-        //@formatter:off
-        given().
-            content(ticket).contentType(ContentType.JSON).
-        when().
-            post(location).
-        then().statusCode(HttpStatus.SC_FORBIDDEN);
-        //@formatter:on
-
-    }
-
-    //FIXME: DATE SENSITIVE ENUM, SHOULD BE INDEPENDENT OF DEADLINE
-
-*/
-/*    @Test
-    public void testAddToOrder_User() {
-        Map<String, String> ticket = new HashMap<>(2);
-        ticket.put("pickupService", "true");
-        ticket.put("chMember", "false");
-        ticket.put("type", TicketType.REGULAR_FULL.toString());
-
-        String location = createOrderAndReturnLocation();
-        logout();
-
-        SessionData login = login(user.getUsername(), userCleartextPassword);
-
-        //@formatter:off
-        given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
-        when().
-            content(ticket).
-            contentType(ContentType.JSON).
-            post(location).
-        then().
-            statusCode(HttpStatus.SC_OK).
+            body("object.user.username", is(user.getUsername())).
+            body("object.status", is("ASSIGNED")).
             body("object.tickets", hasSize(2)).
-            body("object.tickets.type", hasItems(equalTo("REGULAR_FULL"), equalTo("EARLY_FULL"))).
-            body("object.amount",equalTo(80.00F));
-
+            body("object.tickets.type.name", hasItems(TEST_TICKET, TEST_TICKET)).
+            body("object.tickets.enabledOptions.name", hasItem(hasItems(CH_MEMBER, PICKUP_SERVICE))).
+            body("object.amount",equalTo(57.5F));
         //@formatter:on
-    }*//*
-
-
-    @Test
-    public void testAddToOrder_OtherUser() {
-        Map<String, String> ticket = new HashMap<>(2);
-        ticket.put("pickupService", "true");
-        ticket.put("chMember", "false");
-        ticket.put("type", TicketType.REGULAR_FULL.toString());
-
-        String location = createOrderAndReturnLocation();
-        assignOrder(location, user.getUsername(), userCleartextPassword);
-        logout();
-
-        SessionData login = login(outsider.getUsername(), outsiderCleartextPassword);
-
-        //@formatter:off
-        given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
-        when().
-            content(ticket).
-            contentType(ContentType.JSON).
-            post(location).
-        then().
-            statusCode(HttpStatus.SC_FORBIDDEN);
-        //@formatter:on
-
-        String locationParse = location.substring(location.lastIndexOf('/') + 1);
-        Long orderId = Long.parseLong(locationParse);
-        assertThat("Order still contains one ticket", orderRepository.findOne(orderId).getTickets().size(), is(1));
     }
 
-    //FIXME: DATE SENSITIVE ENUM, SHOULD BE INDEPENDENT OF DEADLINE
-*/
-/*    @Test
-    public void testAddToOrder_Admin() {
-        Map<String, String> ticket = new HashMap<>(2);
-        ticket.put("pickupService", "true");
-        ticket.put("chMember", "true");
-        ticket.put("type", TicketType.REGULAR_FULL.toString());
+    @Test
+    public void testAddTicketToAssignedOrderAsWrongUser() {
+        User user = createUser();
+        User user2 = createUser();
+        Order order = addOrderForUser(user);
 
-        String location = createOrderAndReturnLocation();
-        logout();
-
-        SessionData login = login(admin.getUsername(), adminCleartextPassword);
+        Map<String, Object> orderDTO = new HashMap<>();
+        List<String> options = Arrays.asList(CH_MEMBER, PICKUP_SERVICE);
+        orderDTO.put("type", TEST_TICKET);
+        orderDTO.put("options", options);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(user2)).
         when().
-            content(ticket).
-            contentType(ContentType.JSON).
-            post(location).
-        then().
+            body(orderDTO).contentType(ContentType.JSON).
+            post(ORDER_ENDPOINT + order.getId())
+        .then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
+    }
+
+    @Test
+    public void testAddTicketToAssignedOrderAsAdmin() {
+        User user = createUser();
+        User admin = createUser(true);
+        Order order = addOrderForUser(user);
+
+        Map<String, Object> orderDTO = new HashMap<>();
+        List<String> options = Arrays.asList(CH_MEMBER, PICKUP_SERVICE);
+        orderDTO.put("type", TEST_TICKET);
+        orderDTO.put("options", options);
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(admin)).
+        when().
+            body(orderDTO).contentType(ContentType.JSON).
+            post(ORDER_ENDPOINT + order.getId())
+        .then().
             statusCode(HttpStatus.SC_OK).
+            body("object.user.username", is(user.getUsername())).
+            body("object.status", is("ASSIGNED")).
             body("object.tickets", hasSize(2)).
-            body("object.tickets.type", hasItems(equalTo("REGULAR_FULL"), equalTo("EARLY_FULL"))).
-            body("object.amount",equalTo(75.00F));
-        //@formatter:on
-    }*//*
-
-
-    @Test
-    public void testAddToOrderLimit_User() {
-
-        Map<String, String> ticket = new HashMap<>(3);
-        ticket.put("pickupService", "true");
-        ticket.put("chMember", "false");
-        ticket.put("type", TicketType.EARLY_FULL.toString());
-
-        Order order1 = new Order();
-        order1.setUser(user);
-
-        Collection<Ticket> ticketList = new ArrayList<>(5);
-
-        ticketList.add(ticketRepository.save(new Ticket(user, TicketType.EARLY_FULL, true, false)));
-        ticketList.add(ticketRepository.save(new Ticket(user, TicketType.EARLY_FULL, true, false)));
-        ticketList.add(ticketRepository.save(new Ticket(user, TicketType.EARLY_FULL, true, false)));
-        ticketList.add(ticketRepository.save(new Ticket(user, TicketType.EARLY_FULL, true, false)));
-        ticketList.add(ticketRepository.save(new Ticket(user, TicketType.EARLY_FULL, true, false)));
-
-        for (Ticket ticket1 : ticketList) {
-            order1.addTicket(ticket1);
-        }
-
-        Order save = orderRepository.save(order1);
-
-        SessionData login = login(user.getUsername(), userCleartextPassword);
-
-        //@formatter:off
-        given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
-        when().
-            content(ticket).
-            contentType(ContentType.JSON).
-            post("/orders/" + save.getId()).
-        then().
-            statusCode(HttpStatus.SC_BAD_REQUEST);
+            body("object.tickets.type.name", hasItems(TEST_TICKET, TEST_TICKET)).
+            body("object.tickets.enabledOptions.name", hasItem(hasItems(CH_MEMBER, PICKUP_SERVICE))).
+            body("object.amount",equalTo(57.5F));
         //@formatter:on
     }
 
     @Test
-    public void testAddToOrderMissingPickupParameter() {
-        Map<String, String> ticket = new HashMap<>(2);
-        ticket.put("chMember", "false");
-        ticket.put("type", TicketType.REGULAR_FULL.toString());
-
-        String location = createOrderAndReturnLocation();
-        logout();
-
-        SessionData login = login(user.getUsername(), userCleartextPassword);
+    public void testGetAnonOrderAsAnon() {
+        Order order = insertAnonOrder();
 
         //@formatter:off
-        given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
-        when().
-            content(ticket).
-            contentType(ContentType.JSON).
-            post(location).
-        then().
-            statusCode(HttpStatus.SC_BAD_REQUEST);
-        //@formatter:on
-    }
-
-    @Test
-    public void testAddToOrderMissingTypeParameter() {
-        Map<String, String> ticket = new HashMap<>(2);
-        ticket.put("chMember", "false");
-        ticket.put("pickupService", "false");
-
-        String location = createOrderAndReturnLocation();
-
-        SessionData login = login(user.getUsername(), userCleartextPassword);
-
-        //@formatter:off
-        given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
-        when().
-            content(ticket).
-            contentType(ContentType.JSON).
-            post(location).
-        then().
-            statusCode(HttpStatus.SC_BAD_REQUEST);
-        //@formatter:on
-    }
-
-    @Test
-    public void testAddToOrderUnavailableTicket() {
-        for (int i = 0; i < TicketType.EARLY_FULL.getLimit() - 1; i++) {
-            ticketRepository.save(new Ticket(user, TicketType.EARLY_FULL, false, false));
-        }
-
-        Map<String, String> ticket = new HashMap<>(2);
-        ticket.put("pickupService", "true");
-        ticket.put("chMember", "false");
-        ticket.put("type", TicketType.EARLY_FULL.toString());
-
-        String location = createOrderAndReturnLocation();
-
-        long countBefore = ticketRepository.count();
-
-        SessionData login = login(user.getUsername(), userCleartextPassword);
-
-        //@formatter:off
-        given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
-        when().
-            content(ticket).
-            contentType(ContentType.JSON).
-            post(location).
-        then().
-            statusCode(HttpStatus.SC_GONE);
-        //@formatter:on
-
-        assertThat("Ticketcount still equal", ticketRepository.count(), equalTo(countBefore));
-    }
-
-    @Test
-    public void testAddToOrderUnknownType() {
-        Map<String, String> ticket = new HashMap<>(2);
-        ticket.put("pickupService", "true");
-        ticket.put("chMember", "false");
-        ticket.put("type", "UNKNOWN");
-
-        String location = createOrderAndReturnLocation();
-
-        SessionData login = login(user.getUsername(), userCleartextPassword);
-
-        //@formatter:off
-        given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
-        when().
-            content(ticket).
-            contentType(ContentType.JSON).
-            post(location).
-        then().
-            statusCode(HttpStatus.SC_BAD_REQUEST);
-        //@formatter:on
-    }
-
-    @Test
-    public void testAddToOrderWrongStatus() {
-        Map<String, String> ticket = new HashMap<>(2);
-        ticket.put("pickupService", "true");
-        ticket.put("chMember", "false");
-        ticket.put("type", TicketType.REGULAR_FULL.toString());
-
-        String location = createOrderAndReturnLocation();
-
-        String locationParse = location.substring(location.lastIndexOf('/') + 1);
-        Long orderId = Long.parseLong(locationParse);
-
-        Order order = orderRepository.findOne(orderId);
-        order.setStatus(OrderStatus.PENDING);
-        orderRepository.save(order);
-
-        SessionData login = login(user.getUsername(), userCleartextPassword);
-
-        //@formatter:off
-        given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
-        when().
-            content(ticket).
-            contentType(ContentType.JSON).
-            post(location).
-        then().
-            statusCode(HttpStatus.SC_CONFLICT);
-        //@formatter:on
-    }
-
-    @Test
-    public void testRemoveTicketFromOrder() {
-
-        Map<String, String> ticket = new HashMap<>(3);
-        ticket.put("pickupService", "true");
-        ticket.put("chMember", "false");
-        ticket.put("type", TicketType.EARLY_FULL.toString());
-
-        Order order1 = new Order();
-        order1.setUser(user);
-
-        Ticket earlyAndPickup = new Ticket(user, TicketType.EARLY_FULL, true, false);
-        Ticket earlyNoPickup = new Ticket(user, TicketType.EARLY_FULL, false, false);
-
-        earlyAndPickup = ticketRepository.save(earlyAndPickup);
-        earlyNoPickup = ticketRepository.save(earlyNoPickup);
-
-        order1.addTicket(earlyAndPickup);
-        order1.addTicket(earlyNoPickup);
-
-        Order save = orderRepository.save(order1);
-
-        SessionData login = login(user.getUsername(), userCleartextPassword);
-
-        //@formatter:off
-        given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
-        when().
-            content(ticket).contentType(ContentType.JSON).
-            delete("/orders/" + save.getId()).
+         when().
+            get(ORDER_ENDPOINT + order.getId()).
         then().
             statusCode(HttpStatus.SC_OK).
-            body("object.tickets", hasSize(1));
-        //@formatter:on
+            body("user", is(nullValue())).
+            body("status", is("ANONYMOUS")).
+            body("tickets", hasSize(1)).
+            body("tickets.type.name", hasItem(is(TEST_TICKET))).
+            body("tickets.type.text", anything()).
+            body("tickets.enabledOptions.name", hasItem(emptyIterable())).
+            body("amount",equalTo(30F));
+         //@formatter:on
     }
 
     @Test
-    public void testRemoveTicketFromOrderNotFound() {
-
-        Map<String, String> ticket = new HashMap<>(3);
-        ticket.put("pickupService", "true");
-        ticket.put("chMember", "false");
-        ticket.put("type", TicketType.REGULAR_FULL.toString());
-
-        Order order1 = new Order();
-        order1.setUser(user);
-
-        Ticket earlyAndPickup = new Ticket(user, TicketType.EARLY_FULL, true, false);
-        Ticket earlyNoPickup = new Ticket(user, TicketType.EARLY_FULL, false, false);
-
-        earlyAndPickup = ticketRepository.save(earlyAndPickup);
-        earlyNoPickup = ticketRepository.save(earlyNoPickup);
-
-        order1.addTicket(earlyAndPickup);
-        order1.addTicket(earlyNoPickup);
-
-        Order save = orderRepository.save(order1);
-
-        SessionData login = login(user.getUsername(), userCleartextPassword);
+    public void testGetAnonOrderAsUser() {
+        Order order = insertAnonOrder();
+        User user = createUser();
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(user)).
         when().
-            content(ticket).contentType(ContentType.JSON).
-            delete("/orders/" + save.getId()).
-        then().
-            statusCode(HttpStatus.SC_NOT_MODIFIED);
-        //@formatter:on
-    }
-
-    @Test
-    public void testOrderCheckout_User() {
-        String location = createOrderAndReturnLocation();
-        assignOrder(location, user.getUsername(), userCleartextPassword);
-
-        logout();
-
-        String locationParse = location.substring(location.lastIndexOf('/') + 1);
-        Long orderId = Long.parseLong(locationParse);
-
-
-        SessionData login = login(user.getUsername(), userCleartextPassword);
-
-        //@formatter:off
-        given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
-        when().
-            get(location + "/checkout").
+            get(ORDER_ENDPOINT + order.getId()).
         then().
             statusCode(HttpStatus.SC_OK).
-            header("Location", containsString("http://paymentURL.com")).
-            body("message", containsString("http://paymentURL.com"));
-        //@formatter:on
-
-        Order order = orderRepository.findOne(orderId);
-
-        assertThat("Orderstatus updated", order.getStatus(), equalTo(OrderStatus.PENDING));
+            body("user", is(nullValue())).
+            body("status", is("ANONYMOUS")).
+            body("tickets", hasSize(1)).
+            body("tickets.type.name", hasItem(is(TEST_TICKET))).
+            body("tickets.type.text", anything()).
+            body("tickets.enabledOptions.name", hasItem(emptyIterable())).
+            body("amount",equalTo(30F));
+         //@formatter:on
     }
 
     @Test
-    public void testOrderCheckout_Anon() {
-        String location = createOrderAndReturnLocation();
-        assignOrder(location, user.getUsername(), userCleartextPassword);
-        logout();
-
-        String locationParse = location.substring(location.lastIndexOf('/') + 1);
-        Long orderId = Long.parseLong(locationParse);
+    public void testGetAnonOrderAsAdmin() {
+        Order order = insertAnonOrder();
+        User user = createUser(true);
 
         //@formatter:off
         given().
+            header(getXAuthTokenHeaderForUser(user)).
         when().
-            get(location + "/checkout").
-        then().
-            statusCode(HttpStatus.SC_FORBIDDEN);
-        //@formatter:on
-
-        Order order = orderRepository.findOne(orderId);
-
-        assertThat("Orderstatus updated", order.getStatus(), equalTo(OrderStatus.ASSIGNED));
-    }
-
-    @Test
-    public void testGetTicketAvailability() {
-        insertTestOrders();
-
-        //@formatter:off
-        when().
-            get("/tickets/available").
-        then().
-            body("ticketType", hasItems(equalTo("EARLY_FULL"), equalTo("REGULAR_FULL"))).
-            body("ticketType", not(hasItems(equalTo(equalTo(TicketType.TEST.toString())), equalTo(TicketType.FREE
-                    .toString()))));
-    }
-
-    @Test
-    public void testNotAuthorizedTickets() {
-        insertTestOrders();
-
-        when().
-            get("/users/current/tickets").
-        then().
-            statusCode(HttpStatus.SC_FORBIDDEN);
-    }
-
-    @Test
-    public void testGetOneValidTicket() {
-        insertTestOrders();
-        SessionData login = login(user.getUsername(), userCleartextPassword);
-
-        Ticket ticket = new Ticket(user, TicketType.EARLY_FULL, false, false);
-        ticket.setValid(true);
-        ticketRepository.saveAndFlush(ticket);
-
-        //@formatter:off
-        given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
-        when().
-            get("/users/current/tickets").
-        then().
-            body("object", hasSize(1)).
-            body("[0].owner.username", is("user@mail.com"));
-        //@formatter:on
-    }
-
-    @Test
-    public void testZeroValidTickets() {
-        insertTestOrders();
-        SessionData login = login(user.getUsername(), userCleartextPassword);
-
-        //@formatter:off
-        given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
-        when().
-            get("/users/current/tickets").
-        then().
-            body("object", hasSize(0));
-        //@formatter:on
-    }
-
-    @Test
-    public void testAdminCheckoutAsAdmin() {
-        String location = createOrderAndReturnLocation();
-        assignOrder(location, user.getUsername(), userCleartextPassword);
-        logout();
-
-        String locationParse = location.substring(location.lastIndexOf('/') + 1);
-        Long orderId = Long.parseLong(locationParse);
-
-        SessionData login = login(admin.getUsername(), adminCleartextPassword);
-
-        //@formatter:off
-        given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
-        when().
-            post(location + "/approve").
+            get(ORDER_ENDPOINT + order.getId()).
         then().
             statusCode(HttpStatus.SC_OK).
-            body("message", containsString("successfully approved"));
-        //@formatter:on
-
-        Order order = orderRepository.findOne(orderId);
-
-        assertThat("Orderstatus updated", order.getStatus(), equalTo(OrderStatus.PAID));
-        for (Ticket ticket : order.getTickets()) {
-            Assert.assertTrue(ticket.isValid());
-        }
+            body("user", is(nullValue())).
+            body("status", is("ANONYMOUS")).
+            body("tickets", hasSize(1)).
+            body("tickets.type.name", hasItem(is(TEST_TICKET))).
+            body("tickets.type.text", anything()).
+            body("tickets.enabledOptions", hasItem(emptyIterable())).
+            body("amount",equalTo(30F));
+         //@formatter:on
     }
 
     @Test
-    public void testAdminCheckoutAsUser() {
-        String location = createOrderAndReturnLocation();
-        logout();
+    public void testGetAssignedOrderAsAnon() {
+        User user = createUser();
+        Order order = addOrderForUser(user);
 
-        String locationParse = location.substring(location.lastIndexOf('/') + 1);
-        Long orderId = Long.parseLong(locationParse);
+        //@formatter:off
+        when().
+            get(ORDER_ENDPOINT + order.getId())
+        .then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
+    }
 
-        SessionData login = login(user.getUsername(), userCleartextPassword);
+    @Test
+    public void testGetAssignedOrderAsUser() {
+        User user = createUser();
+        Order order = addOrderForUser(user);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(user)).
         when().
-            post(location + "/approve").
-        then().
+            get(ORDER_ENDPOINT + order.getId())
+        .then().
+            statusCode(HttpStatus.SC_OK).
+            body("user.username", is(user.getUsername())).
+            body("status", is("ASSIGNED")).
+            body("tickets", hasSize(1)).
+            body("tickets.type.name", hasItem(is(TEST_TICKET))).
+            body("tickets.type.text", anything()).
+            body("tickets.enabledOptions.name", hasItem(emptyIterable())).
+            body("amount",equalTo(30F));
+        //@formatter:on
+    }
+
+    @Test
+    public void testGetAssignedOrderAsWrongUser() {
+        User user = createUser();
+        User user2 = createUser();
+        Order order = addOrderForUser(user);
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user2)).
+        when().
+            get(ORDER_ENDPOINT + order.getId())
+        .then().
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
-
-        Order order = orderRepository.findOne(orderId);
-
-        assertThat("Orderstatus PENDING", order.getStatus(), equalTo(OrderStatus.ANONYMOUS));
-        for (Ticket ticket : order.getTickets()) {
-            Assert.assertFalse(ticket.isValid());
-        }
     }
+
+    @Test
+    public void testGetAssignedOrderAsAdmin() {
+        User user = createUser();
+        User admin = createUser(true);
+        Order order = addOrderForUser(user);
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(admin)).
+        when().
+            get(ORDER_ENDPOINT + order.getId())
+        .then().
+            statusCode(HttpStatus.SC_OK).
+            body("user.username", is(user.getUsername())).
+            body("status", is("ASSIGNED")).
+            body("tickets", hasSize(1)).
+            body("tickets.type.name", hasItem(is(TEST_TICKET))).
+            body("tickets.type.text", anything()).
+            body("tickets.enabledOptions", hasItem(emptyIterable())).
+            body("amount",equalTo(30F));
+        //@formatter:on
+    }
+
+    @Test
+    public void testAssignAnonOrderAsAnon() {
+
+    }
+
+    @Test
+    public void testAssignAnonOrderAsUser() {
+
+    }
+
+    @Test
+    public void testAssignAssignedOrderAsAnon() {
+
+    }
+
+    @Test
+    public void testAssignAssignedOrderAsUser() {
+
+    }
+
+    @Test
+    public void testAssignAssignedOrderAsAdmin() {
+
+    }
+
+    @Test
+    public void testCheckoutAssignedOrderAsAnon() {
+
+    }
+
+    @Test
+    public void testCheckoutAssignedOrderAsUser() {
+
+    }
+
+    @Test
+    public void testCheckoutAssignedOrderWrongUser() {
+
+    }
+
+    @Test
+    public void testCheckoutAssignedOrderAsAdmin() {
+
+    }
+
+    @Test
+    public void testCheckoutAnonOrder() {
+
+    }
+
+    @Test
+    public void testApproveOrderAsAnon() {
+
+    }
+
+    @Test
+    public void testApproveOrderAsUser() {
+
+    }
+
+    @Test
+    public void testApproveOrderAsAdmin() {
+
+    }
+
+
 }
-
-
-
-
-*/

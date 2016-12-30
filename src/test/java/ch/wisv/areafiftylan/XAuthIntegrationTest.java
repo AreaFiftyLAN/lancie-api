@@ -67,7 +67,7 @@ public abstract class XAuthIntegrationTest {
     private AuthenticationService authenticationService;
 
     @Autowired
-    private TicketTypeRepository ticketTypeRepository;
+    protected TicketTypeRepository ticketTypeRepository;
     @Autowired
     private TicketOptionRepository ticketOptionRepository;
     @Autowired
