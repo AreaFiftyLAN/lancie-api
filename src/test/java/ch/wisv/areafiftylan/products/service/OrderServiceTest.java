@@ -169,7 +169,7 @@ public class OrderServiceTest extends ServiceTest {
     @Test
     public void create() {
         persistTicket();
-        Order order = orderService.create(TEST_TICKET, Arrays.asList(CH_MEMBER, PICKUP_SERVICE));
+        Order order = orderService.create(TEST_TICKET, Arrays.asList(CH_MEMBER_OPTION, PICKUP_SERVICE_OPTION));
 
         assertEquals(1, order.getTickets().size());
         assertNull(order.getUser());
@@ -177,7 +177,7 @@ public class OrderServiceTest extends ServiceTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void createNullType() {
-        Order order = orderService.create(null, Arrays.asList(CH_MEMBER, PICKUP_SERVICE));
+        Order order = orderService.create(null, Arrays.asList(CH_MEMBER_OPTION, PICKUP_SERVICE_OPTION));
         assertEquals(0, orderRepository.findAll().size());
     }
 
@@ -205,7 +205,7 @@ public class OrderServiceTest extends ServiceTest {
         order.addTicket(ticket);
         Long id = testEntityManager.persistAndGetId(order, Long.class);
 
-        order = orderService.addTicketToOrder(id, TEST_TICKET, Collections.singletonList(CH_MEMBER));
+        order = orderService.addTicketToOrder(id, TEST_TICKET, Collections.singletonList(CH_MEMBER_OPTION));
 
         assertEquals(2, order.getTickets().size());
         assertTrue(order.getTickets().stream().noneMatch(Ticket::isValid));
@@ -223,7 +223,7 @@ public class OrderServiceTest extends ServiceTest {
         order.addTicket(ticket);
         Long id = testEntityManager.persistAndGetId(order, Long.class);
 
-        orderService.addTicketToOrder(id, TEST_TICKET, Collections.singletonList(CH_MEMBER));
+        orderService.addTicketToOrder(id, TEST_TICKET, Collections.singletonList(CH_MEMBER_OPTION));
     }
 
     @Test
@@ -237,7 +237,7 @@ public class OrderServiceTest extends ServiceTest {
         order.addTicket(ticket);
         Long id = testEntityManager.persistAndGetId(order, Long.class);
 
-        orderService.addTicketToOrder(id, TEST_TICKET, Collections.singletonList(CH_MEMBER));
+        orderService.addTicketToOrder(id, TEST_TICKET, Collections.singletonList(CH_MEMBER_OPTION));
     }
 
     @Test
@@ -251,7 +251,7 @@ public class OrderServiceTest extends ServiceTest {
         order.addTicket(ticket);
         Long id = testEntityManager.persistAndGetId(order, Long.class);
 
-        orderService.addTicketToOrder(id, TEST_TICKET, Collections.singletonList(CH_MEMBER));
+        orderService.addTicketToOrder(id, TEST_TICKET, Collections.singletonList(CH_MEMBER_OPTION));
     }
 
     @Test
@@ -265,7 +265,7 @@ public class OrderServiceTest extends ServiceTest {
         order.addTicket(ticket);
         Long id = testEntityManager.persistAndGetId(order, Long.class);
 
-        orderService.addTicketToOrder(id, TEST_TICKET, Collections.singletonList(CH_MEMBER));
+        orderService.addTicketToOrder(id, TEST_TICKET, Collections.singletonList(CH_MEMBER_OPTION));
     }
 
     @Test
@@ -279,7 +279,7 @@ public class OrderServiceTest extends ServiceTest {
         Long id = testEntityManager.persistAndGetId(order, Long.class);
 
         try {
-            orderService.addTicketToOrder(id, TEST_TICKET, Collections.singletonList(CH_MEMBER));
+            orderService.addTicketToOrder(id, TEST_TICKET, Collections.singletonList(CH_MEMBER_OPTION));
         } catch (IllegalStateException e) {
             assertEquals("Order numberAvailable reached", e.getMessage());
             assertEquals(ORDER_LIMIT, testEntityManager.find(Order.class, id).getTickets().size());
@@ -408,7 +408,7 @@ public class OrderServiceTest extends ServiceTest {
 
         Long id = testEntityManager.persistAndGetId(order, Long.class);
 
-        orderService.removeTicketFromOrder(id, TEST_TICKET, Arrays.asList(CH_MEMBER, PICKUP_SERVICE));
+        orderService.removeTicketFromOrder(id, TEST_TICKET, Arrays.asList(CH_MEMBER_OPTION, PICKUP_SERVICE_OPTION));
 
         assertEquals(0, testEntityManager.find(Order.class, id).getTickets().size());
     }
@@ -419,7 +419,7 @@ public class OrderServiceTest extends ServiceTest {
         Order order = new Order();
         Long id = testEntityManager.persistAndGetId(order, Long.class);
 
-        orderService.removeTicketFromOrder(id, TEST_TICKET, Arrays.asList(CH_MEMBER, PICKUP_SERVICE));
+        orderService.removeTicketFromOrder(id, TEST_TICKET, Arrays.asList(CH_MEMBER_OPTION, PICKUP_SERVICE_OPTION));
     }
 
     @Test
@@ -432,7 +432,7 @@ public class OrderServiceTest extends ServiceTest {
         assertEquals(1, testEntityManager.find(Order.class, id).getTickets().size());
 
         try {
-            orderService.removeTicketFromOrder(id, TEST_TICKET, Arrays.asList(CH_MEMBER, PICKUP_SERVICE));
+            orderService.removeTicketFromOrder(id, TEST_TICKET, Arrays.asList(CH_MEMBER_OPTION, PICKUP_SERVICE_OPTION));
         } catch (TicketNotFoundException e) {
             assertEquals(1, testEntityManager.find(Order.class, id).getTickets().size());
         }
@@ -448,7 +448,7 @@ public class OrderServiceTest extends ServiceTest {
         assertEquals(1, testEntityManager.find(Order.class, id).getTickets().size());
 
         try {
-            orderService.removeTicketFromOrder(id, null, Arrays.asList(CH_MEMBER, PICKUP_SERVICE));
+            orderService.removeTicketFromOrder(id, null, Arrays.asList(CH_MEMBER_OPTION, PICKUP_SERVICE_OPTION));
         } catch (TicketNotFoundException e) {
             assertEquals(1, testEntityManager.find(Order.class, id).getTickets().size());
         }
@@ -463,7 +463,7 @@ public class OrderServiceTest extends ServiceTest {
         Long id = testEntityManager.persistAndGetId(order, Long.class);
 
         assertEquals(2, testEntityManager.find(Order.class, id).getTickets().size());
-        orderService.removeTicketFromOrder(id, TEST_TICKET, Arrays.asList(CH_MEMBER, PICKUP_SERVICE));
+        orderService.removeTicketFromOrder(id, TEST_TICKET, Arrays.asList(CH_MEMBER_OPTION, PICKUP_SERVICE_OPTION));
         assertEquals(1, testEntityManager.find(Order.class, id).getTickets().size());
     }
 
@@ -476,9 +476,9 @@ public class OrderServiceTest extends ServiceTest {
         Long id = testEntityManager.persistAndGetId(order, Long.class);
 
         assertEquals(2, testEntityManager.find(Order.class, id).getTickets().size());
-        orderService.removeTicketFromOrder(id, TEST_TICKET, Arrays.asList(CH_MEMBER, PICKUP_SERVICE));
+        orderService.removeTicketFromOrder(id, TEST_TICKET, Arrays.asList(CH_MEMBER_OPTION, PICKUP_SERVICE_OPTION));
         assertEquals(1, testEntityManager.find(Order.class, id).getTickets().size());
-        orderService.removeTicketFromOrder(id, TEST_TICKET, Arrays.asList(CH_MEMBER, PICKUP_SERVICE));
+        orderService.removeTicketFromOrder(id, TEST_TICKET, Arrays.asList(CH_MEMBER_OPTION, PICKUP_SERVICE_OPTION));
         assertEquals(0, testEntityManager.find(Order.class, id).getTickets().size());
     }
 
@@ -491,7 +491,7 @@ public class OrderServiceTest extends ServiceTest {
         order.addTicket(persistTicket());
         Long id = testEntityManager.persistAndGetId(order, Long.class);
 
-        orderService.removeTicketFromOrder(9999L, TEST_TICKET, Arrays.asList(CH_MEMBER, PICKUP_SERVICE));
+        orderService.removeTicketFromOrder(9999L, TEST_TICKET, Arrays.asList(CH_MEMBER_OPTION, PICKUP_SERVICE_OPTION));
     }
 
     @Test
@@ -502,7 +502,7 @@ public class OrderServiceTest extends ServiceTest {
         order.addTicket(persistTicket());
         Long id = testEntityManager.persistAndGetId(order, Long.class);
 
-        orderService.removeTicketFromOrder(null, TEST_TICKET, Arrays.asList(CH_MEMBER, PICKUP_SERVICE));
+        orderService.removeTicketFromOrder(null, TEST_TICKET, Arrays.asList(CH_MEMBER_OPTION, PICKUP_SERVICE_OPTION));
     }
 
     @Test

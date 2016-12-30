@@ -141,7 +141,7 @@ public class TicketServiceImpl implements TicketService {
         }
         // Check if the TicketType has a numberAvailable and if the numberAvailable is reached
         if (!isTicketAvailable(type)) {
-            throw new TicketUnavailableException(type);
+            throw new TicketUnavailableException();
         } else {
             Ticket ticket = new Ticket(user, type);
             // If one of the ticketOptions is not supported
@@ -155,6 +155,9 @@ public class TicketServiceImpl implements TicketService {
     }
 
     private boolean isTicketAvailable(TicketType type) {
+        if (type == null) {
+            return false;
+        }
         boolean typeLimitReached = type.getNumberAvailable() != 0 &&
                 ticketRepository.countByType(type) >= type.getNumberAvailable();
         boolean eventLimitReached = ticketRepository.count() >= TICKET_LIMIT;

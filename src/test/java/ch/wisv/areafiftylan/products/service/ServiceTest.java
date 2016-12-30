@@ -3,6 +3,8 @@ package ch.wisv.areafiftylan.products.service;
 import ch.wisv.areafiftylan.ApplicationTest;
 import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.service.repository.OrderRepository;
+import ch.wisv.areafiftylan.products.service.repository.TicketOptionRepository;
+import ch.wisv.areafiftylan.products.service.repository.TicketTypeRepository;
 import ch.wisv.areafiftylan.users.model.Gender;
 import ch.wisv.areafiftylan.users.model.User;
 import org.junit.After;
@@ -46,12 +48,17 @@ public abstract class ServiceTest {
     protected TestEntityManager testEntityManager;
     @Autowired
     protected OrderRepository orderRepository;
+    @Autowired
+    protected TicketOptionRepository ticketOptionRepository;
+    @Autowired
+    protected TicketTypeRepository ticketTypeRepository;
 
     @Value("${a5l.orderLimit}")
     protected int ORDER_LIMIT;
 
-    protected final String CH_MEMBER = "chMember";
-    protected final String PICKUP_SERVICE = "pickupService";
+    protected final String CH_MEMBER_OPTION = "chMember";
+    protected final String PICKUP_SERVICE_OPTION = "pickupService";
+    protected final String EXTRA_OPTION = "extraOption";
     protected final String TEST_TICKET = "test";
 
     @Rule
@@ -66,7 +73,7 @@ public abstract class ServiceTest {
     }
 
     protected Ticket persistTicket() {
-        Ticket ticket = ticketService.requestTicketOfType(TEST_TICKET, Arrays.asList(CH_MEMBER, PICKUP_SERVICE));
+        Ticket ticket = ticketService.requestTicketOfType(TEST_TICKET, Arrays.asList(CH_MEMBER_OPTION, PICKUP_SERVICE_OPTION));
         return testEntityManager.persist(ticket);
     }
 
