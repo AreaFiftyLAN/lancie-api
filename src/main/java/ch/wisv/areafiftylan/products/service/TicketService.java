@@ -50,7 +50,7 @@ public interface TicketService {
      * TicketUnavailableException is thrown
      *
      * @param type          Type of the Ticket requested
-     * @param pickupService If the Ticket includes the pickupService
+     * @param options       The options to add to the ticket
      *
      * @return The requested ticket, if available
      *
@@ -105,6 +105,8 @@ public interface TicketService {
     TicketType addTicketType(TicketType type);
 
     Collection<TicketType> getAllTicketTypes();
+
+    Collection<TicketOption> getAllTicketOptions();
 
     TicketOption addTicketOption(TicketOption option);
 }
