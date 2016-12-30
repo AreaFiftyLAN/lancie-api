@@ -19,6 +19,8 @@ package ch.wisv.areafiftylan.security.token;
 
 import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.users.model.User;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -26,22 +28,17 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 
 @Entity
+@NoArgsConstructor
 public class TicketTransferToken extends Token {
     private static final int EXPIRATION = 0;
 
     @OneToOne(targetEntity = Ticket.class, fetch = FetchType.EAGER)
     @JoinColumn(nullable = false)
+    @Getter
     private Ticket ticket;
-
-    public TicketTransferToken() {
-    }
 
     public TicketTransferToken(User user, Ticket ticket) {
         super(user, EXPIRATION);
         this.ticket = ticket;
-    }
-
-    public Ticket getTicket() {
-        return ticket;
     }
 }
