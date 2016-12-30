@@ -185,6 +185,7 @@ public class OrderServiceTest extends ServiceTest {
     public void addTicketToOrderAnonymous() {
         Order order = new Order();
         Ticket ticket = persistTicket();
+        ticket.setValid(false);
         order.addTicket(ticket);
         Long id = testEntityManager.persistAndGetId(order, Long.class);
 
@@ -200,6 +201,7 @@ public class OrderServiceTest extends ServiceTest {
         User user = persistUser();
         Order order = new Order(user);
         Ticket ticket = persistTicket();
+        ticket.setValid(false);
         ticket.setOwner(user);
         ticket = testEntityManager.persist(ticket);
         order.addTicket(ticket);
@@ -601,8 +603,9 @@ public class OrderServiceTest extends ServiceTest {
     public void updateOrderStatusByReferenceOrderStatusAssigned() {
         Order order = new Order();
         User user = persistUser();
-
-        order.addTicket(persistTicket());
+        Ticket ticket = persistTicket();
+        ticket.setValid(false);
+        order.addTicket(ticket);
         order.setUser(user);
         order = testEntityManager.persist(order);
         given(paymentService.updateStatus(Mockito.anyString())).willReturn(order);
@@ -637,7 +640,9 @@ public class OrderServiceTest extends ServiceTest {
         Order order = new Order();
         User user = persistUser();
 
-        order.addTicket(persistTicket());
+        Ticket ticket = persistTicket();
+        ticket.setValid(false);
+        order.addTicket(ticket);
         order = testEntityManager.persist(order);
         order.setUser(user);
         order.setStatus(OrderStatus.PENDING);
