@@ -20,6 +20,10 @@ package ch.wisv.areafiftylan.users.model;
 import ch.wisv.areafiftylan.utils.view.View;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.validator.constraints.Email;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -32,6 +36,8 @@ import java.util.Set;
 
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(name = "username", columnNames = { "username" }) })
+@EqualsAndHashCode
+@NoArgsConstructor
 public class User implements Serializable, UserDetails {
 
     @Column(nullable = false)
@@ -40,14 +46,18 @@ public class User implements Serializable, UserDetails {
     @Column(nullable = false)
     @JsonView(View.NoProfile.class)
     @Email(message = "Username should be a valid Email!")
+    @Getter
+    @Setter
     private String username;
 
     @OneToOne(targetEntity = Profile.class, cascade = CascadeType.ALL)
     @JsonView(View.Public.class)
+    @Getter
     private Profile profile;
 
     @GeneratedValue
     @Id
+    @Getter
     private Long id;
 
     @JsonIgnore
@@ -57,12 +67,21 @@ public class User implements Serializable, UserDetails {
     private Set<Role> roles;
 
     @JsonIgnore
+    @Getter
     private final boolean accountNonExpired = true;
+
     @JsonIgnore
+    @Getter
+    @Setter
     private boolean accountNonLocked = true;
+
     @JsonIgnore
+    @Getter
     private final boolean credentialsNonExpired = true;
+
     @JsonIgnore
+    @Getter
+    @Setter
     private boolean enabled = true;
 
     public User(String username, String passwordHash) {
@@ -71,17 +90,6 @@ public class User implements Serializable, UserDetails {
         this.profile = new Profile();
         this.roles = new HashSet<>();
         roles.add(Role.ROLE_USER);
-    }
-
-    User() { // jpa only
-    }
-
-    public Profile getProfile() {
-        return profile;
-    }
-
-    public Long getId() {
-        return id;
     }
 
     public void setPasswordHash(String passwordHash) {
@@ -99,34 +107,6 @@ public class User implements Serializable, UserDetails {
         return passwordHash;
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return accountNonExpired;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return accountNonLocked;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return credentialsNonExpired;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return enabled;
-    }
-
     public void resetProfile() {
         this.profile = new Profile();
     }
@@ -135,36 +115,8 @@ public class User implements Serializable, UserDetails {
         this.roles.add(role);
     }
 
-    public void setAccountNonLocked(boolean accountNonLocked) {
-        this.accountNonLocked = accountNonLocked;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
-
     @JsonView(View.Public.class)
     public int getReference() {
-        return username.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        User user = (User) o;
-
-        return username.equals(user.username) && id.equals(user.id);
-
-    }
-
-    @Override
-    public int hashCode() {
         return username.hashCode();
     }
 }
