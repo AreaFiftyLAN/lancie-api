@@ -1,9 +1,11 @@
 package ch.wisv.areafiftylan.products.service;
 
 import ch.wisv.areafiftylan.exception.*;
+import ch.wisv.areafiftylan.extras.rfid.model.RFIDLink;
 import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.model.TicketOption;
 import ch.wisv.areafiftylan.products.model.TicketType;
+import ch.wisv.areafiftylan.security.token.TicketTransferToken;
 import ch.wisv.areafiftylan.users.model.User;
 import org.junit.Test;
 
@@ -316,11 +318,58 @@ public class TicketServiceTest extends ServiceTest {
 
     @Test
     public void setupForTransfer() {
+        User goalUser = persistUser();
+        String goalUsername = goalUser.getUsername();
+        Ticket ticket = persistTicket();
+        Long ticketId = ticket.getId();
 
+        TicketTransferToken ttt = ticketService.setupForTransfer(ticketId, goalUsername);
+
+        assertEquals(ticket, ttt.getTicket());
+        assertEquals(goalUser, ttt.getUser());
+        assertEquals(true, ttt.isValid());
+    }
+
+    @Test
+    public void setupForTransferDuplicate() {
+        User goalUser = persistUser();
+        String goalUsername = goalUser.getUsername();
+        Ticket ticket = persistTicket();
+        Long ticketId = ticket.getId();
+
+        thrown.expect(DuplicateTicketTransferTokenException.class);
+        thrown.expectMessage(" is already set up for transfer!");
+
+        ticketService.setupForTransfer(ticketId, goalUsername);
+        ticketService.setupForTransfer(ticketId, goalUsername);
+    }
+
+    @Test
+    public void setupForTransferAlreadyLinked() {
+        User goalUser = persistUser();
+        String goalUsername = goalUser.getUsername();
+        Ticket ticket = persistTicket();
+        Long ticketId = ticket.getId();
+        testEntityManager.persist(new RFIDLink("1234567890", ticket));
+
+        thrown.expect(TicketAlreadyLinkedException.class);
+        thrown.expectMessage("Ticket has already been linked to a RFID");
+
+        ticketService.setupForTransfer(ticketId, goalUsername);
     }
 
     @Test
     public void transferTicket() {
+        User goalUser = persistUser();
+        String goalUsername = goalUser.getUsername();
+        Ticket ticket = persistTicket();
+        Long ticketId = ticket.getId();
+        TicketTransferToken ttt = ticketService.setupForTransfer(ticketId, goalUsername);
+        String token = ttt.getToken();
+
+        ticketService.transferTicket(token);
+
+        assertEquals(goalUser, ticket.getOwner());
 
     }
 
