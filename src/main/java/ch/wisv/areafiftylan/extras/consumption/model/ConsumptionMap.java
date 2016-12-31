@@ -20,6 +20,7 @@ package ch.wisv.areafiftylan.extras.consumption.model;
 import ch.wisv.areafiftylan.exception.AlreadyConsumedException;
 import ch.wisv.areafiftylan.products.model.Ticket;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
 import javax.persistence.*;
@@ -27,23 +28,22 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 @Entity
+@NoArgsConstructor
 public class ConsumptionMap {
+
     @Id
     @GeneratedValue
     Long id;
 
     @NonNull
     @ManyToMany(fetch = FetchType.EAGER)
+    @Getter
     private Collection<Consumption> consumptionsMade;
 
     @OneToOne(targetEntity = Ticket.class, cascade = CascadeType.MERGE)
     @NonNull
     @Getter
     private Ticket ticket;
-
-    public ConsumptionMap() {
-        // JPA Only
-    }
 
     public ConsumptionMap(Ticket t) {
         this.consumptionsMade = new ArrayList<>();
@@ -66,9 +66,5 @@ public class ConsumptionMap {
         if (isConsumed(consumption)) {
             consumptionsMade.remove(consumption);
         }
-    }
-
-    public Collection<Consumption> getConsumptionsMade() {
-        return consumptionsMade;
     }
 }

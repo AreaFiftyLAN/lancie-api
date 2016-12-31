@@ -17,42 +17,28 @@
 
 package ch.wisv.areafiftylan.extras.consumption.model;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
 @Entity
+@NoArgsConstructor
+@EqualsAndHashCode
 public class Consumption {
+
     @GeneratedValue
-    @Getter
     @Id
+    @Getter
     Long id;
 
     @Getter
     String name;
 
-    public Consumption() {
-        // JPA Only
-    }
-
     public Consumption(String name) {
         this.name = name;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof Consumption)) {
-            return false;
-        }
-
-        Consumption that = (Consumption) o;
-
-        return id == that.id && name.equals(that.getName());
-
     }
 }

@@ -13,7 +13,7 @@
  *
  *     You should have received a copy of the GNU General Public License
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *//*
+ */
 
 
 package ch.wisv.areafiftylan;
@@ -24,10 +24,9 @@ import ch.wisv.areafiftylan.extras.consumption.model.ConsumptionMapsRepository;
 import ch.wisv.areafiftylan.extras.consumption.model.PossibleConsumptionsRepository;
 import ch.wisv.areafiftylan.extras.consumption.service.ConsumptionService;
 import ch.wisv.areafiftylan.products.model.Ticket;
-import ch.wisv.areafiftylan.products.model.TicketType;
 import ch.wisv.areafiftylan.products.service.repository.TicketRepository;
+import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.utils.SessionData;
-import com.jayway.restassured.http.ContentType;
 import org.apache.http.HttpStatus;
 import org.junit.After;
 import org.junit.Assert;
@@ -35,17 +34,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static com.jayway.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.containsInAnyOrder;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 
-*/
-/**
- * Created by beer on 20-5-16.
- *//*
+public class ConsumptionTest extends XAuthIntegrationTest {
 
-public class ConsumptionTest extends IntegrationTest {
-    private final String CONSUMPTION_ENDPOINT = "/consumptions";
     @Autowired
     private ConsumptionMapsRepository consumptionMapsRepository;
 
@@ -58,96 +53,155 @@ public class ConsumptionTest extends IntegrationTest {
     @Autowired
     private ConsumptionService consumptionService;
 
-    private Consumption spicyFood;
-    private Consumption coldMilkshake;
-    private final String UNUSED_CONSUMPTION_NAME = "Hot Chocolate";
+    private final String CONSUMPTION_ENDPOINT = "/consumptions";
 
-    private Ticket ticket;
+    private final String UNUSED_CONSUMPTION = "Hot Chocolate";
+    private final String SPICY_CONSUMPTION = "Nice Spicy Food";
+    private final String MILKSHAKE_CONSUMPTION = "Deliciously Cold Milkshake";
 
     @Before
     public void InitConsumptionTest(){
-        spicyFood = consumptionService.addPossibleConsumption("Nice Spicy Food");
-        coldMilkshake = consumptionService.addPossibleConsumption("Deliciously Cold Milkshake");
-        ticket = makeTicket();
-    }
-
-    @After
-    public void consumptionTestCleanup(){
         consumptionMapsRepository.deleteAll();
         possibleConsumptionsRepository.deleteAll();
         ticketRepository.deleteAll();
     }
 
-    @Test
-    public void getAllPossibleConsumptionsTestNone_NoAdmin(){
-        SessionData session = login(user.getUsername(), userCleartextPassword);
+    @After
+    public void consumptionTestCleanup(){
 
-        given().
-                filter(sessionFilter).
-                header(session.getCsrfHeader()).
-        when().
-                get(CONSUMPTION_ENDPOINT).
-        then().
-                statusCode(HttpStatus.SC_FORBIDDEN);
     }
 
     @Test
-    public void getAllPossibleConsumptionsTestNone_Admin(){
-        consumptionService.removePossibleConsumption(spicyFood.getId());
-        consumptionService.removePossibleConsumption(coldMilkshake.getId());
+    public void getAllPossibleConsumptionsTestAsUser(){
+        User user = createUser();
 
-
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
-
+        //@formatter:off
         given().
-                filter(sessionFilter).
-                header(session.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(user)).
         when().
-                get(CONSUMPTION_ENDPOINT).
+            get(CONSUMPTION_ENDPOINT).
         then().
-                statusCode(HttpStatus.SC_OK).
-                body("$", hasSize(0));
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
     }
 
     @Test
-    public void getAllPossibleConsumptionsTestSingle_Admin(){
-        consumptionService.removePossibleConsumption(spicyFood.getId());
+    public void getAllPossibleConsumptionsTestAsAdminNone(){
+        User user = createUser(true);
 
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
-
+        //@formatter:off
         given().
-                filter(sessionFilter).
-                header(session.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(user)).
         when().
-                get(CONSUMPTION_ENDPOINT).
+            get(CONSUMPTION_ENDPOINT).
         then().
-                statusCode(HttpStatus.SC_OK).
-                body("$", hasSize(1)).
-                body("name", containsInAnyOrder(coldMilkshake.getName()));
+            statusCode(HttpStatus.SC_OK).
+            body(empty());
+        //@formatter:on
     }
 
     @Test
-    public void getAllPossibleConsumptionsTestMultiple_Admin(){
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
+    public void getAllPossibleConsumptionsTestAsAdminSingle(){
+        User user = createUser(true);
+        consumptionService.addPossibleConsumption(SPICY_CONSUMPTION);
 
+        //@formatter:off
         given().
-                filter(sessionFilter).
-                header(session.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(user)).
         when().
-                get(CONSUMPTION_ENDPOINT).
+            get(CONSUMPTION_ENDPOINT).
         then().
-                statusCode(HttpStatus.SC_OK).
-                body("$", hasSize(2)).
-                body("name", containsInAnyOrder(coldMilkshake.getName(), spicyFood.getName()));
+            statusCode(HttpStatus.SC_OK).
+            body("name", contains(SPICY_CONSUMPTION));
+        //@formatter:on
     }
 
+    @Test
+    public void getAllPossibleConsumptionsTestAsAdminMultiple(){
+        User user = createUser(true);
+        consumptionService.addPossibleConsumption(SPICY_CONSUMPTION);
+        consumptionService.addPossibleConsumption(MILKSHAKE_CONSUMPTION);
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+        when().
+            get(CONSUMPTION_ENDPOINT).
+        then().
+            statusCode(HttpStatus.SC_OK).
+            body("name", containsInAnyOrder(SPICY_CONSUMPTION, MILKSHAKE_CONSUMPTION));
+        //@formatter:on
+    }
+
+    @Test
+    public void addAvailableConsumptionTestAsUser() {
+        User user = createUser();
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+        when().
+            post(CONSUMPTION_ENDPOINT).
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
+    }
+
+    @Test
+    public void addAvailableConsumptionTestAsAdmin() {
+        User user = createUser(true);
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+            body(SPICY_CONSUMPTION).
+        when().
+            post(CONSUMPTION_ENDPOINT).
+        then().
+            statusCode(HttpStatus.SC_OK).
+            body("message", equalTo("Successfully added " + SPICY_CONSUMPTION + " as a supported consumption."));
+        //@formatter:on
+    }
+
+    @Test
+    public void addAvailableConsumptionTestAsAdminDuplicate() {
+        User user = createUser(true);
+        consumptionService.addPossibleConsumption(SPICY_CONSUMPTION);
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+            body(SPICY_CONSUMPTION).
+        when().
+            post(CONSUMPTION_ENDPOINT).
+        then().
+            statusCode(HttpStatus.SC_CONFLICT).
+            body("message", equalTo("Consumption " + SPICY_CONSUMPTION + " is already supported"));
+        //@formatter:on
+    }
+
+    @Test
+    public void removeAvailableConsumptionTestAsUser() {
+        User user = createUser();
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+        when().
+            delete(CONSUMPTION_ENDPOINT).
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
+    }
+
+/*
     @Test
     public void getTicketConsumptions_NoneConsumed(){
         SessionData session = login(admin.getUsername(), adminCleartextPassword);
 
         given().
-                filter(sessionFilter).
-                header(session.getCsrfHeader()).
+
+                header(getXAuthTokenHeaderForUser()).
         when().
                 get(CONSUMPTION_ENDPOINT + "/" + ticket.getId()).
         then().
@@ -162,8 +216,8 @@ public class ConsumptionTest extends IntegrationTest {
         SessionData session = login(admin.getUsername(), adminCleartextPassword);
 
         given().
-                filter(sessionFilter).
-                header(session.getCsrfHeader()).
+
+                header(getXAuthTokenHeaderForUser()).
         when().
                 get(CONSUMPTION_ENDPOINT + "/" + ticket.getId()).
         then().
@@ -180,8 +234,8 @@ public class ConsumptionTest extends IntegrationTest {
         SessionData session = login(admin.getUsername(), adminCleartextPassword);
 
         given().
-                filter(sessionFilter).
-                header(session.getCsrfHeader()).
+
+                header(getXAuthTokenHeaderForUser()).
         when().
                 get(CONSUMPTION_ENDPOINT + "/" + ticket.getId()).
         then().
@@ -194,8 +248,8 @@ public class ConsumptionTest extends IntegrationTest {
         SessionData session = login(admin.getUsername(), adminCleartextPassword);
 
         given().
-                filter(sessionFilter).
-                header(session.getCsrfHeader()).
+
+                header(getXAuthTokenHeaderForUser()).
         when().
                 content(spicyFood.getId()).
                 contentType(ContentType.JSON).
@@ -214,8 +268,8 @@ public class ConsumptionTest extends IntegrationTest {
         SessionData session = login(admin.getUsername(), adminCleartextPassword);
 
         given().
-                filter(sessionFilter).
-                header(session.getCsrfHeader()).
+
+                header(getXAuthTokenHeaderForUser()).
         when().
                 content(spicyFood.getId()).
                 contentType(ContentType.JSON).
@@ -229,8 +283,8 @@ public class ConsumptionTest extends IntegrationTest {
         SessionData session = login(admin.getUsername(), adminCleartextPassword);
 
         given().
-                filter(sessionFilter).
-                header(session.getCsrfHeader()).
+
+                header(getXAuthTokenHeaderForUser()).
         when().
                 content(getUnusedConsumptionId()).
                 contentType(ContentType.JSON).
@@ -245,8 +299,8 @@ public class ConsumptionTest extends IntegrationTest {
         SessionData session = login(admin.getUsername(), adminCleartextPassword);
 
         given().
-                filter(sessionFilter).
-                header(session.getCsrfHeader()).
+
+                header(getXAuthTokenHeaderForUser()).
         when().
                 content(spicyFood.getId()).
                 contentType(ContentType.JSON).
@@ -262,8 +316,8 @@ public class ConsumptionTest extends IntegrationTest {
         SessionData session = login(admin.getUsername(), adminCleartextPassword);
 
         given().
-                filter(sessionFilter).
-                header(session.getCsrfHeader()).
+
+                header(getXAuthTokenHeaderForUser()).
         when().
                 content(spicyFood.getId()).
                 contentType(ContentType.JSON).
@@ -281,8 +335,8 @@ public class ConsumptionTest extends IntegrationTest {
         SessionData session = login(admin.getUsername(), adminCleartextPassword);
 
         given().
-                filter(sessionFilter).
-                header(session.getCsrfHeader()).
+
+                header(getXAuthTokenHeaderForUser()).
         when().
                 content(spicyFood.getId()).
                 contentType(ContentType.JSON).
@@ -298,8 +352,8 @@ public class ConsumptionTest extends IntegrationTest {
         consumptionService.consume(ticket.getId(), spicyFood.getId());
 
         given().
-                filter(sessionFilter).
-                header(session.getCsrfHeader()).
+
+                header(getXAuthTokenHeaderForUser()).
         when().
                 content(spicyFood.getId()).
                 contentType(ContentType.JSON).
@@ -315,8 +369,8 @@ public class ConsumptionTest extends IntegrationTest {
         consumptionService.consume(ticket.getId(), spicyFood.getId());
 
         given().
-                filter(sessionFilter).
-                header(session.getCsrfHeader()).
+
+                header(getXAuthTokenHeaderForUser()).
         when().
                 content(getUnusedConsumptionId()).
                 contentType(ContentType.JSON).
@@ -334,8 +388,8 @@ public class ConsumptionTest extends IntegrationTest {
         consumptionService.removePossibleConsumption(spicyFood.getId());
 
         given().
-                filter(sessionFilter).
-                header(session.getCsrfHeader()).
+
+                header(getXAuthTokenHeaderForUser()).
         when().
                 content(spicyFood.getId()).
                 contentType(ContentType.JSON).
@@ -353,8 +407,8 @@ public class ConsumptionTest extends IntegrationTest {
         invalidateTicket();
 
         given().
-                filter(sessionFilter).
-                header(session.getCsrfHeader()).
+
+                header(getXAuthTokenHeaderForUser()).
         when().
                 content(spicyFood.getId()).
                 contentType(ContentType.JSON).
@@ -368,10 +422,10 @@ public class ConsumptionTest extends IntegrationTest {
         SessionData session = login(admin.getUsername(), adminCleartextPassword);
 
         given().
-                filter(sessionFilter).
-                header(session.getCsrfHeader()).
+
+                header(getXAuthTokenHeaderForUser()).
         when().
-                content(UNUSED_CONSUMPTION_NAME).
+                content(UNUSED_CONSUMPTION).
                 contentType(ContentType.JSON).
                 post(CONSUMPTION_ENDPOINT).
         then().
@@ -380,7 +434,7 @@ public class ConsumptionTest extends IntegrationTest {
         boolean consumptionExists =
                 consumptionService.getPossibleConsumptions()
                         .stream()
-                        .anyMatch(c -> c.getName().equals(UNUSED_CONSUMPTION_NAME));
+                        .anyMatch(c -> c.getName().equals(UNUSED_CONSUMPTION));
         Assert.assertTrue(consumptionExists);
     }
 
@@ -388,13 +442,13 @@ public class ConsumptionTest extends IntegrationTest {
     public void addPossibleConsumption_Duplicate(){
         SessionData session = login(admin.getUsername(), adminCleartextPassword);
 
-        consumptionService.addPossibleConsumption(UNUSED_CONSUMPTION_NAME);
+        consumptionService.addPossibleConsumption(UNUSED_CONSUMPTION);
 
         given().
-                filter(sessionFilter).
-                header(session.getCsrfHeader()).
+
+                header(getXAuthTokenHeaderForUser()).
         when().
-                content(UNUSED_CONSUMPTION_NAME).
+                content(UNUSED_CONSUMPTION).
                 contentType(ContentType.JSON).
                 post(CONSUMPTION_ENDPOINT).
         then().
@@ -407,8 +461,8 @@ public class ConsumptionTest extends IntegrationTest {
         SessionData session = login(admin.getUsername(), adminCleartextPassword);
 
         given().
-                filter(sessionFilter).
-                header(session.getCsrfHeader()).
+
+                header(getXAuthTokenHeaderForUser()).
         when().
                 content(spicyFood.getId()).
                 contentType(ContentType.JSON).
@@ -419,7 +473,7 @@ public class ConsumptionTest extends IntegrationTest {
         boolean consumptionExists =
                 consumptionService.getPossibleConsumptions()
                         .stream()
-                        .anyMatch(c -> c.getName().equals(UNUSED_CONSUMPTION_NAME));
+                        .anyMatch(c -> c.getName().equals(UNUSED_CONSUMPTION));
         Assert.assertFalse(consumptionExists);
     }
 
@@ -428,20 +482,14 @@ public class ConsumptionTest extends IntegrationTest {
         SessionData session = login(admin.getUsername(), adminCleartextPassword);
 
         given().
-                filter(sessionFilter).
-                header(session.getCsrfHeader()).
+
+                header(getXAuthTokenHeaderForUser()).
         when().
                 content(getUnusedConsumptionId()).
                 contentType(ContentType.JSON).
                 delete(CONSUMPTION_ENDPOINT).
         then().
                 statusCode(HttpStatus.SC_NOT_FOUND);
-    }
-
-    private Ticket makeTicket() {
-        Ticket t = new Ticket(user, TicketType.EARLY_FULL, false, false);
-        t.setValid(true);
-        return ticketRepository.saveAndFlush(t);
     }
 
     private void invalidateTicket(){
