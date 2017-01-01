@@ -156,7 +156,7 @@ public class OrderRestController {
      * @return Instructions on how to proceed.
      */
     @PreAuthorize("@currentUserServiceImpl.canAccessOrder(principal, #orderId)")
-    @RequestMapping(value = "/orders/{orderId}/checkout", method = RequestMethod.GET)
+    @RequestMapping(value = "/orders/{orderId}/checkout", method = RequestMethod.POST)
     public ResponseEntity<?> payOrder(@PathVariable Long orderId) throws URISyntaxException {
         String paymentUrl = orderService.requestPayment(orderId);
         HttpHeaders headers = new HttpHeaders();
