@@ -25,13 +25,12 @@ import ch.wisv.areafiftylan.extras.consumption.service.ConsumptionService;
 import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.users.model.User;
+import io.restassured.http.ContentType;
 import org.apache.http.HttpStatus;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.Collections;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
@@ -92,7 +91,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
             get(CONSUMPTION_ENDPOINT).
         then().
             statusCode(HttpStatus.SC_OK).
-            body("", hasSize(0));
+            body("", empty());
         //@formatter:on
     }
 
@@ -187,6 +186,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(user)).
             body(consumption.getId()).
+            contentType(ContentType.JSON).
         when().
             delete(CONSUMPTION_ENDPOINT).
         then().
@@ -203,6 +203,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(user)).
             body(consumption.getId()).
+            contentType(ContentType.JSON).
         when().
             delete(CONSUMPTION_ENDPOINT).
         then().
@@ -221,11 +222,12 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(user)).
             body(consumption.getId()).
+            contentType(ContentType.JSON).
         when().
             delete(CONSUMPTION_ENDPOINT).
         then().
-            statusCode(HttpStatus.SC_OK).
-            body("message", equalTo("Successfully removed " + CONSUMPTION + " as a supported consumption."));
+            statusCode(HttpStatus.SC_NOT_FOUND).
+            body("message", equalTo("Can't find a consumption with id: \"" + consumption.getId() + "\" is unsupported."));
         //@formatter:on
     }
 
@@ -258,7 +260,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
             get(CONSUMPTION_ENDPOINT + "/" + ticket.getId()).
         then().
             statusCode(HttpStatus.SC_OK).
-            body("object", equalTo(Collections.singletonList(consumption)));
+            body("name", contains(CONSUMPTION));
         //@formatter:on
     }
 
@@ -274,7 +276,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
             get(CONSUMPTION_ENDPOINT + "/" + ticket.getId()).
         then().
             statusCode(HttpStatus.SC_OK).
-            body("object", equalTo(Collections.emptyList()));
+            body("", empty());
         //@formatter:on
     }
 
@@ -306,6 +308,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(user)).
             body(consumption.getId()).
+            contentType(ContentType.JSON).
         when().
             post(CONSUMPTION_ENDPOINT + "/" + ticket.getId() + "/consume").
         then().
@@ -323,6 +326,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(user)).
             body(consumption.getId()).
+            contentType(ContentType.JSON).
         when().
             post(CONSUMPTION_ENDPOINT + "/" + ticket.getId() + "/consume").
         then().
@@ -342,6 +346,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(user)).
             body(consumption.getId()).
+            contentType(ContentType.JSON).
         when().
             post(CONSUMPTION_ENDPOINT + "/" + ticket.getId() + "/consume").
         then().
@@ -361,6 +366,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(user)).
             body(consumption.getId()).
+            contentType(ContentType.JSON).
         when().
             post(CONSUMPTION_ENDPOINT + "/" + ticket.getId() + "/consume").
         then().
@@ -380,6 +386,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(user)).
             body(consumption.getId()).
+            contentType(ContentType.JSON).
         when().
             post(CONSUMPTION_ENDPOINT + "/" + ticket.getId() + "/consume").
         then().
@@ -399,6 +406,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(user)).
             body(consumption.getId()).
+            contentType(ContentType.JSON).
         when().
             post(CONSUMPTION_ENDPOINT + "/" + ticket.getId() + "/consume").
         then().
@@ -418,6 +426,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(user)).
             body(consumption.getId()).
+            contentType(ContentType.JSON).
         when().
             post(CONSUMPTION_ENDPOINT + "/" + ticket.getId() + "/reset").
         then().
@@ -427,7 +436,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void resetTestAsAdmin() {
-        User user = createUser();
+        User user = createUser(true);
         Ticket ticket = createTicketForUser(user);
         Consumption consumption = consumptionService.addPossibleConsumption(CONSUMPTION);
         consumptionService.consume(ticket.getId(), consumption.getId());
@@ -436,6 +445,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(user)).
             body(consumption.getId()).
+            contentType(ContentType.JSON).
         when().
             post(CONSUMPTION_ENDPOINT + "/" + ticket.getId() + "/reset").
         then().
@@ -446,7 +456,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void resetTestAsAdminDoesntExist() {
-        User user = createUser();
+        User user = createUser(true);
         Ticket ticket = createTicketForUser(user);
         Consumption consumption = consumptionService.addPossibleConsumption(CONSUMPTION);
         consumption = consumptionService.removePossibleConsumption(consumption.getId());
@@ -455,17 +465,18 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(user)).
             body(consumption.getId()).
+            contentType(ContentType.JSON).
         when().
             post(CONSUMPTION_ENDPOINT + "/" + ticket.getId() + "/reset").
         then().
             statusCode(HttpStatus.SC_NOT_FOUND).
-            body("message", equalTo("Successfully reset consumption"));
+            body("message", equalTo("Can't find a consumption with id: \"" + consumption.getId() + "\" is unsupported."));
         //@formatter:on
     }
 
     @Test
     public void resetTestAsAdminInvalidTicket() {
-        User user = createUser();
+        User user = createUser(true);
         Ticket ticket = createTicketForUser(user);
         ticket.setValid(false);
         ticketRepository.saveAndFlush(ticket);
@@ -475,6 +486,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(user)).
             body(consumption.getId()).
+            contentType(ContentType.JSON).
         when().
             post(CONSUMPTION_ENDPOINT + "/" + ticket.getId() + "/reset").
         then().
