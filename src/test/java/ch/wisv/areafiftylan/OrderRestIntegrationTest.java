@@ -15,7 +15,6 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 package ch.wisv.areafiftylan;
 
 import ch.wisv.areafiftylan.products.model.Ticket;
@@ -42,7 +41,7 @@ import static org.hamcrest.Matchers.*;
 public class OrderRestIntegrationTest extends XAuthIntegrationTest {
 
     @Autowired
-    protected OrderRepository orderRepository;
+    private OrderRepository orderRepository;
 
     @Autowired
     private TicketRepository ticketRepository;
@@ -58,7 +57,6 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
         Order order = new Order(user);
         order.addTicket(ticket);
         return orderRepository.save(order);
-
     }
 
     private Order insertAnonOrder() {
@@ -84,7 +82,6 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
     @Test
     public void testGetAllOrdersAsUser() {
         insertAnonOrder();
-
         User user = createUser();
 
         //@formatter:off
@@ -100,7 +97,6 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
     @Test
     public void testGetAllOrdersAsAdmin() {
         insertAnonOrder();
-
         User admin = createUser(true);
 
         //@formatter:off
@@ -125,8 +121,8 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
         given().
         when().
             body(order).contentType(ContentType.JSON).
-            post(ORDER_ENDPOINT)
-        .then().
+            post(ORDER_ENDPOINT).
+        then().
             statusCode(HttpStatus.SC_CREATED).
             body("object.user", is(nullValue())).
             body("object.status", is("ANONYMOUS")).
@@ -151,8 +147,8 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
             header(getXAuthTokenHeaderForUser(user)).
         when().
             body(order).contentType(ContentType.JSON).
-            post(ORDER_ENDPOINT)
-        .then().
+            post(ORDER_ENDPOINT).
+        then().
             statusCode(HttpStatus.SC_CREATED).
             body("object.user", is(nullValue())).
             body("object.status", is("ANONYMOUS")).
@@ -167,7 +163,6 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
     @Test
     public void testAddTicketToAnonOrder() {
         Order order = insertAnonOrder();
-
         Map<String, Object> orderDTO = new HashMap<>();
         List<String> options = Arrays.asList(CH_MEMBER, PICKUP_SERVICE);
         orderDTO.put("type", TEST_TICKET);
@@ -177,8 +172,8 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
         given().
         when().
             body(orderDTO).contentType(ContentType.JSON).
-            post(ORDER_ENDPOINT + order.getId())
-        .then().
+            post(ORDER_ENDPOINT + order.getId()).
+        then().
             statusCode(HttpStatus.SC_OK).
             body("object.user", is(nullValue())).
             body("object.status", is("ANONYMOUS")).
@@ -203,8 +198,8 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
         given().
         when().
             body(orderDTO).contentType(ContentType.JSON).
-            post(ORDER_ENDPOINT + order.getId())
-        .then().
+            post(ORDER_ENDPOINT + order.getId()).
+        then().
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
     }
@@ -224,8 +219,8 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
             header(getXAuthTokenHeaderForUser(user)).
         when().
             body(orderDTO).contentType(ContentType.JSON).
-            post(ORDER_ENDPOINT + order.getId())
-        .then().
+            post(ORDER_ENDPOINT + order.getId()).
+        then().
             statusCode(HttpStatus.SC_OK).
             body("object.user.username", is(user.getUsername())).
             body("object.status", is("ASSIGNED")).
@@ -252,8 +247,8 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
             header(getXAuthTokenHeaderForUser(user2)).
         when().
             body(orderDTO).contentType(ContentType.JSON).
-            post(ORDER_ENDPOINT + order.getId())
-        .then().
+            post(ORDER_ENDPOINT + order.getId()).
+        then().
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
     }
@@ -274,8 +269,8 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
             header(getXAuthTokenHeaderForUser(admin)).
         when().
             body(orderDTO).contentType(ContentType.JSON).
-            post(ORDER_ENDPOINT + order.getId())
-        .then().
+            post(ORDER_ENDPOINT + order.getId()).
+        then().
             statusCode(HttpStatus.SC_OK).
             body("object.user.username", is(user.getUsername())).
             body("object.status", is("ASSIGNED")).
@@ -302,7 +297,7 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
             body("tickets.type.text", anything()).
             body("tickets.enabledOptions.name", hasItem(emptyIterable())).
             body("amount",equalTo(30F));
-         //@formatter:on
+        //@formatter:on
     }
 
     @Test
@@ -324,7 +319,7 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
             body("tickets.type.text", anything()).
             body("tickets.enabledOptions.name", hasItem(emptyIterable())).
             body("amount",equalTo(30F));
-         //@formatter:on
+        //@formatter:on
     }
 
     @Test
@@ -346,7 +341,7 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
             body("tickets.type.text", anything()).
             body("tickets.enabledOptions", hasItem(emptyIterable())).
             body("amount",equalTo(30F));
-         //@formatter:on
+        //@formatter:on
     }
 
     @Test
@@ -356,8 +351,8 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
 
         //@formatter:off
         when().
-            get(ORDER_ENDPOINT + order.getId())
-        .then().
+            get(ORDER_ENDPOINT + order.getId()).
+        then().
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
     }
@@ -371,8 +366,8 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(user)).
         when().
-            get(ORDER_ENDPOINT + order.getId())
-        .then().
+            get(ORDER_ENDPOINT + order.getId()).
+        then().
             statusCode(HttpStatus.SC_OK).
             body("user.username", is(user.getUsername())).
             body("status", is("ASSIGNED")).
@@ -394,8 +389,8 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(user2)).
         when().
-            get(ORDER_ENDPOINT + order.getId())
-        .then().
+            get(ORDER_ENDPOINT + order.getId()).
+        then().
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
     }
@@ -410,8 +405,8 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(admin)).
         when().
-            get(ORDER_ENDPOINT + order.getId())
-        .then().
+            get(ORDER_ENDPOINT + order.getId()).
+        then().
             statusCode(HttpStatus.SC_OK).
             body("user.username", is(user.getUsername())).
             body("status", is("ASSIGNED")).
@@ -425,68 +420,204 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void testAssignAnonOrderAsAnon() {
+        Order order = insertAnonOrder();
 
+        //@formatter:off
+        when().
+            post(ORDER_ENDPOINT + order.getId() + "/assign").
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
     }
 
     @Test
     public void testAssignAnonOrderAsUser() {
+        Order order = insertAnonOrder();
+        User user = createUser();
 
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+        when().
+            post(ORDER_ENDPOINT + order.getId() + "/assign").
+        then().
+            statusCode(HttpStatus.SC_OK).
+            body("object.id", equalTo(order.getId().intValue())).
+            body("object.status", is("ASSIGNED")).
+            body("object.user.username", is(user.getUsername()));
+        //@formatter:on
     }
 
     @Test
     public void testAssignAssignedOrderAsAnon() {
+        User user = createUser();
+        Order order = addOrderForUser(user);
 
+        //@formatter:off
+        when().
+            post(ORDER_ENDPOINT + order.getId() + "/assign").
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
     }
 
     @Test
     public void testAssignAssignedOrderAsUser() {
+        User user = createUser();
+        Order order = addOrderForUser(user);
 
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+        when().
+            post(ORDER_ENDPOINT + order.getId() + "/assign").
+        then().
+            statusCode(HttpStatus.SC_CONFLICT).
+            body("object", is(nullValue()));
+        //@formatter:on
     }
 
     @Test
     public void testAssignAssignedOrderAsAdmin() {
+        User admin = createUser(true);
+        User user = createUser();
+        Order order = addOrderForUser(user);
 
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(admin)).
+        when().
+            post(ORDER_ENDPOINT + order.getId() + "/assign").
+        then().
+            statusCode(HttpStatus.SC_CONFLICT).
+            body("object", is(nullValue()));
+        //@formatter:on
     }
 
     @Test
     public void testCheckoutAssignedOrderAsAnon() {
+        User user = createUser();
+        Order order = addOrderForUser(user);
 
+        //@formatter:off
+        when().
+            post(ORDER_ENDPOINT + order.getId() + "/checkout").
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN).
+            body("object", is(nullValue()));
+        //@formatter:on
     }
 
     @Test
     public void testCheckoutAssignedOrderAsUser() {
+        User user = createUser();
+        Order order = addOrderForUser(user);
 
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+        when().
+            post(ORDER_ENDPOINT + order.getId() + "/checkout").
+        then().
+            statusCode(HttpStatus.SC_OK).
+            body("object", is("http://paymentURL.com"));
+        //@formatter:on
     }
 
     @Test
     public void testCheckoutAssignedOrderWrongUser() {
+        User user = createUser();
+        User user2 = createUser();
+        Order order = addOrderForUser(user);
 
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user2)).
+        when().
+            post(ORDER_ENDPOINT + order.getId() + "/checkout").
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN).
+            body("object", is(nullValue()));
+        //@formatter:on
     }
 
     @Test
     public void testCheckoutAssignedOrderAsAdmin() {
+        User user = createUser();
+        User admin = createUser(true);
+        Order order = addOrderForUser(user);
 
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(admin)).
+        when().
+            post(ORDER_ENDPOINT + order.getId() + "/checkout").
+        then().
+            statusCode(HttpStatus.SC_OK).
+            body("object", is("http://paymentURL.com"));
+        //@formatter:on
     }
 
     @Test
     public void testCheckoutAnonOrder() {
+        User user = createUser();
+        Order order = addOrderForUser(user);
 
+        //@formatter:off
+        when().
+            post(ORDER_ENDPOINT + order.getId() + "/checkout").
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN).
+            body("object", is(nullValue()));
+        //@formatter:on
     }
 
     @Test
     public void testApproveOrderAsAnon() {
+        User user = createUser();
+        Order order = addOrderForUser(user);
+
+        //@formatter:off
+        when().
+            post(ORDER_ENDPOINT + order.getId() + "/approve").
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN).
+            body("object", is(nullValue()));
+        //@formatter:on
 
     }
 
     @Test
     public void testApproveOrderAsUser() {
+        User user = createUser();
+        Order order = addOrderForUser(user);
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+        when().
+            post(ORDER_ENDPOINT + order.getId() + "/approve").
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN).
+            body("object", is(nullValue()));
+        //@formatter:on
 
     }
 
     @Test
     public void testApproveOrderAsAdmin() {
+        User user = createUser();
+        User admin = createUser(true);
+        Order order = addOrderForUser(user);
 
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(admin)).
+        when().
+            post(ORDER_ENDPOINT + order.getId() + "/approve").
+        then().
+            statusCode(HttpStatus.SC_OK).
+            body("object", is(nullValue()));
+        //@formatter:on
     }
-
-
 }
