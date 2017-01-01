@@ -283,7 +283,7 @@ public class TicketServiceImpl implements TicketService {
     @Override
     public Collection<Ticket> getOwnedTicketsAndFromTeamMembers(User u) {
         if (u == null) {
-            throw new UserNotFoundException("null");
+            throw new IllegalArgumentException("User can't be null");
         }
         Collection<Ticket> ownedTickets = ticketRepository.findAllByOwnerUsernameIgnoreCase(u.getUsername()).
                 stream().

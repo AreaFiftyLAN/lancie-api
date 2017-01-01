@@ -4,6 +4,7 @@ import ch.wisv.areafiftylan.ApplicationTest;
 import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.service.repository.OrderRepository;
 import ch.wisv.areafiftylan.products.service.repository.TicketOptionRepository;
+import ch.wisv.areafiftylan.products.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.products.service.repository.TicketTypeRepository;
 import ch.wisv.areafiftylan.teams.model.Team;
 import ch.wisv.areafiftylan.users.model.Gender;
@@ -56,6 +57,8 @@ public abstract class ServiceTest {
     protected TicketOptionRepository ticketOptionRepository;
     @Autowired
     protected TicketTypeRepository ticketTypeRepository;
+    @Autowired
+    protected TicketRepository ticketRepository;
     @Autowired
     protected UserRepository userRepository;
 

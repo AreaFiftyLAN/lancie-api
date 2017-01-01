@@ -12,7 +12,9 @@ import org.junit.Test;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.*;
+
 
 public class TicketServiceTest extends ServiceTest {
 
@@ -43,6 +45,7 @@ public class TicketServiceTest extends ServiceTest {
         Long id = persistTicket().getId();
         Ticket ticket = ticketService.removeTicket(id);
         assertEquals(id, ticket.getId());
+        assertNull(ticketRepository.findOne(id));
     }
 
     @Test
@@ -101,15 +104,17 @@ public class TicketServiceTest extends ServiceTest {
 
     @Test
     public void findValidTicketsByOwnerUsername() {
-        //TODO I can't get this method to do my bidding...
-        /*
         User user = persistUser();
-        Ticket ticket = ticketService.requestTicketOfType(
-        user, TEST_TICKET, Arrays.asList(CH_MEMBER_OPTION, PICKUP_SERVICE_OPTION));
-        testEntityManager.persist(ticket);
-        Collection<Ticket> tickets = ticketService.findValidTicketsByOwnerUsername(user.getUsername());
-        assertEquals(Collections.singleton(ticket), tickets);
-        */
+
+        Ticket ticket = persistTicketForUser(user);
+        Ticket ticket2 = persistTicketForUser(user);
+        ticket2.setValid(false);
+        testEntityManager.persist(ticket2);
+
+        Collection<Ticket> validTicketsByOwnerUsername =
+                ticketService.findValidTicketsByOwnerUsername(user.getUsername());
+
+        assertThat(validTicketsByOwnerUsername).containsExactly(ticket);
     }
 
     @Test
@@ -137,20 +142,22 @@ public class TicketServiceTest extends ServiceTest {
     public void validateTicketFromInvalid() {
         Ticket ticket = persistTicket();
         ticket.setValid(false);
-        testEntityManager.persist(ticket);
+        ticket = testEntityManager.persist(ticket);
         assertEquals(false, ticket.isValid());
+
         ticketService.validateTicket(ticket.getId());
-        assertEquals(true, ticket.isValid());
+
+        assertEquals(true, testEntityManager.find(Ticket.class, ticket.getId()).isValid());
     }
 
     @Test
     public void validateTicketAlreadyValid() {
         Ticket ticket = persistTicket();
         ticket.setValid(true);
-        testEntityManager.persist(ticket);
+        ticket = testEntityManager.persist(ticket);
         assertEquals(true, ticket.isValid());
         ticketService.validateTicket(ticket.getId());
-        assertEquals(true, ticket.isValid());
+        assertEquals(true, testEntityManager.find(Ticket.class, ticket.getId()).isValid());
     }
 
     @Test
@@ -171,18 +178,19 @@ public class TicketServiceTest extends ServiceTest {
     @Test
     public void requestTicketOfTypeStrings() {
         User user = persistUser();
-        TicketType type = ticketTypeRepository.findByName(TEST_TICKET).get();
-        TicketOption pickupOption = ticketOptionRepository.findByName(PICKUP_SERVICE_OPTION).get();
-        TicketOption chMemberOption = ticketOptionRepository.findByName(CH_MEMBER_OPTION).get();
-        List<TicketOption> options = Arrays.asList(pickupOption, chMemberOption);
-        Set<TicketOption> optionSet = new HashSet<>(options);
-        String typeString = TEST_TICKET;
-        List<String> optionsString = Arrays.asList(CH_MEMBER_OPTION, PICKUP_SERVICE_OPTION);
+        TicketType type = ticketTypeRepository.findByName(TEST_TICKET)
+                .orElseThrow(() -> new TicketTypeNotFoundException(TEST_TICKET));
+        TicketOption pickupOption = ticketOptionRepository.findByName(PICKUP_SERVICE_OPTION)
+                .orElseThrow(TicketOptionNotFoundException::new);
+        TicketOption chMemberOption =
+                ticketOptionRepository.findByName(CH_MEMBER_OPTION).orElseThrow(TicketOptionNotFoundException::new);
 
-        Ticket ticket = ticketService.requestTicketOfType(user, typeString, optionsString);
+        List<String> optionsList = Arrays.asList(CH_MEMBER_OPTION, PICKUP_SERVICE_OPTION);
+
+        Ticket ticket = ticketService.requestTicketOfType(user, TEST_TICKET, optionsList);
 
         assertEquals(user, ticket.getOwner());
-        assertEquals(optionSet, ticket.getEnabledOptions());
+        assertThat(ticket.getEnabledOptions()).containsAll(Arrays.asList(pickupOption, chMemberOption));
         assertEquals(type, ticket.getType());
     }
 
@@ -201,97 +209,83 @@ public class TicketServiceTest extends ServiceTest {
     @Test
     public void requestTicketOfTypeStringsTypeNull() {
         User user = persistUser();
-        String typeString = null;
         List<String> optionsString = Arrays.asList(CH_MEMBER_OPTION, PICKUP_SERVICE_OPTION);
 
         thrown.expect(TicketTypeNotFoundException.class);
         thrown.expectMessage("TicketType ");
 
-        ticketService.requestTicketOfType(user, typeString, optionsString);
+        ticketService.requestTicketOfType(user, null, optionsString);
     }
 
     @Test
     public void requestTicketOfTypeStringsOptionsNotFound() {
         User user = persistUser();
-        String typeString = TEST_TICKET;
         List<String> optionsString = Arrays.asList("not found", "nope.avi");
 
         thrown.expect(TicketOptionNotFoundException.class);
         thrown.expectMessage("Ticket Option not found!");
 
-        ticketService.requestTicketOfType(user, typeString, optionsString);
+        ticketService.requestTicketOfType(user, TEST_TICKET, optionsString);
     }
 
     @Test
     public void requestTicketOfTypeStringsOptionsNull() {
         User user = persistUser();
-        TicketType type = ticketTypeRepository.findByName(TEST_TICKET).get();
-        Set<TicketOption> optionSet = new HashSet<>();
-        String typeString = TEST_TICKET;
-        List<String> optionsString = null;
 
-        Ticket ticket = ticketService.requestTicketOfType(user, typeString, optionsString);
+        Ticket ticket = ticketService.requestTicketOfType(user, TEST_TICKET, null);
 
         assertEquals(user, ticket.getOwner());
-        assertEquals(optionSet, ticket.getEnabledOptions());
-        assertEquals(type, ticket.getType());
+        assertThat(ticket.getEnabledOptions()).isEmpty();
+        assertEquals(TEST_TICKET, ticket.getType().getName());
     }
 
     @Test
     public void requestTicketOfTypeObjects() {
         User user = persistUser();
-        TicketType type = ticketTypeRepository.findByName(TEST_TICKET).get();
-        Ticket ticketToPersist = new Ticket(user, type);
-        TicketOption pickupOption = ticketOptionRepository.findByName(PICKUP_SERVICE_OPTION).get();
-        ticketToPersist.addOption(pickupOption);
-        TicketOption chMemberOption = ticketOptionRepository.findByName(CH_MEMBER_OPTION).get();
-        ticketToPersist.addOption(chMemberOption);
-        List<TicketOption> options = Arrays.asList(pickupOption, chMemberOption);
-        Set<TicketOption> optionSet = new HashSet<>(options);
-        testEntityManager.persist(ticketToPersist);
+        TicketType type = ticketTypeRepository.findByName(TEST_TICKET)
+                .orElseThrow(() -> new TicketTypeNotFoundException(TEST_TICKET));
+        TicketOption pickupOption = ticketOptionRepository.findByName(PICKUP_SERVICE_OPTION)
+                .orElseThrow(TicketOptionNotFoundException::new);
+        TicketOption chMemberOption =
+                ticketOptionRepository.findByName(CH_MEMBER_OPTION).orElseThrow(TicketOptionNotFoundException::new);
 
-        Ticket ticket = ticketService.requestTicketOfType(user, type, options);
+        List<TicketOption> optionsList = Arrays.asList(chMemberOption, pickupOption);
+
+        Ticket ticket = ticketService.requestTicketOfType(user, type, optionsList);
 
         assertEquals(user, ticket.getOwner());
-        assertEquals(optionSet, ticket.getEnabledOptions());
+        assertThat(ticket.getEnabledOptions()).containsAll(Arrays.asList(pickupOption, chMemberOption));
         assertEquals(type, ticket.getType());
     }
 
     @Test
-    public void requestTicketOfTypeObjectsTypeNotAvailable() {
+    public void requestTicketDeadlinePassed() {
         User user = persistUser();
-        TicketOption pickupOption = ticketOptionRepository.findByName(PICKUP_SERVICE_OPTION).get();
-        TicketOption chMemberOption = ticketOptionRepository.findByName(CH_MEMBER_OPTION).get();
-        List<TicketOption> options = Arrays.asList(pickupOption, chMemberOption);
-        TicketType type = new TicketType("bla", "bla", 5F, 10, LocalDateTime.now().minusDays(1), true);
-        type.addPossibleOption(pickupOption);
-        type.addPossibleOption(chMemberOption);
+        TicketType type =
+                new TicketType("unavailable", "Unavailable TicketType", 5F, 10, LocalDateTime.now().minusDays(1), true);
         testEntityManager.persist(type);
 
         thrown.expect(TicketUnavailableException.class);
         thrown.expectMessage("Ticket is no longer available.");
 
-        ticketService.requestTicketOfType(user, type, options);
+        ticketService.requestTicketOfType(user, type, Collections.emptyList());
     }
 
     @Test
     public void requestTicketOfTypeObjectsTypeNull() {
         User user = persistUser();
-        TicketType type = null;
-        TicketOption pickupOption = ticketOptionRepository.findByName(PICKUP_SERVICE_OPTION).get();
-        TicketOption chMemberOption = ticketOptionRepository.findByName(CH_MEMBER_OPTION).get();
-        List<TicketOption> options = Arrays.asList(pickupOption, chMemberOption);
 
         thrown.expect(TicketUnavailableException.class);
         thrown.expectMessage("Ticket is no longer available.");
 
-        ticketService.requestTicketOfType(user, type, options);
+        ticketService.requestTicketOfType(user, null, new ArrayList<TicketOption>());
     }
 
     @Test
     public void requestTicketOfTypeObjectsOptionsNotFound() {
         User user = persistUser();
-        TicketType type = ticketTypeRepository.findByName(TEST_TICKET).get();
+        TicketType type = ticketTypeRepository.findByName(TEST_TICKET)
+                .orElseThrow(() -> new TicketTypeNotFoundException(TEST_TICKET));
         TicketOption unavailableOption = new TicketOption("unavailable", 5F);
         List<TicketOption> options = Collections.singletonList(unavailableOption);
 
@@ -304,16 +298,15 @@ public class TicketServiceTest extends ServiceTest {
     @Test
     public void requestTicketOfTypeObjectsOptionsNull() {
         User user = persistUser();
-        TicketType type = ticketTypeRepository.findByName(TEST_TICKET).get();
+        TicketType type = ticketTypeRepository.findByName(TEST_TICKET)
+                .orElseThrow(() -> new TicketTypeNotFoundException(TEST_TICKET));
         Ticket ticketToPersist = new Ticket(user, type);
-        List<TicketOption> options = null;
-        Set<TicketOption> optionSet = new HashSet<>();
         testEntityManager.persist(ticketToPersist);
 
-        Ticket ticket = ticketService.requestTicketOfType(user, type, options);
+        Ticket ticket = ticketService.requestTicketOfType(user, type, null);
 
         assertEquals(user, ticket.getOwner());
-        assertEquals(optionSet, ticket.getEnabledOptions());
+        assertThat(ticket.getEnabledOptions()).isEmpty();
         assertEquals(type, ticket.getType());
     }
 
@@ -408,7 +401,7 @@ public class TicketServiceTest extends ServiceTest {
     }
 
     @Test
-    public void transferTicketTicketAlreadyLinked() {
+    public void transferTicketAlreadyLinked() {
         User goalUser = persistUser();
         String goalUsername = goalUser.getUsername();
         Ticket ticket = persistTicket();
@@ -491,8 +484,8 @@ public class TicketServiceTest extends ServiceTest {
 
         Collection<Ticket> tickets = ticketService.getOwnedTicketsAndFromTeamMembers(captain);
 
-        assertEquals(tickets, Arrays.asList(captainTicket, member1Team1Ticket,
-                member2Team1Ticket, member1Team2Ticket, member2Team2Ticket));
+        assertThat(tickets).containsAll(Arrays.asList(captainTicket, member1Team1Ticket, member2Team1Ticket, member1Team2Ticket,
+                member2Team2Ticket));
     }
 
     @Test
@@ -519,8 +512,7 @@ public class TicketServiceTest extends ServiceTest {
 
     @Test
     public void getOwnedTicketsAndFromTeamMembersNull() {
-        thrown.expect(UserNotFoundException.class);
-        thrown.expectMessage("could not find user 'null'.");
+        thrown.expect(IllegalArgumentException.class);
 
         ticketService.getOwnedTicketsAndFromTeamMembers(null);
     }
@@ -534,7 +526,7 @@ public class TicketServiceTest extends ServiceTest {
         Ticket ticket3 = persistTicketForUser(goalUser);
         TicketTransferToken ttt1 = ticketService.setupForTransfer(ticket1.getId(), goalUser.getUsername());
         TicketTransferToken ttt2 = ticketService.setupForTransfer(ticket2.getId(), goalUser.getUsername());
-        TicketTransferToken ttt3 = ticketService.setupForTransfer(ticket3.getId(), owner.getUsername());
+        ticketService.setupForTransfer(ticket3.getId(), owner.getUsername());
         ttt1.use();
         testEntityManager.persist(ttt1);
 
@@ -578,7 +570,7 @@ public class TicketServiceTest extends ServiceTest {
 
         Collection<Ticket> tickets = ticketService.getAllTicketsWithTransport();
 
-        assertEquals(tickets, Collections.emptyList());
+        assertThat(tickets).isEmpty();
     }
 
     @Test
@@ -600,7 +592,7 @@ public class TicketServiceTest extends ServiceTest {
     }
 
     @Test
-    public void addTicketTypeOne() {
+    public void addTicketType() {
         long countBefore = ticketTypeRepository.count();
         TicketType ticketType = new TicketType("type1", "text", 5F, 0, LocalDateTime.now(), true);
         ticketService.addTicketType(ticketType);
@@ -618,7 +610,7 @@ public class TicketServiceTest extends ServiceTest {
     }
 
     @Test
-    public void getAllTicketTypesZeroExtra() {
+    public void getAllTicketTypes() {
         long countBefore = ticketTypeRepository.count();
         Collection<TicketType> types = ticketService.getAllTicketTypes();
         assertEquals(countBefore, types.size());
@@ -645,7 +637,7 @@ public class TicketServiceTest extends ServiceTest {
     }
 
     @Test
-    public void addTicketOptionOne() {
+    public void addTicketOption() {
         long countBefore = ticketOptionRepository.count();
         TicketOption option = new TicketOption("option1", 2.5F);
         ticketService.addTicketOption(option);
