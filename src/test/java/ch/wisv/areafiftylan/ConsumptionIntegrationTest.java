@@ -19,50 +19,46 @@
 package ch.wisv.areafiftylan;
 
 import ch.wisv.areafiftylan.extras.consumption.model.Consumption;
-import ch.wisv.areafiftylan.extras.consumption.model.ConsumptionMap;
 import ch.wisv.areafiftylan.extras.consumption.model.ConsumptionMapsRepository;
 import ch.wisv.areafiftylan.extras.consumption.model.PossibleConsumptionsRepository;
 import ch.wisv.areafiftylan.extras.consumption.service.ConsumptionService;
 import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.users.model.User;
-import ch.wisv.areafiftylan.utils.SessionData;
 import org.apache.http.HttpStatus;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Collections;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
-import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 
-public class ConsumptionTest extends XAuthIntegrationTest {
-
-    @Autowired
-    private ConsumptionMapsRepository consumptionMapsRepository;
-
-    @Autowired
-    private PossibleConsumptionsRepository possibleConsumptionsRepository;
+public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
 
     @Autowired
     private TicketRepository ticketRepository;
+
+    @Autowired
+    private PossibleConsumptionsRepository consumptionsRepository;
+
+    @Autowired
+    private ConsumptionMapsRepository consumptionMapsRepository;
 
     @Autowired
     private ConsumptionService consumptionService;
 
     private final String CONSUMPTION_ENDPOINT = "/consumptions";
 
-    private final String UNUSED_CONSUMPTION = "Hot Chocolate";
-    private final String SPICY_CONSUMPTION = "Nice Spicy Food";
-    private final String MILKSHAKE_CONSUMPTION = "Deliciously Cold Milkshake";
+    private final String CONSUMPTION = "Delicious Consumption";
 
     @Before
     public void InitConsumptionTest(){
+        // Needs to happen before clearing the other two, otherwise shit hits the fan.
         consumptionMapsRepository.deleteAll();
-        possibleConsumptionsRepository.deleteAll();
+        consumptionsRepository.deleteAll();
         ticketRepository.deleteAll();
     }
 
@@ -96,14 +92,14 @@ public class ConsumptionTest extends XAuthIntegrationTest {
             get(CONSUMPTION_ENDPOINT).
         then().
             statusCode(HttpStatus.SC_OK).
-            body(empty());
+            body("", hasSize(0));
         //@formatter:on
     }
 
     @Test
     public void getAllPossibleConsumptionsTestAsAdminSingle(){
         User user = createUser(true);
-        consumptionService.addPossibleConsumption(SPICY_CONSUMPTION);
+        consumptionService.addPossibleConsumption(CONSUMPTION);
 
         //@formatter:off
         given().
@@ -112,14 +108,15 @@ public class ConsumptionTest extends XAuthIntegrationTest {
             get(CONSUMPTION_ENDPOINT).
         then().
             statusCode(HttpStatus.SC_OK).
-            body("name", contains(SPICY_CONSUMPTION));
+            body("name", contains(CONSUMPTION));
         //@formatter:on
     }
 
     @Test
     public void getAllPossibleConsumptionsTestAsAdminMultiple(){
         User user = createUser(true);
-        consumptionService.addPossibleConsumption(SPICY_CONSUMPTION);
+        consumptionService.addPossibleConsumption(CONSUMPTION);
+        String MILKSHAKE_CONSUMPTION = "Deliciously Cold Milkshake";
         consumptionService.addPossibleConsumption(MILKSHAKE_CONSUMPTION);
 
         //@formatter:off
@@ -129,7 +126,7 @@ public class ConsumptionTest extends XAuthIntegrationTest {
             get(CONSUMPTION_ENDPOINT).
         then().
             statusCode(HttpStatus.SC_OK).
-            body("name", containsInAnyOrder(SPICY_CONSUMPTION, MILKSHAKE_CONSUMPTION));
+            body("name", containsInAnyOrder(CONSUMPTION, MILKSHAKE_CONSUMPTION));
         //@formatter:on
     }
 
@@ -140,6 +137,7 @@ public class ConsumptionTest extends XAuthIntegrationTest {
         //@formatter:off
         given().
             header(getXAuthTokenHeaderForUser(user)).
+            body(CONSUMPTION).
         when().
             post(CONSUMPTION_ENDPOINT).
         then().
@@ -154,39 +152,41 @@ public class ConsumptionTest extends XAuthIntegrationTest {
         //@formatter:off
         given().
             header(getXAuthTokenHeaderForUser(user)).
-            body(SPICY_CONSUMPTION).
+            body(CONSUMPTION).
         when().
             post(CONSUMPTION_ENDPOINT).
         then().
             statusCode(HttpStatus.SC_OK).
-            body("message", equalTo("Successfully added " + SPICY_CONSUMPTION + " as a supported consumption."));
+            body("message", equalTo("Successfully added " + CONSUMPTION + " as a supported consumption."));
         //@formatter:on
     }
 
     @Test
     public void addAvailableConsumptionTestAsAdminDuplicate() {
         User user = createUser(true);
-        consumptionService.addPossibleConsumption(SPICY_CONSUMPTION);
+        consumptionService.addPossibleConsumption(CONSUMPTION);
 
         //@formatter:off
         given().
             header(getXAuthTokenHeaderForUser(user)).
-            body(SPICY_CONSUMPTION).
+            body(CONSUMPTION).
         when().
             post(CONSUMPTION_ENDPOINT).
         then().
             statusCode(HttpStatus.SC_CONFLICT).
-            body("message", equalTo("Consumption " + SPICY_CONSUMPTION + " is already supported"));
+            body("message", equalTo("Consumption " + CONSUMPTION + " is already supported"));
         //@formatter:on
     }
 
     @Test
     public void removeAvailableConsumptionTestAsUser() {
         User user = createUser();
+        Consumption consumption = consumptionService.addPossibleConsumption(CONSUMPTION);
 
         //@formatter:off
         given().
             header(getXAuthTokenHeaderForUser(user)).
+            body(consumption.getId()).
         when().
             delete(CONSUMPTION_ENDPOINT).
         then().
@@ -194,317 +194,292 @@ public class ConsumptionTest extends XAuthIntegrationTest {
         //@formatter:on
     }
 
-/*
     @Test
-    public void getTicketConsumptions_NoneConsumed(){
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
+    public void removeAvailableConsumptionTestAsAdmin() {
+        User user = createUser(true);
+        Consumption consumption = consumptionService.addPossibleConsumption(CONSUMPTION);
 
+        //@formatter:off
         given().
-
-                header(getXAuthTokenHeaderForUser()).
+            header(getXAuthTokenHeaderForUser(user)).
+            body(consumption.getId()).
         when().
-                get(CONSUMPTION_ENDPOINT + "/" + ticket.getId()).
+            delete(CONSUMPTION_ENDPOINT).
         then().
-                statusCode(HttpStatus.SC_OK).
-                body("$", hasSize(0));
+            statusCode(HttpStatus.SC_OK).
+            body("message", equalTo("Successfully removed " + CONSUMPTION + " as a supported consumption."));
+        //@formatter:on
     }
 
     @Test
-    public void getTicketConsumptions_OneConsumed(){
-        consumptionService.consume(ticket.getId(), spicyFood.getId());
+    public void removeAvailableConsumptionTestAsAdminNoneThere() {
+        User user = createUser(true);
+        Consumption consumption = consumptionService.addPossibleConsumption(CONSUMPTION);
+        consumption = consumptionService.removePossibleConsumption(consumption.getId());
 
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
-
+        //@formatter:off
         given().
-
-                header(getXAuthTokenHeaderForUser()).
+            header(getXAuthTokenHeaderForUser(user)).
+            body(consumption.getId()).
         when().
-                get(CONSUMPTION_ENDPOINT + "/" + ticket.getId()).
+            delete(CONSUMPTION_ENDPOINT).
         then().
-                statusCode(HttpStatus.SC_OK).
-                body("$", hasSize(1)).
-                body("name", containsInAnyOrder(spicyFood.getName()));
+            statusCode(HttpStatus.SC_OK).
+            body("message", equalTo("Successfully removed " + CONSUMPTION + " as a supported consumption."));
+        //@formatter:on
     }
 
     @Test
-    public void getTicketConsumptions_OneConsumedAndDeleted(){
-        consumptionService.consume(ticket.getId(), spicyFood.getId());
-        consumptionService.removePossibleConsumption(spicyFood.getId());
+    public void consumptionsMadeTestAsUser() {
+        User user = createUser();
+        Ticket ticket = createTicketForUser(user);
 
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
-
+        //@formatter:off
         given().
-
-                header(getXAuthTokenHeaderForUser()).
+            header(getXAuthTokenHeaderForUser(user)).
         when().
-                get(CONSUMPTION_ENDPOINT + "/" + ticket.getId()).
+            get(CONSUMPTION_ENDPOINT + "/" + ticket.getId()).
         then().
-                statusCode(HttpStatus.SC_OK).
-                body("$", hasSize(0));
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
     }
 
     @Test
-    public void consumeConsumption(){
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
+    public void consumptionsMadeTestAsAdmin() {
+        User user = createUser(true);
+        Ticket ticket = createTicketForUser(user);
+        Consumption consumption = consumptionService.addPossibleConsumption(CONSUMPTION);
+        consumptionService.consume(ticket.getId(), consumption.getId());
 
+        //@formatter:off
         given().
-
-                header(getXAuthTokenHeaderForUser()).
+            header(getXAuthTokenHeaderForUser(user)).
         when().
-                content(spicyFood.getId()).
-                contentType(ContentType.JSON).
-                post(CONSUMPTION_ENDPOINT + "/" + ticket.getId() + "/consume").
+            get(CONSUMPTION_ENDPOINT + "/" + ticket.getId()).
         then().
-                statusCode(HttpStatus.SC_OK);
-
-        ConsumptionMap ticketConsumptionMap = consumptionMapsRepository.findByTicketId(ticket.getId()).get();
-        Assert.assertTrue(ticketConsumptionMap.isConsumed(spicyFood));
+            statusCode(HttpStatus.SC_OK).
+            body("object", equalTo(Collections.singletonList(consumption)));
+        //@formatter:on
     }
 
     @Test
-    public void consumeConsumption_AlreadyConsumed(){
-        consumptionService.consume(ticket.getId(), spicyFood.getId());
+    public void consumptionsMadeTestAsAdminNoConsumptions() {
+        User user = createUser(true);
+        Ticket ticket = createTicketForUser(user);
 
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
-
+        //@formatter:off
         given().
-
-                header(getXAuthTokenHeaderForUser()).
+            header(getXAuthTokenHeaderForUser(user)).
         when().
-                content(spicyFood.getId()).
-                contentType(ContentType.JSON).
-                post(CONSUMPTION_ENDPOINT + "/" + ticket.getId() + "/consume").
+            get(CONSUMPTION_ENDPOINT + "/" + ticket.getId()).
         then().
-                statusCode(HttpStatus.SC_CONFLICT);
+            statusCode(HttpStatus.SC_OK).
+            body("object", equalTo(Collections.emptyList()));
+        //@formatter:on
     }
 
     @Test
-    public void consumeConsumption_ConsumptionDoesntExist(){
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
-
-        given().
-
-                header(getXAuthTokenHeaderForUser()).
-        when().
-                content(getUnusedConsumptionId()).
-                contentType(ContentType.JSON).
-                post(CONSUMPTION_ENDPOINT + "/" + ticket.getId() + "/consume").
-        then().
-                statusCode(HttpStatus.SC_NOT_FOUND);
-    }
-
-    @Test
-    public void consumeConsumption_ConsumptionDeleted(){
-        consumptionService.removePossibleConsumption(spicyFood.getId());
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
-
-        given().
-
-                header(getXAuthTokenHeaderForUser()).
-        when().
-                content(spicyFood.getId()).
-                contentType(ContentType.JSON).
-                post(CONSUMPTION_ENDPOINT + "/" + ticket.getId() + "/consume").
-        then().
-                statusCode(HttpStatus.SC_NOT_FOUND);
-    }
-
-    @Test
-    public void consumeConsumption_InvalidTicket(){
-        invalidateTicket();
-
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
-
-        given().
-
-                header(getXAuthTokenHeaderForUser()).
-        when().
-                content(spicyFood.getId()).
-                contentType(ContentType.JSON).
-                post(CONSUMPTION_ENDPOINT + "/" + ticket.getId() + "/consume").
-        then().
-                statusCode(HttpStatus.SC_BAD_REQUEST);
-    }
-
-    @Test
-    public void consumeConsumption_InSuccession(){
-        Ticket otherTicket = makeTicket();
-
-        consumptionService.consume(otherTicket.getId(), spicyFood.getId());
-
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
-
-        given().
-
-                header(getXAuthTokenHeaderForUser()).
-        when().
-                content(spicyFood.getId()).
-                contentType(ContentType.JSON).
-                post(CONSUMPTION_ENDPOINT + "/" + ticket.getId() + "/consume").
-        then().
-                statusCode(HttpStatus.SC_OK);
-    }
-
-    @Test
-    public void resetConsumption(){
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
-
-        consumptionService.consume(ticket.getId(), spicyFood.getId());
-
-        given().
-
-                header(getXAuthTokenHeaderForUser()).
-        when().
-                content(spicyFood.getId()).
-                contentType(ContentType.JSON).
-                post(CONSUMPTION_ENDPOINT + "/" + ticket.getId() + "/reset").
-        then().
-                statusCode(HttpStatus.SC_OK);
-    }
-
-    @Test
-    public void resetConsumption_ConsumptionDoesntExist(){
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
-
-        consumptionService.consume(ticket.getId(), spicyFood.getId());
-
-        given().
-
-                header(getXAuthTokenHeaderForUser()).
-        when().
-                content(getUnusedConsumptionId()).
-                contentType(ContentType.JSON).
-                post(CONSUMPTION_ENDPOINT + "/" + ticket.getId() + "/reset").
-        then().
-                statusCode(HttpStatus.SC_NOT_FOUND);
-    }
-
-    @Test
-    public void resetConsumption_ConsumptionDeleted(){
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
-
-        consumptionService.consume(ticket.getId(), spicyFood.getId());
-
-        consumptionService.removePossibleConsumption(spicyFood.getId());
-
-        given().
-
-                header(getXAuthTokenHeaderForUser()).
-        when().
-                content(spicyFood.getId()).
-                contentType(ContentType.JSON).
-                post(CONSUMPTION_ENDPOINT + "/" + ticket.getId() + "/reset").
-        then().
-                statusCode(HttpStatus.SC_NOT_FOUND);
-    }
-
-    @Test
-    public void resetConsumption_InvalidTicket(){
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
-
-        consumptionService.consume(ticket.getId(), spicyFood.getId());
-
-        invalidateTicket();
-
-        given().
-
-                header(getXAuthTokenHeaderForUser()).
-        when().
-                content(spicyFood.getId()).
-                contentType(ContentType.JSON).
-                post(CONSUMPTION_ENDPOINT + "/" + ticket.getId() + "/reset").
-        then().
-                statusCode(HttpStatus.SC_BAD_REQUEST);
-    }
-
-    @Test
-    public void addPossibleConsumption(){
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
-
-        given().
-
-                header(getXAuthTokenHeaderForUser()).
-        when().
-                content(UNUSED_CONSUMPTION).
-                contentType(ContentType.JSON).
-                post(CONSUMPTION_ENDPOINT).
-        then().
-                statusCode(HttpStatus.SC_OK);
-
-        boolean consumptionExists =
-                consumptionService.getPossibleConsumptions()
-                        .stream()
-                        .anyMatch(c -> c.getName().equals(UNUSED_CONSUMPTION));
-        Assert.assertTrue(consumptionExists);
-    }
-
-    @Test
-    public void addPossibleConsumption_Duplicate(){
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
-
-        consumptionService.addPossibleConsumption(UNUSED_CONSUMPTION);
-
-        given().
-
-                header(getXAuthTokenHeaderForUser()).
-        when().
-                content(UNUSED_CONSUMPTION).
-                contentType(ContentType.JSON).
-                post(CONSUMPTION_ENDPOINT).
-        then().
-                statusCode(HttpStatus.SC_CONFLICT);
-
-    }
-
-    @Test
-    public void removePossibleConsumption(){
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
-
-        given().
-
-                header(getXAuthTokenHeaderForUser()).
-        when().
-                content(spicyFood.getId()).
-                contentType(ContentType.JSON).
-                delete(CONSUMPTION_ENDPOINT).
-        then().
-                statusCode(HttpStatus.SC_OK);
-
-        boolean consumptionExists =
-                consumptionService.getPossibleConsumptions()
-                        .stream()
-                        .anyMatch(c -> c.getName().equals(UNUSED_CONSUMPTION));
-        Assert.assertFalse(consumptionExists);
-    }
-
-    @Test
-    public void removePossibleConsumption_DoesntExist(){
-        SessionData session = login(admin.getUsername(), adminCleartextPassword);
-
-        given().
-
-                header(getXAuthTokenHeaderForUser()).
-        when().
-                content(getUnusedConsumptionId()).
-                contentType(ContentType.JSON).
-                delete(CONSUMPTION_ENDPOINT).
-        then().
-                statusCode(HttpStatus.SC_NOT_FOUND);
-    }
-
-    private void invalidateTicket(){
+    public void consumptionsMadeTestAsAdminInvalidTicket() {
+        User user = createUser(true);
+        Ticket ticket = createTicketForUser(user);
         ticket.setValid(false);
         ticketRepository.saveAndFlush(ticket);
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+        when().
+            get(CONSUMPTION_ENDPOINT + "/" + ticket.getId()).
+        then().
+            statusCode(HttpStatus.SC_BAD_REQUEST).
+            body("message", equalTo("Ticket is invalid; It can not be used for consumptions."));
+        //@formatter:on
     }
 
-    private Long getUnusedConsumptionId(){
-        Long id = 0L
-                ;
-        while(possibleConsumptionsRepository.findById(id).isPresent()){
-            id++;
-        }
+    @Test
+    public void consumeTestAsUser() {
+        User user = createUser();
+        Ticket ticket = createTicketForUser(user);
+        Consumption consumption = consumptionService.addPossibleConsumption(CONSUMPTION);
 
-        return id;
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+            body(consumption.getId()).
+        when().
+            post(CONSUMPTION_ENDPOINT + "/" + ticket.getId() + "/consume").
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
+    }
+
+    @Test
+    public void consumeTestAsAdmin() {
+        User user = createUser(true);
+        Ticket ticket = createTicketForUser(user);
+        Consumption consumption = consumptionService.addPossibleConsumption(CONSUMPTION);
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+            body(consumption.getId()).
+        when().
+            post(CONSUMPTION_ENDPOINT + "/" + ticket.getId() + "/consume").
+        then().
+            statusCode(HttpStatus.SC_OK).
+            body("message", equalTo("Successfully consumed consumption"));
+        //@formatter:on
+    }
+
+    @Test
+    public void consumeTestAsAdminAlreadyConsumed() {
+        User user = createUser(true);
+        Ticket ticket = createTicketForUser(user);
+        Consumption consumption = consumptionService.addPossibleConsumption(CONSUMPTION);
+        consumptionService.consume(ticket.getId(), consumption.getId());
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+            body(consumption.getId()).
+        when().
+            post(CONSUMPTION_ENDPOINT + "/" + ticket.getId() + "/consume").
+        then().
+            statusCode(HttpStatus.SC_CONFLICT).
+            body("message", equalTo("Consumption " + consumption.getName() + " has already been consumed."));
+        //@formatter:on
+    }
+
+    @Test
+    public void consumeTestAsAdminDoesntExist() {
+        User user = createUser(true);
+        Ticket ticket = createTicketForUser(user);
+        Consumption consumption = consumptionService.addPossibleConsumption(CONSUMPTION);
+        consumption = consumptionService.removePossibleConsumption(consumption.getId());
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+            body(consumption.getId()).
+        when().
+            post(CONSUMPTION_ENDPOINT + "/" + ticket.getId() + "/consume").
+        then().
+            statusCode(HttpStatus.SC_NOT_FOUND);
+        //@formatter:on
+    }
+
+    @Test
+    public void consumeTestAsAdminInvalidTicket() {
+        User user = createUser(true);
+        Ticket ticket = createTicketForUser(user);
+        ticket.setValid(false);
+        ticketRepository.saveAndFlush(ticket);
+        Consumption consumption = consumptionService.addPossibleConsumption(CONSUMPTION);
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+            body(consumption.getId()).
+        when().
+            post(CONSUMPTION_ENDPOINT + "/" + ticket.getId() + "/consume").
+        then().
+            statusCode(HttpStatus.SC_BAD_REQUEST).
+            body("message", equalTo("Ticket is invalid; It can not be used for consumptions."));
+        //@formatter:on
+    }
+
+    @Test
+    public void consumeTestAsAdminConsumedByOther() {
+        User user = createUser(true);
+        Ticket ticket = createTicketForUser(user);
+        Consumption consumption = consumptionService.addPossibleConsumption(CONSUMPTION);
+        consumptionService.consume(createTicketForUser(createUser()).getId(), consumption.getId());
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+            body(consumption.getId()).
+        when().
+            post(CONSUMPTION_ENDPOINT + "/" + ticket.getId() + "/consume").
+        then().
+            statusCode(HttpStatus.SC_OK).
+            body("message", equalTo("Successfully consumed consumption"));
+        //@formatter:on
+    }
+
+    @Test
+    public void resetTestAsUser() {
+        User user = createUser();
+        Ticket ticket = createTicketForUser(user);
+        Consumption consumption = consumptionService.addPossibleConsumption(CONSUMPTION);
+        consumptionService.consume(ticket.getId(), consumption.getId());
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+            body(consumption.getId()).
+        when().
+            post(CONSUMPTION_ENDPOINT + "/" + ticket.getId() + "/reset").
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
+    }
+
+    @Test
+    public void resetTestAsAdmin() {
+        User user = createUser();
+        Ticket ticket = createTicketForUser(user);
+        Consumption consumption = consumptionService.addPossibleConsumption(CONSUMPTION);
+        consumptionService.consume(ticket.getId(), consumption.getId());
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+            body(consumption.getId()).
+        when().
+            post(CONSUMPTION_ENDPOINT + "/" + ticket.getId() + "/reset").
+        then().
+            statusCode(HttpStatus.SC_OK).
+            body("message", equalTo("Successfully reset consumption"));
+        //@formatter:on
+    }
+
+    @Test
+    public void resetTestAsAdminDoesntExist() {
+        User user = createUser();
+        Ticket ticket = createTicketForUser(user);
+        Consumption consumption = consumptionService.addPossibleConsumption(CONSUMPTION);
+        consumption = consumptionService.removePossibleConsumption(consumption.getId());
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+            body(consumption.getId()).
+        when().
+            post(CONSUMPTION_ENDPOINT + "/" + ticket.getId() + "/reset").
+        then().
+            statusCode(HttpStatus.SC_NOT_FOUND).
+            body("message", equalTo("Successfully reset consumption"));
+        //@formatter:on
+    }
+
+    @Test
+    public void resetTestAsAdminInvalidTicket() {
+        User user = createUser();
+        Ticket ticket = createTicketForUser(user);
+        ticket.setValid(false);
+        ticketRepository.saveAndFlush(ticket);
+        Consumption consumption = consumptionService.addPossibleConsumption(CONSUMPTION);
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+            body(consumption.getId()).
+        when().
+            post(CONSUMPTION_ENDPOINT + "/" + ticket.getId() + "/reset").
+        then().
+            statusCode(HttpStatus.SC_BAD_REQUEST).
+            body("message", equalTo("Ticket is invalid; It can not be used for consumptions."));
+        //@formatter:on
     }
 }
-*/
