@@ -20,7 +20,6 @@ package ch.wisv.areafiftylan.products.service;
 import ch.wisv.areafiftylan.exception.*;
 import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.model.TicketInformationResponse;
-import ch.wisv.areafiftylan.products.model.TicketOption;
 import ch.wisv.areafiftylan.products.model.TicketType;
 import ch.wisv.areafiftylan.products.model.order.ExpiredOrder;
 import ch.wisv.areafiftylan.products.model.order.Order;
@@ -37,7 +36,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -155,14 +153,13 @@ public class OrderServiceImpl implements OrderService {
 
             // Find a Ticket in the order, equal to the given DTO. Throw an exception when the ticket doesn't exist
             Ticket ticket = order.getTickets().stream().
-                    filter(t -> t.getId() == ticketId).
+                    filter(t -> t.getId().equals(ticketId)).
                     findFirst().orElseThrow(TicketNotFoundException::new);
 
             order.getTickets().remove(ticket);
             ticketService.removeTicket(ticket.getId());
 
             return orderRepository.save(order);
-
         } else {
             throw new ImmutableOrderException(orderId);
         }

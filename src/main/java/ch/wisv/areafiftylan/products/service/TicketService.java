@@ -30,7 +30,7 @@ import java.util.List;
 public interface TicketService {
     Ticket getTicketById(Long ticketId);
 
-    void removeTicket(Long ticketId);
+    Ticket removeTicket(Long ticketId);
 
     Integer getNumberSoldOfType(TicketType type);
 
@@ -50,8 +50,6 @@ public interface TicketService {
      * TicketUnavailableException is thrown
      *
      * @param type          Type of the Ticket requested
-     * @param pickupService If the Ticket includes the pickupService
-     *
      * @return The requested ticket, if available
      *
      * @throws TicketUnavailableException If the requested ticket is sold out.

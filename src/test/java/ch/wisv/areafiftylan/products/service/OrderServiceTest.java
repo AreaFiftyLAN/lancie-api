@@ -177,7 +177,7 @@ public class OrderServiceTest extends ServiceTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void createNullType() {
-        Order order = orderService.create(null, Arrays.asList(CH_MEMBER_OPTION, PICKUP_SERVICE_OPTION));
+        orderService.create(null, Arrays.asList(CH_MEMBER_OPTION, PICKUP_SERVICE_OPTION));
         assertEquals(0, orderRepository.findAll().size());
     }
 
@@ -406,8 +406,8 @@ public class OrderServiceTest extends ServiceTest {
     @Test
     public void removeTicketFromOrder() {
         Order order = new Order();
-        Ticket ticket = new Ticket(TicketType.TEST, true, true);
-        order.addTicket(testEntityManager.persist(ticket));
+        Ticket ticket = persistTicket();
+        order.addTicket(ticket);
 
         Long id = testEntityManager.persistAndGetId(order, Long.class);
 
@@ -428,8 +428,8 @@ public class OrderServiceTest extends ServiceTest {
     @Test
     public void removeTicketFromOrderTicketNotFound() {
         Order order = new Order();
-        Ticket ticket = new Ticket(TicketType.TEST, true, true);
-        order.addTicket(testEntityManager.persist(ticket));
+        Ticket ticket = persistTicket();
+        order.addTicket(ticket);
 
         Long id = testEntityManager.persistAndGetId(order, Long.class);
 
@@ -445,8 +445,8 @@ public class OrderServiceTest extends ServiceTest {
     @Test
     public void removeTicketFromOrderTypeNull() {
         Order order = new Order();
-        Ticket ticket = new Ticket(TicketType.TEST, true, true);
-        order.addTicket(testEntityManager.persist(ticket));
+        Ticket ticket = persistTicket();
+        order.addTicket(ticket);
 
         Long id = testEntityManager.persistAndGetId(order, Long.class);
 
@@ -460,25 +460,10 @@ public class OrderServiceTest extends ServiceTest {
     }
 
     @Test
-    public void removeTicketFromOrderTwoMatchingTickets() {
+    public void removeTicketFromOrderDeleteTwo() {
         Order order = new Order();
-        Ticket ticket1 = new Ticket(TicketType.TEST, true, true);
-        Ticket ticket2 = new Ticket(TicketType.TEST, true, true);
-        order.addTicket(testEntityManager.persist(ticket1));
-        order.addTicket(testEntityManager.persist(ticket2));
-
-        Long id = testEntityManager.persistAndGetId(order, Long.class);
-
-        assertEquals(2, testEntityManager.find(Order.class, id).getTickets().size());
-        orderService.removeTicketFromOrder(id, ticket1.getId());
-        assertEquals(1, testEntityManager.find(Order.class, id).getTickets().size());
-    }
-
-    @Test
-    public void removeTicketFromOrderTwoMatchingTicketsDeleteTwice() {
-        Order order = new Order();
-        Ticket ticket1 = new Ticket(TicketType.TEST, true, true);
-        Ticket ticket2 = new Ticket(TicketType.TEST, true, true);
+        Ticket ticket1 = persistTicket();
+        Ticket ticket2 = persistTicket();
         order.addTicket(testEntityManager.persist(ticket1));
         order.addTicket(testEntityManager.persist(ticket2));
 
@@ -497,9 +482,9 @@ public class OrderServiceTest extends ServiceTest {
         thrown.expect(OrderNotFoundException.class);
 
         Order order = new Order();
-        Ticket ticket = new Ticket(TicketType.TEST, true, true);
+        Ticket ticket = persistTicket();
         order.addTicket(testEntityManager.persist(ticket));
-        Long id = testEntityManager.persistAndGetId(order, Long.class);
+        testEntityManager.persistAndGetId(order, Long.class);
 
         orderService.removeTicketFromOrder(9999L, ticket.getId());
     }
@@ -509,9 +494,9 @@ public class OrderServiceTest extends ServiceTest {
         thrown.expect(OrderNotFoundException.class);
 
         Order order = new Order();
-        Ticket ticket = new Ticket(TicketType.TEST, true, true);
+        Ticket ticket = persistTicket();
         order.addTicket(testEntityManager.persist(ticket));
-        Long id = testEntityManager.persistAndGetId(order, Long.class);
+        testEntityManager.persistAndGetId(order, Long.class);
 
         orderService.removeTicketFromOrder(null, ticket.getId());
     }
@@ -523,7 +508,7 @@ public class OrderServiceTest extends ServiceTest {
         order.addTicket(persistTicket());
 
         Long id = testEntityManager.persistAndGetId(order, Long.class);
-        String payment = orderService.requestPayment(id);
+        orderService.requestPayment(id);
         verify(paymentService, times(1)).registerOrder(Mockito.any(Order.class));
         reset(paymentService);
     }
@@ -535,7 +520,7 @@ public class OrderServiceTest extends ServiceTest {
 
         Long id = testEntityManager.persistAndGetId(order, Long.class);
         try {
-            String payment = orderService.requestPayment(id);
+            orderService.requestPayment(id);
         } catch (IllegalStateException e) {
             assertEquals("Order can not be empty", e.getMessage());
             verify(paymentService, never()).registerOrder(Mockito.any(Order.class));
@@ -552,7 +537,7 @@ public class OrderServiceTest extends ServiceTest {
 
         Long id = testEntityManager.persistAndGetId(order, Long.class);
         try {
-            String payment = orderService.requestPayment(id);
+            orderService.requestPayment(id);
         } catch (UnassignedOrderException e) {
             verify(paymentService, never()).registerOrder(Mockito.any(Order.class));
         } finally {
@@ -566,9 +551,9 @@ public class OrderServiceTest extends ServiceTest {
         Order order = new Order(user);
         order.addTicket(persistTicket());
 
-        Long id = testEntityManager.persistAndGetId(order, Long.class);
+        testEntityManager.persistAndGetId(order, Long.class);
         try {
-            String payment = orderService.requestPayment(null);
+            orderService.requestPayment(null);
         } catch (OrderNotFoundException e) {
             verify(paymentService, never()).registerOrder(Mockito.any(Order.class));
         } finally {
