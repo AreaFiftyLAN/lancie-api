@@ -27,10 +27,10 @@ import ch.wisv.areafiftylan.products.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.users.model.User;
 import io.restassured.http.ContentType;
 import org.apache.http.HttpStatus;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Optional;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
@@ -53,21 +53,14 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
 
     private final String CONSUMPTION = "Delicious Consumption";
 
-    @Before
-    public void InitConsumptionTest(){
-        // Needs to happen before clearing the other two, otherwise shit hits the fan.
-        consumptionMapsRepository.deleteAll();
-        consumptionsRepository.deleteAll();
-        ticketRepository.deleteAll();
-    }
+    private Consumption getOrPersistConsumption(String consumption) {
+        Optional<Consumption> consumptionOptional = consumptionsRepository.findByName(consumption);
 
-    @After
-    public void consumptionTestCleanup(){
-
+        return consumptionOptional.orElseGet(() -> consumptionService.addPossibleConsumption(consumption));
     }
 
     @Test
-    public void getAllPossibleConsumptionsTestAsUser(){
+    public void getAllPossibleConsumptionsTestAsUser() {
         User user = createUser();
 
         //@formatter:off
@@ -81,24 +74,9 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
     }
 
     @Test
-    public void getAllPossibleConsumptionsTestAsAdminNone(){
+    public void getAllPossibleConsumptionsTestAsAdmin() {
         User user = createUser(true);
-
-        //@formatter:off
-        given().
-            header(getXAuthTokenHeaderForUser(user)).
-        when().
-            get(CONSUMPTION_ENDPOINT).
-        then().
-            statusCode(HttpStatus.SC_OK).
-            body("", empty());
-        //@formatter:on
-    }
-
-    @Test
-    public void getAllPossibleConsumptionsTestAsAdminSingle(){
-        User user = createUser(true);
-        consumptionService.addPossibleConsumption(CONSUMPTION);
+        getOrPersistConsumption(CONSUMPTION);
 
         //@formatter:off
         given().
@@ -112,11 +90,11 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
     }
 
     @Test
-    public void getAllPossibleConsumptionsTestAsAdminMultiple(){
+    public void getAllPossibleConsumptionsTestAsAdminMultiple() {
         User user = createUser(true);
-        consumptionService.addPossibleConsumption(CONSUMPTION);
+        getOrPersistConsumption(CONSUMPTION);
         String MILKSHAKE_CONSUMPTION = "Deliciously Cold Milkshake";
-        consumptionService.addPossibleConsumption(MILKSHAKE_CONSUMPTION);
+        getOrPersistConsumption(MILKSHAKE_CONSUMPTION);
 
         //@formatter:off
         given().
@@ -136,7 +114,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
         //@formatter:off
         given().
             header(getXAuthTokenHeaderForUser(user)).
-            body(CONSUMPTION).
+            body("addAvailableConsumptionTestAsUser").
         when().
             post(CONSUMPTION_ENDPOINT).
         then().
@@ -147,23 +125,24 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
     @Test
     public void addAvailableConsumptionTestAsAdmin() {
         User user = createUser(true);
+        String consumption = "addAvailableConsumptionTestAsAdmin";
 
         //@formatter:off
         given().
             header(getXAuthTokenHeaderForUser(user)).
-            body(CONSUMPTION).
+            body(consumption).
         when().
             post(CONSUMPTION_ENDPOINT).
         then().
             statusCode(HttpStatus.SC_OK).
-            body("message", equalTo("Successfully added " + CONSUMPTION + " as a supported consumption."));
+            body("message", equalTo("Successfully added " + consumption + " as a supported consumption."));
         //@formatter:on
     }
 
     @Test
     public void addAvailableConsumptionTestAsAdminDuplicate() {
         User user = createUser(true);
-        consumptionService.addPossibleConsumption(CONSUMPTION);
+        getOrPersistConsumption(CONSUMPTION);
 
         //@formatter:off
         given().
@@ -180,14 +159,14 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
     @Test
     public void removeAvailableConsumptionTestAsUser() {
         User user = createUser();
-        Consumption consumption = consumptionService.addPossibleConsumption(CONSUMPTION);
+        Consumption consumption = getOrPersistConsumption(CONSUMPTION);
 
         //@formatter:off
         given().
             header(getXAuthTokenHeaderForUser(user)).
+        when().
             body(consumption.getId()).
             contentType(ContentType.JSON).
-        when().
             delete(CONSUMPTION_ENDPOINT).
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
@@ -197,7 +176,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
     @Test
     public void removeAvailableConsumptionTestAsAdmin() {
         User user = createUser(true);
-        Consumption consumption = consumptionService.addPossibleConsumption(CONSUMPTION);
+        Consumption consumption = getOrPersistConsumption(CONSUMPTION);
 
         //@formatter:off
         given().
@@ -215,19 +194,17 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
     @Test
     public void removeAvailableConsumptionTestAsAdminNoneThere() {
         User user = createUser(true);
-        Consumption consumption = consumptionService.addPossibleConsumption(CONSUMPTION);
-        consumption = consumptionService.removePossibleConsumption(consumption.getId());
 
         //@formatter:off
         given().
             header(getXAuthTokenHeaderForUser(user)).
-            body(consumption.getId()).
+            body(9999F).
             contentType(ContentType.JSON).
         when().
             delete(CONSUMPTION_ENDPOINT).
         then().
             statusCode(HttpStatus.SC_NOT_FOUND).
-            body("message", equalTo("Can't find a consumption with id: \"" + consumption.getId() + "\" is unsupported."));
+            body("message", equalTo("Can't find a consumption with id: 9999 is unsupported."));
         //@formatter:on
     }
 
@@ -250,7 +227,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
     public void consumptionsMadeTestAsAdmin() {
         User user = createUser(true);
         Ticket ticket = createTicketForUser(user);
-        Consumption consumption = consumptionService.addPossibleConsumption(CONSUMPTION);
+        Consumption consumption = getOrPersistConsumption(CONSUMPTION);
         consumptionService.consume(ticket.getId(), consumption.getId());
 
         //@formatter:off
@@ -302,7 +279,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
     public void consumeTestAsUser() {
         User user = createUser();
         Ticket ticket = createTicketForUser(user);
-        Consumption consumption = consumptionService.addPossibleConsumption(CONSUMPTION);
+        Consumption consumption = getOrPersistConsumption(CONSUMPTION);
 
         //@formatter:off
         given().
@@ -320,7 +297,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
     public void consumeTestAsAdmin() {
         User user = createUser(true);
         Ticket ticket = createTicketForUser(user);
-        Consumption consumption = consumptionService.addPossibleConsumption(CONSUMPTION);
+        Consumption consumption = getOrPersistConsumption(CONSUMPTION);
 
         //@formatter:off
         given().
@@ -339,7 +316,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
     public void consumeTestAsAdminAlreadyConsumed() {
         User user = createUser(true);
         Ticket ticket = createTicketForUser(user);
-        Consumption consumption = consumptionService.addPossibleConsumption(CONSUMPTION);
+        Consumption consumption = getOrPersistConsumption(CONSUMPTION);
         consumptionService.consume(ticket.getId(), consumption.getId());
 
         //@formatter:off
@@ -359,13 +336,11 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
     public void consumeTestAsAdminDoesntExist() {
         User user = createUser(true);
         Ticket ticket = createTicketForUser(user);
-        Consumption consumption = consumptionService.addPossibleConsumption(CONSUMPTION);
-        consumption = consumptionService.removePossibleConsumption(consumption.getId());
 
         //@formatter:off
         given().
             header(getXAuthTokenHeaderForUser(user)).
-            body(consumption.getId()).
+            body(9999F).
             contentType(ContentType.JSON).
         when().
             post(CONSUMPTION_ENDPOINT + "/" + ticket.getId() + "/consume").
@@ -380,7 +355,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
         Ticket ticket = createTicketForUser(user);
         ticket.setValid(false);
         ticketRepository.saveAndFlush(ticket);
-        Consumption consumption = consumptionService.addPossibleConsumption(CONSUMPTION);
+        Consumption consumption = getOrPersistConsumption(CONSUMPTION);
 
         //@formatter:off
         given().
@@ -399,7 +374,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
     public void consumeTestAsAdminConsumedByOther() {
         User user = createUser(true);
         Ticket ticket = createTicketForUser(user);
-        Consumption consumption = consumptionService.addPossibleConsumption(CONSUMPTION);
+        Consumption consumption = getOrPersistConsumption(CONSUMPTION);
         consumptionService.consume(createTicketForUser(createUser()).getId(), consumption.getId());
 
         //@formatter:off
@@ -419,7 +394,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
     public void resetTestAsUser() {
         User user = createUser();
         Ticket ticket = createTicketForUser(user);
-        Consumption consumption = consumptionService.addPossibleConsumption(CONSUMPTION);
+        Consumption consumption = getOrPersistConsumption(CONSUMPTION);
         consumptionService.consume(ticket.getId(), consumption.getId());
 
         //@formatter:off
@@ -438,7 +413,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
     public void resetTestAsAdmin() {
         User user = createUser(true);
         Ticket ticket = createTicketForUser(user);
-        Consumption consumption = consumptionService.addPossibleConsumption(CONSUMPTION);
+        Consumption consumption = getOrPersistConsumption(CONSUMPTION);
         consumptionService.consume(ticket.getId(), consumption.getId());
 
         //@formatter:off
@@ -458,19 +433,17 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
     public void resetTestAsAdminDoesntExist() {
         User user = createUser(true);
         Ticket ticket = createTicketForUser(user);
-        Consumption consumption = consumptionService.addPossibleConsumption(CONSUMPTION);
-        consumption = consumptionService.removePossibleConsumption(consumption.getId());
 
         //@formatter:off
         given().
             header(getXAuthTokenHeaderForUser(user)).
-            body(consumption.getId()).
+            body(9999F).
             contentType(ContentType.JSON).
         when().
             post(CONSUMPTION_ENDPOINT + "/" + ticket.getId() + "/reset").
         then().
             statusCode(HttpStatus.SC_NOT_FOUND).
-            body("message", equalTo("Can't find a consumption with id: \"" + consumption.getId() + "\" is unsupported."));
+            body("message", equalTo("Can't find a consumption with id: 9999 is unsupported."));
         //@formatter:on
     }
 
@@ -480,7 +453,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
         Ticket ticket = createTicketForUser(user);
         ticket.setValid(false);
         ticketRepository.saveAndFlush(ticket);
-        Consumption consumption = consumptionService.addPossibleConsumption(CONSUMPTION);
+        Consumption consumption = getOrPersistConsumption(CONSUMPTION);
 
         //@formatter:off
         given().
