@@ -2,7 +2,7 @@ import org.springframework.boot.gradle.run.BootRunTask
 
 buildscript {
     ext {
-        springBootVersion = '1.4.2.RELEASE'
+        springBootVersion = '1.4.3.RELEASE'
     }
     repositories {
         mavenCentral()
@@ -55,20 +55,17 @@ dependencies {
     compile("com.zaxxer:HikariCP")
     compile("org.flywaydb:flyway-core:4.0.3")
 
-    compile("com.allanditzel:spring-security-csrf-token-filter:1.1")
-    compile("org.projectlombok:lombok:1.16.8")
+    compile("org.projectlombok:lombok:1.16.12")
     compile("com.google.guava:guava:19.0")
-    compile("nl.stil4m:mollie-api:2.3.0")
+    compile("nl.stil4m:mollie-api:2.4.0")
     compile("org.apache.logging.log4j:log4j-core:2.6.2")
     compile("org.apache.logging.log4j:log4j-api:2.6.2")
 
     runtime("org.hsqldb:hsqldb")
     runtime("org.postgresql:postgresql")
-    runtime("net.sourceforge.nekohtml:nekohtml:1.9.22")
 
     testCompile("org.springframework.boot:spring-boot-starter-test")
-    testCompile("com.jayway.restassured:rest-assured:2.8.0")
-    testCompile 'io.rest-assured:rest-assured:3.0.1'
+    testCompile("io.rest-assured:rest-assured:3.0.1")
 }
 
 eclipse {
@@ -82,7 +79,7 @@ task wrapper(type: Wrapper) {
     gradleVersion = '3.2.1'
 }
 
-task bootRunDev(type: org.springframework.boot.gradle.run.BootRunTask) {
+task bootRunDev(type: BootRunTask) {
     group = 'Application'
     doFirst() {
         main = project.mainClassName
