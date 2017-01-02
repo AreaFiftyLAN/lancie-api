@@ -570,9 +570,11 @@ public class OrderServiceTest extends ServiceTest {
     public void updateOrderStatusByReference() {
         Order order = new Order();
         order.setUser(persistUser());
+        order.setReference("updateOrderStatusByReference");
+        order = testEntityManager.persist(order);
         given(paymentService.updateStatus(Mockito.anyString())).willReturn(order);
 
-        orderService.updateOrderStatusByReference("Reference");
+        orderService.updateOrderStatusByReference("updateOrderStatusByReference");
 
         verify(paymentService, times(1)).updateStatus(Mockito.anyString());
 
@@ -587,10 +589,12 @@ public class OrderServiceTest extends ServiceTest {
         order.addTicket(persistTicket());
         order.setUser(user);
         order.setStatus(OrderStatus.PAID);
+        order.setReference("updateOrderStatusByReferenceOrderStatusPaid");
+
         order = testEntityManager.persist(order);
         given(paymentService.updateStatus(Mockito.anyString())).willReturn(order);
 
-        orderService.updateOrderStatusByReference("Reference");
+        orderService.updateOrderStatusByReference("updateOrderStatusByReferenceOrderStatusPaid");
 
         assertTrue(order.getTickets().stream().allMatch(Ticket::isValid));
         assertTrue(order.getTickets().stream().allMatch(t -> t.getOwner().equals(user)));
@@ -606,10 +610,11 @@ public class OrderServiceTest extends ServiceTest {
         ticket.setValid(false);
         order.addTicket(ticket);
         order.setUser(user);
+        order.setReference("updateOrderStatusByReferenceOrderStatusAssigned");
         order = testEntityManager.persist(order);
         given(paymentService.updateStatus(Mockito.anyString())).willReturn(order);
 
-        orderService.updateOrderStatusByReference("Reference");
+        orderService.updateOrderStatusByReference("updateOrderStatusByReferenceOrderStatusAssigned");
 
         assertTrue(order.getTickets().stream().noneMatch(Ticket::isValid));
         assertTrue(order.getTickets().stream().allMatch(t -> t.getOwner() == null));
@@ -623,10 +628,11 @@ public class OrderServiceTest extends ServiceTest {
         thrown.expect(UnassignedOrderException.class);
 
         order.addTicket(persistTicket());
+        order.setReference("updateOrderStatusByReferenceOrderStatusAnonymous");
         order = testEntityManager.persist(order);
         given(paymentService.updateStatus(Mockito.anyString())).willReturn(order);
 
-        orderService.updateOrderStatusByReference("Reference");
+        orderService.updateOrderStatusByReference("updateOrderStatusByReferenceOrderStatusAnonymous");
 
         assertTrue(order.getTickets().stream().noneMatch(Ticket::isValid));
         assertTrue(order.getTickets().stream().allMatch(t -> t.getOwner() == null));
@@ -642,12 +648,13 @@ public class OrderServiceTest extends ServiceTest {
         Ticket ticket = persistTicket();
         ticket.setValid(false);
         order.addTicket(ticket);
-        order = testEntityManager.persist(order);
         order.setUser(user);
         order.setStatus(OrderStatus.PENDING);
+        order.setReference("updateOrderStatusByReferenceOrderStatusPending");
+        order = testEntityManager.persist(order);
         given(paymentService.updateStatus(Mockito.anyString())).willReturn(order);
 
-        orderService.updateOrderStatusByReference("Reference");
+        orderService.updateOrderStatusByReference("updateOrderStatusByReferenceOrderStatusPending");
 
         assertTrue(order.getTickets().stream().noneMatch(Ticket::isValid));
         assertTrue(order.getTickets().stream().allMatch(t -> t.getOwner() == null));
@@ -661,10 +668,11 @@ public class OrderServiceTest extends ServiceTest {
         thrown.expect(UnassignedOrderException.class);
 
         order.addTicket(persistTicket());
+        order.setReference("updateOrderStatusByReferenceUnassignedOrder");
         order = testEntityManager.persist(order);
         given(paymentService.updateStatus(Mockito.anyString())).willReturn(order);
 
-        orderService.updateOrderStatusByReference("Reference");
+        orderService.updateOrderStatusByReference("updateOrderStatusByReferenceUnassignedOrder");
 
         assertTrue(order.getTickets().stream().noneMatch(Ticket::isValid));
 
@@ -675,15 +683,16 @@ public class OrderServiceTest extends ServiceTest {
     public void updateOrderStatusToPaid() {
         User user = persistUser();
         Order order = new Order(user);
-        order.setReference("Reference");
+        order.setReference("updateOrderStatusToPaid");
         order = testEntityManager.persist(order);
         Order paidOrder = new Order(user);
         paidOrder.setStatus(OrderStatus.PAID);
-        given(paymentService.updateStatus("Reference")).willReturn(paidOrder);
+        given(paymentService.updateStatus(anyString())).willReturn(paidOrder);
 
-        order = orderService.updateOrderStatusByReference("Reference");
+        orderService.updateOrderStatusByReference("updateOrderStatusToPaid");
 
         verify(mailService, times(1)).sendOrderConfirmation(any(Order.class));
+
         reset(paymentService);
     }
 }
