@@ -82,7 +82,7 @@ public class MailServiceImpl implements MailService {
     @Override
     public void sendMail(String recipientEmail, String recipientName, String subject, String messageString) {
         String htmlContent = prepareHtmlContent(recipientName, messageString);
-        sendMailWithContent(recipientEmail, subject, messageString);
+        sendMailWithContent(recipientEmail, subject, htmlContent);
     }
 
     @Override
