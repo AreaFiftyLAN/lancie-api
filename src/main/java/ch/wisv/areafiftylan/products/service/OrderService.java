@@ -48,8 +48,13 @@ public interface OrderService {
     /**
      * Removes a ticket with the given DTO from an order. Throws a NotFoundException when a ticket with such a DTO can't
      * be found
+     *
+     * @param orderId       The Id of the Order from which the tickets have to be removed
+     * @param ticketId      The Id of the Ticket to remove from the order
+     *
+     * @return The updated Order where ticket has been removed if present
      */
-    Order removeTicketFromOrder(Long orderId, String type, List<String> options);
+    Order removeTicketFromOrder(Long orderId, Long ticketId);
 
     /**
      * Register the order with the payment provider
