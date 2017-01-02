@@ -604,6 +604,50 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
     }
 
     @Test
+    public void testAlcoholCheckAsUser() {
+        User user = createUser();
+
+        //@formatter:off
+        when().
+            get("/users/" + user.getId() + "/alcoholcheck").
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
+    }
+
+    @Test
+    public void testAlcoholCheckAsAdminUnderage() {
+        User admin = createUser(true);
+        User user = createUser(17, false);
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(admin)).
+        when().
+            get("/users/" + user.getId() + "/alcoholcheck").
+        then().
+            statusCode(HttpStatus.SC_OK).
+            body("object", equalTo(false));
+        //@formatter:on
+    }
+
+    @Test
+    public void testAlcoholCheckAsAdminOverage() {
+        User admin = createUser(true);
+        User user = createUser(19, false);
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(admin)).
+        when().
+            get("/users/" + user.getId() + "/alcoholcheck").
+        then().
+            statusCode(HttpStatus.SC_OK).
+            body("object", equalTo(true));
+        //@formatter:on
+    }
+
+    @Test
     public void testChangePassword() {
         //TODO: Move to new AuthenticationTest
         User user = createUser();

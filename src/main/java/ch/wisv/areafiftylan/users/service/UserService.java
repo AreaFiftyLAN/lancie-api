@@ -61,4 +61,11 @@ public interface UserService {
     void changePassword(Long userId, String oldPassword, String newPassword);
 
     Boolean checkUsernameAvailable(String username);
+
+    /**
+     * This method checks wether a user is older than the alcohol age provided by properties.
+     * @param userId The ID of the user to check.
+     * @return A boolean indicating wether a user is old enough.
+     */
+    Boolean alcoholCheck(Long userId);
 }

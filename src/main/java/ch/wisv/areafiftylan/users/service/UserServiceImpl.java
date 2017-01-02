@@ -39,6 +39,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
+import java.time.LocalDate;
 import java.util.Collection;
 
 @Service
@@ -53,6 +54,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     String requestUrl;
     @Value("${a5l.user.resetUrl}")
     String resetUrl;
+    @Value("${a51.user.alcoholage : 18}")
+    Long ALCOHOL_AGE;
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository, VerificationTokenRepository verificationTokenRepository,
@@ -236,6 +239,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public Boolean checkUsernameAvailable(String username) {
         return !userRepository.findOneByUsernameIgnoreCase(username).isPresent();
 
+    }
+
+    @Override
+    public Boolean alcoholCheck(Long userId) {
+        User user = userRepository.findOne(userId);
+        return user.getProfile().getBirthday().isBefore(LocalDate.now().minusYears(ALCOHOL_AGE));
     }
 
     /**

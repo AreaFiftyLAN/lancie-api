@@ -20,6 +20,7 @@ package ch.wisv.areafiftylan.users.controller;
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.users.model.UserDTO;
 import ch.wisv.areafiftylan.users.service.UserService;
+import ch.wisv.areafiftylan.utils.ResponseEntityBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
@@ -147,6 +148,15 @@ public class UserRestController {
         userService.lock(userId);
         return createResponseEntity(HttpStatus.OK, "User disabled");
     }
+
+    @PreAuthorize("hasRole('ADMIN') OR hasRole('COMMITTEE')")
+    @GetMapping("/{userId}/alcoholcheck")
+    public ResponseEntity<?> alcoholCheck(@PathVariable Long userId) {
+        boolean oldEnough = userService.alcoholCheck(userId);
+        return ResponseEntityBuilder.createResponseEntity(HttpStatus.OK, "Age checked!", oldEnough);
+    }
+
+
 
     /**
      * Checks for the availability of a username. Returns false when another user is already registered with this
