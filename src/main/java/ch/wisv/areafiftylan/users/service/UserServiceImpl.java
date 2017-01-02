@@ -112,7 +112,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         // Build the URL and send this to the mailservice for sending.
         String confirmUrl = requestUrl + "?token=" + verificationToken.getToken();
         if (orderId != null) {
-            confirmUrl += "?orderId=" + orderId;
+            confirmUrl += "&orderId=" + orderId;
         }
         mailService.sendVerificationmail(user, confirmUrl);
     }
