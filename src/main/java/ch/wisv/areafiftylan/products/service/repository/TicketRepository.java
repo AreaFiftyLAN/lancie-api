@@ -30,9 +30,6 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
     Optional<Ticket> findById(Long ticketId);
 
-    //FIXME: Build a new query using options.contains or something
-    //    Collection<Ticket> findByPickupService_True();
-
     Integer countByType(TicketType type);
 
     Collection<Ticket> findAllByOwnerUsernameIgnoreCase(String username);

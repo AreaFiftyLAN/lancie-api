@@ -34,16 +34,4 @@ public class Application {
         SpringApplication.run(Application.class, args);
     }
 
-    //    /**
-    //     * This function inserts some testdata into the database for development testing.
-    //     */
-    //    @Bean
-    //    @Profile("dev")
-    //    CommandLineRunner init(UserRepository accountRepository, TicketRepository ticketRepository, SeatService
-    // seatService,
-    //                           TeamRepository teamRepository) {
-    //
-    //        return new TestDataRunner(accountRepository, ticketRepository, teamRepository, seatService);
-    //
-    //    }
 }

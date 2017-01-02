@@ -204,7 +204,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
             delete(CONSUMPTION_ENDPOINT).
         then().
             statusCode(HttpStatus.SC_NOT_FOUND).
-            body("message", equalTo("Can't find a consumption with id: 9999 is unsupported."));
+            body("message", equalTo("Can't find a consumption with id: 9999"));
         //@formatter:on
     }
 
@@ -443,7 +443,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
             post(CONSUMPTION_ENDPOINT + "/" + ticket.getId() + "/reset").
         then().
             statusCode(HttpStatus.SC_NOT_FOUND).
-            body("message", equalTo("Can't find a consumption with id: 9999 is unsupported."));
+            body("message", equalTo("Can't find a consumption with id: 9999"));
         //@formatter:on
     }
 

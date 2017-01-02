@@ -497,7 +497,7 @@ public class TicketServiceTest extends ServiceTest {
 
         Collection<Ticket> tickets = ticketService.getOwnedTicketsAndFromTeamMembers(captain);
 
-        assertEquals(tickets, Collections.singletonList(captainTicket));
+        assertThat(tickets).containsExactly(captainTicket);
     }
 
     @Test
@@ -507,7 +507,7 @@ public class TicketServiceTest extends ServiceTest {
 
         Collection<Ticket> tickets = ticketService.getOwnedTicketsAndFromTeamMembers(captain);
 
-        assertEquals(tickets, Collections.singletonList(captainTicket));
+        assertThat(tickets).containsExactly(captainTicket);
     }
 
     @Test
