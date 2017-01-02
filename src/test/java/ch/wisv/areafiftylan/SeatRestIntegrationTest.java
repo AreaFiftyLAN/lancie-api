@@ -15,80 +15,42 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
 package ch.wisv.areafiftylan;
 
 import ch.wisv.areafiftylan.products.model.Ticket;
-import ch.wisv.areafiftylan.products.model.TicketType;
-import ch.wisv.areafiftylan.products.service.TicketRepository;
+import ch.wisv.areafiftylan.products.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.seats.model.Seat;
 import ch.wisv.areafiftylan.seats.service.SeatRepository;
+import ch.wisv.areafiftylan.seats.service.SeatService;
 import ch.wisv.areafiftylan.teams.model.Team;
-import ch.wisv.areafiftylan.teams.service.TeamRepository;
-import ch.wisv.areafiftylan.users.model.Gender;
 import ch.wisv.areafiftylan.users.model.User;
-import ch.wisv.areafiftylan.utils.SessionData;
-import com.jayway.restassured.http.ContentType;
+import io.restassured.http.ContentType;
 import org.apache.http.HttpStatus;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.jayway.restassured.RestAssured.given;
-import static com.jayway.restassured.RestAssured.when;
+import static io.restassured.RestAssured.given;
+import static io.restassured.RestAssured.when;
 import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertTrue;
 
-/**
- * Created by Sille Kamoen on 17-11-15.
- */
-public class SeatRestIntegrationTest extends IntegrationTest {
 
-    @Autowired
-    SeatRepository seatRepository;
+public class SeatRestIntegrationTest extends XAuthIntegrationTest {
 
     @Autowired
-    TeamRepository teamRepository;
+    private SeatRepository seatRepository;
+    @Autowired
+    private TicketRepository ticketRepository;
 
     @Autowired
-    TicketRepository ticketRepository;
-
-    private User captain;
-    private String captainCleartextPassword = "password";
-
-    private Team team;
-
-    private Ticket userTicket;
-
-    private Ticket captainTicket;
-
-    @Before
-    public void setupSeatIntegrationTests() {
-        List<Seat> seatList = new ArrayList<>(5);
-
-        for (int i = 1; i <= 5; i++) {
-            seatList.add(new Seat("A", i));
-        }
-
-        seatRepository.save(seatList);
-
-        userTicket = new Ticket(user, TicketType.EARLY_FULL, false, false);
-        userTicket.setValid(true);
-        userTicket = ticketRepository.saveAndFlush(userTicket);
-    }
-
-    @After
-    public void cleanupSeatIntegrationTest() {
-        seatRepository.deleteAll();
-        ticketRepository.deleteAll();
-        teamRepository.deleteAll();
-    }
+    SeatService seatService;
 
     private void setTicketOnA1(Ticket ticket) {
         Seat seat = seatRepository.findAll().get(0);
@@ -97,34 +59,21 @@ public class SeatRestIntegrationTest extends IntegrationTest {
         seatRepository.save(seat);
     }
 
-    private void createCaptainAndTeam() {
-        captain = new User("captain@mail.com", new BCryptPasswordEncoder().encode(captainCleartextPassword));
-        captain.getProfile()
-                .setAllFields("Captain", "Hook", "PeterPanKiller", localDate, Gender.MALE, "High Road 3", "2826ZZ", "Neverland",
-                        "0906-0777", null);
-        captain = userRepository.saveAndFlush(captain);
-
-        captainTicket = new Ticket(captain, TicketType.EARLY_FULL, false, false);
-        captainTicket.setValid(true);
-        captainTicket = ticketRepository.save(captainTicket);
-
-
-        team = new Team("team", captain);
-        team.addMember(user);
-
-        team = teamRepository.save(team);
+    @After
+    public void cleanupSeatTest() {
+        seatService.clearSeat("A", 1);
+        seatService.clearSeat("A", 2);
     }
 
     @Test
     public void getAllSeatAsUser() {
-        setTicketOnA1(userTicket);
-
-        SessionData login = login(user.getUsername(), userCleartextPassword);
+        User user = createUser();
+        Ticket ticket = createTicketForUser(user);
+        setTicketOnA1(ticket);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(user)).
         when().
             get("/seats").
         then().
@@ -147,14 +96,11 @@ public class SeatRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void getAllSeatsAdminViewAsUser() {
-        setTicketOnA1(userTicket);
-
-        SessionData login = login(user.getUsername(), userCleartextPassword);
+        User user = createUser();
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(user)).
         when().
             get("/seats?admin").
         then().
@@ -164,14 +110,13 @@ public class SeatRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void getAllSeatsAdminViewAsAdmin() {
-        setTicketOnA1(userTicket);
-
-        SessionData login = login(admin.getUsername(), adminCleartextPassword);
+        User admin = createUser(true);
+        Ticket ticket = createTicketForUser(admin);
+        setTicketOnA1(ticket);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(admin)).
         when().
             get("/seats?admin").
         then().
@@ -185,14 +130,13 @@ public class SeatRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void getSeatGroupAsUser() {
-        setTicketOnA1(userTicket);
-
-        SessionData login = login(user.getUsername(), userCleartextPassword);
+        User user = createUser();
+        Ticket ticket = createTicketForUser(user);
+        setTicketOnA1(ticket);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(user)).
         when().
             get("/seats/A").
         then().
@@ -205,12 +149,11 @@ public class SeatRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void getSeatGroupAdminViewAsUser() {
-        SessionData login = login(user.getUsername(), userCleartextPassword);
+        User user = createUser();
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(user)).
         when().
             get("/seats/A?admin").
         then().
@@ -220,14 +163,13 @@ public class SeatRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void getSeatGroupAdminViewAsAdmin() {
-        setTicketOnA1(userTicket);
-
-        SessionData login = login(admin.getUsername(), adminCleartextPassword);
+        User admin = createUser(true);
+        Ticket ticket = createTicketForUser(admin);
+        setTicketOnA1(ticket);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(admin)).
         when().
             get("/seats/A?admin").
         then().
@@ -241,14 +183,13 @@ public class SeatRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void getSeatAsUser() {
-        setTicketOnA1(userTicket);
-
-        SessionData login = login(user.getUsername(), userCleartextPassword);
+        User user = createUser();
+        Ticket ticket = createTicketForUser(user);
+        setTicketOnA1(ticket);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(user)).
         when().
             get("/seats/A/1").
         then().
@@ -261,14 +202,13 @@ public class SeatRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void getSeatAdminViewAsUser() {
-        setTicketOnA1(userTicket);
-
-        SessionData login = login(user.getUsername(), userCleartextPassword);
+        User user = createUser();
+        Ticket ticket = createTicketForUser(user);
+        setTicketOnA1(ticket);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(user)).
         when().
             get("/seats/A/1?admin").
         then().
@@ -278,14 +218,13 @@ public class SeatRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void getCurrentSeatAsUser() {
-        setTicketOnA1(userTicket);
-
-        SessionData login = login(user.getUsername(), userCleartextPassword);
+        User user = createUser();
+        Ticket ticket = createTicketForUser(user);
+        setTicketOnA1(ticket);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(user)).
         when().
             get("/users/current/seat").
         then().
@@ -298,8 +237,12 @@ public class SeatRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void getSeatsForTeam() {
-        createCaptainAndTeam();
-
+        User captain = createUser();
+        Ticket captainTicket = createTicketForUser(captain);
+        User user = createUser();
+        Ticket userTicket = createTicketForUser(user);
+        Team team = createTeamWithCaptain(captain);
+        addMemberToTeam(team, user);
         setTicketOnA1(captainTicket);
 
         // Seat User on seat A2
@@ -307,12 +250,9 @@ public class SeatRestIntegrationTest extends IntegrationTest {
         seat.setTicket(userTicket);
         seatRepository.save(seat);
 
-        SessionData login = login(user.getUsername(), userCleartextPassword);
-
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(user)).
         when().
             get("/teams/" + team.getTeamName() + "/seats").
         then().
@@ -336,9 +276,9 @@ public class SeatRestIntegrationTest extends IntegrationTest {
 
         //@formatter:off
         given().
-        when().
-            content(seatGroupDTO).
+            body(seatGroupDTO).
             contentType(ContentType.JSON).
+        when().
             post("/seats").
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
@@ -347,19 +287,17 @@ public class SeatRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void addSeatGroupAsUser() {
+        User user = createUser();
         Map<String, String> seatGroupDTO = new HashMap<>();
         seatGroupDTO.put("seatGroupName", "testGroup");
         seatGroupDTO.put("numberOfSeats", "5");
 
         //@formatter:off
-        SessionData login = login(user.getUsername(), userCleartextPassword);
-
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
-        when().
-            content(seatGroupDTO).
+            header(getXAuthTokenHeaderForUser(user)).
+            body(seatGroupDTO).
             contentType(ContentType.JSON).
+        when().
             post("/seats").
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
@@ -368,42 +306,36 @@ public class SeatRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void addSeatGroupAsAdmin() {
+        User admin = createUser(true);
         Map<String, String> seatGroupDTO = new HashMap<>();
         seatGroupDTO.put("seatGroupName", "testGroup");
         seatGroupDTO.put("numberOfSeats", "5");
 
         //@formatter:off
-        SessionData login = login(admin.getUsername(), adminCleartextPassword);
-
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(admin)).
         when().
-            content(seatGroupDTO).
+            body(seatGroupDTO).
             contentType(ContentType.JSON).
             post("/seats").
         then().
             statusCode(HttpStatus.SC_OK);
-
-        given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
-        when().
-            get("/seats/" + "testGroup").
-        then().
-            statusCode(HttpStatus.SC_OK).
-            body("seatmap.testGroup", hasSize(5));
         //@formatter:on
+
+        List<Seat> seatGroup = seatRepository.findBySeatGroup(seatGroupDTO.get("seatGroupName"));
+        assertTrue(seatGroup.size() == 5);
     }
     //endregion
 
     //region Test Reserve Seat
     @Test
     public void reserveSeatAsAnon() {
+        User user = createUser();
+        Ticket ticket = createTicketForUser(user);
         //@formatter:off
         given().
         when().
-            param("username", user.getUsername()).
+            param("ticketId", ticket.getId()).
             post("/seats/A/1").
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
@@ -412,14 +344,14 @@ public class SeatRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void reserveSeatAsUser() {
-        SessionData login = login(user.getUsername(), userCleartextPassword);
+        User user = createUser();
+        Ticket ticket = createTicketForUser(user);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(user)).
         when().
-            param("ticketId", userTicket.getId()).
+            param("ticketId", ticket.getId()).
             post("/seats/A/1").
         then().
             statusCode(HttpStatus.SC_OK);
@@ -428,16 +360,15 @@ public class SeatRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void reserveSeatAsOtherUser() {
-        SessionData login = login(user.getUsername(), userCleartextPassword);
-
-        createCaptainAndTeam();
+        User user1 = createUser();
+        Ticket ticket = createTicketForUser(user1);
+        User user2 = createUserWithTicket();
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(user2)).
         when().
-            param("ticketId", captainTicket.getId()).
+            param("ticketId", ticket.getId()).
             post("/seats/A/1").
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
@@ -446,14 +377,16 @@ public class SeatRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void reserveSeatForUserAsTeamCaptain() {
-        createCaptainAndTeam();
-
-        SessionData login = login(captain.getUsername(), captainCleartextPassword);
+        User captain = createUser();
+        Ticket captainTicket = createTicketForUser(captain);
+        User user = createUser();
+        Ticket userTicket = createTicketForUser(user);
+        Team team = createTeamWithCaptain(captain);
+        addMemberToTeam(team, user);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(captain)).
         when().
             param("ticketId", userTicket.getId()).
             post("/seats/A/1").
@@ -464,14 +397,13 @@ public class SeatRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void reserveSeatForUserAsAdmin() {
-        createCaptainAndTeam();
-
-        SessionData login = login(admin.getUsername(), adminCleartextPassword);
+        User user = createUser();
+        Ticket userTicket = createTicketForUser(user);
+        User admin = createUser(true);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(admin)).
         when().
             param("ticketId", userTicket.getId()).
             post("/seats/A/1").
@@ -482,29 +414,18 @@ public class SeatRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void reserveTakenSeatAsUser() {
-        createCaptainAndTeam();
+        User user1 = createUser();
+        Ticket ticket1 = createTicketForUser(user1);
+        setTicketOnA1(ticket1);
 
-        SessionData login = login(captain.getUsername(), captainCleartextPassword);
+        User user2 = createUser();
+        Ticket ticket2 = createTicketForUser(user2);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(user2)).
         when().
-            param("ticketId", captainTicket.getId()).
-            post("/seats/A/1").
-        then().
-            statusCode(HttpStatus.SC_OK);
-
-        logout();
-
-        SessionData login2 = login(user.getUsername(), userCleartextPassword);
-
-        given().
-            filter(sessionFilter).
-            header(login2.getCsrfHeader()).
-        when().
-            param("ticketId", userTicket.getId()).
+            param("ticketId", ticket2.getId()).
             post("/seats/A/1").
         then().
             statusCode(HttpStatus.SC_CONFLICT);
@@ -513,17 +434,16 @@ public class SeatRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void reserveSeatWithInvalidTicket() {
-        userTicket.setValid(false);
-        ticketRepository.save(userTicket);
-
-        SessionData login = login(user.getUsername(), userCleartextPassword);
+        User user = createUser();
+        Ticket ticket = createTicketForUser(user);
+        ticket.setValid(false);
+        ticketRepository.save(ticket);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(user)).
         when().
-            param("ticketId", userTicket.getId()).
+            param("ticketId", ticket.getId()).
             post("/seats/A/1").
         then().
             statusCode(HttpStatus.SC_BAD_REQUEST);
@@ -532,23 +452,15 @@ public class SeatRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void changeSeatAsUser() {
-        SessionData login = login(user.getUsername(), userCleartextPassword);
+        User user = createUser();
+        Ticket ticket = createTicketForUser(user);
+        setTicketOnA1(ticket);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(user)).
         when().
-            param("ticketId", userTicket.getId()).
-            post("/seats/A/1").
-        then().
-            statusCode(HttpStatus.SC_OK);
-
-        given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
-        when().
-            param("ticketId", userTicket.getId()).
+            param("ticketId", ticket.getId()).
             post("/seats/A/2").
         then().
             statusCode(HttpStatus.SC_OK);
@@ -559,35 +471,22 @@ public class SeatRestIntegrationTest extends IntegrationTest {
 
         Assert.assertNull(previousSeat.getTicket());
         Assert.assertFalse(previousSeat.isTaken());
-        Assert.assertEquals(currentSeat.getTicket().getId(), userTicket.getId());
-        Assert.assertTrue(currentSeat.isTaken());
+        Assert.assertEquals(currentSeat.getTicket().getId(), ticket.getId());
+        assertTrue(currentSeat.isTaken());
     }
 
     @Test
     public void changeSeatAsAdmin() {
-        SessionData login = login(user.getUsername(), userCleartextPassword);
+        User user = createUser();
+        Ticket ticket = createTicketForUser(user);
+        setTicketOnA1(ticket);
+        User admin = createUser(true);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(admin)).
         when().
-            param("ticketId", userTicket.getId()).
-            post("/seats/A/1").
-        then().
-            statusCode(HttpStatus.SC_OK);
-        //@formatter:on
-
-        logout();
-
-        login = login(admin.getUsername(), adminCleartextPassword);
-
-        //@formatter:off
-        given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
-        when().
-            param("ticketId", userTicket.getId()).
+            param("ticketId", ticket.getId()).
             post("/seats/A/2").
         then().
             statusCode(HttpStatus.SC_OK);
@@ -596,27 +495,17 @@ public class SeatRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void changeSeatAsCaptain() {
-        createCaptainAndTeam();
-
-        SessionData login = login(user.getUsername(), userCleartextPassword);
+        User captain = createUser();
+        Ticket captainTicket = createTicketForUser(captain);
+        User user = createUser();
+        Ticket userTicket = createTicketForUser(user);
+        Team team = createTeamWithCaptain(captain);
+        addMemberToTeam(team, user);
+        setTicketOnA1(userTicket);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
-        when().
-            param("ticketId", userTicket.getId()).
-            post("/seats/A/1").
-        then().
-            statusCode(HttpStatus.SC_OK);
-
-        logout();
-
-        login = login(captain.getUsername(), captainCleartextPassword);
-
-        given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(captain)).
         when().
             param("ticketId", userTicket.getId()).
             post("/seats/A/2").
@@ -628,7 +517,8 @@ public class SeatRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void clearSeatAsAnon() {
-        setTicketOnA1(userTicket);
+        Ticket ticket = createTicketForUser(createUser());
+        setTicketOnA1(ticket);
 
         //@formatter:off
         given().
@@ -641,13 +531,13 @@ public class SeatRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void clearSeatAsUser() {
-        setTicketOnA1(userTicket);
-        SessionData login = login(user.getUsername(), userCleartextPassword);
+        User user = createUser();
+        Ticket ticket = createTicketForUser(user);
+        setTicketOnA1(ticket);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(user)).
         when().
             delete("/seats/A/1").
         then().
@@ -657,13 +547,13 @@ public class SeatRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void clearSeatAsAdmin() {
-        setTicketOnA1(userTicket);
-        SessionData login = login(admin.getUsername(), adminCleartextPassword);
+        User user = createUser();
+        Ticket ticket = createTicketForUser(user);
+        setTicketOnA1(ticket);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(createUser(true))).
         when().
             delete("/seats/A/1").
         then().

@@ -17,87 +17,29 @@
 
 package ch.wisv.areafiftylan.products.service;
 
-import ch.wisv.areafiftylan.ApplicationTest;
 import ch.wisv.areafiftylan.exception.ImmutableOrderException;
 import ch.wisv.areafiftylan.exception.OrderNotFoundException;
 import ch.wisv.areafiftylan.exception.TicketNotFoundException;
 import ch.wisv.areafiftylan.exception.UnassignedOrderException;
-import ch.wisv.areafiftylan.products.model.Order;
-import ch.wisv.areafiftylan.products.model.OrderStatus;
 import ch.wisv.areafiftylan.products.model.Ticket;
-import ch.wisv.areafiftylan.products.model.TicketType;
-import ch.wisv.areafiftylan.users.model.Gender;
+import ch.wisv.areafiftylan.products.model.order.Order;
+import ch.wisv.areafiftylan.products.model.order.OrderStatus;
 import ch.wisv.areafiftylan.users.model.User;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.thymeleaf.spring4.SpringTemplateEngine;
 
-import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = ApplicationTest.class)
-@ActiveProfiles("test")
-@DataJpaTest
-public class OrderServiceTest {
-
-    @MockBean
-    SpringTemplateEngine springTemplateEngine;
-    @MockBean
-    JavaMailSender javaMailSender;
-
-    @Autowired
-    private OrderService orderService;
-    @Autowired
-    private PaymentService paymentSerivce;
-    @Autowired
-    private TestEntityManager testEntityManager;
-    @Autowired
-    private OrderRepository orderRepository;
-
-    @Value("${a5l.orderLimit}")
-    private int ORDER_LIMIT;
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
-    private User persistUser() {
-        User user = new User("user@mail.com", new BCryptPasswordEncoder().encode("password"));
-        user.getProfile()
-                .setAllFields("first", "last", "display", LocalDate.now(), Gender.MALE, "address", "1234AB", "Delft",
-                        "0612345678", null);
-        return testEntityManager.persist(user);
-    }
-
-    @Before
-    public void setUp() {
-    }
-
-    @After
-    public void tearDown() {
-
-    }
+public class OrderServiceTest extends ServiceTest {
 
     @Test
     public void getOrderById() {
@@ -131,7 +73,7 @@ public class OrderServiceTest {
 
         Order order = new Order();
         order.setUser(user);
-        order = testEntityManager.persist(order);
+        testEntityManager.persist(order);
 
         Collection<Order> ordersByUsername = orderService.findOrdersByUsername(user.getUsername());
 
@@ -144,12 +86,11 @@ public class OrderServiceTest {
 
         Order order = new Order();
         order.setUser(user);
-        order = testEntityManager.persist(order);
+        testEntityManager.persist(order);
 
         Collection<Order> ordersByUsername = orderService.findOrdersByUsername(user.getUsername().toUpperCase());
 
         assertEquals(1, ordersByUsername.size());
-
     }
 
     @Test
@@ -227,7 +168,8 @@ public class OrderServiceTest {
 
     @Test
     public void create() {
-        Order order = orderService.create(TicketType.TEST, true, true);
+        persistTicket();
+        Order order = orderService.create(TEST_TICKET, Arrays.asList(CH_MEMBER_OPTION, PICKUP_SERVICE_OPTION));
 
         assertEquals(1, order.getTickets().size());
         assertNull(order.getUser());
@@ -235,18 +177,19 @@ public class OrderServiceTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void createNullType() {
-        orderService.create(null, true, true);
+        Order order = orderService.create(null, Arrays.asList(CH_MEMBER_OPTION, PICKUP_SERVICE_OPTION));
         assertEquals(0, orderRepository.findAll().size());
     }
 
     @Test
     public void addTicketToOrderAnonymous() {
         Order order = new Order();
-        Ticket ticket = testEntityManager.persist(new Ticket(TicketType.TEST, true, true));
+        Ticket ticket = persistTicket();
+        ticket.setValid(false);
         order.addTicket(ticket);
         Long id = testEntityManager.persistAndGetId(order, Long.class);
 
-        order = orderService.addTicketToOrder(id, TicketType.TEST, false, false);
+        order = orderService.addTicketToOrder(id, TEST_TICKET, null);
 
         assertEquals(2, order.getTickets().size());
         assertTrue(order.getTickets().stream().noneMatch(Ticket::isValid));
@@ -257,11 +200,14 @@ public class OrderServiceTest {
     public void addTicketToOrderAssigned() {
         User user = persistUser();
         Order order = new Order(user);
-        Ticket ticket = testEntityManager.persist(new Ticket(user, TicketType.TEST, true, true));
+        Ticket ticket = persistTicket();
+        ticket.setValid(false);
+        ticket.setOwner(user);
+        ticket = testEntityManager.persist(ticket);
         order.addTicket(ticket);
         Long id = testEntityManager.persistAndGetId(order, Long.class);
 
-        order = orderService.addTicketToOrder(id, TicketType.TEST, false, false);
+        order = orderService.addTicketToOrder(id, TEST_TICKET, Collections.singletonList(CH_MEMBER_OPTION));
 
         assertEquals(2, order.getTickets().size());
         assertTrue(order.getTickets().stream().noneMatch(Ticket::isValid));
@@ -273,13 +219,13 @@ public class OrderServiceTest {
         thrown.expect(ImmutableOrderException.class);
 
         User user = persistUser();
-        Ticket ticket = testEntityManager.persist(new Ticket(TicketType.TEST, true, true));
+        Ticket ticket = persistTicket();
         Order order = new Order(user);
         order.setStatus(OrderStatus.PENDING);
         order.addTicket(ticket);
         Long id = testEntityManager.persistAndGetId(order, Long.class);
 
-        orderService.addTicketToOrder(id, TicketType.TEST, false, false);
+        orderService.addTicketToOrder(id, TEST_TICKET, Collections.singletonList(CH_MEMBER_OPTION));
     }
 
     @Test
@@ -287,13 +233,13 @@ public class OrderServiceTest {
         thrown.expect(ImmutableOrderException.class);
 
         User user = persistUser();
-        Ticket ticket = testEntityManager.persist(new Ticket(TicketType.TEST, true, true));
+        Ticket ticket = persistTicket();
         Order order = new Order(user);
         order.setStatus(OrderStatus.PAID);
         order.addTicket(ticket);
         Long id = testEntityManager.persistAndGetId(order, Long.class);
 
-        orderService.addTicketToOrder(id, TicketType.TEST, false, false);
+        orderService.addTicketToOrder(id, TEST_TICKET, Collections.singletonList(CH_MEMBER_OPTION));
     }
 
     @Test
@@ -301,13 +247,13 @@ public class OrderServiceTest {
         thrown.expect(ImmutableOrderException.class);
 
         User user = persistUser();
-        Ticket ticket = testEntityManager.persist(new Ticket(TicketType.TEST, true, true));
+        Ticket ticket = persistTicket();
         Order order = new Order(user);
         order.setStatus(OrderStatus.CANCELLED);
         order.addTicket(ticket);
         Long id = testEntityManager.persistAndGetId(order, Long.class);
 
-        orderService.addTicketToOrder(id, TicketType.TEST, false, false);
+        orderService.addTicketToOrder(id, TEST_TICKET, Collections.singletonList(CH_MEMBER_OPTION));
     }
 
     @Test
@@ -315,13 +261,13 @@ public class OrderServiceTest {
         thrown.expect(ImmutableOrderException.class);
 
         User user = persistUser();
-        Ticket ticket = testEntityManager.persist(new Ticket(TicketType.TEST, true, true));
+        Ticket ticket = persistTicket();
         Order order = new Order(user);
         order.setStatus(OrderStatus.EXPIRED);
         order.addTicket(ticket);
         Long id = testEntityManager.persistAndGetId(order, Long.class);
 
-        orderService.addTicketToOrder(id, TicketType.TEST, false, false);
+        orderService.addTicketToOrder(id, TEST_TICKET, Collections.singletonList(CH_MEMBER_OPTION));
     }
 
     @Test
@@ -330,14 +276,14 @@ public class OrderServiceTest {
         Order order = new Order(user);
         // Fill the order
         for (int i = 0; i < ORDER_LIMIT; i++) {
-            order.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
+            order.addTicket(persistTicket());
         }
         Long id = testEntityManager.persistAndGetId(order, Long.class);
 
         try {
-            orderService.addTicketToOrder(id, TicketType.TEST, false, false);
+            orderService.addTicketToOrder(id, TEST_TICKET, Collections.singletonList(CH_MEMBER_OPTION));
         } catch (IllegalStateException e) {
-            assertEquals("Order limit reached", e.getMessage());
+            assertEquals("Order numberAvailable reached", e.getMessage());
             assertEquals(ORDER_LIMIT, testEntityManager.find(Order.class, id).getTickets().size());
         }
     }
@@ -346,31 +292,13 @@ public class OrderServiceTest {
     public void assignOrderToUser() {
         User user = persistUser();
         Order order = new Order();
-        order.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
+        order.addTicket(persistTicket());
 
         Long id = testEntityManager.persistAndGetId(order, Long.class);
 
         orderService.assignOrderToUser(id, user.getUsername());
 
         assertEquals(user, testEntityManager.find(Order.class, id).getUser());
-    }
-
-    @Test
-    public void assignOrderToUserWithOpenOrder() {
-        User user = persistUser();
-        Order order = new Order();
-        Order order2 = new Order();
-        order.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
-        order2.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
-
-        Long id = testEntityManager.persistAndGetId(order, Long.class);
-        Long id2 = testEntityManager.persistAndGetId(order2, Long.class);
-
-        orderService.assignOrderToUser(id, user.getUsername());
-        orderService.assignOrderToUser(id2, user.getUsername());
-
-        assertEquals(user, testEntityManager.find(Order.class, id2).getUser());
-        assertNull(testEntityManager.find(Order.class, id));
     }
 
     @Test
@@ -467,7 +395,7 @@ public class OrderServiceTest {
         User user2 =
                 testEntityManager.persist(new User("user2@mail.com", new BCryptPasswordEncoder().encode("password")));
         Order order = new Order(user);
-        order.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
+        order.addTicket(persistTicket());
         Long id = testEntityManager.persistAndGetId(order, Long.class);
 
         orderService.assignOrderToUser(id, user2.getUsername());
@@ -478,11 +406,11 @@ public class OrderServiceTest {
     @Test
     public void removeTicketFromOrder() {
         Order order = new Order();
-        order.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
+        order.addTicket(persistTicket());
 
         Long id = testEntityManager.persistAndGetId(order, Long.class);
 
-        orderService.removeTicketFromOrder(id, TicketType.TEST, true, true);
+        orderService.removeTicketFromOrder(id, TEST_TICKET, Arrays.asList(CH_MEMBER_OPTION, PICKUP_SERVICE_OPTION));
 
         assertEquals(0, testEntityManager.find(Order.class, id).getTickets().size());
     }
@@ -493,20 +421,20 @@ public class OrderServiceTest {
         Order order = new Order();
         Long id = testEntityManager.persistAndGetId(order, Long.class);
 
-        orderService.removeTicketFromOrder(id, TicketType.TEST, true, true);
+        orderService.removeTicketFromOrder(id, TEST_TICKET, Arrays.asList(CH_MEMBER_OPTION, PICKUP_SERVICE_OPTION));
     }
 
     @Test
     public void removeTicketFromOrderTicketNotFound() {
         Order order = new Order();
-        order.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
+        order.addTicket(persistTicket());
 
         Long id = testEntityManager.persistAndGetId(order, Long.class);
 
         assertEquals(1, testEntityManager.find(Order.class, id).getTickets().size());
 
         try {
-            orderService.removeTicketFromOrder(id, TicketType.TEST, false, true);
+            orderService.removeTicketFromOrder(id, TEST_TICKET, Arrays.asList(CH_MEMBER_OPTION, PICKUP_SERVICE_OPTION));
         } catch (TicketNotFoundException e) {
             assertEquals(1, testEntityManager.find(Order.class, id).getTickets().size());
         }
@@ -515,14 +443,14 @@ public class OrderServiceTest {
     @Test
     public void removeTicketFromOrderTypeNull() {
         Order order = new Order();
-        order.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
+        order.addTicket(persistTicket());
 
         Long id = testEntityManager.persistAndGetId(order, Long.class);
 
         assertEquals(1, testEntityManager.find(Order.class, id).getTickets().size());
 
         try {
-            orderService.removeTicketFromOrder(id, null, false, true);
+            orderService.removeTicketFromOrder(id, null, Arrays.asList(CH_MEMBER_OPTION, PICKUP_SERVICE_OPTION));
         } catch (TicketNotFoundException e) {
             assertEquals(1, testEntityManager.find(Order.class, id).getTickets().size());
         }
@@ -531,28 +459,28 @@ public class OrderServiceTest {
     @Test
     public void removeTicketFromOrderTwoMatchingTickets() {
         Order order = new Order();
-        order.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
-        order.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
+        order.addTicket(persistTicket());
+        order.addTicket(persistTicket());
 
         Long id = testEntityManager.persistAndGetId(order, Long.class);
 
         assertEquals(2, testEntityManager.find(Order.class, id).getTickets().size());
-        orderService.removeTicketFromOrder(id, TicketType.TEST, true, true);
+        orderService.removeTicketFromOrder(id, TEST_TICKET, Arrays.asList(CH_MEMBER_OPTION, PICKUP_SERVICE_OPTION));
         assertEquals(1, testEntityManager.find(Order.class, id).getTickets().size());
     }
 
     @Test
     public void removeTicketFromOrderTwoMatchingTicketsDeleteTwice() {
         Order order = new Order();
-        order.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
-        order.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
+        order.addTicket(persistTicket());
+        order.addTicket(persistTicket());
 
         Long id = testEntityManager.persistAndGetId(order, Long.class);
 
         assertEquals(2, testEntityManager.find(Order.class, id).getTickets().size());
-        orderService.removeTicketFromOrder(id, TicketType.TEST, true, true);
+        orderService.removeTicketFromOrder(id, TEST_TICKET, Arrays.asList(CH_MEMBER_OPTION, PICKUP_SERVICE_OPTION));
         assertEquals(1, testEntityManager.find(Order.class, id).getTickets().size());
-        orderService.removeTicketFromOrder(id, TicketType.TEST, true, true);
+        orderService.removeTicketFromOrder(id, TEST_TICKET, Arrays.asList(CH_MEMBER_OPTION, PICKUP_SERVICE_OPTION));
         assertEquals(0, testEntityManager.find(Order.class, id).getTickets().size());
     }
 
@@ -562,10 +490,10 @@ public class OrderServiceTest {
         thrown.expect(OrderNotFoundException.class);
 
         Order order = new Order();
-        order.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
+        order.addTicket(persistTicket());
         Long id = testEntityManager.persistAndGetId(order, Long.class);
 
-        orderService.removeTicketFromOrder(9999L, TicketType.TEST, true, true);
+        orderService.removeTicketFromOrder(9999L, TEST_TICKET, Arrays.asList(CH_MEMBER_OPTION, PICKUP_SERVICE_OPTION));
     }
 
     @Test
@@ -573,22 +501,22 @@ public class OrderServiceTest {
         thrown.expect(OrderNotFoundException.class);
 
         Order order = new Order();
-        order.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
+        order.addTicket(persistTicket());
         Long id = testEntityManager.persistAndGetId(order, Long.class);
 
-        orderService.removeTicketFromOrder(null, TicketType.TEST, true, true);
+        orderService.removeTicketFromOrder(null, TEST_TICKET, Arrays.asList(CH_MEMBER_OPTION, PICKUP_SERVICE_OPTION));
     }
 
     @Test
     public void requestPayment() {
         User user = persistUser();
         Order order = new Order(user);
-        order.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
+        order.addTicket(persistTicket());
 
         Long id = testEntityManager.persistAndGetId(order, Long.class);
         String payment = orderService.requestPayment(id);
-        verify(paymentSerivce, times(1)).registerOrder(Mockito.any(Order.class));
-        reset(paymentSerivce);
+        verify(paymentService, times(1)).registerOrder(Mockito.any(Order.class));
+        reset(paymentService);
     }
 
     @Test
@@ -601,9 +529,9 @@ public class OrderServiceTest {
             String payment = orderService.requestPayment(id);
         } catch (IllegalStateException e) {
             assertEquals("Order can not be empty", e.getMessage());
-            verify(paymentSerivce, never()).registerOrder(Mockito.any(Order.class));
+            verify(paymentService, never()).registerOrder(Mockito.any(Order.class));
         } finally {
-            reset(paymentSerivce);
+            reset(paymentService);
         }
 
     }
@@ -611,15 +539,15 @@ public class OrderServiceTest {
     @Test
     public void requestPaymentOrderUnassigned() {
         Order order = new Order();
-        order.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
+        order.addTicket(persistTicket());
 
         Long id = testEntityManager.persistAndGetId(order, Long.class);
         try {
             String payment = orderService.requestPayment(id);
         } catch (UnassignedOrderException e) {
-            verify(paymentSerivce, never()).registerOrder(Mockito.any(Order.class));
+            verify(paymentService, never()).registerOrder(Mockito.any(Order.class));
         } finally {
-            reset(paymentSerivce);
+            reset(paymentService);
         }
     }
 
@@ -627,15 +555,15 @@ public class OrderServiceTest {
     public void requestPaymentOrderIdNull() {
         User user = persistUser();
         Order order = new Order(user);
-        order.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
+        order.addTicket(persistTicket());
 
         Long id = testEntityManager.persistAndGetId(order, Long.class);
         try {
             String payment = orderService.requestPayment(null);
         } catch (OrderNotFoundException e) {
-            verify(paymentSerivce, never()).registerOrder(Mockito.any(Order.class));
+            verify(paymentService, never()).registerOrder(Mockito.any(Order.class));
         } finally {
-            reset(paymentSerivce);
+            reset(paymentService);
         }
     }
 
@@ -643,13 +571,13 @@ public class OrderServiceTest {
     public void updateOrderStatusByReference() {
         Order order = new Order();
         order.setUser(persistUser());
-        given(paymentSerivce.updateStatus(Mockito.anyString())).willReturn(order);
+        given(paymentService.updateStatus(Mockito.anyString())).willReturn(order);
 
         orderService.updateOrderStatusByReference("Reference");
 
-        verify(paymentSerivce, times(1)).updateStatus(Mockito.anyString());
+        verify(paymentService, times(1)).updateStatus(Mockito.anyString());
 
-        reset(paymentSerivce);
+        reset(paymentService);
     }
 
     @Test
@@ -657,36 +585,37 @@ public class OrderServiceTest {
         Order order = new Order();
         User user = persistUser();
 
-        order.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
+        order.addTicket(persistTicket());
         order.setUser(user);
         order.setStatus(OrderStatus.PAID);
         order = testEntityManager.persist(order);
-        given(paymentSerivce.updateStatus(Mockito.anyString())).willReturn(order);
+        given(paymentService.updateStatus(Mockito.anyString())).willReturn(order);
 
         orderService.updateOrderStatusByReference("Reference");
 
         assertTrue(order.getTickets().stream().allMatch(Ticket::isValid));
         assertTrue(order.getTickets().stream().allMatch(t -> t.getOwner().equals(user)));
 
-        reset(paymentSerivce);
+        reset(paymentService);
     }
 
     @Test
     public void updateOrderStatusByReferenceOrderStatusAssigned() {
         Order order = new Order();
         User user = persistUser();
-
-        order.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
+        Ticket ticket = persistTicket();
+        ticket.setValid(false);
+        order.addTicket(ticket);
         order.setUser(user);
         order = testEntityManager.persist(order);
-        given(paymentSerivce.updateStatus(Mockito.anyString())).willReturn(order);
+        given(paymentService.updateStatus(Mockito.anyString())).willReturn(order);
 
         orderService.updateOrderStatusByReference("Reference");
 
         assertTrue(order.getTickets().stream().noneMatch(Ticket::isValid));
         assertTrue(order.getTickets().stream().allMatch(t -> t.getOwner() == null));
 
-        reset(paymentSerivce);
+        reset(paymentService);
     }
 
     @Test
@@ -694,16 +623,16 @@ public class OrderServiceTest {
         Order order = new Order();
         thrown.expect(UnassignedOrderException.class);
 
-        order.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
+        order.addTicket(persistTicket());
         order = testEntityManager.persist(order);
-        given(paymentSerivce.updateStatus(Mockito.anyString())).willReturn(order);
+        given(paymentService.updateStatus(Mockito.anyString())).willReturn(order);
 
         orderService.updateOrderStatusByReference("Reference");
 
         assertTrue(order.getTickets().stream().noneMatch(Ticket::isValid));
         assertTrue(order.getTickets().stream().allMatch(t -> t.getOwner() == null));
 
-        reset(paymentSerivce);
+        reset(paymentService);
     }
 
     @Test
@@ -711,18 +640,20 @@ public class OrderServiceTest {
         Order order = new Order();
         User user = persistUser();
 
-        order.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
+        Ticket ticket = persistTicket();
+        ticket.setValid(false);
+        order.addTicket(ticket);
         order = testEntityManager.persist(order);
         order.setUser(user);
         order.setStatus(OrderStatus.PENDING);
-        given(paymentSerivce.updateStatus(Mockito.anyString())).willReturn(order);
+        given(paymentService.updateStatus(Mockito.anyString())).willReturn(order);
 
         orderService.updateOrderStatusByReference("Reference");
 
         assertTrue(order.getTickets().stream().noneMatch(Ticket::isValid));
         assertTrue(order.getTickets().stream().allMatch(t -> t.getOwner() == null));
 
-        reset(paymentSerivce);
+        reset(paymentService);
     }
 
     @Test
@@ -730,14 +661,14 @@ public class OrderServiceTest {
         Order order = new Order();
         thrown.expect(UnassignedOrderException.class);
 
-        order.addTicket(testEntityManager.persist(new Ticket(TicketType.TEST, true, true)));
+        order.addTicket(persistTicket());
         order = testEntityManager.persist(order);
-        given(paymentSerivce.updateStatus(Mockito.anyString())).willReturn(order);
+        given(paymentService.updateStatus(Mockito.anyString())).willReturn(order);
 
         orderService.updateOrderStatusByReference("Reference");
 
         assertTrue(order.getTickets().stream().noneMatch(Ticket::isValid));
 
-        reset(paymentSerivce);
+        reset(paymentService);
     }
 }

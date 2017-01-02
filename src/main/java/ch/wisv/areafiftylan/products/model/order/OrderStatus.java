@@ -15,16 +15,13 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.wisv.areafiftylan.products.service;
+package ch.wisv.areafiftylan.products.model.order;
 
-import ch.wisv.areafiftylan.products.model.ExpiredOrder;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
-import java.util.Collection;
-
-@Repository
-public interface ExpiredOrderRepository extends JpaRepository<ExpiredOrder, Long> {
-    Collection<ExpiredOrder> findAllBycreatedByIgnoreCase(String username);
-
+public enum OrderStatus {
+    ANONYMOUS, // Initial creating status
+    ASSIGNED,  // Has a User assigned
+    PENDING,  // Sent to the payment provider
+    PAID,  // Confirmed paid by payment provider
+    EXPIRED, // Payment attempted, but expired
+    CANCELLED // Payment attempted, but manually cancelled
 }

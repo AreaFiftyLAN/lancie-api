@@ -19,6 +19,6 @@ package ch.wisv.areafiftylan.exception;
 
 public class ConsumptionNotFoundException extends RuntimeException {
     public ConsumptionNotFoundException(Long consumptionId) {
-        super("Can't find a consumption with id: \"" + consumptionId + "\" is unsupported.");
+        super("Can't find a consumption with id: " + consumptionId);
     }
 }

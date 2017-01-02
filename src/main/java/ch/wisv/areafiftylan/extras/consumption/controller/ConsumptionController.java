@@ -42,11 +42,6 @@ public class ConsumptionController {
         this.consumptionService = consumptionService;
     }
 
-    @RequestMapping(value = "/{ticketId}", method = RequestMethod.GET)
-    public Collection<Consumption> consumptionsMade(@PathVariable Long ticketId) {
-        return consumptionService.getByTicketIdIfValid(ticketId).getConsumptionsMade();
-    }
-
     @RequestMapping(method = RequestMethod.GET)
     public Collection<Consumption> getAllPossibleConsumptions() {
         return consumptionService.getPossibleConsumptions();
@@ -66,6 +61,11 @@ public class ConsumptionController {
 
         return createResponseEntity(HttpStatus.OK,
                 "Successfully removed " + c.getName() + " as a supported consumption.");
+    }
+
+    @RequestMapping(value = "/{ticketId}", method = RequestMethod.GET)
+    public Collection<Consumption> consumptionsMade(@PathVariable Long ticketId) {
+        return consumptionService.getByTicketIdIfValid(ticketId).getConsumptionsMade();
     }
 
     @RequestMapping(value = "/{ticketId}/consume", method = RequestMethod.POST)

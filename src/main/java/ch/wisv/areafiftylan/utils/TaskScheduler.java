@@ -17,10 +17,10 @@
 
 package ch.wisv.areafiftylan.utils;
 
-import ch.wisv.areafiftylan.products.model.Order;
-import ch.wisv.areafiftylan.products.model.OrderStatus;
-import ch.wisv.areafiftylan.products.service.OrderRepository;
+import ch.wisv.areafiftylan.products.model.order.Order;
+import ch.wisv.areafiftylan.products.model.order.OrderStatus;
 import ch.wisv.areafiftylan.products.service.OrderService;
+import ch.wisv.areafiftylan.products.service.repository.OrderRepository;
 import ch.wisv.areafiftylan.security.token.Token;
 import ch.wisv.areafiftylan.security.token.VerificationToken;
 import ch.wisv.areafiftylan.security.token.repository.VerificationTokenRepository;

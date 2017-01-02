@@ -17,12 +17,10 @@
 
 package ch.wisv.areafiftylan.exception;
 
-import ch.wisv.areafiftylan.products.model.TicketType;
-
 public class TicketUnavailableException extends RuntimeException {
 
-    public TicketUnavailableException(TicketType type) {
-        super("Ticket with type " + type.toString() + " has been sold out");
+    public TicketUnavailableException() {
+        super("Ticket is no longer available.");
     }
 
 

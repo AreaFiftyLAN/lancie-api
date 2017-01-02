@@ -15,34 +15,22 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.wisv.areafiftylan.utils;
+package ch.wisv.areafiftylan.products.service.repository;
 
-import com.jayway.restassured.response.Cookie;
-import com.jayway.restassured.response.Header;
+import ch.wisv.areafiftylan.products.model.Ticket;
+import ch.wisv.areafiftylan.products.model.TicketType;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-public class SessionData {
-    Header token;
-    Cookie cookie;
+import java.util.Collection;
+import java.util.Optional;
 
-    public SessionData(String token, String cookie) {
-        this.token = new Header("X-CSRF-TOKEN", token);
-        this.cookie = new Cookie.Builder("JSESSIONID", cookie).build();
-    }
+@Repository
+public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
-    public Header getCsrfHeader() {
-        return token;
-    }
+    Optional<Ticket> findById(Long ticketId);
 
-    public String getToken() {
-        return token.getValue();
-    }
+    Integer countByType(TicketType type);
 
-    public Cookie getCookie() {
-        return cookie;
-    }
-
-    public String getSessionId() {
-        return cookie.getValue();
-    }
-
+    Collection<Ticket> findAllByOwnerUsernameIgnoreCase(String username);
 }

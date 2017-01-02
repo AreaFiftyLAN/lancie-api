@@ -20,7 +20,11 @@ package ch.wisv.areafiftylan.products.service;
 import ch.wisv.areafiftylan.exception.*;
 import ch.wisv.areafiftylan.extras.rfid.service.RFIDService;
 import ch.wisv.areafiftylan.products.model.Ticket;
+import ch.wisv.areafiftylan.products.model.TicketOption;
 import ch.wisv.areafiftylan.products.model.TicketType;
+import ch.wisv.areafiftylan.products.service.repository.TicketOptionRepository;
+import ch.wisv.areafiftylan.products.service.repository.TicketRepository;
+import ch.wisv.areafiftylan.products.service.repository.TicketTypeRepository;
 import ch.wisv.areafiftylan.security.token.TicketTransferToken;
 import ch.wisv.areafiftylan.security.token.Token;
 import ch.wisv.areafiftylan.security.token.repository.TicketTransferTokenRepository;
@@ -29,13 +33,14 @@ import ch.wisv.areafiftylan.teams.service.TeamService;
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.users.service.UserService;
 import ch.wisv.areafiftylan.utils.mail.MailService;
+import lombok.Synchronized;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -44,6 +49,8 @@ public class TicketServiceImpl implements TicketService {
     private final TicketRepository ticketRepository;
     private final UserService userService;
     private final TicketTransferTokenRepository tttRepository;
+    private final TicketTypeRepository ticketTypeRepository;
+    private final TicketOptionRepository ticketOptionRepository;
     private final MailService mailService;
     private final TeamService teamService;
     private RFIDService rfidService;
@@ -56,11 +63,14 @@ public class TicketServiceImpl implements TicketService {
 
     @Autowired
     public TicketServiceImpl(TicketRepository ticketRepository, UserService userService,
-                             TicketTransferTokenRepository tttRepository, MailService mailService,
+                             TicketTransferTokenRepository tttRepository, TicketTypeRepository ticketTypeRepository,
+                             TicketOptionRepository ticketOptionRepository, MailService mailService,
                              TeamService teamService) {
         this.ticketRepository = ticketRepository;
-        this.userService = userService;
         this.tttRepository = tttRepository;
+        this.ticketTypeRepository = ticketTypeRepository;
+        this.userService = userService;
+        this.ticketOptionRepository = ticketOptionRepository;
         this.mailService = mailService;
         this.teamService = teamService;
     }
@@ -72,13 +82,8 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public Ticket getTicketById(Long ticketId) {
-        Ticket t = ticketRepository.findOne(ticketId);
-
-        if (t == null) {
-            throw new TicketNotFoundException();
-        }
-
-        return t;
+        return ticketRepository.findById(ticketId).
+                orElseThrow(TicketNotFoundException::new);
     }
 
     @Override
@@ -95,8 +100,9 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public Collection<Ticket> findValidTicketsByOwnerUsername(String username) {
-        return ticketRepository.findAllByOwnerUsernameIgnoreCase(username).stream().filter(Ticket::isValid)
-                .collect(Collectors.toList());
+        return ticketRepository.findAllByOwnerUsernameIgnoreCase(username).stream().
+                filter(Ticket::isValid).
+                collect(Collectors.toList());
     }
 
     @Override
@@ -106,26 +112,53 @@ public class TicketServiceImpl implements TicketService {
         ticketRepository.save(ticket);
     }
 
-    @Override
-    public Ticket requestTicketOfType(TicketType type, boolean pickupService, boolean chMember) {
-        return requestTicketOfType(null, type, pickupService, chMember);
-
+    private TicketOption getTicketOptionByName(String name) {
+        return ticketOptionRepository.findByName(name).
+                orElseThrow(TicketOptionNotFoundException::new);
     }
 
     @Override
-    public synchronized Ticket requestTicketOfType(User user, TicketType type, boolean pickupService,
-                                                   boolean chMember) {
-        // Check if the TicketType has a limit and if the limit is reached
+    public Ticket requestTicketOfType(User user, String type, List<String> options) {
+        // Make sure we're not passing null
+        options = (options == null) ? Collections.emptyList() : options;
+
+        TicketType ticketType = ticketTypeRepository.findByName(type).
+                orElseThrow(() -> new TicketTypeNotFoundException(type));
+
+        List<TicketOption> ticketOptions = options.stream().
+                map(this::getTicketOptionByName).
+                collect(Collectors.toList());
+
+        return requestTicketOfType(user, ticketType, ticketOptions);
+    }
+
+    @Override
+    @Synchronized
+    public Ticket requestTicketOfType(User user, TicketType type, List<TicketOption> options) {
+        if (options == null) {
+            options = Collections.emptyList();
+        }
+        // Check if the TicketType has a numberAvailable and if the numberAvailable is reached
         if (!isTicketAvailable(type)) {
-            throw new TicketUnavailableException(type);
+            throw new TicketUnavailableException();
         } else {
-            Ticket ticket = new Ticket(user, type, pickupService, chMember);
+            Ticket ticket = new Ticket(user, type);
+            // If one of the ticketOptions is not supported
+            for (TicketOption option : options) {
+                if (!ticket.addOption(option)) {
+                    throw new TicketOptionNotSupportedException(option);
+                }
+            }
             return ticketRepository.save(ticket);
         }
     }
 
     private boolean isTicketAvailable(TicketType type) {
-        boolean typeLimitReached = type.getLimit() != 0 && ticketRepository.countByType(type) >= type.getLimit();
+        if (type == null) {
+            return false;
+        }
+        boolean typeLimitReached =
+                type.getNumberAvailable() != 0 && ticketRepository.countByType(type) >= type.getNumberAvailable();
         boolean eventLimitReached = ticketRepository.count() >= TICKET_LIMIT;
         boolean deadlineExceeded = type.getDeadline().isBefore(LocalDateTime.now());
 
@@ -138,8 +171,9 @@ public class TicketServiceImpl implements TicketService {
         User u = userService.getUserByUsername(goalUserName);
         Ticket t = getTicketById(ticketId);
 
-        List<TicketTransferToken> ticketTransferTokens =
-                tttRepository.findAllByTicketId(ticketId).stream().filter(Token::isValid).collect(Collectors.toList());
+        List<TicketTransferToken> ticketTransferTokens = tttRepository.findAllByTicketId(ticketId).stream().
+                filter(Token::isValid).
+                collect(Collectors.toList());
 
         if (!ticketTransferTokens.isEmpty()) {
             throw new DuplicateTicketTransferTokenException(ticketId);
@@ -188,8 +222,9 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public Collection<TicketTransferToken> getValidTicketTransferTokensByUser(String username) {
-        return tttRepository.findAllByTicketOwnerUsernameIgnoreCase(username).stream()
-                .filter(TicketTransferToken::isValid).collect(Collectors.toList());
+        return tttRepository.findAllByTicketOwnerUsernameIgnoreCase(username).stream().
+                filter(TicketTransferToken::isValid).
+                collect(Collectors.toList());
     }
 
     @Override
@@ -198,8 +233,12 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public Collection<Ticket> getAllTicketsWithTransport() {
-        return ticketRepository.findByPickupService_True();
+    public List<Ticket> getAllTicketsWithTransport() {
+        TicketOption pickupServiceOption = getTicketOptionByName("pickupService");
+
+        return ticketRepository.findAll().stream().
+                filter(ticket -> ticket.getEnabledOptions().contains(pickupServiceOption)).
+                collect(Collectors.toList());
     }
 
     @Override
@@ -208,6 +247,21 @@ public class TicketServiceImpl implements TicketService {
         User user = userService.getUserByUsername(username);
         ticket.setOwner(user);
         return ticketRepository.save(ticket);
+    }
+
+    @Override
+    public TicketType addTicketType(TicketType type) {
+        return ticketTypeRepository.save(type);
+    }
+
+    @Override
+    public Collection<TicketType> getAllTicketTypes() {
+        return ticketTypeRepository.findAll();
+    }
+
+    @Override
+    public TicketOption addTicketOption(TicketOption option) {
+        return ticketOptionRepository.save(option);
     }
 
 
@@ -223,24 +277,24 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public Collection<Ticket> getOwnedTicketsAndFromTeamMembers(User u) {
-        Collection<Ticket> ownedTickets =
-                ticketRepository.findAllByOwnerUsernameIgnoreCase(u.getUsername()).stream().filter(Ticket::isValid)
-                        .collect(Collectors.toList());
-        Collection<Ticket> captainedTickets = getCaptainedTickets(u);
+    public Collection<Ticket> getOwnedTicketsAndFromTeamMembers(User user) {
+        if (user == null) {
+            throw new IllegalArgumentException("User can't be null");
+        }
 
-        Collection<Ticket> ticketsInControl = new ArrayList<>();
-        ticketsInControl.addAll(ownedTickets);
-        ticketsInControl.addAll(captainedTickets);
+        Collection<Team> captainedTeams = teamService.getTeamByCaptainId(user.getId());
 
-        return ticketsInControl;
-    }
-
-    private Collection<Ticket> getCaptainedTickets(User u) {
-        Collection<Team> captainedTeams = teamService.getTeamByCaptainId(u.getId());
-
-        return captainedTeams.stream().flatMap(t -> t.getMembers().stream()).filter(m -> !m.equals(u)).flatMap(
-                m -> ticketRepository.findAllByOwnerUsernameIgnoreCase(m.getUsername()).stream()
-                        .filter(Ticket::isValid)).collect(Collectors.toList());
+        if (captainedTeams.isEmpty()) {
+            return ticketRepository.findAllByOwnerUsernameIgnoreCase(user.getUsername());
+        } else {
+            return captainedTeams.stream().
+                    // Get all team members, including the owner
+                            flatMap(team -> team.getMembers().stream()).
+                    // Find all tickets of those members and filter for validity
+                            flatMap(
+                            member -> ticketRepository.findAllByOwnerUsernameIgnoreCase(member.getUsername()).stream()).
+                            filter(Ticket::isValid).
+                            collect(Collectors.toSet());
+        }
     }
 }

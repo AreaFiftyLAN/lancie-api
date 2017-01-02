@@ -15,42 +15,32 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
 package ch.wisv.areafiftylan;
 
-import ch.wisv.areafiftylan.products.model.Ticket;
-import ch.wisv.areafiftylan.products.model.TicketType;
-import ch.wisv.areafiftylan.products.service.TicketRepository;
 import ch.wisv.areafiftylan.security.token.TeamInviteToken;
 import ch.wisv.areafiftylan.security.token.repository.TeamInviteTokenRepository;
 import ch.wisv.areafiftylan.teams.model.Team;
 import ch.wisv.areafiftylan.teams.service.TeamRepository;
-import ch.wisv.areafiftylan.users.model.Gender;
 import ch.wisv.areafiftylan.users.model.User;
-import ch.wisv.areafiftylan.utils.SessionData;
-import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.response.Response;
+import io.restassured.http.ContentType;
+import io.restassured.http.Header;
 import org.apache.http.HttpStatus;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.jayway.restassured.RestAssured.given;
+import static io.restassured.RestAssured.given;
+import static io.restassured.RestAssured.when;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.core.IsCollectionContaining.hasItem;
 
 
-public class TeamRestIntegrationTest extends IntegrationTest {
-
-    protected User captain;
-    protected final String captainCleartextPassword = "password";
-    private Ticket captainTicket;
+public class TeamRestIntegrationTest extends XAuthIntegrationTest {
 
     @Autowired
     protected TeamRepository teamRepository;
@@ -58,130 +48,34 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     @Autowired
     private TeamInviteTokenRepository teamInviteTokenRepository;
 
-    @Autowired
-    private TicketRepository ticketRepository;
+    private final String TEAM_ENDPOINT = "/teams/";
 
-    private Map<String, String> team1 = new HashMap<>();
+    private Map<String, String> getTeamDTO(User captain) {
+        Map<String, String> team = new HashMap<>();
+        team.put("captainUsername", captain.getUsername());
+        team.put("teamName", "Team + " + captain.getId());
+        return team;
 
-    @Before
-    public void initTeamTest() {
-        captain = new User("captain@mail.com", new BCryptPasswordEncoder().encode(captainCleartextPassword));
-        captain.getProfile()
-                .setAllFields("Captain", "Hook", "PeterPanKiller", localDate, Gender.MALE, "High Road 3", "2826ZZ", "Neverland",
-                        "0906-0777", null);
-
-        captain = userRepository.saveAndFlush(captain);
-
-        Ticket captainTicket = new Ticket(captain, TicketType.EARLY_FULL, false, false);
-        captainTicket.setValid(true);
-
-        Ticket userTicket = new Ticket(user, TicketType.EARLY_FULL, false, false);
-        userTicket.setValid(true);
-
-        ticketRepository.save(captainTicket);
-        ticketRepository.save(userTicket);
-
-        team1.put("teamName", "testteam1");
     }
-
-    @After
-    public void teamTestsCleanup() {
-        ticketRepository.deleteAll();
-        teamInviteTokenRepository.deleteAll();
-        teamRepository.deleteAll();
-        userRepository.delete(captain);
-    }
-
-    //region Private Helper Functions
-    private void addUserAsAdmin(String location, User user) {
-        SessionData sessionData = login(admin.getUsername(), adminCleartextPassword);
-
-        //@formatter:off
-        given().
-            filter(sessionFilter).
-            header(sessionData.getCsrfHeader()).
-        when().
-            content(user.getUsername()).
-            post(location).
-        then().
-            statusCode(HttpStatus.SC_OK);
-        //@formatter:on
-
-        logout();
-    }
-
-    private void inviteUserAsCaptain(String location, User user) {
-        SessionData sessionData = login(captain.getUsername(), captainCleartextPassword);
-
-        //@formatter:off
-        given().
-            filter(sessionFilter).
-            header(sessionData.getCsrfHeader()).
-        when().
-            content(user.getUsername()).
-            post(location + "/invites").
-        then().
-            statusCode(HttpStatus.SC_OK);
-        //@formatter:on
-
-        logout();
-    }
-
-    private String createTeamWithCaptain() {
-        SessionData sessionData = login(captain.getUsername(), captainCleartextPassword);
-
-        team1.put("captainUsername", captain.getUsername());
-
-        //@formatter:off
-        Response response =
-            given().
-                header(sessionData.getCsrfHeader()).
-                filter(sessionFilter).
-            when().
-                content(team1).contentType(ContentType.JSON).
-                post("/teams").
-            then().
-                extract().response();
-        //@formatter:on
-
-        logout();
-        return response.header("Location");
-    }
-
-    private Response getTeam(String location, String user, String password) {
-        SessionData login = login(user, password);
-
-        //@formatter:off
-        return
-            given().
-                filter(sessionFilter).
-                header(login.getCsrfHeader()).
-            when().
-                get(location).
-            then().extract().response();
-        //@formatter:on
-    }
-    //endregion
 
     //region Test Create Teams
     @Test
     public void testCreateTeamAsCaptain() {
-        team1.put("captainUsername", captain.getUsername());
-
-        SessionData login = login(captain.getUsername(), captainCleartextPassword);
+        User captain = createUserWithTicket();
+        Map<String, String> teamDTO = getTeamDTO(captain);
 
         //@formatter:off
         Integer teamId =
             given().
-                filter(sessionFilter).
-                header(login.getCsrfHeader()).
+                header(getXAuthTokenHeaderForUser(captain)).
             when().
-                content(team1).contentType(ContentType.JSON).
-                post("/teams").
+                body(teamDTO).
+                contentType(ContentType.JSON).
+                post(TEAM_ENDPOINT).
             then().
                 statusCode(HttpStatus.SC_CREATED).
                 header("Location", containsString("/teams/")).
-                body("object.teamName", equalTo(team1.get("teamName"))).
+                body("object.teamName", equalTo(teamDTO.get("teamName"))).
                 body("object.captain.profile.displayName", equalTo(captain.getProfile().getDisplayName())).
                 body("object.members", hasSize(1)).
             extract().response().path("object.id");
@@ -193,22 +87,21 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testCreateTeamAsCaptainDifferentCase() {
-        team1.put("captainUsername", captain.getUsername().toUpperCase());
-
-        SessionData login = login(captain.getUsername(), captainCleartextPassword);
+        User captain = createUserWithTicket();
+        Map<String, String> teamDTO = getTeamDTO(captain);
+        teamDTO.put("captainUsername", captain.getUsername().toUpperCase());
 
         //@formatter:off
         Integer teamId =
             given().
-                filter(sessionFilter).
-                header(login.getCsrfHeader()).
+                header(getXAuthTokenHeaderForUser(captain)).
             when().
-                content(team1).contentType(ContentType.JSON).
-                post("/teams").
+                body(teamDTO).contentType(ContentType.JSON).
+                post(TEAM_ENDPOINT).
             then().
                 statusCode(HttpStatus.SC_CREATED).
                 header("Location", containsString("/teams/")).
-                body("object.teamName", equalTo(team1.get("teamName"))).
+                body("object.teamName", equalTo(teamDTO.get("teamName"))).
                 body("object.captain.profile.displayName", equalTo(captain.getProfile().getDisplayName())).
                 body("object.members", hasSize(1)).
             extract().response().path("object.id");
@@ -220,18 +113,16 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testCreateTeamMissingTicket() {
-        ticketRepository.deleteAll();
-        team1.put("captainUsername", captain.getUsername());
+        User captain = createUser();
 
-        SessionData login = login(captain.getUsername(), captainCleartextPassword);
+        Map<String, String> teamDTO = getTeamDTO(captain);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(captain)).
         when().
-            content(team1).contentType(ContentType.JSON).
-            post("/teams").
+            body(teamDTO).contentType(ContentType.JSON).
+            post(TEAM_ENDPOINT).
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
@@ -240,15 +131,17 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     @Test
     public void testCreateTeamAsUserMissingCaptainParameter() {
 
-        SessionData login = login(captain.getUsername(), captainCleartextPassword);
+        User captain = createUserWithTicket();
+        Map<String, String> teamDTO = getTeamDTO(captain);
+        teamDTO.remove("captainUsername");
+
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(captain)).
         when().
-            content(team1).contentType(ContentType.JSON).
-            post("/teams").
+            body(teamDTO).contentType(ContentType.JSON).
+            post(TEAM_ENDPOINT).
         then().
             statusCode(HttpStatus.SC_BAD_REQUEST);
         //@formatter:on
@@ -256,17 +149,15 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testCreateTeamWithDifferentCaptainUsername() {
-        team1.put("captainUsername", user.getUsername());
-
-        SessionData login = login(captain.getUsername(), captainCleartextPassword);
+        User user = createUserWithTicket();
+        User captain = createUserWithTicket();
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(captain)).
         when().
-            content(team1).contentType(ContentType.JSON).
-            post("/teams").
+            body(getTeamDTO(user)).contentType(ContentType.JSON).
+            post(TEAM_ENDPOINT).
         then().
             statusCode(HttpStatus.SC_BAD_REQUEST);
         //@formatter:on
@@ -274,21 +165,20 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testCreateTeamAsAdminWithDifferentCaptain() {
-        team1.put("captainUsername", captain.getUsername());
+        User admin = createUser(true);
+        User captain = createUserWithTicket();
 
-        SessionData login = login(admin.getUsername(), adminCleartextPassword);
-
+        Map<String, String> teamDTO = getTeamDTO(captain);
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(admin)).
         when().
-            content(team1).contentType(ContentType.JSON).
-            post("/teams").
+            body(teamDTO).contentType(ContentType.JSON).
+            post(TEAM_ENDPOINT).
         then().
             statusCode(HttpStatus.SC_CREATED).
             header("Location", containsString("/teams/")).
-            body("object.teamName", equalTo(team1.get("teamName"))).
+            body("object.teamName", equalTo(teamDTO.get("teamName"))).
             body("object.captain.profile.displayName", equalTo(captain.getProfile().getDisplayName())).
             body("object.members", hasSize(1));
         //@formatter:on
@@ -296,36 +186,30 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testCreateTeamAsUserDuplicateTeamName() {
-        team1.put("captainUsername", captain.getUsername());
-
-        SessionData login = login(captain.getUsername(), captainCleartextPassword);
+        User captain = createUserWithTicket();
+        User captain2 = createUserWithTicket();
+        Map<String, String> teamDTO = getTeamDTO(captain);
+        Map<String, String> teamDTO2 = getTeamDTO(captain2);
+        teamDTO2.put("teamName", teamDTO.get("teamName"));
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(captain)).
         when().
-            content(team1).contentType(ContentType.JSON).
-            post("/teams").
+            body(teamDTO).contentType(ContentType.JSON).
+            post(TEAM_ENDPOINT).
         then().
             statusCode(HttpStatus.SC_CREATED).
             header("Location", containsString("/teams/")).
-            body("object.teamName", equalTo(team1.get("teamName"))).
+            body("object.teamName", equalTo(teamDTO.get("teamName"))).
             body("object.captain.profile.displayName", equalTo(captain.getProfile().getDisplayName())).
             body("object.members.profile.displayName", hasItem(captain.getProfile().getDisplayName()));
 
-        logout();
-
-        team1.put("captainUsername", user.getUsername());
-
-        SessionData login2 = login(user.getUsername(), userCleartextPassword);
-
         given().
-            filter(sessionFilter).
-            header(login2.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(captain2)).
         when().
-            content(team1).contentType(ContentType.JSON).
-            post("/teams").
+            body(teamDTO2).contentType(ContentType.JSON).
+            post(TEAM_ENDPOINT).
         then().
             statusCode(HttpStatus.SC_CONFLICT);
         //@formatter:on
@@ -333,37 +217,31 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testCreateTeamAsUserDuplicateTeamNameDifferentCasing() {
-        team1.put("captainUsername", captain.getUsername());
-
-        SessionData login = login(captain.getUsername(), captainCleartextPassword);
+        User captain = createUserWithTicket();
+        Map<String, String> teamDTO = getTeamDTO(captain);
+        User user = createUserWithTicket();
 
         //@formatter:off
         given().
-                filter(sessionFilter).
-                header(login.getCsrfHeader()).
-                when().
-                content(team1).contentType(ContentType.JSON).
-                post("/teams").
-                then().
-                statusCode(HttpStatus.SC_CREATED).
-                header("Location", containsString("/teams/")).
-                body("object.teamName", equalTo(team1.get("teamName"))).
-                body("object.captain.profile.displayName", equalTo(captain.getProfile().getDisplayName())).
-                body("object.members.profile.displayName", hasItem(captain.getProfile().getDisplayName()));
+            header(getXAuthTokenHeaderForUser(captain)).
+        when().
+            body(teamDTO).contentType(ContentType.JSON).
+            post(TEAM_ENDPOINT).
+        then().
+            statusCode(HttpStatus.SC_CREATED).
+            header("Location", containsString("/teams/")).
+            body("object.teamName", equalTo(teamDTO.get("teamName"))).
+            body("object.captain.profile.displayName", equalTo(captain.getProfile().getDisplayName())).
+            body("object.members.profile.displayName", hasItem(captain.getProfile().getDisplayName()));
 
-        logout();
-
-        team1.put("captainUsername", user.getUsername());
-        team1.put("teamName", "Testteam1");
-
-        SessionData login2 = login(user.getUsername(), userCleartextPassword);
+        Map<String, String> teamDTO2 = getTeamDTO(user);
+        teamDTO2.put("teamName", teamDTO.get("teamName").toUpperCase());
 
         given().
-                filter(sessionFilter).
-                header(login2.getCsrfHeader()).
+                header(getXAuthTokenHeaderForUser(user)).
                 when().
-                content(team1).contentType(ContentType.JSON).
-                post("/teams").
+                body(teamDTO).contentType(ContentType.JSON).
+                post(TEAM_ENDPOINT).
                 then().
                 statusCode(HttpStatus.SC_CONFLICT);
         //@formatter:on
@@ -373,50 +251,79 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     //region Test Get Team
     @Test
     public void getTeamAsAdmin() {
-        Response team = getTeam(createTeamWithCaptain(), admin.getUsername(), adminCleartextPassword);
-
-        team.then().statusCode(HttpStatus.SC_OK);
+        User admin = createUser(true);
+        User captain = createUserWithTicket();
+        Team team = createTeamWithCaptain(captain);
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(admin)).
+        when().
+            get(TEAM_ENDPOINT + team.getId()).
+        then().
+            statusCode(HttpStatus.SC_OK);
+        //formatter:on
     }
 
     @Test
     public void getTeamAsCaptain() {
-        Response team = getTeam(createTeamWithCaptain(), captain.getUsername(), captainCleartextPassword);
-
-        team.then().statusCode(HttpStatus.SC_OK);
+        User captain = createUserWithTicket();
+        Team team = createTeamWithCaptain(captain);
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(captain)).
+        when().
+            get(TEAM_ENDPOINT + team.getId()).
+        then().
+            statusCode(HttpStatus.SC_OK);
+        //formatter:on
     }
 
     @Test
     public void getTeamAsMember() {
-        String location = createTeamWithCaptain();
-        addUserAsAdmin(location, user);
-        Response team = getTeam(location, user.getUsername(), userCleartextPassword);
+        User captain = createUserWithTicket();
+        User member = createUserWithTicket();
+        Team team = createTeamWithCaptain(captain);
+        team = addMemberToTeam(team, member);
 
-        team.then().statusCode(HttpStatus.SC_OK);
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(member)).
+        when().
+            get(TEAM_ENDPOINT + team.getId()).
+        then().
+            statusCode(HttpStatus.SC_OK);
+        //formatter:on
     }
 
     @Test
     public void getTeamAsUser() {
-        String location = createTeamWithCaptain();
-        Response team = getTeam(location, user.getUsername(), userCleartextPassword);
+        User captain = createUserWithTicket();
+        User user = createUserWithTicket();
+        Team team = createTeamWithCaptain(captain);
 
-        team.then().statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+        when().
+            get(TEAM_ENDPOINT + team.getId()).
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //formatter:on
     }
 
     @Test
     public void getTeamCurrentUser() {
-        createTeamWithCaptain();
-
-        SessionData login = login(captain.getUsername(), captainCleartextPassword);
+        User captain = createUserWithTicket();
+        Team team = createTeamWithCaptain(captain);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(captain)).
         when().
             get("/users/current/teams").
         then().
             statusCode(HttpStatus.SC_OK).
-            body("[0].teamName", equalTo(team1.get("teamName"))).
+            body("[0].teamName", equalTo(team.getTeamName())).
             body("[0].captain.profile.displayName", equalTo(captain.getProfile().getDisplayName())).
             body("[0].members.profile.displayName", hasItem(captain.getProfile().getDisplayName()));
         //@formatter:on
@@ -426,139 +333,100 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     //region Test Add/Invite Members
     @Test
     public void testInviteMemberAsAdmin() {
-        //@formatter:off
-        String location = createTeamWithCaptain();
-
-        SessionData sessionData = login(admin.getUsername(), adminCleartextPassword);
-
+        User captain = createUserWithTicket();
+        User admin = createUser(true);
+        User member = createUserWithTicket();
+        Team team = createTeamWithCaptain(captain);
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(sessionData.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(admin)).
         when().
-            content(user.getUsername()).
-            post(location + "/invites").
+            body(member.getUsername()).
+            post(TEAM_ENDPOINT + team.getId() + "/invites").
         then().
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
 
-        Collection<TeamInviteToken> tokens = teamInviteTokenRepository.findByUserUsernameIgnoreCase(user.getUsername());
+        Collection<TeamInviteToken> tokens =
+                teamInviteTokenRepository.findByUserUsernameIgnoreCase(member.getUsername());
         Assert.assertFalse(tokens.isEmpty());
     }
 
     @Test
     public void testAddMemberAsAdmin() {
+        User captain = createUserWithTicket();
+        User admin = createUser(true);
+        User member = createUserWithTicket();
+        Team team = createTeamWithCaptain(captain);
 
         //@formatter:off
-        String location = createTeamWithCaptain();
-
-        SessionData login = login(admin.getUsername(), adminCleartextPassword);
+        Header header = getXAuthTokenHeaderForUser(admin);
 
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(header).
         when().
-            content(user.getUsername()).
-            post(location).
+            body(member.getUsername()).
+            post(TEAM_ENDPOINT + team.getId()).
         then().
             statusCode(HttpStatus.SC_OK);
 
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(header).
         when().
-            get(location).
+            get(TEAM_ENDPOINT + team.getId()).
         then().
             statusCode(HttpStatus.SC_OK).
             body("members.profile.displayName", hasItems(
                     captain.getProfile().getDisplayName(),
-                    user.getProfile().getDisplayName())).
+                    member.getProfile().getDisplayName())).
             body("size", equalTo(2));
         //@formatter:on
     }
 
     @Test
     public void testInviteMemberAsCaptain() {
-        //@formatter:off
-        String location = createTeamWithCaptain();
+        User captain = createUserWithTicket();
+        User member = createUserWithTicket();
+        Team team = createTeamWithCaptain(captain);
 
-        SessionData sessionData = login(captain.getUsername(), captainCleartextPassword);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(sessionData.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(captain)).
         when().
-            content(user.getUsername()).
-            post(location + "/invites").
+            body(member.getUsername()).
+            post(TEAM_ENDPOINT + team.getId() + "/invites").
         then().
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
 
-        Collection<TeamInviteToken> tokens = teamInviteTokenRepository.findByUserUsernameIgnoreCase(user.getUsername());
-        Assert.assertFalse(tokens.isEmpty());
-    }
-
-    @Test
-    public void testInviteMemberAsCaptainDifferentCase() {
-        //@formatter:off
-        String location = createTeamWithCaptain();
-
-        SessionData sessionData = login(captain.getUsername(), captainCleartextPassword);
-
-        //@formatter:off
-        given().
-            filter(sessionFilter).
-            header(sessionData.getCsrfHeader()).
-        when().
-            content(user.getUsername().toUpperCase()).
-            post(location + "/invites").
-        then().
-            statusCode(HttpStatus.SC_OK);
-        //@formatter:on
-
-        Collection<TeamInviteToken> tokens = teamInviteTokenRepository.findByUserUsernameIgnoreCase(user.getUsername());
+        Collection<TeamInviteToken> tokens =
+                teamInviteTokenRepository.findByUserUsernameIgnoreCase(member.getUsername());
         Assert.assertFalse(tokens.isEmpty());
     }
 
     @Test
     public void testInviteMemberTwiceAsCaptain() {
+        User captain = createUserWithTicket();
+        User user = createUserWithTicket();
+        Team team = createTeamWithCaptain(captain);
+
         //@formatter:off
-        String location = createTeamWithCaptain();
-
-        inviteUserAsCaptain(location, user);
-
-        SessionData sessionData = login(captain.getUsername(), captainCleartextPassword);
+        Header header = getXAuthTokenHeaderForUser(captain);
 
         given().
-            filter(sessionFilter).
-            header(sessionData.getCsrfHeader()).
+            header(header).
         when().
-            content(user.getUsername()).
-            post(location + "/invites").
+            body(user.getUsername()).
+            post(TEAM_ENDPOINT + team.getId() + "/invites").
         then().
-            statusCode(HttpStatus.SC_CONFLICT);
-        //@formatter:on
-
-        Collection<TeamInviteToken> tokens = teamInviteTokenRepository.findByUserUsernameIgnoreCase(user.getUsername());
-        Assert.assertEquals(1, tokens.size());
-    }
-
-    @Test
-    public void testInviteMemberTwiceAsCaptainDifferentCase() {
-        //@formatter:off
-        String location = createTeamWithCaptain();
-
-        inviteUserAsCaptain(location, user);
-
-        SessionData sessionData = login(captain.getUsername(), captainCleartextPassword);
+            statusCode(HttpStatus.SC_OK);
 
         given().
-            filter(sessionFilter).
-            header(sessionData.getCsrfHeader()).
+            header(header).
         when().
-            content(user.getUsername().toUpperCase()).
-            post(location + "/invites").
+            body(user.getUsername()).
+            post(TEAM_ENDPOINT + team.getId() + "/invites").
         then().
             statusCode(HttpStatus.SC_CONFLICT);
         //@formatter:on
@@ -569,22 +437,18 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testAddMemberAsMember() {
-        team1.put("captainUsername", captain.getUsername());
-
-        //@formatter:off
-        String location = createTeamWithCaptain();
-
-        addUserAsAdmin(location, user);
-
-        SessionData login = login(user.getUsername(), userCleartextPassword);
+        User captain = createUser();
+        Team team = createTeamWithCaptain(captain);
+        User member = createUserWithTicket();
+        User member2 = createUserWithTicket();
+        team = addMemberToTeam(team, member);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(member)).
         when().
-            content(admin.getUsername()).
-            post(location).
+            body(member2.getUsername()).
+            post(TEAM_ENDPOINT + team.getId()).
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
@@ -592,22 +456,18 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testInviteMemberAsMember() {
-        team1.put("captainUsername", captain.getUsername());
-
-        //@formatter:off
-        String location = createTeamWithCaptain();
-
-        addUserAsAdmin(location, user);
-
-        SessionData login = login(user.getUsername(), userCleartextPassword);
+        User captain = createUser();
+        Team team = createTeamWithCaptain(captain);
+        User member = createUserWithTicket();
+        User member2 = createUserWithTicket();
+        team = addMemberToTeam(team, member);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(member)).
         when().
-            content(admin.getUsername()).
-            post(location + "/invites").
+            body(member2.getUsername()).
+            post(TEAM_ENDPOINT + team.getId() + "/invites").
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
@@ -615,17 +475,17 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testAddMemberAsUser() {
+        User captain = createUser();
+        Team team = createTeamWithCaptain(captain);
+        User member = createUserWithTicket();
+        User user = createUserWithTicket();
+
         //@formatter:off
-        String location = createTeamWithCaptain();
-
-        SessionData login = login(user.getUsername(), userCleartextPassword);
-
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(user)).
         when().
-            content(user.getUsername()).
-            post(location).
+            body(member.getUsername()).
+            post(TEAM_ENDPOINT + team.getId()).
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
@@ -633,17 +493,17 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testInviteMemberAsUser() {
+        User captain = createUser();
+        Team team = createTeamWithCaptain(captain);
+        User member = createUserWithTicket();
+        User user = createUserWithTicket();
+
         //@formatter:off
-        String location = createTeamWithCaptain();
-
-        SessionData login = login(user.getUsername(), userCleartextPassword);
-
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(user)).
         when().
-            content(user.getUsername()).
-            post(location + "/invites").
+            body(member.getUsername()).
+            post(TEAM_ENDPOINT + team.getId() + "/invites").
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
@@ -651,17 +511,15 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testAddSelfToTeamAsCaptain() {
-        String location = createTeamWithCaptain();
-
-        SessionData login = login(captain.getUsername(), captainCleartextPassword);
+        User captain = createUserWithTicket();
+        Team team = createTeamWithCaptain(captain);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(captain)).
         when().
-            content(captain.getUsername()).
-            post(location).
+            body(captain.getUsername()).
+            post(TEAM_ENDPOINT + team.getId()).
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
@@ -669,17 +527,15 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testInviteSelfToTeamAsCaptain() {
-        String location = createTeamWithCaptain();
-
-        SessionData login = login(captain.getUsername(), captainCleartextPassword);
+        User captain = createUserWithTicket();
+        Team team = createTeamWithCaptain(captain);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(captain)).
         when().
-            content(captain.getUsername()).
-            post(location + "/invites").
+            body(captain.getUsername()).
+            post(TEAM_ENDPOINT + team.getId() + "/invites").
         then().
             statusCode(HttpStatus.SC_CONFLICT);
         //@formatter:on
@@ -687,19 +543,17 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testInviteMemberAsCaptainDuplicate() {
-        String location = createTeamWithCaptain();
-
-        addUserAsAdmin(location, user);
-
-        SessionData login = login(captain.getUsername(), captainCleartextPassword);
+        User captain = createUser();
+        Team team = createTeamWithCaptain(captain);
+        User member = createUserWithTicket();
+        team = addMemberToTeam(team, member);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(captain)).
         when().
-            content(user.getUsername()).
-            post(location + "/invites").
+            body(member.getUsername()).
+            post(TEAM_ENDPOINT + team.getId() + "/invites").
         then().
             statusCode(HttpStatus.SC_CONFLICT);
         //@formatter:on
@@ -707,17 +561,16 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testInviteMemberWithoutTicket() {
-        String location = createTeamWithCaptain();
-
-        SessionData login = login(captain.getUsername(), captainCleartextPassword);
+        User captain = createUser();
+        Team team = createTeamWithCaptain(captain);
+        User member = createUser();
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(captain)).
         when().
-            content(admin.getUsername()).
-            post(location + "/invites").
+            body(member.getUsername()).
+            post(TEAM_ENDPOINT + team.getId() + "/invites").
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
@@ -725,26 +578,18 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testAddMemberAsAdminDuplicate() {
-        String location = createTeamWithCaptain();
-
-        SessionData login = login(admin.getUsername(), adminCleartextPassword);
+        User admin = createUser(true);
+        User captain = createUserWithTicket();
+        User member = createUserWithTicket();
+        Team team = createTeamWithCaptain(captain);
+        team = addMemberToTeam(team, member);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(admin)).
         when().
-            content(user.getUsername()).
-            post(location).
-        then().
-            statusCode(HttpStatus.SC_OK);
-
-        given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
-        when().
-            content(user.getUsername()).
-            post(location).
+            body(member.getUsername()).
+            post(TEAM_ENDPOINT + team.getId()).
         then().
             statusCode(HttpStatus.SC_CONFLICT);
         //@formatter:on
@@ -755,21 +600,19 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testViewCurrentUserInvites() {
-        String location = createTeamWithCaptain();
-
-        inviteUserAsCaptain(location, user);
-
-        SessionData login = login(user.getUsername(), userCleartextPassword);
+        User captain = createUserWithTicket();
+        User user = createUser();
+        Team team = createTeamWithCaptain(captain);
+        teamInviteTokenRepository.save(new TeamInviteToken(user, team));
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(user)).
         when().
             get("/users/current/teams/invites").
         then().
             statusCode(HttpStatus.SC_OK).
-            body("teamName", hasItem(equalTo(team1.get("teamName")))).
+            body("teamName", hasItem(equalTo(team.getTeamName()))).
             body("username", hasItem(equalTo(user.getUsername()))).
             body("$", hasSize(1));
         //@formatter:on
@@ -777,21 +620,19 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testViewTeamInvitesAsCaptain() {
-        String location = createTeamWithCaptain();
-
-        inviteUserAsCaptain(location, user);
-
-        SessionData login = login(captain.getUsername(), captainCleartextPassword);
+        User captain = createUserWithTicket();
+        User user = createUserWithTicket();
+        Team team = createTeamWithCaptain(captain);
+        teamInviteTokenRepository.save(new TeamInviteToken(user, team));
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(captain)).
         when().
-            get(location + "/invites").
+            get(TEAM_ENDPOINT + team.getId() + "/invites").
         then().
             statusCode(HttpStatus.SC_OK).
-            body("teamName", hasItem(equalTo(team1.get("teamName")))).
+            body("teamName", hasItem(equalTo(team.getTeamName()))).
             body("username", hasItem(equalTo(user.getUsername()))).
             body("$", hasSize(1));
         //@formatter:on
@@ -799,24 +640,18 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testViewTeamInvitesAsMember() {
-        String location = createTeamWithCaptain();
-
-        addUserAsAdmin(location, user);
-
-        Ticket adminTicket = new Ticket(admin, TicketType.EARLY_FULL, false, false);
-        adminTicket.setValid(true);
-        ticketRepository.save(adminTicket);
-
-        inviteUserAsCaptain(location, admin);
-
-        SessionData login = login(user.getUsername(), userCleartextPassword);
+        User captain = createUserWithTicket();
+        User member = createUserWithTicket();
+        User user = createUserWithTicket();
+        Team team = createTeamWithCaptain(captain);
+        team = addMemberToTeam(team, member);
+        teamInviteTokenRepository.save(new TeamInviteToken(user, team));
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(member)).
         when().
-            get(location + "/invites").
+            get(TEAM_ENDPOINT + team.getId() + "/invites").
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
@@ -824,21 +659,20 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testViewTeamInvitesAsAdmin() {
-        String location = createTeamWithCaptain();
-
-        inviteUserAsCaptain(location, user);
-
-        SessionData login = login(admin.getUsername(), adminCleartextPassword);
+        User captain = createUserWithTicket();
+        User admin = createUser(true);
+        User user = createUserWithTicket();
+        Team team = createTeamWithCaptain(captain);
+        teamInviteTokenRepository.save(new TeamInviteToken(user, team));
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(admin)).
         when().
-            get(location + "/invites").
+            get(TEAM_ENDPOINT + team.getId() + "/invites").
         then().
             statusCode(HttpStatus.SC_OK).
-            body("teamName", hasItem(equalTo(team1.get("teamName")))).
+            body("teamName", hasItem(equalTo(team.getTeamName()))).
             body("username", hasItem(equalTo(user.getUsername()))).
             body("$", hasSize(1));
         //@formatter:on
@@ -846,14 +680,14 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testViewTeamInvitesAsAnon() {
-        String location = createTeamWithCaptain();
-
-        inviteUserAsCaptain(location, user);
+        User captain = createUserWithTicket();
+        User user = createUserWithTicket();
+        Team team = createTeamWithCaptain(captain);
+        teamInviteTokenRepository.save(new TeamInviteToken(user, team));
 
         //@formatter:off
-        given().
         when().
-            get(location + "/invites").
+            get(TEAM_ENDPOINT + team.getId() + "/invites").
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
@@ -861,22 +695,18 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testAcceptInviteAsUser() {
-        String location = createTeamWithCaptain();
+        User captain = createUserWithTicket();
+        User user = createUserWithTicket();
+        Team team = createTeamWithCaptain(captain);
 
-        inviteUserAsCaptain(location, user);
-
-        TeamInviteToken token =
-                teamInviteTokenRepository.findByUserUsernameIgnoreCase(user.getUsername()).stream().findFirst().get();
-
-        SessionData login = login(user.getUsername(), userCleartextPassword);
+        TeamInviteToken token = teamInviteTokenRepository.save(new TeamInviteToken(user, team));
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(user)).
         when().
-            content(token.getToken()).
-            post("/teams/invites").
+            body(token.getToken()).
+            post(TEAM_ENDPOINT + "invites").
         then().
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
@@ -887,25 +717,22 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testDeclineInviteAsUser() {
-        String location = createTeamWithCaptain();
+        User captain = createUserWithTicket();
+        User user = createUserWithTicket();
+        Team team = createTeamWithCaptain(captain);
 
-        inviteUserAsCaptain(location, user);
-
-        TeamInviteToken token =
-                teamInviteTokenRepository.findByUserUsernameIgnoreCase(user.getUsername()).stream().findFirst().get();
-
-        SessionData login = login(user.getUsername(), userCleartextPassword);
+        TeamInviteToken token = teamInviteTokenRepository.save(new TeamInviteToken(user, team));
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(user)).
         when().
-            content(token.getToken()).
-            delete("/teams/invites").
+            body(token.getToken()).
+            post(TEAM_ENDPOINT + "invites").
         then().
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
+
 
         Collection<TeamInviteToken> tokens = teamInviteTokenRepository.findByUserUsernameIgnoreCase(user.getUsername());
         tokens.removeIf(t -> !t.isValid());
@@ -918,18 +745,17 @@ public class TeamRestIntegrationTest extends IntegrationTest {
     //region Test Remove Members
     @Test
     public void testRemoveMemberAsCaptain() {
-        String location = createTeamWithCaptain();
-
-        addUserAsAdmin(location, user);
-
-        SessionData login = login(captain.getUsername(), captainCleartextPassword);
+        User captain = createUserWithTicket();
+        User member = createUserWithTicket();
+        Team team = createTeamWithCaptain(captain);
+        team = addMemberToTeam(team, member);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(captain)).
         when().
-            content(user.getUsername()).delete(location + "/members").
+            body(member.getUsername()).
+            delete(TEAM_ENDPOINT + team.getId() + "/members").
         then().
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
@@ -937,19 +763,15 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testRemoveCaptainAsCaptain() {
-        String location = createTeamWithCaptain();
-
-        addUserAsAdmin(location, user);
-
-        SessionData login = login(captain.getUsername(), captainCleartextPassword);
+        User captain = createUserWithTicket();
+        Team team = createTeamWithCaptain(captain);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(captain)).
         when().
-            content(captain.getUsername()).
-            delete(location + "/members").
+            body(captain.getUsername()).
+            delete(TEAM_ENDPOINT + team.getId() + "/members").
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
@@ -957,18 +779,18 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testRemoveMemberAsdmin() {
-        String location = createTeamWithCaptain();
-
-        addUserAsAdmin(location, user);
-
-        SessionData login = login(admin.getUsername(), adminCleartextPassword);
+        User admin = createUser(true);
+        User captain = createUserWithTicket();
+        User member = createUserWithTicket();
+        Team team = createTeamWithCaptain(captain);
+        team = addMemberToTeam(team, member);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(admin)).
         when().
-            content(user.getUsername()).delete(location + "/members").
+            body(member.getUsername()).
+            delete(TEAM_ENDPOINT + team.getId() + "/members").
         then().
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
@@ -976,18 +798,17 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testRemoveSelf() {
-        String location = createTeamWithCaptain();
-
-        addUserAsAdmin(location, user);
-
-        SessionData login = login(user.getUsername(), userCleartextPassword);
+        User captain = createUserWithTicket();
+        User member = createUserWithTicket();
+        Team team = createTeamWithCaptain(captain);
+        team = addMemberToTeam(team, member);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(member)).
         when().
-            content(user.getUsername()).delete(location + "/members").
+            body(member.getUsername()).
+            delete(TEAM_ENDPOINT + team.getId() + "/members").
         then().
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
@@ -995,20 +816,20 @@ public class TeamRestIntegrationTest extends IntegrationTest {
 
     @Test
     public void testRemoveMemberAsUser() {
-        String location = createTeamWithCaptain();
-
-        addUserAsAdmin(location, admin);
-
-        SessionData login = login(user.getUsername(), userCleartextPassword);
+        User captain = createUserWithTicket();
+        User member = createUserWithTicket();
+        User user = createUserWithTicket();
+        Team team = createTeamWithCaptain(captain);
+        team = addMemberToTeam(team, member);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+            header(getXAuthTokenHeaderForUser(user)).
         when().
-            content(admin.getUsername()).delete(location + "/members").
+            body(member.getUsername()).
+            delete(TEAM_ENDPOINT + team.getId() + "/members").
         then().
-            statusCode(HttpStatus.SC_FORBIDDEN);
+                statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
     }
     //endregion

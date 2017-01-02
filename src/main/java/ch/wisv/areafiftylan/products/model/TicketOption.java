@@ -17,16 +17,41 @@
 
 package ch.wisv.areafiftylan.products.model;
 
-public enum TicketOptions {
-    PICKUPSERVICE(2.50F), CHMEMBER(-5.00F);
+import ch.wisv.areafiftylan.utils.view.View;
+import com.fasterxml.jackson.annotation.JsonView;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-    final float price;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 
-    TicketOptions(float price) {
+@Entity
+@NoArgsConstructor
+@EqualsAndHashCode
+public class TicketOption {
+
+    @Id
+    @GeneratedValue
+    @Getter
+    private Long id;
+
+    @Getter
+    @Setter
+    @JsonView(View.OrderOverview.class)
+    private float price;
+
+    @Getter
+    @Setter
+    @JsonView(View.OrderOverview.class)
+    private String name;
+
+
+    public TicketOption(String name, float price) {
+        this.name = name;
         this.price = price;
     }
 
-    public float getPrice() {
-        return price;
-    }
 }

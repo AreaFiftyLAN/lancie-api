@@ -15,30 +15,15 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.wisv.areafiftylan.extras.consumption.model;
+package ch.wisv.areafiftylan.products.service.repository;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import ch.wisv.areafiftylan.products.model.TicketType;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import java.util.Optional;
 
-@Entity
-@NoArgsConstructor
-@EqualsAndHashCode
-public class Consumption {
-
-    @GeneratedValue
-    @Id
-    @Getter
-    Long id;
-
-    @Getter
-    String name;
-
-    public Consumption(String name) {
-        this.name = name;
-    }
+@Repository
+public interface TicketTypeRepository extends JpaRepository<TicketType, Long> {
+    Optional<TicketType> findByName(String name);
 }

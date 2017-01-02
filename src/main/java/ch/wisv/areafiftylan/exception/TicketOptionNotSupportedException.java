@@ -15,13 +15,12 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.wisv.areafiftylan.products.model;
+package ch.wisv.areafiftylan.exception;
 
-public enum OrderStatus {
-    ANONYMOUS, // Initial creating status
-    ASSIGNED,  // Has a User assigned
-    PENDING,  // Sent to the payment provider
-    PAID,  // Confirmed paid by payment provider
-    EXPIRED, // Payment attempted, but expired
-    CANCELLED // Payment attempted, but manually cancelled
+import ch.wisv.areafiftylan.products.model.TicketOption;
+
+public class TicketOptionNotSupportedException extends RuntimeException {
+    public TicketOptionNotSupportedException(TicketOption ticketOption) {
+        super("Ticket option " + ticketOption.getName() + " is not available for this ticket");
+    }
 }

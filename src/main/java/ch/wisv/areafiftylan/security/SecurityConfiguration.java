@@ -18,8 +18,6 @@
 package ch.wisv.areafiftylan.security;
 
 import ch.wisv.areafiftylan.security.token.repository.AuthenticationTokenRepository;
-import com.allanditzel.springframework.security.web.csrf.CsrfTokenResponseHeaderBindingFilter;
-import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.context.annotation.Configuration;
@@ -28,14 +26,10 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.csrf.CsrfFilter;
-import org.springframework.security.web.util.matcher.RequestMatcher;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.regex.Pattern;
 
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
@@ -48,20 +42,12 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private final RESTAuthenticationEntryPoint authenticationEntryPoint;
 
-    private final RESTAuthenticationSuccessHandler authenticationSuccessHandler;
-
-    private final RESTAuthenticationFailureHandler authenticationFailureHandler;
-
     @Autowired
     public SecurityConfiguration(AuthenticationTokenRepository authenticationTokenRepository,
-                                 RESTAuthenticationFailureHandler authenticationFailureHandler,
                                  UserDetailsService userDetailsService,
-                                 RESTAuthenticationSuccessHandler authenticationSuccessHandler,
                                  RESTAuthenticationEntryPoint authenticationEntryPoint) {
         this.authenticationTokenRepository = authenticationTokenRepository;
-        this.authenticationFailureHandler = authenticationFailureHandler;
         this.userDetailsService = userDetailsService;
-        this.authenticationSuccessHandler = authenticationSuccessHandler;
         this.authenticationEntryPoint = authenticationEntryPoint;
     }
 
@@ -86,30 +72,10 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         // should have been authenticated.
         http.exceptionHandling().authenticationEntryPoint(authenticationEntryPoint);
 
-        //@formatter:off
-        http.formLogin()
-                .loginProcessingUrl("/login")
-                .successHandler(authenticationSuccessHandler)
-                .failureHandler(authenticationFailureHandler)
-            .and()
-                .logout()
-                .logoutUrl("/logout");
-        //@formatter:on
+        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
-        http.csrf().
-                // This is used for the Mollie webhook, so it shouldn't be protected by CSRF
-                        ignoringAntMatchers("/orders/status").
-                // Don't require CSRF on requests with valid Tokens
-                        requireCsrfProtectionMatcher(csrfRequestMatcher).
-                // We also ignore this for Token requests
-                        ignoringAntMatchers("/token").
-                // Ignore the route to request a password reset, no CSRF protection is needed
-                        ignoringAntMatchers("/requestResetPassword");
-        //@formatter:on
-
-        // This is the filter that adds the CSRF Token to the header. CSRF is enabled by default in Spring, this just
-        // copies the content to the X-CSRF-TOKEN header field.
-        http.addFilterAfter(new CsrfTokenResponseHeaderBindingFilter(), CsrfFilter.class);
+        // We use custom Authentication Tokens, making csrf redundant
+        http.csrf().disable();
 
         // Add support for Token-base authentication
         http.addFilterAfter(new TokenAuthenticationFilter(authenticationTokenRepository),
@@ -120,18 +86,5 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetailsService).passwordEncoder(new BCryptPasswordEncoder());
     }
-
-    // We want to enable CSRF for State Changing methods. We don't want CSRF for requests with valid tokens.
-    private final RequestMatcher csrfRequestMatcher = new RequestMatcher() {
-        private final Pattern allowedMethods = Pattern.compile("^(GET|HEAD|TRACE|OPTIONS)$");
-
-        @Override
-        public boolean matches(HttpServletRequest request) {
-            String requestHeader = request.getHeader("X-Auth-Token");
-            boolean methodAllowed = !(allowedMethods.matcher(request.getMethod()).matches());
-
-            return Strings.isNullOrEmpty(requestHeader) && methodAllowed;
-        }
-    };
 }
 

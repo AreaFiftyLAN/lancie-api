@@ -21,26 +21,16 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 public class TicketDTO {
     @NotNull
     @Getter
     @Setter
-    TicketType type;
+    String type;
 
     @NotNull
+    @Getter
     @Setter
-    private Boolean pickupService;
-
-    public boolean hasPickupService() {
-        return pickupService;
-    }
-
-    @NotNull
-    @Setter
-    private Boolean chMember;
-
-    public Boolean isCHMember() {
-        return chMember;
-    }
+    List<String> options;
 }
