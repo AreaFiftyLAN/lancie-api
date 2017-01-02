@@ -27,6 +27,8 @@ public interface OrderService {
 
     Order getOrderById(Long id);
 
+    Order getOrderByReference(String reference);
+
     List<Order> getAllOrders();
 
     Collection<Order> findOrdersByUsername(String username);

@@ -17,6 +17,7 @@
 
 package ch.wisv.areafiftylan.utils.mail;
 
+import ch.wisv.areafiftylan.products.model.order.Order;
 import ch.wisv.areafiftylan.teams.model.Team;
 import ch.wisv.areafiftylan.users.model.User;
 
@@ -35,6 +36,8 @@ public interface MailService {
     void sendTemplateMailToUser(User user, MailDTO mailDTO);
 
     void sendVerificationmail(User user, String url);
+
+    void sendOrderConfirmation(Order order);
 
     void sendPasswordResetMail(User user, String url);
 

@@ -25,8 +25,10 @@ import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.model.order.Order;
 import ch.wisv.areafiftylan.products.model.order.OrderStatus;
 import ch.wisv.areafiftylan.users.model.User;
+import ch.wisv.areafiftylan.utils.mail.MailService;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
@@ -40,6 +42,9 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 public class OrderServiceTest extends ServiceTest {
+
+    @Autowired
+    private MailService mailService;
 
     @Test
     public void getOrderById() {
@@ -663,6 +668,22 @@ public class OrderServiceTest extends ServiceTest {
 
         assertTrue(order.getTickets().stream().noneMatch(Ticket::isValid));
 
+        reset(paymentService);
+    }
+
+    @Test
+    public void updateOrderStatusToPaid() {
+        User user = persistUser();
+        Order order = new Order(user);
+        order.setReference("Reference");
+        order = testEntityManager.persist(order);
+        Order paidOrder = new Order(user);
+        paidOrder.setStatus(OrderStatus.PAID);
+        given(paymentService.updateStatus("Reference")).willReturn(paidOrder);
+
+        order = orderService.updateOrderStatusByReference("Reference");
+
+        verify(mailService, times(1)).sendOrderConfirmation(any(Order.class));
         reset(paymentService);
     }
 }
