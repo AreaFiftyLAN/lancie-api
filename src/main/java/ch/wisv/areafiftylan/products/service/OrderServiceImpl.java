@@ -205,7 +205,7 @@ public class OrderServiceImpl implements OrderService {
     public Order updateOrderStatusByOrderId(Long orderId) {
         Order order = getOrderById(orderId);
         if (!Strings.isNullOrEmpty(order.getReference())) {
-            return paymentService.updateStatus(order.getReference());
+            return updateOrderStatusByReference(order.getReference());
         } else {
             throw new PaymentException("Order with id " + order + " has not been checked out yet");
         }
