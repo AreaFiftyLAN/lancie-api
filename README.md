@@ -6,12 +6,27 @@ The API is a Spring based application to suit the needs of a LAN-party.
 
 ### Tools
 -   [PostgresQL](https://www.postgresql.org/)
--   [mailcatcher](https://mailcatcher.me/), mailcatcher creates a mailserver locally on your pc. All mail sent from the API is cought here, you end up with a mailbox with every outgoing mailaddress. If you have an error installing mailcatcher, you probably do not have Ruby installed. You can find Ruby [here](https://www.ruby-lang.org/en/)
+-   [mailcatcher](https://mailcatcher.me/), mailcatcher creates a mailserver locally on your pc. All mail sent from the API is cought here, you end up with a mailbox with every outgoing mailaddress. Unix-like systems: `gem install mailcatcher`. Windows users can try mailcatcher as well, but [Papercut](https://github.com/changemakerstudios/papercut) has an easier installation. 
 
 ### Run
 1.  Import the project into IntelliJ IDEA, we really recommend using [IntelliJ IDEA Ultimate Edition](https://www.jetbrains.com/idea/), since it includes all the support for Spring. You could use another IDE, but we do not recommend this
+2.  Make sure you have installed the `Lombok Plugin`
 2.  Enable annotation processing, this can be enabled in `Settings > Build, Execution, Deployment > Compiler > Annotation Processors`. Here you have to check the checkmark that says `Enable Annotation Processors`
-3.  Copy `resources/config/application.properties.sample` to `config/application.properties`, fill in the blank fields, required fields are `spring.datasource.url`, `spring.datasource.username`, `spring.datasource.password`. Please also fill in the `a5l.molliekey` and `a5l.googleMapsAPIkey`, ask your nearest responsible developer for this key. You could also change the url parts of the `AREA FIFTYLAN SETTINGS` to `$(local_frontend_serve_port)/$(tail)`, this is probably something like `https://localhost:5100/${tail}`.  The `#` at the start of the `spring.jpa.nibernate.ddl-auto` also has to be removed.
+3.  Copy `config/application.properties.sample` to `config/application.properties`. The sample properties assume a working PostgreSQL installation running in the background.
+
+  You should change:
+  - `spring.datasource.[…]` (`url`, `username`, `password`) to your database url and credentials
+  - `flyway.enabled` to `false`
+  - `a5l.molliekey` and `a5l.googleMapsAPIkey` to their respective keys if you have those
+  - all occurrences of `areafiftylan.nl` to `localhost:5100`
+ 
+  You should comment out:
+  - `spring.jpa.properties.hibernate.hbm2ddl.auto`
+  - `logging.config`
+  
+  You should comment in:
+  - `spring.jpa.hibernate.ddl-auto`
+
 4.  Go to the Run/Debug Configuration window `Run -> Edit Configurations`, and add a new Spring Boot configuration. It needs only two settings to run. The `Main class` should be set to `ch.wisv.areafiftylan.Application` and the `Use classpath of module` should be set to your project module. Finally, enable the dev profile by entering `dev` in the `Active Profiles` box.
 
 ### Run from terminal
