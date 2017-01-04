@@ -1,62 +1,47 @@
-# Area FiftyLAN API [![Build Status](https://travis-ci.org/AreaFiftyLAN/lancie-api.svg?branch=master)](https://travis-ci.org/AreaFiftyLAN/lancie-api)
-This is a Spring based implementation of the LANcie API, used for [Area FiftyLAN](https://areafiftylan.nl/).
-This API is responsible for everything persistent, from user registration to ordering tickets.
+# LANcie API
+This is the repository for the LANcie-API. The LANcie-API handles everything from registering users to buying tickets and reserving a seat. You can use your own front-end to interact with the API, but you can also use the [LANcie frontend](https://github.com/AreaFiftyLAN/lancie-frontend).
 
-## Getting Started
-Most of the developers (if not all) use IntelliJ, the Java IDE from Jetbrains.
-It's highly recommended, even when you think Eclipse is the best thing out there.
-For this application, you need the Ultimate version, as we need the Spring Boot support.
-Get it here: https://www.jetbrains.com/idea/.
-If you already have IntelliJ installed, make sure you have the latest version (2016.1 at the time of writing).
-We assume you have a working version (including it running on Java 8) before you read on.
+## lancie-api
+The API is a Spring based application to suit the needs of a LAN-party.
 
-There's one plugin you need, which is the Lombok plugin.
-This can be found in IntelliJ's repositories and should be installed before attempting to run the applcation.
-Next to that, there's one checkbox you need to enable in IntelliJ's settings.
-Go to `Settings->Build,Execution,Deployment->Compiler->Annotation Processors` and enable the `Enable Annotation Processors` checkbox.
+### Tools
+-   [PostgresQL](https://www.postgresql.org/)
+-   [mailcatcher](https://mailcatcher.me/), mailcatcher creates a mailserver locally on your pc. All mail sent from the API is cought here, you end up with a mailbox with every outgoing mailaddress. Unix-like systems: `gem install mailcatcher`. Windows users can try mailcatcher as well, but [Papercut](https://github.com/changemakerstudios/papercut) has an easier installation. 
 
-### Running the application
-IntelliJ has some neat functionality to make running the application very easy. 
+### Run
+1.  Import the project into IntelliJ IDEA, we really recommend using [IntelliJ IDEA Ultimate Edition](https://www.jetbrains.com/idea/), since it includes all the support for Spring. You could use another IDE, but we do not recommend this
+2.  Make sure you have installed the `Lombok Plugin`
+3.  Enable annotation processing, this can be enabled in `Settings > Build, Execution, Deployment > Compiler > Annotation Processors`. Here you have to check the checkmark that says `Enable Annotation Processors`
+4.  Copy `config/application.properties.sample` to `config/application.properties`. The sample properties assume a working PostgreSQL installation running in the background.
 
-#### Set the properties
-The API has a number of properties that need to be set before the applicaiton can run.
-There's a template in `resources/config/application.properties.sample`.
-Copy the contents from this file into a `application-dev.properties`.
-This file is gitignored because it contains private information such as possible database credentials and API keys.
-The sample proprties assume a working PostgreSQL installation running in the background.
+  You should change:
+  - `spring.datasource.[…]` (`url`, `username`, `password`) to your database url and credentials
+  - `flyway.enabled` to `false`
+  - `a5l.molliekey` and `a5l.googleMapsAPIkey` to their respective keys if you have those
+  - all occurrences of `areafiftylan.nl` to `localhost:5100`
+ 
+  You should comment:
+  - `spring.jpa.properties.hibernate.hbm2ddl.auto`
+  - `logging.config`
+  
+  You should uncomment:
+  - `spring.jpa.hibernate.ddl-auto`
 
-#### Running with Spring Boot
-Go to the Run/Debug Configuration window via Run -> Edit Configurations, and add a new Spring Boot configuration.
-It needs only two settings to run.
-The *Main class* should be set to **ch.wisv.areafiftylan.Application** and the *Use classpath of module* should be set to your project module.
-Finally, enable the dev profile by entering `dev` in the `Active Profiles` box.
+5.  Right click the `Application` class (`src -> main -> java -> ch.wisv.areafiftylan`) and choose `Run`. Terminate the process (you don't have to wait for it to finish starting). Now go to the Run/Debug Configuration window `Run -> Edit Configurations` choose the `Spring Boot` configuration called `Application`. Enable the dev profile for this configuration by entering `dev` in the `Active Profiles` box.
 
-That's it! Select your new Spring Boot configuration and click Run!. This should launch the application on localhost:9000
+### Run from terminal
+After this, it is also possible to start the API directly from the terminal, ommitting the IDE. This can be done by running the `./gradlew bootRunDev` command.
 
-#### Running with Gradle
-It is also possible to run the application directly from the command line.
-This is done by running the command `./gradlew bootRunDev`, the application will now start just as usual.
-
-## Deploying
+## Deploy
 If you want to run the API on your server, you probably don't want to run it from the IDE.
-### Building
-To generate a runnable JAR file, run `./gradlew build`.
-This command will run all tests, and create a runnable JAR file in the root folder.
-### Configuration
-The API has a number of properties that need to be set before the application can run.
-There's a template in `config/application.properties.sample`.
-Copy this file to a file `application.properties` in the `/config` directory, relative to the location of the JAR.
-If you run the JAR, the properties from this file will be used.
-### Templates
-In the `/config` directory, a folder `/templates` should contain the templates `loginForm.html` and `mailTemplate.html`. Check the git repository for examples.
+
+### Build
+To generate a runnable JAR file, make sure that you have followed all the instructions under the **run** section. When you have done so, run `./gradlew build`. This command will run all tests, and create a runnable JAR file in the `./build` folder. You could also run `Build` from the gradle view in IntelliJ IDEA.
 
 ## Contributing
 If you want to contribute, awesome! First, pick an issue and self-assign it. Make your changes in a new branch, with the following naming convention:
 
-* Fixing a bug? > git checkout -b "**fix-**description-of-bug"
-* Implementing a new feature? > git checkout -b "**feature-**description-of-feature"
+* Fixing a bug? > "**fix-**description\_of\_bug"
+* Implementing a new feature? > "**feature-**description\_of\_feature"
 
-Once you're satisfied with your changes, create a pull request and give it the label "Ready for merge". 
-You can assign someone in specific or wait for someone to pick it up. 
-Make sure to include tests and documentation.
-If Travis isn't happy, we're not happy. 
+Once you're satisfied with your changes, create a pull request and give it the label "Ready for merge". You can assign someone in specific or wait for someone to pick it up. Make sure to include tests and documentation. If Travis isn't happy, we're not happy.
