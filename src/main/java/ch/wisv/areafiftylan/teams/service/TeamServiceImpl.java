@@ -19,7 +19,6 @@ package ch.wisv.areafiftylan.teams.service;
 
 import ch.wisv.areafiftylan.exception.TeamNotFoundException;
 import ch.wisv.areafiftylan.exception.TokenNotFoundException;
-import ch.wisv.areafiftylan.exception.UserNotFoundException;
 import ch.wisv.areafiftylan.security.token.TeamInviteToken;
 import ch.wisv.areafiftylan.security.token.Token;
 import ch.wisv.areafiftylan.security.token.repository.TeamInviteTokenRepository;
@@ -113,6 +112,10 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public Team delete(Long teamId) {
+        List<TeamInviteResponse> invites = findTeamInvitesByTeamId(teamId);
+        invites.stream().
+                map(TeamInviteResponse::getToken).
+                forEach(this::revokeInvite);
         Team team = teamRepository.getOne(teamId);
         teamRepository.delete(teamId);
         return team;

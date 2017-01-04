@@ -232,6 +232,21 @@ public class TeamRestController {
     }
 
     /**
+     * Delete the Team with the given Id. Can only be done by an admin,
+     * or the captain of the team when it has no other members.
+     *
+     * @param teamId Id of the Team to be deleted.
+     * @return A status message of the operation
+     */
+    @PreAuthorize("@currentUserServiceImpl.canDeleteTeam(principal, #teamId)")
+    @JsonView(View.Public.class)
+    @DeleteMapping("/{teamId}")
+    public ResponseEntity<?> deleteTeam(@PathVariable Long teamId) {
+        Team deletedTeam = teamService.delete(teamId);
+        return createResponseEntity(HttpStatus.OK, "Deleted team with " + teamId, deletedTeam);
+    }
+
+    /**
      * Delete a member from a team. Expects only a username in the RequestBody. Can only be done by the Captain or an
      * Admin
      *
@@ -245,22 +260,6 @@ public class TeamRestController {
     public ResponseEntity<?> removeTeamMember(@PathVariable Long teamId, @RequestBody String username) {
         teamService.removeMember(teamId, username);
         return createResponseEntity(HttpStatus.OK, "User " + username + " successfully removed from Team " + teamId);
-    }
-
-    /**
-     * Delete an entire Team. Limit this for Admins for now
-     *
-     * @param teamId Id of the Team to be deleted
-     *
-     * @return The deleted Team
-     */
-    @PreAuthorize("hasRole('ADMIN')")
-    @JsonView(View.Public.class)
-    @RequestMapping(method = RequestMethod.DELETE, value = "{teamId}")
-    public ResponseEntity<?> delete(@PathVariable Long teamId) {
-
-        Team deletedTeam = teamService.delete(teamId);
-        return createResponseEntity(HttpStatus.OK, "Deleted team with " + teamId, deletedTeam);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
