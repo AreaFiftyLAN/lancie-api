@@ -28,6 +28,7 @@ import ch.wisv.areafiftylan.products.service.repository.ExpiredOrderRepository;
 import ch.wisv.areafiftylan.products.service.repository.OrderRepository;
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.users.service.UserService;
+import ch.wisv.areafiftylan.utils.mail.MailService;
 import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,24 +47,37 @@ public class OrderServiceImpl implements OrderService {
     private final TicketService ticketService;
     private final UserService userService;
     private final PaymentService paymentService;
+    private final MailService mailService;
 
     @Value("${a5l.orderLimit}")
     private int ORDER_LIMIT;
 
     @Autowired
     public OrderServiceImpl(OrderRepository orderRepository, UserService userService, TicketService ticketService,
-                            PaymentService paymentService, ExpiredOrderRepository expiredOrderRepository) {
+                            PaymentService paymentService, ExpiredOrderRepository expiredOrderRepository,
+                            MailService mailService) {
         this.orderRepository = orderRepository;
         this.userService = userService;
         this.ticketService = ticketService;
         this.paymentService = paymentService;
         this.expiredOrderRepository = expiredOrderRepository;
+        this.mailService = mailService;
     }
 
     @Override
     public Order getOrderById(Long id) {
         return orderRepository.findById(id)
                 .orElseThrow(() -> new OrderNotFoundException("Order with id: " + id + " not found"));
+    }
+
+    @Override
+    public Order getOrderByReference(String reference) {
+        if (Strings.isNullOrEmpty(reference)) {
+            throw new IllegalArgumentException();
+        }
+
+        return orderRepository.findByReference(reference)
+                .orElseThrow(() -> new OrderNotFoundException("Order with reference " + reference + " not found"));
     }
 
     @Override
@@ -181,10 +195,15 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Order updateOrderStatusByReference(String orderReference) {
 
-        Order order = paymentService.updateStatus(orderReference);
+        Order order = getOrderByReference(orderReference);
+        OrderStatus statusBefore = order.getStatus();
+        order = paymentService.updateStatus(orderReference);
 
         // Set all tickets from this Order to valid
         validateTicketsIfPaid(order);
+        if (statusBefore != OrderStatus.PAID && order.getStatus().equals(OrderStatus.PAID)) {
+            mailService.sendOrderConfirmation(order);
+        }
         return order;
     }
 

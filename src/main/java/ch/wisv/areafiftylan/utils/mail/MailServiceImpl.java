@@ -17,6 +17,7 @@
 
 package ch.wisv.areafiftylan.utils.mail;
 
+import ch.wisv.areafiftylan.products.model.order.Order;
 import ch.wisv.areafiftylan.teams.model.Team;
 import ch.wisv.areafiftylan.users.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,8 +56,7 @@ public class MailServiceImpl implements MailService {
         this.templateEngine = templateEngine;
     }
 
-    @Override
-    public void sendMail(String recipientEmail, String recipientName, String subject, String messageString) {
+    private void sendMailWithContent(String recipientEmail, String subject, String content) {
         // Prepare message using a Spring helper
         MimeMessage mimeMessage = this.mailSender.createMimeMessage();
         MimeMessageHelper message;
@@ -68,8 +68,7 @@ public class MailServiceImpl implements MailService {
             message.setTo(recipientEmail);
 
             // Create the HTML body using Thymeleaf
-            String htmlContent = prepareHtmlContent(recipientName, messageString);
-            message.setText(htmlContent, true); // true = isHtml
+            message.setText(content, true); // true = isHtml
 
             // Send mail
             this.mailSender.send(mimeMessage);
@@ -78,6 +77,12 @@ public class MailServiceImpl implements MailService {
         } catch (MailException m) {
             throw new MailSendException("Unable to send email", m.getCause());
         }
+    }
+
+    @Override
+    public void sendMail(String recipientEmail, String recipientName, String subject, String messageString) {
+        String htmlContent = prepareHtmlContent(recipientName, messageString);
+        sendMailWithContent(recipientEmail, subject, htmlContent);
     }
 
     @Override
@@ -128,29 +133,39 @@ public class MailServiceImpl implements MailService {
 
     @Override
     public void sendVerificationmail(User user, String url) {
-        String message = "Please click on the following link to complete your registration: <a href=\"" +
-                url + "\">" + url + "</a><br /><br />If the link does not work, please copy the link and" +
-                " paste it into your browser.";
+        String message =
+                "Please click on the following link to complete your registration: <a href=\"" + url + "\">" + url +
+                        "</a><br /><br />If the link does not work, please copy the link and" +
+                        " paste it into your browser.";
         sendMail(user.getUsername(), user.getUsername(), "Confirm your registration", message);
     }
 
     @Override
+    public void sendOrderConfirmation(Order order) {
+        // Prepare the evaluation context
+        final Context ctx = new Context(new Locale("en"));
+        ctx.setVariable("name",
+                order.getUser().getProfile().getFirstName() + " " + order.getUser().getProfile().getLastName());
+        ctx.setVariable("order", order);
+        String content = this.templateEngine.process("orderConfirmation", ctx);
+
+        sendMailWithContent(order.getUser().getUsername(), "[Area FiftyLAN] Order Confirmation", content);
+    }
+
+    @Override
     public void sendPasswordResetMail(User user, String url) {
-        String message = "Please click on the following link to reset your password: <a href=\"" +
-                url + "\">" + url + "</a><br /><br />If the link does not work, please copy the link and" +
-                " paste it into your browser.";
+        String message = "Please click on the following link to reset your password: <a href=\"" + url + "\">" + url +
+                "</a><br /><br />If the link does not work, please copy the link and" + " paste it into your browser.";
         sendMail(user.getUsername(), user.getUsername(), "Password reset requested", message);
     }
 
     @Override
     public void sendTeamInviteMail(User user, String teamName, User teamCaptain) {
 
-        String message = "You've been invited to join \"Team " + teamName +
-                "\" by " +
-                teamCaptain.getProfile().getFirstName() +
-                " " +
-                teamCaptain.getProfile().getLastName() +
-                "! Please log in to My Area to accept the invitation.";
+        String message =
+                "You've been invited to join \"Team " + teamName + "\" by " + teamCaptain.getProfile().getFirstName() +
+                        " " + teamCaptain.getProfile().getLastName() +
+                        "! Please log in to My Area to accept the invitation.";
 
         sendMail(user.getUsername(), user.getUsername(), "You've been invited to \"Team " + teamName + "\"", message);
     }
@@ -160,7 +175,8 @@ public class MailServiceImpl implements MailService {
         String message = sender.getProfile().firstName +
                 " has sent you a ticket for AreaFiftyLAN! To accept this ticket please click on the following link: " +
                 "<a href=\"" + url + "\">" + url + "</a>";
-        sendMail(receiver.getUsername(), receiver.getProfile().getFirstName() + " " + receiver.getProfile().getLastName(),
+        sendMail(receiver.getUsername(),
+                receiver.getProfile().getFirstName() + " " + receiver.getProfile().getLastName(),
                 "A ticket for AreaFiftyLAN has been sent to you!", message);
     }
 }
