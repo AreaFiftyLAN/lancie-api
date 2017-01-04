@@ -43,6 +43,8 @@ import static org.junit.Assert.assertTrue;
 
 
 public class SeatRestIntegrationTest extends XAuthIntegrationTest {
+    
+    private final String SEAT_ENDPOINT = "/seats";
 
     @Autowired
     private SeatRepository seatRepository;
@@ -75,7 +77,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(user)).
         when().
-            get("/seats").
+            get(SEAT_ENDPOINT).
         then().
             statusCode(HttpStatus.SC_OK).
             body("seatmap.A.ticket.owner", not(contains(hasKey("username")))).
@@ -88,7 +90,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
     public void getAllSeatsAdminViewAsAnon() {
         //@formatter:off
         when().
-            get("/seats?admin").
+            get(SEAT_ENDPOINT + "?admin").
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
@@ -102,7 +104,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(user)).
         when().
-            get("/seats?admin").
+            get(SEAT_ENDPOINT + "?admin").
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
@@ -118,7 +120,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(admin)).
         when().
-            get("/seats?admin").
+            get(SEAT_ENDPOINT + "?admin").
         then().
             statusCode(HttpStatus.SC_OK).
             body("seatmap.A.ticket.owner", hasItem(hasKey("username"))).
@@ -138,7 +140,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(user)).
         when().
-            get("/seats/A").
+            get(SEAT_ENDPOINT + "/A").
         then().
             statusCode(HttpStatus.SC_OK).
             body("seatmap.A.ticket.owner", not(contains(hasKey("username")))).
@@ -155,7 +157,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(user)).
         when().
-            get("/seats/A?admin").
+            get(SEAT_ENDPOINT + "/A?admin").
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
@@ -171,7 +173,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(admin)).
         when().
-            get("/seats/A?admin").
+            get(SEAT_ENDPOINT + "/A?admin").
         then().
             statusCode(HttpStatus.SC_OK).
             body("seatmap.A.ticket.owner", hasItem(hasKey("username"))).
@@ -191,7 +193,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(user)).
         when().
-            get("/seats/A/1").
+            get(SEAT_ENDPOINT + "/A/1").
         then().
             statusCode(HttpStatus.SC_OK).
             body("ticket.owner", not(hasKey("username"))).
@@ -210,7 +212,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(user)).
         when().
-            get("/seats/A/1?admin").
+            get(SEAT_ENDPOINT + "/A/1?admin").
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
@@ -254,7 +256,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(user)).
         when().
-            get("/teams/" + team.getTeamName() + "/seats").
+            get(SEAT_ENDPOINT + "/team/" + team.getTeamName()).
         then().
             statusCode(HttpStatus.SC_OK).
             body("$", hasSize(2)).
@@ -279,7 +281,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
             body(seatGroupDTO).
             contentType(ContentType.JSON).
         when().
-            post("/seats").
+            post(SEAT_ENDPOINT).
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
@@ -298,7 +300,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
             body(seatGroupDTO).
             contentType(ContentType.JSON).
         when().
-            post("/seats").
+            post(SEAT_ENDPOINT).
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
@@ -317,7 +319,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         when().
             body(seatGroupDTO).
             contentType(ContentType.JSON).
-            post("/seats").
+            post(SEAT_ENDPOINT).
         then().
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
@@ -336,7 +338,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         given().
         when().
             param("ticketId", ticket.getId()).
-            post("/seats/A/1").
+            post(SEAT_ENDPOINT + "/A/1").
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
@@ -351,8 +353,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(user)).
         when().
-            param("ticketId", ticket.getId()).
-            post("/seats/A/1").
+            post(SEAT_ENDPOINT + "/A/1/" + ticket.getId()).
         then().
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
@@ -368,8 +369,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(user2)).
         when().
-            param("ticketId", ticket.getId()).
-            post("/seats/A/1").
+            post(SEAT_ENDPOINT + "/A/1/" + ticket.getId()).
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
@@ -388,8 +388,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(captain)).
         when().
-            param("ticketId", userTicket.getId()).
-            post("/seats/A/1").
+            post(SEAT_ENDPOINT + "/A/1/" + userTicket.getId()).
         then().
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
@@ -405,8 +404,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(admin)).
         when().
-            param("ticketId", userTicket.getId()).
-            post("/seats/A/1").
+            post(SEAT_ENDPOINT + "/A/1/" + userTicket.getId()).
         then().
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
@@ -425,8 +423,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(user2)).
         when().
-            param("ticketId", ticket2.getId()).
-            post("/seats/A/1").
+            post(SEAT_ENDPOINT + "/A/1/" + ticket2.getId()).
         then().
             statusCode(HttpStatus.SC_CONFLICT);
         //@formatter:on
@@ -443,8 +440,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(user)).
         when().
-            param("ticketId", ticket.getId()).
-            post("/seats/A/1").
+            post(SEAT_ENDPOINT + "/A/1/" + ticket.getId()).
         then().
             statusCode(HttpStatus.SC_BAD_REQUEST);
         //@formatter:on
@@ -460,8 +456,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(user)).
         when().
-            param("ticketId", ticket.getId()).
-            post("/seats/A/2").
+            post(SEAT_ENDPOINT + "/A/2/" + ticket.getId()).
         then().
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
@@ -486,8 +481,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(admin)).
         when().
-            param("ticketId", ticket.getId()).
-            post("/seats/A/2").
+            post(SEAT_ENDPOINT + "/A/2/" + ticket.getId()).
         then().
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
@@ -507,8 +501,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(captain)).
         when().
-            param("ticketId", userTicket.getId()).
-            post("/seats/A/2").
+            post(SEAT_ENDPOINT + "/A/2/" + userTicket.getId()).
         then().
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
@@ -523,7 +516,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         //@formatter:off
         given().
         when().
-            delete("/seats/A/1").
+            delete(SEAT_ENDPOINT + "/A/1").
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
@@ -539,7 +532,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(user)).
         when().
-            delete("/seats/A/1").
+            delete(SEAT_ENDPOINT + "/A/1").
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
@@ -555,7 +548,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(createUser(true))).
         when().
-            delete("/seats/A/1").
+            delete(SEAT_ENDPOINT + "/A/1").
         then().
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
