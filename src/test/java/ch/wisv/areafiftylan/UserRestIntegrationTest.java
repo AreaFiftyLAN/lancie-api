@@ -21,7 +21,6 @@ import ch.wisv.areafiftylan.security.token.repository.VerificationTokenRepositor
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.utils.TaskScheduler;
 import io.restassured.http.ContentType;
-import io.restassured.http.Header;
 import org.apache.http.HttpStatus;
 import org.junit.After;
 import org.junit.Test;
@@ -648,42 +647,6 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
     }
 
     @Test
-    public void testChangePassword() {
-        //TODO: Move to new AuthenticationTest
-        User user = createUser();
-
-        String newPassword = "newPassword";
-        Map<String, String> passwordDTO = new HashMap<>();
-        passwordDTO.put("oldPassword", cleartextPassword);
-        passwordDTO.put("newPassword", newPassword);
-
-        //@formatter:off
-        Header xAuthTokenHeader = getXAuthTokenHeaderForUser(user);
-
-        given().
-            header(xAuthTokenHeader).
-        when().
-            body(passwordDTO).
-            contentType(ContentType.JSON).
-            put("/users/current/password").
-        then().
-            statusCode(HttpStatus.SC_OK);
-        //@formatter:on
-
-        removeXAuthToken(xAuthTokenHeader);
-
-        //@formatter:off
-        given().
-            header(getXAuthTokenHeaderForUser(user, newPassword)).
-        when().
-            get("/users/current").
-        then().statusCode(HttpStatus.SC_OK).
-            body("username", equalTo(user.getUsername())).
-            body("authorities", hasItem("ROLE_USER"));
-        //@formatter:on
-    }
-
-    @Test
     public void testChangePasswordWrongOldPassword() {
         //TODO: Move to new AuthenticationTest
         User user = createUser();
@@ -778,7 +741,7 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         User user = createUser();
         //@formatter:off
         given().
-            header(getXAuthTokenHeaderForUser(user.getUsername().toUpperCase(), cleartextPassword)).
+            header(getXAuthTokenHeaderForUser(user.getUsername().toUpperCase())).
         when().
             get("/users/current").
         then().statusCode(HttpStatus.SC_OK).

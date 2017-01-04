@@ -17,6 +17,7 @@
 
 package ch.wisv.areafiftylan.security;
 
+import ch.wisv.areafiftylan.security.authentication.AuthenticationService;
 import ch.wisv.areafiftylan.security.token.repository.AuthenticationTokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
@@ -42,13 +43,17 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private final RESTAuthenticationEntryPoint authenticationEntryPoint;
 
+    private AuthenticationService authenticationService;
+
     @Autowired
     public SecurityConfiguration(AuthenticationTokenRepository authenticationTokenRepository,
                                  UserDetailsService userDetailsService,
-                                 RESTAuthenticationEntryPoint authenticationEntryPoint) {
+                                 RESTAuthenticationEntryPoint authenticationEntryPoint,
+                                 AuthenticationService authenticationService) {
         this.authenticationTokenRepository = authenticationTokenRepository;
         this.userDetailsService = userDetailsService;
         this.authenticationEntryPoint = authenticationEntryPoint;
+        this.authenticationService = authenticationService;
     }
 
     /**
@@ -77,6 +82,10 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         // We use custom Authentication Tokens, making csrf redundant
         http.csrf().disable();
 
+        // Set the login point to get X-Auth-Tokens
+        http.addFilterAfter(new JsonLoginFilter(this.authenticationManagerBean(),
+                        new JsonLoginAuthenticationSuccessHandler(authenticationService)),
+                UsernamePasswordAuthenticationFilter.class);
         // Add support for Token-base authentication
         http.addFilterAfter(new TokenAuthenticationFilter(authenticationTokenRepository),
                 UsernamePasswordAuthenticationFilter.class);
