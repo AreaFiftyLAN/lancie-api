@@ -11,8 +11,8 @@ The API is a Spring based application to suit the needs of a LAN-party.
 ### Run
 1.  Import the project into IntelliJ IDEA, we really recommend using [IntelliJ IDEA Ultimate Edition](https://www.jetbrains.com/idea/), since it includes all the support for Spring. You could use another IDE, but we do not recommend this
 2.  Make sure you have installed the `Lombok Plugin`
-2.  Enable annotation processing, this can be enabled in `Settings > Build, Execution, Deployment > Compiler > Annotation Processors`. Here you have to check the checkmark that says `Enable Annotation Processors`
-3.  Copy `config/application.properties.sample` to `config/application.properties`. The sample properties assume a working PostgreSQL installation running in the background.
+3.  Enable annotation processing, this can be enabled in `Settings > Build, Execution, Deployment > Compiler > Annotation Processors`. Here you have to check the checkmark that says `Enable Annotation Processors`
+4.  Copy `config/application.properties.sample` to `config/application.properties`. The sample properties assume a working PostgreSQL installation running in the background.
 
   You should change:
   - `spring.datasource.[…]` (`url`, `username`, `password`) to your database url and credentials
@@ -20,14 +20,14 @@ The API is a Spring based application to suit the needs of a LAN-party.
   - `a5l.molliekey` and `a5l.googleMapsAPIkey` to their respective keys if you have those
   - all occurrences of `areafiftylan.nl` to `localhost:5100`
  
-  You should comment out:
+  You should comment:
   - `spring.jpa.properties.hibernate.hbm2ddl.auto`
   - `logging.config`
   
-  You should comment in:
+  You should uncomment:
   - `spring.jpa.hibernate.ddl-auto`
 
-4.  Go to the Run/Debug Configuration window `Run -> Edit Configurations`, and add a new Spring Boot configuration. It needs only two settings to run. The `Main class` should be set to `ch.wisv.areafiftylan.Application` and the `Use classpath of module` should be set to your project module. Finally, enable the dev profile by entering `dev` in the `Active Profiles` box.
+5.  Right click the `Application` class (`src -> main -> java -> ch.wisv.areafiftylan`) and choose `Run`. Terminate the process (you don't have to wait for it to finish starting). Now go to the Run/Debug Configuration window `Run -> Edit Configurations` choose the `Spring Boot` configuration called `Application`. Enable the dev profile for this configuration by entering `dev` in the `Active Profiles` box.
 
 ### Run from terminal
 After this, it is also possible to start the API directly from the terminal, ommitting the IDE. This can be done by running the `./gradlew bootRunDev` command.
