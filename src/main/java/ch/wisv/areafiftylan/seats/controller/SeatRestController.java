@@ -19,7 +19,6 @@ package ch.wisv.areafiftylan.seats.controller;
 
 import ch.wisv.areafiftylan.seats.model.Seat;
 import ch.wisv.areafiftylan.seats.model.SeatGroupDTO;
-import ch.wisv.areafiftylan.seats.model.SeatReservationDTO;
 import ch.wisv.areafiftylan.seats.model.SeatmapResponse;
 import ch.wisv.areafiftylan.seats.service.SeatService;
 import ch.wisv.areafiftylan.users.model.User;
@@ -39,6 +38,7 @@ import java.util.List;
 import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEntity;
 
 @RestController
+@RequestMapping("/seats")
 public class SeatRestController {
 
     private final SeatService seatService;
@@ -60,7 +60,7 @@ public class SeatRestController {
      */
     @JsonView(View.Public.class)
     @PreAuthorize("isAuthenticated()")
-    @RequestMapping(value = "seats/{group}/{number}", method = RequestMethod.GET)
+    @GetMapping("/{group}/{number}")
     Seat getSeatByGroupAndNumber(@PathVariable String group, @PathVariable int number) {
         return seatService.getSeatBySeatGroupAndSeatNumber(group, number);
     }
@@ -74,7 +74,7 @@ public class SeatRestController {
      * @return The seat at the given location
      */
     @PreAuthorize("hasRole('ADMIN')")
-    @RequestMapping(value = "seats/{group}/{number}", method = RequestMethod.GET, params = "admin")
+    @GetMapping(value = "/{group}/{number}", params = "admin")
     Seat getSeatByGroupAndNumberAdmin(@PathVariable String group, @PathVariable int number) {
         return seatService.getSeatBySeatGroupAndSeatNumber(group, number);
     }
@@ -88,7 +88,7 @@ public class SeatRestController {
      */
     @JsonView(View.Public.class)
     @PreAuthorize("isAuthenticated()")
-    @RequestMapping(value = "seats/{group}", method = RequestMethod.GET)
+    @GetMapping("/{group}")
     SeatmapResponse getSeatGroupByName(@PathVariable String group) {
         return seatService.getSeatGroupByName(group);
     }
@@ -101,24 +101,24 @@ public class SeatRestController {
      * @return A List of Seats in a group.
      */
     @PreAuthorize("hasRole('ADMIN')")
-    @RequestMapping(value = "seats/{group}", method = RequestMethod.GET, params = "admin")
+    @GetMapping(value = "/{group}", params = "admin")
     SeatmapResponse getSeatGroupByNameAdminView(@PathVariable String group) {
         return seatService.getSeatGroupByName(group);
     }
-
 
     /**
      * Reserve a Seat at a given location. This can be done for yourself, an Admin or a member of a Team you're the
      * captain of.
      *
-     * @param group    Group of the Seat
-     * @param number   Number in the group of a Seat
+     * @param group    The Seatgroup the Seat is in.
+     * @param number   The number of the Seat in the Seatgroup.
+     * @param ticketId The ticketId of the User's Ticket.
+     *
      * @return Status message indicating the result.
      */
     @PreAuthorize("@currentUserServiceImpl.canReserveSeat(principal, #ticketId)")
-    @RequestMapping(value = "seats/{group}/{number}", method = RequestMethod.POST)
-    ResponseEntity<?> reserveSingleSeat(@PathVariable String group, @PathVariable int number,
-                                        @RequestParam Long ticketId) {
+    @PostMapping("/{group}/{number}/{ticketId}")
+    ResponseEntity<?> reserveSingleSeat(@PathVariable String group, @PathVariable Integer number, @PathVariable Long ticketId) {
         if (seatService.reserveSeatForTicket(group, number, ticketId)) {
             return createResponseEntity(HttpStatus.OK, "Seat successfully reserved");
         } else {
@@ -129,14 +129,15 @@ public class SeatRestController {
     /**
      * Reserve a seat without assigning a User to it. Can be used for Group reservations. Can only be done by Admins.
      *
-     * @param seatReservationDTO DTO containing the seatLocation.
+     * @param group    The Seatgroup the Seat is in.
+     * @param number   The number of the Seat in the Seatgroup.
      *
      * @return Status message indicating the result
      */
     @PreAuthorize("hasRole('ADMIN')")
-    @RequestMapping(value = "seats/reservations", method = RequestMethod.POST)
-    ResponseEntity<?> reserveSingleSeat(@RequestBody SeatReservationDTO seatReservationDTO) {
-        if (seatService.reserveSeat(seatReservationDTO.getGroup(), seatReservationDTO.getNumber())) {
+    @PostMapping("/{group}/{number}")
+    ResponseEntity<?> reserveSingleSeat(@PathVariable String group, @PathVariable Integer number) {
+        if (seatService.reserveSeat(group, number)) {
             return createResponseEntity(HttpStatus.OK, "Seat successfully reserved");
         } else {
             return createResponseEntity(HttpStatus.CONFLICT, "Seat is already taken");
@@ -152,7 +153,7 @@ public class SeatRestController {
      * @return Status message of the result
      */
     @PreAuthorize("hasRole('ADMIN')")
-    @RequestMapping(value = "seats/{group}/{number}", method = RequestMethod.DELETE)
+    @DeleteMapping("/{group}/{number}")
     ResponseEntity<?> clearSeat(@PathVariable String group, @PathVariable int number) {
 
         seatService.clearSeat(group, number);
@@ -165,7 +166,7 @@ public class SeatRestController {
      * @return A list of all Seats in the seatmap.
      */
     @JsonView(View.Public.class)
-    @RequestMapping(value = "/seats", method = RequestMethod.GET)
+    @GetMapping
     SeatmapResponse getAllSeats() {
         return seatService.getAllSeats();
     }
@@ -176,7 +177,7 @@ public class SeatRestController {
      * @return A list of all Seats in the seatmap.
      */
     @PreAuthorize("hasRole('ADMIN')")
-    @RequestMapping(value = "/seats", method = RequestMethod.GET, params = "admin")
+    @GetMapping(params = "admin")
     SeatmapResponse getAllSeatsAdminView() {
         return seatService.getAllSeats();
     }
@@ -189,7 +190,7 @@ public class SeatRestController {
      * @return Status message indicating the result
      */
     @PreAuthorize("hasRole('ADMIN')")
-    @RequestMapping(value = "/seats", method = RequestMethod.POST)
+    @PostMapping
     ResponseEntity<?> addSeatGroup(@RequestBody @Validated SeatGroupDTO seatGroupDTO) {
         seatService.addSeats(seatGroupDTO);
 
@@ -205,7 +206,7 @@ public class SeatRestController {
      * @return The Seat of the given User.
      */
     @PreAuthorize("hasRole('ADMIN')")
-    @RequestMapping(value = "/users/{userId}/seat", method = RequestMethod.GET)
+    @GetMapping("/user/{userId}")
     public List<Seat> getSeatByUser(@PathVariable Long userId) {
         User user = userService.getUserById(userId);
 
@@ -221,7 +222,7 @@ public class SeatRestController {
      */
     @JsonView(View.Public.class)
     @PreAuthorize("isAuthenticated()")
-    @RequestMapping(value = "/teams/{teamName}/seats", method = RequestMethod.GET)
+    @GetMapping("/team/{teamName}")
     public Collection<Seat> getSeatsForTeam(@PathVariable String teamName) {
         return seatService.getSeatsByTeamName(teamName);
     }
