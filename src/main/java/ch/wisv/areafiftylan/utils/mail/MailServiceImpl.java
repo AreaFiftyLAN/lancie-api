@@ -149,7 +149,7 @@ public class MailServiceImpl implements MailService {
         ctx.setVariable("order", order);
         String content = this.templateEngine.process("orderConfirmation", ctx);
 
-
+        sendMailWithContent(order.getUser().getUsername(), "[Area FiftyLAN] Order Confirmation", content);
     }
 
     @Override

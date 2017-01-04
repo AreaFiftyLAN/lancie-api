@@ -72,7 +72,11 @@
                                             <tbody class="tickets">
                                                 <tr th:each="ticket : ${order.getTickets()}">
                                                     <td th:text="${ticket.getType().getText()}">Ticket Type</td>
-                                                    <td th:text="${ticket.getEnabledOptions()}">Options</td>
+                                                    <td>
+                                                        <div th:each="option : ${ticket.getEnabledOptions()}"><span
+                                                                th:text="${option.getName()}">Options</span>
+                                                        </div>
+                                                    </td>
                                                     <td th:text="${ticket.getPrice()}">Ticket price</td>
                                                 </tr>
                                                 <tr>
