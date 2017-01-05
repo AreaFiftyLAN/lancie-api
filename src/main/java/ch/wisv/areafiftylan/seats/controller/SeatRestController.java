@@ -197,33 +197,4 @@ public class SeatRestController {
         return createResponseEntity(HttpStatus.OK,
                 seatGroupDTO.getNumberOfSeats() + " added in group " + seatGroupDTO.getSeatGroupName());
     }
-
-    /**
-     * Get the Seat of a specific User
-     *
-     * @param userId Id of the User you want the Seat of.
-     *
-     * @return The Seat of the given User.
-     */
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/user/{userId}")
-    public List<Seat> getSeatByUser(@PathVariable Long userId) {
-        User user = userService.getUserById(userId);
-
-        return seatService.getSeatsByUsername(user.getUsername());
-    }
-
-    /**
-     * Get the Seats of a Team with the given teamname
-     *
-     * @param teamName Name of the Team you want the Seats of.
-     *
-     * @return Collection of Seats belonging to members of the Team.
-     */
-    @JsonView(View.Public.class)
-    @PreAuthorize("isAuthenticated()")
-    @GetMapping("/team/{teamName}")
-    public Collection<Seat> getSeatsForTeam(@PathVariable String teamName) {
-        return seatService.getSeatsByTeamName(teamName);
-    }
 }
