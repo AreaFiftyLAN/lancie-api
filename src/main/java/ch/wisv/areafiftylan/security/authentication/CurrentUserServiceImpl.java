@@ -95,19 +95,6 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     }
 
     @Override
-    public boolean canDeleteTeam(Object principal, Long teamId) {
-        if (principal instanceof UserDetails) {
-            UserDetails user = (UserDetails) principal;
-            Team team = teamService.getTeamById(teamId);
-            return (team.getCaptain().getUsername().equals(user.getUsername()) &&
-                    team.getMembers().size() == 1) ||
-                    user.getAuthorities().contains(Role.ROLE_ADMIN);
-        } else {
-            return false;
-        }
-    }
-
-    @Override
     public boolean canRemoveFromTeam(Object principal, Long teamId, String username) {
         if (principal instanceof UserDetails) {
             UserDetails currentUser = (UserDetails) principal;

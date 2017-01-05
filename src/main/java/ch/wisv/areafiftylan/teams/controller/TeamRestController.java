@@ -238,12 +238,16 @@ public class TeamRestController {
      * @param teamId Id of the Team to be deleted.
      * @return A status message of the operation
      */
-    @PreAuthorize("@currentUserServiceImpl.canDeleteTeam(principal, #teamId)")
+    @PreAuthorize("@currentUserServiceImpl.canEditTeam(principal, #teamId)")
     @JsonView(View.Public.class)
     @DeleteMapping("/{teamId}")
     public ResponseEntity<?> deleteTeam(@PathVariable Long teamId) {
-        Team deletedTeam = teamService.delete(teamId);
-        return createResponseEntity(HttpStatus.OK, "Deleted team with " + teamId, deletedTeam);
+        if (teamService.getTeamById(teamId).getMembers().size() == 1) {
+            Team deletedTeam = teamService.delete(teamId);
+            return createResponseEntity(HttpStatus.OK, "Deleted team with " + teamId, deletedTeam);
+        } else {
+            return createResponseEntity(HttpStatus.FORBIDDEN, "Team with ID: " + teamId + " has other users.");
+        }
     }
 
     /**
