@@ -37,7 +37,6 @@ import java.util.List;
 import java.util.Map;
 
 import static io.restassured.RestAssured.given;
-import static io.restassured.RestAssured.when;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertTrue;
 
@@ -89,8 +88,10 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
     @Test
     public void getAllSeatsAdminViewAsAnon() {
         //@formatter:off
+        given().
+            param("admin", true).
         when().
-            get(SEAT_ENDPOINT + "?admin").
+            get(SEAT_ENDPOINT).
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
@@ -99,14 +100,20 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
     @Test
     public void getAllSeatsAdminViewAsUser() {
         User user = createUser();
+        Ticket ticket = createTicketForUser(user);
+        setTicketOnA1(ticket);
 
         //@formatter:off
         given().
             header(getXAuthTokenHeaderForUser(user)).
+            param("admin", true).
         when().
-            get(SEAT_ENDPOINT + "?admin").
+            get(SEAT_ENDPOINT).
         then().
-            statusCode(HttpStatus.SC_FORBIDDEN);
+            statusCode(HttpStatus.SC_OK).
+            body("seatmap.A.ticket.owner", not(contains(hasKey("username")))).
+            body("seatmap.A.ticket.owner.profile", contains(hasKey("displayName"))).
+            body("seatmap.A", hasSize(5));
         //@formatter:on
     }
 
@@ -119,8 +126,9 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         //@formatter:off
         given().
             header(getXAuthTokenHeaderForUser(admin)).
+            param("admin", true).
         when().
-            get(SEAT_ENDPOINT + "?admin").
+            get(SEAT_ENDPOINT).
         then().
             statusCode(HttpStatus.SC_OK).
             body("seatmap.A.ticket.owner", hasItem(hasKey("username"))).
@@ -152,14 +160,20 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
     @Test
     public void getSeatGroupAdminViewAsUser() {
         User user = createUser();
+        Ticket ticket = createTicketForUser(user);
+        setTicketOnA1(ticket);
 
         //@formatter:off
         given().
             header(getXAuthTokenHeaderForUser(user)).
+            param("admin", true).
         when().
-            get(SEAT_ENDPOINT + "/A?admin").
+            get(SEAT_ENDPOINT + "/A").
         then().
-            statusCode(HttpStatus.SC_FORBIDDEN);
+            statusCode(HttpStatus.SC_OK).
+            body("seatmap.A.ticket.owner", not(contains(hasKey("username")))).
+            body("seatmap.A.ticket.owner.profile", contains(hasKey("displayName"))).
+            body("seatmap.A", hasSize(5));
         //@formatter:on
     }
 
@@ -172,8 +186,9 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         //@formatter:off
         given().
             header(getXAuthTokenHeaderForUser(admin)).
+            param("admin", true).
         when().
-            get(SEAT_ENDPOINT + "/A?admin").
+            get(SEAT_ENDPOINT + "/A").
         then().
             statusCode(HttpStatus.SC_OK).
             body("seatmap.A.ticket.owner", hasItem(hasKey("username"))).
@@ -211,10 +226,14 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         //@formatter:off
         given().
             header(getXAuthTokenHeaderForUser(user)).
+            param("admin", true).
         when().
-            get(SEAT_ENDPOINT + "/A/1?admin").
+            get(SEAT_ENDPOINT + "/A/1").
         then().
-            statusCode(HttpStatus.SC_FORBIDDEN);
+            statusCode(HttpStatus.SC_OK).
+            body("ticket.owner", not(hasKey("username"))).
+            body("ticket.owner.profile", hasKey("displayName")).
+            body("ticket.owner", not(hasItem(hasKey("authorities"))));
         //@formatter:on
     }
 
