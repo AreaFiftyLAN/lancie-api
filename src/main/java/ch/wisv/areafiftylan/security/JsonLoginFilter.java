@@ -32,27 +32,21 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.Reader;
 
+/**
+ * This Login filter uses the default "Form" login filter, but parses a JSON requestbody instead. It accepts requests on
+ * /login and returns an X-Auth-Token Header on successful authentication using the
+ * JsonLoginAuthenticationSuccessHandler
+ */
 public class JsonLoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private UserDTO userDTO = new UserDTO();
     private AuthenticationManager authenticationManager;
     private JsonLoginAuthenticationSuccessHandler successHandler;
 
-    public JsonLoginFilter(AuthenticationManager authenticationManager,
-                           JsonLoginAuthenticationSuccessHandler successHandler) {
+    public JsonLoginFilter(AuthenticationManager authenticationManager, JsonLoginAuthenticationSuccessHandler successHandler) {
         super();
         this.authenticationManager = authenticationManager;
         this.successHandler = successHandler;
-    }
-
-    @Override
-    protected String obtainUsername(HttpServletRequest request) {
-        return userDTO.getUsername();
-    }
-
-    @Override
-    protected String obtainPassword(HttpServletRequest request) {
-        return userDTO.getPassword();
     }
 
     @Override
@@ -60,6 +54,12 @@ public class JsonLoginFilter extends UsernamePasswordAuthenticationFilter {
             throws AuthenticationException {
         userDTO = getUserDTO(request);
         return super.attemptAuthentication(request, response);
+    }
+
+    @Override
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
+                                            Authentication authResult) throws IOException, ServletException {
+        successHandler.onAuthenticationSuccess(request, response, authResult);
     }
 
     private UserDTO getUserDTO(HttpServletRequest request) {
@@ -73,6 +73,16 @@ public class JsonLoginFilter extends UsernamePasswordAuthenticationFilter {
     }
 
     @Override
+    protected String obtainUsername(HttpServletRequest request) {
+        return userDTO.getUsername();
+    }
+
+    @Override
+    protected String obtainPassword(HttpServletRequest request) {
+        return userDTO.getPassword();
+    }
+
+    @Override
     public AuthenticationManager getAuthenticationManager() {
         return this.authenticationManager;
     }
@@ -80,12 +90,5 @@ public class JsonLoginFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     public void setAuthenticationSuccessHandler(AuthenticationSuccessHandler successHandler) {
         super.setAuthenticationSuccessHandler(successHandler);
-    }
-
-    @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
-                                            Authentication authResult) throws IOException, ServletException {
-        successHandler.setUsername(userDTO.getUsername());
-        successHandler.onAuthenticationSuccess(request, response, authResult);
     }
 }

@@ -18,8 +18,6 @@
 package ch.wisv.areafiftylan.security;
 
 import ch.wisv.areafiftylan.security.authentication.AuthenticationService;
-import lombok.Setter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
@@ -30,11 +28,7 @@ import java.io.IOException;
 
 public class JsonLoginAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
-    @Autowired
-    AuthenticationService authenticationService;
-
-    @Setter
-    String username = "";
+    private final AuthenticationService authenticationService;
 
     public JsonLoginAuthenticationSuccessHandler(AuthenticationService service) {
         this.authenticationService = service;
@@ -43,7 +37,7 @@ public class JsonLoginAuthenticationSuccessHandler implements AuthenticationSucc
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
-        response.setHeader("X-Auth-Token", authenticationService.createNewAuthToken(username));
+        response.setHeader("X-Auth-Token", authenticationService.createNewAuthToken(authentication.getName()));
         response.setStatus(200);
     }
 }
