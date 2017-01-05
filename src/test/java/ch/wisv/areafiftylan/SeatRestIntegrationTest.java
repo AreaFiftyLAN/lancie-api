@@ -256,7 +256,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(user)).
         when().
-            get(SEAT_ENDPOINT + "/team/" + team.getTeamName()).
+            get("/teams/" + team.getTeamName() + SEAT_ENDPOINT).
         then().
             statusCode(HttpStatus.SC_OK).
             body("$", hasSize(2)).
