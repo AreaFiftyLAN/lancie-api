@@ -60,14 +60,14 @@ public class TokenAuthenticationTest extends XAuthIntegrationTest {
         Response response = given().
         when().
             body(userDTO).contentType(ContentType.JSON).
-            post("/token");
+            post("/login");
 
         Optional<AuthenticationToken> authenticationToken =
                 authenticationTokenRepository.findByUserUsername(user.getUsername());
 
         Assert.assertTrue(authenticationToken.isPresent());
 
-        response.then().statusCode(HttpStatus.SC_OK).body("object", containsString(authenticationToken.get().getToken()));
+        response.then().statusCode(HttpStatus.SC_OK).header("X-Auth-Token", containsString(authenticationToken.get().getToken()));
 
     }
 
@@ -82,7 +82,7 @@ public class TokenAuthenticationTest extends XAuthIntegrationTest {
         given().
         when().
             body(userDTO).contentType(ContentType.JSON).
-            post("/token").
+            post("/login").
         then().
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
@@ -94,7 +94,7 @@ public class TokenAuthenticationTest extends XAuthIntegrationTest {
         given().
         when().
             body(userDTO).contentType(ContentType.JSON).
-            post("/token").
+            post("/login").
         then().
             statusCode(HttpStatus.SC_OK);
         //@formatter:on

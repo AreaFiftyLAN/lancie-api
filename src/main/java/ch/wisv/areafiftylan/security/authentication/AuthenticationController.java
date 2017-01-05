@@ -25,7 +25,6 @@ import ch.wisv.areafiftylan.security.token.VerificationToken;
 import ch.wisv.areafiftylan.security.token.repository.PasswordResetTokenRepository;
 import ch.wisv.areafiftylan.security.token.repository.VerificationTokenRepository;
 import ch.wisv.areafiftylan.users.model.User;
-import ch.wisv.areafiftylan.users.model.UserDTO;
 import ch.wisv.areafiftylan.users.service.UserService;
 import com.google.common.base.Strings;
 import lombok.extern.log4j.Log4j2;
@@ -36,7 +35,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
@@ -73,26 +71,9 @@ public class AuthenticationController {
         this.passwordResetTokenRepository = passwordResetTokenRepository;
     }
 
-    /**
-     * This basic GET method for the /login endpoint returns a simple login form.
-     *
-     * @return Login view
-     */
-    @RequestMapping(value = "/login", method = RequestMethod.GET)
-    public ModelAndView getLoginPage() {
-        return new ModelAndView("loginForm");
-    }
-
     @RequestMapping(value = "/token", method = RequestMethod.GET)
     public ResponseEntity<?> checkSession() {
         return createResponseEntity(HttpStatus.OK, "Here's your token!");
-    }
-
-    @RequestMapping(value = "/token", method = RequestMethod.POST)
-    public ResponseEntity<?> createAuthenticationToken(@RequestBody UserDTO userDTO) {
-        String authToken = authenticationService.createNewAuthToken(userDTO.getUsername(), userDTO.getPassword());
-
-        return createResponseEntity(HttpStatus.OK, "Token successfully created", authToken);
     }
 
     @PreAuthorize("isAuthenticated()")
@@ -102,13 +83,12 @@ public class AuthenticationController {
     }
 
     @PreAuthorize("isAuthenticated()")
-    @RequestMapping(value = "/logout", method = RequestMethod.GET)
+    @RequestMapping(value = "/logout", method = RequestMethod.POST)
     public ResponseEntity<?> removeSession(@RequestHeader("X-Auth-Token") String xAuth) {
         authenticationService.removeAuthToken(xAuth);
 
         return createResponseEntity(HttpStatus.OK, "Successfully logged out");
     }
-
 
     /**
      * This method requests a passwordResetToken and sends it to the user. With this token, the user can reset his

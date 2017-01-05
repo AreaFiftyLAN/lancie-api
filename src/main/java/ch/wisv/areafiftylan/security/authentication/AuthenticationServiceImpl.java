@@ -25,9 +25,6 @@ import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.users.service.UserService;
 import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -45,18 +42,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public String createNewAuthToken(String username, String password) {
+    public String createNewAuthToken(String username) {
         User user = userService.getUserByUsername(username);
 
-        if (correctCredentials(user, password)) {
-            // Delete the old Token
-            authenticationTokenRepository.findByUserUsername(username).ifPresent(authenticationTokenRepository::delete);
+        // Delete the old Token
+        authenticationTokenRepository.findByUserUsername(username).ifPresent(authenticationTokenRepository::delete);
 
-            return authenticationTokenRepository.save(new AuthenticationToken(user)).getToken();
-        }
-
-        throw new AuthenticationCredentialsNotFoundException("Incorrect credentials");
+        return authenticationTokenRepository.save(new AuthenticationToken(user)).getToken();
     }
+
 
     @Override
     public void removeAuthToken(String xAuth) {
@@ -73,9 +67,5 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         token.revoke();
         authenticationTokenRepository.saveAndFlush(token);
-    }
-
-    private boolean correctCredentials(User user, String password) {
-        return new BCryptPasswordEncoder().matches(password, user.getPassword());
     }
 }

@@ -34,8 +34,7 @@ import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.*;
 import static org.hamcrest.core.IsCollectionContaining.hasItem;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.junit.Assert.assertFalse;
@@ -238,6 +237,33 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
             body("message", containsString("User successfully created at")).
             body("object.username", is(userDTO.get("username")));
         //@formatter:on
+    }
+
+    @Test
+    public void testCreateUserIsDisabled() {
+        Map<String, String> userDTO = new HashMap<>();
+        userDTO.put("username", "disabled@mail.com");
+        userDTO.put("password", cleartextPassword);
+
+        //@formatter:off
+        given().
+        when().
+            body(userDTO).contentType(ContentType.JSON).
+            post("/users").
+        then().
+            statusCode(HttpStatus.SC_CREATED).
+            body("message", containsString("User successfully created at")).
+            body("object.username", is(userDTO.get("username")));
+
+        given().
+            body(userDTO).
+        when().
+            post("/login").
+        then().
+            statusCode(HttpStatus.SC_UNAUTHORIZED).
+            body("message", containsString("disabled"));
+        //@formatter:on
+
     }
 
     @Test
@@ -672,14 +698,18 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
 
         removeXAuthToken(xAuthTokenHeader);
 
+        Map<String, String> userDTO = new HashMap<>();
+        userDTO.put("username", user.getUsername());
+        userDTO.put("password", newPassword);
+
         //@formatter:off
         given().
-            header(getXAuthTokenHeaderForUser(user, newPassword)).
+            body(userDTO).
         when().
-            get("/users/current").
-        then().statusCode(HttpStatus.SC_OK).
-            body("username", equalTo(user.getUsername())).
-            body("authorities", hasItem("ROLE_USER"));
+            post("/login").
+        then().
+            statusCode(HttpStatus.SC_OK).
+            header("X-Auth-Token", not(isEmptyOrNullString()));
         //@formatter:on
     }
 
@@ -778,7 +808,7 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         User user = createUser();
         //@formatter:off
         given().
-            header(getXAuthTokenHeaderForUser(user.getUsername().toUpperCase(), cleartextPassword)).
+            header(getXAuthTokenHeaderForUser(user.getUsername().toUpperCase())).
         when().
             get("/users/current").
         then().statusCode(HttpStatus.SC_OK).
