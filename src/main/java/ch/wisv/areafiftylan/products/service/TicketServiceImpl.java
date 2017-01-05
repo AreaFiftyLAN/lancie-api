@@ -201,6 +201,14 @@ public class TicketServiceImpl implements TicketService {
             throw new TicketAlreadyLinkedException();
         }
 
+        // Remove User from his teams when transferring his last ticket away.
+        String ownerUsername = t.getOwner().getUsername();
+        if (findValidTicketsByOwnerUsername(ownerUsername).size() == 1) {
+            teamService.getTeamsByUsername(ownerUsername).stream().
+                    map(Team::getId).
+                    forEach((teamId) -> teamService.removeMember(teamId, ownerUsername));
+        }
+
         User newOwner = ttt.getUser();
         t.setOwner(newOwner);
 
