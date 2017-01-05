@@ -17,6 +17,8 @@
 
 package ch.wisv.areafiftylan.users.controller;
 
+import ch.wisv.areafiftylan.seats.model.Seat;
+import ch.wisv.areafiftylan.seats.service.SeatService;
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.users.model.UserDTO;
 import ch.wisv.areafiftylan.users.service.UserService;
@@ -36,6 +38,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolationException;
 import java.util.Collection;
+import java.util.List;
 
 import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEntity;
 
@@ -45,9 +48,12 @@ public class UserRestController {
 
     private final UserService userService;
 
+    private final SeatService seatService;
+
     @Autowired
-    UserRestController(UserService userService) {
+    UserRestController(UserService userService, SeatService seatService) {
         this.userService = userService;
+        this.seatService = seatService;
     }
 
     /**
@@ -156,7 +162,19 @@ public class UserRestController {
         return ResponseEntityBuilder.createResponseEntity(HttpStatus.OK, "Age checked!", oldEnough);
     }
 
-
+    /**
+     * Get the Seat of a specific User
+     *
+     * @param userId Id of the User you want the Seat of.
+     *
+     * @return The Seat of the given User.
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/{userId}/seat")
+    public List<Seat> getSeatByUser(@PathVariable Long userId) {
+        User user = userService.getUserById(userId);
+        return seatService.getSeatsByUsername(user.getUsername());
+    }
 
     /**
      * Checks for the availability of a username. Returns false when another user is already registered with this

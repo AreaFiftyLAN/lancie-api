@@ -17,6 +17,8 @@
 
 package ch.wisv.areafiftylan.teams.controller;
 
+import ch.wisv.areafiftylan.seats.model.Seat;
+import ch.wisv.areafiftylan.seats.service.SeatService;
 import ch.wisv.areafiftylan.teams.model.Team;
 import ch.wisv.areafiftylan.teams.model.TeamDTO;
 import ch.wisv.areafiftylan.teams.model.TeamInviteResponse;
@@ -48,9 +50,12 @@ public class TeamRestController {
 
     private final TeamService teamService;
 
+    private final SeatService seatService;
+
     @Autowired
-    public TeamRestController(TeamService teamService) {
+    public TeamRestController(TeamService teamService, SeatService seatService) {
         this.teamService = teamService;
+        this.seatService = seatService;
     }
 
     /**
@@ -118,6 +123,20 @@ public class TeamRestController {
         return this.teamService.getTeamById(teamId);
     }
 
+    /**
+     * Get the Seats of a Team with the given teamname
+     *
+     * @param teamName Name of the Team you want the Seats of.
+     *
+     * @return Collection of Seats belonging to members of the Team.
+     */
+    @JsonView(View.Public.class)
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/{teamName}/seats")
+    public Collection<Seat> getSeatsForTeam(@PathVariable String teamName) {
+        return seatService.getSeatsByTeamName(teamName);
+    }
+    
     /**
      * Get the members of the Team with the given Id.
      *
