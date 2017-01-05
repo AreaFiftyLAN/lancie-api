@@ -21,6 +21,7 @@ import ch.wisv.areafiftylan.security.token.repository.VerificationTokenRepositor
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.utils.TaskScheduler;
 import io.restassured.http.ContentType;
+import io.restassured.http.Header;
 import org.apache.http.HttpStatus;
 import org.junit.After;
 import org.junit.Test;
@@ -33,8 +34,7 @@ import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.*;
 import static org.hamcrest.core.IsCollectionContaining.hasItem;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.junit.Assert.assertFalse;
@@ -237,6 +237,33 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
             body("message", containsString("User successfully created at")).
             body("object.username", is(userDTO.get("username")));
         //@formatter:on
+    }
+
+    @Test
+    public void testCreateUserIsDisabled() {
+        Map<String, String> userDTO = new HashMap<>();
+        userDTO.put("username", "disabled@mail.com");
+        userDTO.put("password", cleartextPassword);
+
+        //@formatter:off
+        given().
+        when().
+            body(userDTO).contentType(ContentType.JSON).
+            post("/users").
+        then().
+            statusCode(HttpStatus.SC_CREATED).
+            body("message", containsString("User successfully created at")).
+            body("object.username", is(userDTO.get("username")));
+
+        given().
+            body(userDTO).
+        when().
+            post("/login").
+        then().
+            statusCode(HttpStatus.SC_UNAUTHORIZED).
+            body("message", containsString("disabled"));
+        //@formatter:on
+
     }
 
     @Test
@@ -643,6 +670,46 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         then().
             statusCode(HttpStatus.SC_OK).
             body("object", equalTo(true));
+        //@formatter:on
+    }
+
+    @Test
+    public void testChangePassword() {
+        //TODO: Move to new AuthenticationTest
+        User user = createUser();
+
+        String newPassword = "newPassword";
+        Map<String, String> passwordDTO = new HashMap<>();
+        passwordDTO.put("oldPassword", cleartextPassword);
+        passwordDTO.put("newPassword", newPassword);
+
+        //@formatter:off
+        Header xAuthTokenHeader = getXAuthTokenHeaderForUser(user);
+
+        given().
+            header(xAuthTokenHeader).
+        when().
+            body(passwordDTO).
+            contentType(ContentType.JSON).
+            put("/users/current/password").
+        then().
+            statusCode(HttpStatus.SC_OK);
+        //@formatter:on
+
+        removeXAuthToken(xAuthTokenHeader);
+
+        Map<String, String> userDTO = new HashMap<>();
+        userDTO.put("username", user.getUsername());
+        userDTO.put("password", newPassword);
+
+        //@formatter:off
+        given().
+            body(userDTO).
+        when().
+            post("/login").
+        then().
+            statusCode(HttpStatus.SC_OK).
+            header("X-Auth-Token", not(isEmptyOrNullString()));
         //@formatter:on
     }
 
