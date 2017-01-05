@@ -778,7 +778,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
     }
 
     @Test
-    public void testRemoveMemberAsdmin() {
+    public void testRemoveMemberAsAdmin() {
         User admin = createUser(true);
         User captain = createUserWithTicket();
         User member = createUserWithTicket();
@@ -832,5 +832,97 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
                 statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
     }
+    //endregion
+
+    //region Delete Team
+
+    @Test
+    public void testDeleteTeamAsUser() {
+        User captain = createUserWithTicket();
+        User member = createUserWithTicket();
+        User user = createUserWithTicket();
+        Team team = createTeamWithCaptain(captain);
+        team = addMemberToTeam(team, member);
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+        when().
+            delete(TEAM_ENDPOINT + team.getId()).
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
+    }
+
+    @Test
+    public void testDeleteTeamAsMember() {
+        User captain = createUserWithTicket();
+        User member = createUserWithTicket();
+        Team team = createTeamWithCaptain(captain);
+        team = addMemberToTeam(team, member);
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(member)).
+        when().
+            delete(TEAM_ENDPOINT + team.getId()).
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
+    }
+
+    @Test
+    public void testDeleteTeamAsCaptainHasMember() {
+        User captain = createUserWithTicket();
+        User member = createUserWithTicket();
+        Team team = createTeamWithCaptain(captain);
+        team = addMemberToTeam(team, member);
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(captain)).
+        when().
+            delete(TEAM_ENDPOINT + team.getId()).
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN).
+            body("message", equalTo("Team with ID: " + team.getId() + " has other users."));
+        //@formatter:on
+    }
+
+    @Test
+    public void testDeleteTeamAsCaptainNoMember() {
+        User captain = createUserWithTicket();
+        Team team = createTeamWithCaptain(captain);
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(captain)).
+        when().
+            delete(TEAM_ENDPOINT + team.getId()).
+        then().
+            statusCode(HttpStatus.SC_OK).
+            body("message", equalTo("Deleted team with ID: " + team.getId()));
+        //@formatter:on
+    }
+
+    @Test
+    public void testDeleteTeamAsAdmin() {
+        User admin = createUser(true);
+        User captain = createUserWithTicket();
+        User member = createUserWithTicket();
+        Team team = createTeamWithCaptain(captain);
+        team = addMemberToTeam(team, member);
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(admin)).
+        when().
+            delete(TEAM_ENDPOINT + team.getId()).
+        then().
+            statusCode(HttpStatus.SC_OK).
+            body("message", equalTo("Deleted team with ID: " + team.getId()));
+        //@formatter:on
+    }
+
     //endregion
 }

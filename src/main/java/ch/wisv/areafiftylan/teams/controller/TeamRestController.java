@@ -245,7 +245,7 @@ public class TeamRestController {
     public ResponseEntity<?> deleteTeam(@PathVariable Long teamId, @AuthenticationPrincipal User user) {
         if (teamService.getTeamById(teamId).getMembers().size() == 1 || user.getAuthorities().contains(Role.ROLE_ADMIN)) {
             Team deletedTeam = teamService.delete(teamId);
-            return createResponseEntity(HttpStatus.OK, "Deleted team with " + teamId, deletedTeam);
+            return createResponseEntity(HttpStatus.OK, "Deleted team with ID: " + teamId, deletedTeam);
         } else {
             return createResponseEntity(HttpStatus.FORBIDDEN, "Team with ID: " + teamId + " has other users.");
         }
