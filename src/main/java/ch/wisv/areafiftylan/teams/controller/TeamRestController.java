@@ -31,6 +31,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -241,8 +242,8 @@ public class TeamRestController {
     @PreAuthorize("@currentUserServiceImpl.canEditTeam(principal, #teamId)")
     @JsonView(View.Public.class)
     @DeleteMapping("/{teamId}")
-    public ResponseEntity<?> deleteTeam(@PathVariable Long teamId) {
-        if (teamService.getTeamById(teamId).getMembers().size() == 1) {
+    public ResponseEntity<?> deleteTeam(@PathVariable Long teamId, @AuthenticationPrincipal User user) {
+        if (teamService.getTeamById(teamId).getMembers().size() == 1 || user.getAuthorities().contains(Role.ROLE_ADMIN)) {
             Team deletedTeam = teamService.delete(teamId);
             return createResponseEntity(HttpStatus.OK, "Deleted team with " + teamId, deletedTeam);
         } else {
