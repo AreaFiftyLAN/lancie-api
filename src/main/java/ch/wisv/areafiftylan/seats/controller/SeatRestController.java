@@ -17,23 +17,20 @@
 
 package ch.wisv.areafiftylan.seats.controller;
 
-import ch.wisv.areafiftylan.seats.model.Seat;
 import ch.wisv.areafiftylan.seats.model.SeatGroupDTO;
-import ch.wisv.areafiftylan.seats.model.SeatmapResponse;
 import ch.wisv.areafiftylan.seats.service.SeatService;
+import ch.wisv.areafiftylan.users.model.Role;
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.users.service.UserService;
 import ch.wisv.areafiftylan.utils.view.View;
-import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Collection;
-import java.util.List;
 
 import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEntity;
 
@@ -51,59 +48,56 @@ public class SeatRestController {
     }
 
     /**
+     * Get all Seats in the Seatmap.
+     *
+     * @param admin Boolean for admins to view full data.
+     *
+     * @return A list of all Seats in the seatmap.
+     */
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping
+    MappingJacksonValue getAllSeats(@RequestParam(value = "admin", required = false) boolean admin, @AuthenticationPrincipal User user) {
+        MappingJacksonValue result = new MappingJacksonValue(seatService.getAllSeats());
+        if (!admin || !user.getAuthorities().contains(Role.ROLE_ADMIN)) {
+            result.setSerializationView(View.Public.class);
+        }
+        return result;
+    }
+
+    /**
+     * Get all Seats in a group.
+     *
+     * @param group The name of the Seat group.
+     * @param admin Boolean for admins to view full data.
+     * @return A List of Seats in a group.
+     */
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/{group}")
+    MappingJacksonValue getSeatGroupByName(@PathVariable String group, @RequestParam(value = "admin", required = false) boolean admin, @AuthenticationPrincipal User user) {
+        MappingJacksonValue result = new MappingJacksonValue(seatService.getSeatGroupByName(group));
+        if (!admin || !user.getAuthorities().contains(Role.ROLE_ADMIN)) {
+            result.setSerializationView(View.Public.class);
+        }
+        return result;
+    }
+
+    /**
      * Get a Seat based on seatGroup and seatNumber
      *
      * @param group  Group of the Seat
      * @param number Number in the group of the Seat
+     * @param admin Boolean for admins to view full data.
      *
      * @return The seat at the given location
      */
-    @JsonView(View.Public.class)
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/{group}/{number}")
-    Seat getSeatByGroupAndNumber(@PathVariable String group, @PathVariable int number) {
-        return seatService.getSeatBySeatGroupAndSeatNumber(group, number);
-    }
-
-    /**
-     * Get a Seat based on seatGroup and seatNumber, with full User details. Only available to Admins
-     *
-     * @param group  Group of the Seat
-     * @param number Number in the group of the Seat
-     *
-     * @return The seat at the given location
-     */
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping(value = "/{group}/{number}", params = "admin")
-    Seat getSeatByGroupAndNumberAdmin(@PathVariable String group, @PathVariable int number) {
-        return seatService.getSeatBySeatGroupAndSeatNumber(group, number);
-    }
-
-    /**
-     * Get all Seats in a group
-     *
-     * @param group The group you want the seats of.
-     *
-     * @return A List of Seats in a group.
-     */
-    @JsonView(View.Public.class)
-    @PreAuthorize("isAuthenticated()")
-    @GetMapping("/{group}")
-    SeatmapResponse getSeatGroupByName(@PathVariable String group) {
-        return seatService.getSeatGroupByName(group);
-    }
-
-    /**
-     * Get all Seats in a group, with full User details.
-     *
-     * @param group The group you want the seats of.
-     *
-     * @return A List of Seats in a group.
-     */
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping(value = "/{group}", params = "admin")
-    SeatmapResponse getSeatGroupByNameAdminView(@PathVariable String group) {
-        return seatService.getSeatGroupByName(group);
+    MappingJacksonValue getSeatByGroupAndNumber(@PathVariable String group, @PathVariable int number, @RequestParam(value = "admin", required = false) boolean admin, @AuthenticationPrincipal User user) {
+        MappingJacksonValue result = new MappingJacksonValue(seatService.getSeatBySeatGroupAndSeatNumber(group, number));
+        if (!admin || !user.getAuthorities().contains(Role.ROLE_ADMIN)) {
+            result.setSerializationView(View.Public.class);
+        }
+        return result;
     }
 
     /**
@@ -158,28 +152,6 @@ public class SeatRestController {
 
         seatService.clearSeat(group, number);
         return createResponseEntity(HttpStatus.OK, "Seat successfully cleared");
-    }
-
-    /**
-     * Get all seats in the Seatmap
-     *
-     * @return A list of all Seats in the seatmap.
-     */
-    @JsonView(View.Public.class)
-    @GetMapping
-    SeatmapResponse getAllSeats() {
-        return seatService.getAllSeats();
-    }
-
-    /**
-     * Get all seats in the Seatmap, with full User details.
-     *
-     * @return A list of all Seats in the seatmap.
-     */
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping(params = "admin")
-    SeatmapResponse getAllSeatsAdminView() {
-        return seatService.getAllSeats();
     }
 
     /**
