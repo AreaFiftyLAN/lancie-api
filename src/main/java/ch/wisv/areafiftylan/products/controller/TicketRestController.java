@@ -53,7 +53,12 @@ public class TicketRestController {
 
     @PreAuthorize("@currentUserServiceImpl.isTicketOwner(principal, #ticketId)")
     @RequestMapping(value = "/transfer/{ticketId}", method = RequestMethod.POST)
-    public ResponseEntity<?> requestTicketTransfer(@PathVariable Long ticketId, @RequestBody String goalUsername) {
+    public ResponseEntity<?> requestTicketTransfer(@PathVariable Long ticketId, @RequestBody String goalUsername,
+                                                   Authentication auth) {
+        if (goalUsername.equals(auth.getName())) {
+            return createResponseEntity(HttpStatus.NOT_MODIFIED, "Can't send ticket to yourself");
+        }
+
         TicketTransferToken ttt = ticketService.setupForTransfer(ticketId, goalUsername);
 
         return createResponseEntity(HttpStatus.OK, "Ticket successfully set up for transfer.", ttt.getToken());

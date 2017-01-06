@@ -153,6 +153,22 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
     }
 
     @Test
+    public void testAddTransferToSelf() {
+        User ticketOwner = createUser();
+        Ticket ticket = createTicketForUser(ticketOwner);
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(ticketOwner)).
+            body(ticketOwner.getUsername()).
+        when().
+            post(TRANSFER_ENDPOINT + "/" + ticket.getId()).
+        then().
+            statusCode(HttpStatus.SC_NOT_MODIFIED);
+        //@formatter:on
+    }
+
+    @Test
     public void testAddTransferAsOutsider() {
         User outsider = createUser();
         User ticketOwner = createUser();
