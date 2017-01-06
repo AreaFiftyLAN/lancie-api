@@ -183,7 +183,7 @@ public class TicketServiceImpl implements TicketService {
             throw new TicketAlreadyLinkedException();
         }
 
-        if (t.getOwner().getUsername().equals(goalUserName)) {
+        if (t.getOwner() != null && t.getOwner().getUsername().equals(goalUserName)) {
             throw new TicketTransferTokenException("Cant send a ticket to yourself");
         }
 

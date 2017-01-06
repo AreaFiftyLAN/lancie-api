@@ -339,6 +339,19 @@ public class TicketServiceTest extends ServiceTest {
     }
 
     @Test
+    public void setupForTransferSelf() {
+        User goalUser = persistUser();
+        String goalUsername = goalUser.getUsername();
+        Ticket ticket = persistTicketForUser(goalUser);
+        Long ticketId = ticket.getId();
+
+        thrown.expect(TicketTransferTokenException.class);
+        thrown.expectMessage("yourself");
+
+        ticketService.setupForTransfer(ticketId, goalUsername);
+    }
+
+    @Test
     public void setupForTransferAlreadyLinked() {
         User goalUser = persistUser();
         String goalUsername = goalUser.getUsername();
