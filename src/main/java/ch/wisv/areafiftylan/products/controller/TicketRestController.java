@@ -17,7 +17,7 @@
 
 package ch.wisv.areafiftylan.products.controller;
 
-import ch.wisv.areafiftylan.exception.DuplicateTicketTransferTokenException;
+import ch.wisv.areafiftylan.exception.TicketTransferTokenException;
 import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.model.TicketInformationResponse;
 import ch.wisv.areafiftylan.products.model.TicketOption;
@@ -55,10 +55,6 @@ public class TicketRestController {
     @RequestMapping(value = "/transfer/{ticketId}", method = RequestMethod.POST)
     public ResponseEntity<?> requestTicketTransfer(@PathVariable Long ticketId, @RequestBody String goalUsername,
                                                    Authentication auth) {
-        if (goalUsername.equals(auth.getName())) {
-            return createResponseEntity(HttpStatus.NOT_MODIFIED, "Can't send ticket to yourself");
-        }
-
         TicketTransferToken ttt = ticketService.setupForTransfer(ticketId, goalUsername);
 
         return createResponseEntity(HttpStatus.OK, "Ticket successfully set up for transfer.", ttt.getToken());
@@ -138,8 +134,8 @@ public class TicketRestController {
         return createResponseEntity(HttpStatus.CREATED, "TicketOption successfully added", ticketOption);
     }
 
-    @ExceptionHandler(DuplicateTicketTransferTokenException.class)
-    public ResponseEntity<?> handleDuplicateTicketTransFerException(DuplicateTicketTransferTokenException ex) {
+    @ExceptionHandler(TicketTransferTokenException.class)
+    public ResponseEntity<?> handleDuplicateTicketTransFerException(TicketTransferTokenException ex) {
         return createResponseEntity(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 }

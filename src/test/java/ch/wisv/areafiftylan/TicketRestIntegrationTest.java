@@ -164,7 +164,7 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         when().
             post(TRANSFER_ENDPOINT + "/" + ticket.getId()).
         then().
-            statusCode(HttpStatus.SC_NOT_MODIFIED);
+            statusCode(HttpStatus.SC_BAD_REQUEST);
         //@formatter:on
     }
 

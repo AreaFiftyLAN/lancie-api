@@ -331,7 +331,7 @@ public class TicketServiceTest extends ServiceTest {
         Ticket ticket = persistTicket();
         Long ticketId = ticket.getId();
 
-        thrown.expect(DuplicateTicketTransferTokenException.class);
+        thrown.expect(TicketTransferTokenException.class);
         thrown.expectMessage(" is already set up for transfer!");
 
         ticketService.setupForTransfer(ticketId, goalUsername);

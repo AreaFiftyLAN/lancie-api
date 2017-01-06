@@ -17,8 +17,8 @@
 
 package ch.wisv.areafiftylan.exception;
 
-public class DuplicateTicketTransferTokenException extends RuntimeException {
-    public DuplicateTicketTransferTokenException(Long ticketId) {
-        super("Ticket " + ticketId + " is already set up for transfer!");
+public class TicketTransferTokenException extends RuntimeException {
+    public TicketTransferTokenException(String message) {
+        super(message);
     }
 }

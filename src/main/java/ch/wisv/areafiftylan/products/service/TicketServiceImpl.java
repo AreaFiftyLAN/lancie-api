@@ -176,20 +176,25 @@ public class TicketServiceImpl implements TicketService {
                 collect(Collectors.toList());
 
         if (!ticketTransferTokens.isEmpty()) {
-            throw new DuplicateTicketTransferTokenException(ticketId);
+            throw new TicketTransferTokenException("Ticket " + ticketId + " is already set up for transfer!");
         }
+
         if (rfidService.isTicketLinked(ticketId)) {
             throw new TicketAlreadyLinkedException();
-        } else {
-            TicketTransferToken ttt = new TicketTransferToken(u, t);
-
-            ttt = tttRepository.save(ttt);
-
-            String acceptUrl = acceptTransferUrl + "?token=" + ttt.getToken();
-            mailService.sendTicketTransferMail(ttt.getTicket().getOwner(), ttt.getUser(), acceptUrl);
-
-            return ttt;
         }
+
+        if (t.getOwner().getUsername().equals(goalUserName)) {
+            throw new TicketTransferTokenException("Cant send a ticket to yourself");
+        }
+
+        TicketTransferToken ttt = new TicketTransferToken(u, t);
+
+        ttt = tttRepository.save(ttt);
+
+        String acceptUrl = acceptTransferUrl + "?token=" + ttt.getToken();
+        mailService.sendTicketTransferMail(ttt.getTicket().getOwner(), ttt.getUser(), acceptUrl);
+
+        return ttt;
     }
 
     @Override
