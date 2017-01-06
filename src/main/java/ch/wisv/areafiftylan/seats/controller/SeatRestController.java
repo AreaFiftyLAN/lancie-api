@@ -59,7 +59,6 @@ public class SeatRestController {
     MappingJacksonValue getAllSeats(@RequestParam(value = "admin", required = false) boolean admin, @AuthenticationPrincipal User user) {
         MappingJacksonValue result = new MappingJacksonValue(seatService.getAllSeats());
         if (!admin || !user.getAuthorities().contains(Role.ROLE_ADMIN)) {
-            System.out.println("Setting Public View...");
             result.setSerializationView(View.Public.class);
         }
         return result;
@@ -77,7 +76,6 @@ public class SeatRestController {
     MappingJacksonValue getSeatGroupByName(@PathVariable String group, @RequestParam(value = "admin", required = false) boolean admin, @AuthenticationPrincipal User user) {
         MappingJacksonValue result = new MappingJacksonValue(seatService.getSeatGroupByName(group));
         if (!admin || !user.getAuthorities().contains(Role.ROLE_ADMIN)) {
-            System.out.println("Setting Public View...");
             result.setSerializationView(View.Public.class);
         }
         return result;
@@ -97,7 +95,6 @@ public class SeatRestController {
     MappingJacksonValue getSeatByGroupAndNumber(@PathVariable String group, @PathVariable int number, @RequestParam(value = "admin", required = false) boolean admin, @AuthenticationPrincipal User user) {
         MappingJacksonValue result = new MappingJacksonValue(seatService.getSeatBySeatGroupAndSeatNumber(group, number));
         if (!admin || !user.getAuthorities().contains(Role.ROLE_ADMIN)) {
-            System.out.println("Setting Public View...");
             result.setSerializationView(View.Public.class);
         }
         return result;
