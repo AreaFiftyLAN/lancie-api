@@ -145,8 +145,8 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         when().
             get("/users/current").
         then().statusCode(HttpStatus.SC_OK).
-            body("object.username", equalTo(user.getUsername())).
-            body("object.authorities", hasItem("ROLE_USER"));
+            body("username", equalTo(user.getUsername())).
+            body("authorities", hasItem("ROLE_USER"));
         //@formatter:on
     }
 
@@ -160,8 +160,8 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         when().
             get("/users/current").
         then().statusCode(HttpStatus.SC_OK).
-            body("object.username", equalTo(admin.getUsername())).
-            body("object.authorities", hasItem("ROLE_ADMIN"));
+            body("username", equalTo(admin.getUsername())).
+            body("authorities", hasItem("ROLE_ADMIN"));
         //@formatter:on
     }
 
@@ -812,8 +812,8 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         when().
             get("/users/current").
         then().statusCode(HttpStatus.SC_OK).
-            body("object.username", equalTo(user.getUsername())).
-            body("object.authorities", hasItem("ROLE_USER"));
+            body("username", equalTo(user.getUsername())).
+            body("authorities", hasItem("ROLE_USER"));
         //@formatter:on
     }
 }

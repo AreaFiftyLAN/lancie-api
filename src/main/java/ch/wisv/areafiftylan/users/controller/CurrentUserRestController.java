@@ -82,7 +82,7 @@ public class CurrentUserRestController {
         if (user == null) {
             return createResponseEntity(HttpStatus.OK, "Not logged in.");
         } else {
-            return createResponseEntity(HttpStatus.OK, "Successfully logged in.", user);
+            return new ResponseEntity<>(user, HttpStatus.OK);
         }
     }
 
