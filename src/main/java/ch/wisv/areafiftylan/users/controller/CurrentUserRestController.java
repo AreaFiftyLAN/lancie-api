@@ -48,7 +48,6 @@ import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEnt
 
 @RestController
 @RequestMapping("/users/current")
-@PreAuthorize("isAuthenticated()")
 public class CurrentUserRestController {
 
     private final UserService userService;
@@ -98,7 +97,7 @@ public class CurrentUserRestController {
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/profile")
     public ResponseEntity<?> addProfile(@AuthenticationPrincipal User user, @Validated @RequestBody ProfileDTO input) {
-        userService.addProfile(user.getId(), input);
+        user = userService.addProfile(user.getId(), input);
         return createResponseEntity(HttpStatus.OK, "Profile successfully set", user.getProfile());
     }
 
@@ -111,6 +110,7 @@ public class CurrentUserRestController {
      *
      * @return Statusmessage of the request.
      */
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("/password")
     public ResponseEntity<?> changeCurrentUserPassword(@AuthenticationPrincipal User user, @RequestBody @Validated PasswordChangeDTO passwordChangeDTO) {
         userService.changePassword(user.getId(), passwordChangeDTO.getOldPassword(), passwordChangeDTO.getNewPassword());
@@ -123,6 +123,7 @@ public class CurrentUserRestController {
      * @return A Collection of Teams of which the current User is a member.
      */
     @JsonView(View.Team.class)
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/teams")
     public Collection<Team> getCurrentTeams(@AuthenticationPrincipal User user) {
         return teamService.getTeamsByUsername(user.getUsername());
@@ -133,6 +134,7 @@ public class CurrentUserRestController {
      *
      * @return A List of TeamInviteResponse's of your teams.
      */
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/teams/invites")
     public List<TeamInviteResponse> getOpenInvites(@AuthenticationPrincipal User user) {
         return teamService.findTeamInvitesByUsername(user.getUsername());
@@ -145,6 +147,7 @@ public class CurrentUserRestController {
      * @return A collection of Orders of the current User.
      */
     @JsonView(View.OrderOverview.class)
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/orders")
     public Collection<Order> getAllOrders(@AuthenticationPrincipal User user) {
         return orderService.findOrdersByUsername(user.getUsername());
@@ -155,6 +158,7 @@ public class CurrentUserRestController {
      *
      * @return The current owned tickets, if any exist.
      */
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/tickets")
     public Collection<Ticket> getAllTickets(@AuthenticationPrincipal User user) {
         return ticketService.findValidTicketsByOwnerUsername(user.getUsername());
@@ -165,6 +169,7 @@ public class CurrentUserRestController {
      *
      * @return The current open order, if any exist.
      */
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/orders/open")
     public List<Order> getOpenOrder(@AuthenticationPrincipal User user) {
         return orderService.getOpenOrders(user.getUsername());
@@ -175,6 +180,7 @@ public class CurrentUserRestController {
      *
      * @return Returns a list of reserved seats by the user.
      */
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/seat")
     public List<Seat> getCurrentUserSeat(@AuthenticationPrincipal User user) {
         return seatService.getSeatsByUsername(user.getUsername());
