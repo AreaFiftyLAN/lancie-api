@@ -86,7 +86,7 @@ public class CurrentUserRestController {
      *
      * @return Statusmessage
      */
-    @RequestMapping(value = "password", method = RequestMethod.PUT)
+    @RequestMapping(value = "/password", method = RequestMethod.POST)
     public ResponseEntity<?> changeCurrentUserPassword(Authentication auth,
                                                        @RequestBody @Validated PasswordChangeDTO passwordChangeDTO) {
         User currentUser = (User) auth.getPrincipal();
