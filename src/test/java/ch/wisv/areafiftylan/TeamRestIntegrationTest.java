@@ -112,20 +112,29 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
     }
 
     @Test
-    public void testCreateTeamMissingTicket() {
+    public void testCreateTeamWithoutTicket() {
         User captain = createUser();
-
         Map<String, String> teamDTO = getTeamDTO(captain);
 
         //@formatter:off
-        given().
-            header(getXAuthTokenHeaderForUser(captain)).
-        when().
-            body(teamDTO).contentType(ContentType.JSON).
-            post(TEAM_ENDPOINT).
-        then().
-            statusCode(HttpStatus.SC_FORBIDDEN);
+        Integer teamId =
+            given().
+                header(getXAuthTokenHeaderForUser(captain)).
+            when().
+                body(teamDTO).
+                contentType(ContentType.JSON).
+                post(TEAM_ENDPOINT).
+            then().
+                statusCode(HttpStatus.SC_CREATED).
+                header("Location", containsString("/teams/")).
+                body("object.teamName", equalTo(teamDTO.get("teamName"))).
+                body("object.captain.profile.displayName", equalTo(captain.getProfile().getDisplayName())).
+                body("object.members", hasSize(1)).
+            extract().response().path("object.id");
         //@formatter:on
+
+        Team team = teamRepository.getOne(new Long(teamId));
+        Assert.assertNotNull(team);
     }
 
     @Test
@@ -572,7 +581,8 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
             body(member.getUsername()).
             post(TEAM_ENDPOINT + team.getId() + "/invites").
         then().
-            statusCode(HttpStatus.SC_FORBIDDEN);
+            statusCode(HttpStatus.SC_OK).
+            body("message", equalTo("User " + member.getUsername() + " successfully invited to Team " + team.getId()));
         //@formatter:on
     }
 

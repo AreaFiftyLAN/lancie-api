@@ -68,7 +68,7 @@ public class TeamRestController {
      *
      * @return Return status message of the operation
      */
-    @PreAuthorize("isAuthenticated() and @currentUserServiceImpl.hasAnyTicket(principal)")
+    @PreAuthorize("isAuthenticated()")
     @JsonView(View.Public.class)
     @RequestMapping(method = RequestMethod.POST)
     ResponseEntity<?> add(@Validated @RequestBody TeamDTO teamDTO, Authentication auth) {
@@ -193,8 +193,7 @@ public class TeamRestController {
      *
      * @return Result message of the request
      */
-    @PreAuthorize("@currentUserServiceImpl.canEditTeam(principal, #teamId) " +
-            "and @currentUserServiceImpl.hasAnyTicket(#username)")
+    @PreAuthorize("@currentUserServiceImpl.canEditTeam(principal, #teamId) ")
     @RequestMapping(method = RequestMethod.POST, value = "/{teamId}/invites")
     public ResponseEntity<?> inviteTeamMember(@PathVariable Long teamId, @RequestBody String username) {
         teamService.inviteMember(teamId, username);
