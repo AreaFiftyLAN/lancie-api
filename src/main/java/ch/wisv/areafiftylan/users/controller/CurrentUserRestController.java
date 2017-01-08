@@ -28,6 +28,7 @@ import ch.wisv.areafiftylan.security.authentication.PasswordChangeDTO;
 import ch.wisv.areafiftylan.teams.model.Team;
 import ch.wisv.areafiftylan.teams.model.TeamInviteResponse;
 import ch.wisv.areafiftylan.teams.service.TeamService;
+import ch.wisv.areafiftylan.users.model.ProfileDTO;
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.users.service.UserService;
 import ch.wisv.areafiftylan.utils.view.View;
@@ -39,10 +40,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
 import java.util.List;
@@ -71,10 +69,42 @@ public class CurrentUserRestController {
     }
 
     /**
-     * The GET /users/current/ mapping is located in the UserRestController as all methods in this authentication
-     * require
-     * Authentication
+     * Get the User currently logged in. Because our User model implements the Spring Security UserDetails, this can be
+     * directly derived from the Authentication object which is automatically added. Returns a not-found entity if
+     * there's no user logged in. Returns the user
+     *
+     * @param auth Current Authentication object, automatically taken from the SecurityContext
+     *
+     * @return The currently logged in User.
      */
+    @GetMapping
+    public ResponseEntity<?> getCurrentUser(Authentication auth) {
+        // To prevent 403 errors on this endpoint, we manually handle unauthenticated users, instead of a
+        // preauthorize tag.
+        if (auth != null) {
+            // Get the currently logged in user from the autowired Authentication object.
+            UserDetails currentUser = (UserDetails) auth.getPrincipal();
+            User user = userService.getUserByUsername(currentUser.getUsername());
+            return new ResponseEntity<>(user, HttpStatus.OK);
+        } else {
+            return createResponseEntity(HttpStatus.OK, "Not logged in");
+        }
+    }
+
+    /**
+     * Add a profile to the current user. An empty profile is created when a user is created, so this method fills the
+     * existing fields
+     *
+     * @param input A representation of the profile
+     *
+     * @return The user with the new profile
+     */
+    @PreAuthorize("isAuthenticated()")
+    @RequestMapping(value = "/profile", method = RequestMethod.POST)
+    public ResponseEntity<?> addProfile(@Validated @RequestBody ProfileDTO input, Authentication auth) {
+        User user = userService.addProfile(((User) auth.getPrincipal()).getId(), input);
+        return createResponseEntity(HttpStatus.OK, "Profile successfully set", user.getProfile());
+    }
 
     /**
      * This mapping allows the user to change their password while logged in. This is different from the password reset
