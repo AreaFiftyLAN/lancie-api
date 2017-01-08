@@ -691,7 +691,7 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         when().
             body(passwordDTO).
             contentType(ContentType.JSON).
-            put("/users/current/password").
+            post("/users/current/password").
         then().
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
@@ -728,7 +728,7 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         when().
             body(passwordDTO).
             contentType(ContentType.JSON).
-            put("/users/current/password").
+            post("/users/current/password").
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
@@ -748,7 +748,7 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         when().
             body(passwordDTO).
             contentType(ContentType.JSON).
-            put("/users/current/password").
+            post("/users/current/password").
         then().
             statusCode(HttpStatus.SC_BAD_REQUEST);
         //@formatter:on
