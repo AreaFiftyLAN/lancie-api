@@ -37,7 +37,7 @@
                             <table cellpadding="0" cellspacing="0" width="100%">
                                 <tr>
                                     <td>
-                                        Dear <span th:text="${name}">User</span>
+                                        Dear <span th:text="${name}">User</span>,
                                     </td>
                                 </tr>
                                 <tr>
@@ -77,11 +77,11 @@
                                                                 th:text="${option.getName()}">Options</span>
                                                         </div>
                                                     </td>
-                                                    <td th:text="${ticket.getPrice()}">Ticket price</td>
+                                                    <td th:text="${'&euro;' + #numbers.formatDecimal(ticket.getPrice(), 0, 'COMMA', 2, 'POINT')}">Ticket price</td>
                                                 </tr>
                                                 <tr>
                                                     <td>Order total: <span
-                                                            th:text="${order.getAmount()}">$price</span>
+                                                            th:text="${'&euro;' + #numbers.formatDecimal(order.getAmount(), 0, 'COMMA', 2, 'POINT')}">$price</span>
                                                     </td>
                                                 </tr>
                                             </tbody>
