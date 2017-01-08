@@ -70,13 +70,13 @@ logging.config=classpath:log4j2-prod.xml
 # Key for sending a paymentrequest to the Mollie api
 a5l.molliekey=[CHANGE ME]
 # The return url for the frontend that displays the success message
-a5l.paymentReturnUrl=https://areafiftylan.nl/ordersuccess
+a5l.paymentReturnUrl=https://areafiftylan.nl/order-check
 # The return url for the frontend that confirms a registration
-a5l.mail.confirmUrl=https://areafiftylan.nl/confirmRegistration
+a5l.mail.confirmUrl=https://areafiftylan.nl/register-confirm
 # The url for the frontend to change the users password
-a5l.user.resetUrl=https://areafiftylan.nl/resetPassword
+a5l.user.resetUrl=https://areafiftylan.nl/password-reset
 # The url for the frontend to accept a ticket transfer
-a5l.user.acceptTransferUrl=https://areafiftylan.nl/acceptTransfer
+a5l.user.acceptTransferUrl=https://areafiftylan.nl/transfer-accept
 # E-mail address used for sending e-mails
 a5l.mail.sender=LANcie <lancie@ch.tudelft.nl>
 a5l.mail.contact=LANcie <lancie@ch.tudelft.nl>
