@@ -19,7 +19,35 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head lang="en">
     <title>Area FiftyLAN Mail</title>
+    <style>
+      html, body {
+        margin: 0;
+        background-color: #EEECED;
+        color: #212121;
+        font-family: "Helvetica Neue", "Calibri Light", Roboto, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        letter-spacing: 0.02em;
+      }
+      .container {
+      max-width: 800px;
+      margin: 0 auto 32px;
+      box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+      }
+      .content {
+        background-color: white;
+        padding: 32px;
+      }
+      .header {
+        background-color: #1a2a43;
+      }
+      img {
+        width: calc(100% - 16px);
+        padding: 8px;
+      }
+    </style>
 </head>
+<<<<<<< 0d09aa18ecb9f9eb709d36205d9bc4fafccf4c5c
 <body style="margin: 0; padding: 0">
     <table cellpadding="0" cellspacing="0" width="100%">
         <tr>
@@ -58,5 +86,18 @@
             </td>
         </tr>
     </table>
+=======
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="https://areafiftylan.nl/images-optimized/lancie/logo_without_date.png" />
+    </div>
+    <div class="content">
+      <p>Dear <span th:text="${name}">User</span>,</p>
+      <p th:utext="${message}">Message</p>
+      <p>Best Regards,<br />LANcie 2017</p>
+    </div>
+  </div>
+>>>>>>> Improve the mailing templates with styling and functionality
 </body>
 </html>

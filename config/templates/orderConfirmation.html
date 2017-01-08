@@ -1,25 +1,76 @@
 <!DOCTYPE html>
 <!--
-  ~ Copyright (c) 2017  W.I.S.V. 'Christiaan Huygens'
-  ~
-  ~     This program is free software: you can redistribute it and/or modify
-  ~     it under the terms of the GNU General Public License as published by
-  ~     the Free Software Foundation, either version 3 of the License, or
-  ~     (at your option) any later version.
-  ~
-  ~     This program is distributed in the hope that it will be useful,
-  ~     but WITHOUT ANY WARRANTY; without even the implied warranty of
-  ~     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  ~     GNU General Public License for more details.
-  ~
-  ~     You should have received a copy of the GNU General Public License
-  ~     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  -->
+~ Copyright (c) 2017  W.I.S.V. 'Christiaan Huygens'
+~
+~     This program is free software: you can redistribute it and/or modify
+~     it under the terms of the GNU General Public License as published by
+~     the Free Software Foundation, either version 3 of the License, or
+~     (at your option) any later version.
+~
+~     This program is distributed in the hope that it will be useful,
+~     but WITHOUT ANY WARRANTY; without even the implied warranty of
+~     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+~     GNU General Public License for more details.
+~
+~     You should have received a copy of the GNU General Public License
+~     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
 
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head lang="en">
-    <title>Area FiftyLAN Mail</title>
+  <title>Area FiftyLAN Mail</title>
+  <style>
+    html, body {
+      margin: 0;
+      background-color: #EEECED;
+      color: #212121;
+      font-family: "Helvetica Neue", "Calibri Light", Roboto, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      letter-spacing: 0.02em;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto 32px;
+      box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+    }
+    .content {
+      background-color: white;
+      padding: 32px;
+    }
+    .header {
+      background-color: #1a2a43;
+    }
+    img {
+      width: calc(100% - 16px);
+      padding: 8px;
+    }
+    .tickets {
+      background-color: white;
+      margin: 0 auto;
+      border-top: 1px solid #e8e8e8;
+    }
+    .group {
+      display: flex;
+      padding: 16px 8px;
+      border-bottom: 1px solid #e8e8e8;
+    }
+    .ticketheader {
+      background-color: #EEECED;
+      font-weight: 600;
+    }
+    .price {
+      min-width: 100px;
+    }
+    .flex {
+      flex: 1;
+    }
+    .flex-2 {
+      flex: 2;
+    }
+  </style>
 </head>
+<<<<<<< 0d09aa18ecb9f9eb709d36205d9bc4fafccf4c5c
 <body style="margin: 0; padding: 0">
     <table cellpadding="0" cellspacing="0" width="100%">
         <tr>
@@ -102,5 +153,38 @@
             </td>
         </tr>
     </table>
+=======
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="https://areafiftylan.nl/images-optimized/lancie/logo_without_date.png" />
+    </div>
+    <div class="content">
+      <p>Dear <span th:text="${name}">User</span>,</p>
+      <p>You have successfully ordered tickets for AreaFiftyLAN 2017. We are looking forward to seeing you there!</p>
+      <p>Order ID: <span th:text="${order.getId()}">#reference</span></p>
+      <div class="tickets">
+        <div class="group ticketheader">
+          <span class="flex">Ticket</span>
+          <span class="flex-2">Options</span>
+          <span class="price">Price</span>
+        </div>
+        <div class="group" th:each="ticket : ${order.getTickets()}">
+          <div class="flex" th:text="${ticket.getType().getText()}">Ticket Type</div>
+          <div class="options flex-2">
+            <span th:each="option, iter : ${ticket.getEnabledOptions()}" th:text="!${iter.last} ? ${option.getName()} + ', ' : ${option.getName()}">Options</span>
+          </div>
+          <div class="price" th:text="${'&euro;' + #numbers.formatDecimal(ticket.getPrice(), 0, 'COMMA', 2, 'POINT')}">Ticket price</div>
+        </div>
+        <div class="group">
+          <span>Order total: </span>
+          <div class="flex"></div>
+          <span class="price" th:text="${'&euro;' + #numbers.formatDecimal(order.getAmount(), 0, 'COMMA', 2, 'POINT')}">price</span>
+        </div>
+      </div>
+      <p>Best Regards,<br />LANcie 2017</p>
+    </div>
+  </div>
+>>>>>>> Improve the mailing templates with styling and functionality
 </body>
 </html>
