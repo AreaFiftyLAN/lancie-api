@@ -82,5 +82,6 @@ a5l.mail.sender=LANcie <lancie@ch.tudelft.nl>
 a5l.mail.contact=LANcie <lancie@ch.tudelft.nl>
 a5l.orderLimit=5
 a5l.ticketLimit=200
+a5l.orderKeepAlive=15
 # API key for Google Maps
 a5l.googleMapsAPIkey=[CHANGE ME]
