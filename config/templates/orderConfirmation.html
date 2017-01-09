@@ -41,9 +41,11 @@
     .header {
       background-color: #1a2a43;
     }
+    .img {
+      padding: 16px;
+    }
     img {
-      width: calc(100% - 16px);
-      padding: 8px;
+      width: 100%;
     }
     .tickets {
       background-color: white;
@@ -157,7 +159,9 @@
 <body>
   <div class="container">
     <div class="header">
-      <img src="https://areafiftylan.nl/images-optimized/lancie/logo_without_date.png" />
+      <div class="img">
+        <img src="https://areafiftylan.nl/images-optimized/lancie/logo_without_date.png" />
+      </div>
     </div>
     <div class="content">
       <p>Dear <span th:text="${name}">User</span>,</p>
