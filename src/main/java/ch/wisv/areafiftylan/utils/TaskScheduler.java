@@ -26,6 +26,7 @@ import ch.wisv.areafiftylan.security.token.VerificationToken;
 import ch.wisv.areafiftylan.security.token.repository.VerificationTokenRepository;
 import ch.wisv.areafiftylan.users.service.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -42,7 +43,9 @@ import java.util.stream.Collectors;
  */
 @Component
 public class TaskScheduler {
-    private final int ORDER_STAY_ALIVE_MINUTES = 30;
+
+    @Value("${a5l.orderKeepAlive:15}")
+    private int ORDER_STAY_ALIVE_MINUTES;
     private final int ORDER_EXPIRY_CHECK_INTERVAL_SECONDS = 60;
 
     private final int USER_CLEANUP_CHECK_INTERVAL_MINUTES = 60;
