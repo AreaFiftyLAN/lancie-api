@@ -19,7 +19,7 @@ apply plugin: 'org.springframework.boot'
 
 jar {
     baseName = 'lancie-api'
-    version = '2017.1'
+    version = '2017.1.1'
 }
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
