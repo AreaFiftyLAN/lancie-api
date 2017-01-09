@@ -1,106 +1,57 @@
 <!DOCTYPE html>
 <!--
-  ~ Copyright (c) 2017  W.I.S.V. 'Christiaan Huygens'
-  ~
-  ~     This program is free software: you can redistribute it and/or modify
-  ~     it under the terms of the GNU General Public License as published by
-  ~     the Free Software Foundation, either version 3 of the License, or
-  ~     (at your option) any later version.
-  ~
-  ~     This program is distributed in the hope that it will be useful,
-  ~     but WITHOUT ANY WARRANTY; without even the implied warranty of
-  ~     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  ~     GNU General Public License for more details.
-  ~
-  ~     You should have received a copy of the GNU General Public License
-  ~     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  -->
+~ Copyright (c) 2017  W.I.S.V. 'Christiaan Huygens'
+~
+~     This program is free software: you can redistribute it and/or modify
+~     it under the terms of the GNU General Public License as published by
+~     the Free Software Foundation, either version 3 of the License, or
+~     (at your option) any later version.
+~
+~     This program is distributed in the hope that it will be useful,
+~     but WITHOUT ANY WARRANTY; without even the implied warranty of
+~     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+~     GNU General Public License for more details.
+~
+~     You should have received a copy of the GNU General Public License
+~     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
 
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="en" style="margin: 0; background-color: #EEECED; color: #212121; font-family: 'Helvetica Neue', 'Calibri Light', Roboto, sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; letter-spacing: 0.02em;">
 <head lang="en">
-    <title>Area FiftyLAN Mail</title>
+  <title>Area FiftyLAN Mail</title>
 </head>
-<body style="margin: 0; padding: 0">
-    <table cellpadding="0" cellspacing="0" width="100%">
-        <tr>
-            <td>
-                <table align="center" cellpadding="0" cellspacing="0" width="600" style="border-collapse: collapse">
-                    <tr>
-                        <td align="center" bgcolor="#1a2a43" style="padding: 20px 0 20px 0;">
-                            <img src="https://areafiftylan.nl/images-optimized/lancie/logo_without_date.png"
-                                 width="400"
-                                 style="display: block;" />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td align="center" bgcolor="#EEECED" style="padding: 30px 30px 30px 30px">
-                            <table cellpadding="0" cellspacing="0" width="100%">
-                                <tr>
-                                    <td>
-                                        Dear <span th:text="${name}">User</span>,
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style=" padding: 10px 0;">
-                                        <p>Order ID: <span th:text="${order.getId()}">#reference</span></p>
-                                        <p>This is your order confirmation. We have received your payment in good
-                                            order.</p>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>
-                                        <table border="0" cellpadding="20" cellspacing="0" width="600"
-                                               id="emailContainer"
-                                               style="">
-                                            <thead style="">
-                                                <tr style="">
-                                                    <th align="left" valign="top"
-                                                        style="padding: 8px; border-bottom: 2px solid #ccc;">
-                                                        <span>Ticket</span>
-                                                    </th>
-                                                    <th align="left" valign="top"
-                                                        style="border-bottom: 2px solid #ccc; padding: 8px;">
-                                                        <span>Options</span>
-                                                    </th>
-                                                    <th align="left" valign="top"
-                                                        style="border-bottom: 2px solid #ccc; padding: 8px;">
-                                                        <span>Price</span>
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody class="tickets">
-                                                <tr th:each="ticket : ${order.getTickets()}">
-                                                    <td th:text="${ticket.getType().getText()}">Ticket Type</td>
-                                                    <td>
-                                                        <div th:each="option : ${ticket.getEnabledOptions()}"><span
-                                                                th:text="${option.getName()}">Options</span>
-                                                        </div>
-                                                    </td>
-                                                    <td th:text="${'&euro;' + #numbers.formatDecimal(ticket.getPrice(), 0, 'COMMA', 2, 'POINT')}">Ticket price</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Order total: <span
-                                                            th:text="${'&euro;' + #numbers.formatDecimal(order.getAmount(), 0, 'COMMA', 2, 'POINT')}">$price</span>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        Best Regards,
-                                        <br />
-                                        LANcie 2017
-                                    </td>
-                                </tr>
-                            </table>
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-    </table>
+<body>
+  <div style="max-width: 800px; margin: 0 auto 32px; box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);">
+    <div style="background-color: #1a2a43;">
+      <div style="padding: 8px;">
+        <img style="width: 100%;" src="https://areafiftylan.nl/images-optimized/lancie/logo_without_date.png" />
+      </div>
+    </div>
+    <div style="background-color: white; padding: 32px;">
+      <p>Dear <span th:text="${name}">User</span>,</p>
+      <p>You have successfully ordered tickets for AreaFiftyLAN 2017. We are looking forward to seeing you there!</p>
+      <p>Order ID: <span th:text="${order.getId()}">#reference</span></p>
+      <div style="background-color: white; margin: 0 auto; border-top: 1px solid #e8e8e8;">
+        <div style="display: flex; padding: 16px 8px; border-bottom: 1px solid #e8e8e8; background-color: #EEECED; font-weight: 600;">
+          <span style="flex: 1;">Ticket</span>
+          <span style="flex: 2;">Options</span>
+          <span style="min-width: 100px;">Price</span>
+        </div>
+        <div th:each="ticket : ${order.getTickets()}" style="display: flex; padding: 16px 8px; border-bottom: 1px solid #e8e8e8;">
+          <div th:text="${ticket.getType().getText()}" style="flex: 1;">Ticket Type</div>
+          <div class="options" style="flex: 2;">
+            <span th:each="option, iter : ${ticket.getEnabledOptions()}" th:text="!${iter.last} ? ${option.getName()} + ', ' : ${option.getName()}">Options</span>
+          </div>
+          <div th:text="${'&euro;' + #numbers.formatDecimal(ticket.getPrice(), 0, 'COMMA', 2, 'POINT')}" style="min-width: 100px;">Ticket price</div>
+        </div>
+        <div style="display: flex; padding: 16px 8px; border-bottom: 1px solid #e8e8e8;">
+          <span>Order total: </span>
+          <div style="flex: 1;"></div>
+          <span th:text="${'&euro;' + #numbers.formatDecimal(order.getAmount(), 0, 'COMMA', 2, 'POINT')}" style="min-width: 100px;">price</span>
+        </div>
+      </div>
+      <p>Best Regards,<br />LANcie 2017</p>
+    </div>
+  </div>
 </body>
 </html>
