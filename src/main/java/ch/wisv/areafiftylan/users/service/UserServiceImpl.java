@@ -157,7 +157,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             whether this is a different user. If this is the case, we throw an exception, if not, we can continue.
          */
         userRepository.findOneByProfileDisplayNameIgnoreCase(profileDTO.getDisplayName()).ifPresent(u -> {
-            if (u.getId() != userId) {
+            if (!u.getId().equals(userId)) {
                 throw new DataIntegrityViolationException("DisplayName already in use");
             }
         });
