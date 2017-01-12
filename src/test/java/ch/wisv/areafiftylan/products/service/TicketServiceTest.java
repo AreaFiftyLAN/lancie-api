@@ -604,6 +604,8 @@ public class TicketServiceTest extends ServiceTest {
         assertEquals(user, result.getOwner());
     }
 
+    //region TicketType
+
     @Test
     public void addTicketType() {
         long countBefore = ticketTypeRepository.count();
@@ -648,6 +650,62 @@ public class TicketServiceTest extends ServiceTest {
         Collection<TicketType> types = ticketService.getAllTicketTypes();
         assertEquals(countBefore + 2, types.size());
     }
+
+    @Test
+    public void updateTicketTypeTest() {
+        TicketType ticketType = new TicketType("type1", "text", 5F, 0, LocalDateTime.now(), true);
+        ticketTypeRepository.save(ticketType);
+        ticketType.setBuyable(false);
+        ticketType = ticketService.updateTicketType(ticketType);
+        assertFalse(ticketType.isBuyable());
+    }
+
+    @Test
+    public void updateTicketTypeTestSame() {
+        TicketType ticketType = new TicketType("type1", "text", 5F, 0, LocalDateTime.now(), true);
+        ticketTypeRepository.save(ticketType);
+        ticketType = ticketService.updateTicketType(ticketType);
+        assertTrue(ticketType.isBuyable());
+    }
+
+    @Test
+    public void updateTicketTypeTestDifferent() {
+        TicketType ticketType = new TicketType("type1", "text", 5F, 0, LocalDateTime.now(), true);
+        ticketTypeRepository.save(ticketType);
+        TicketType ticketType2 = new TicketType("type2", "text", 5F, 0, LocalDateTime.now(), false);
+        ticketTypeRepository.save(ticketType2);
+        ticketType = ticketService.updateTicketType(ticketType);
+        assertTrue(ticketType.isBuyable());
+    }
+
+    @Test
+    public void updateTicketTypeTestNoneThere() {
+        TicketType ticketType = new TicketType("type1", "text", 5F, 0, LocalDateTime.now(), false);
+        ticketType = ticketService.updateTicketType(ticketType);
+        assertFalse(ticketType.isBuyable());
+    }
+
+    @Test
+    public void deleteTicketTypeTest() {
+        long countBefore = ticketTypeRepository.count();
+        TicketType ticketType = new TicketType("type1", "text", 5F, 0, LocalDateTime.now(), true);
+        ticketTypeRepository.save(ticketType);
+        ticketService.deleteTicketType(ticketType);
+        assertEquals(countBefore, ticketTypeRepository.count());
+    }
+
+    @Test
+    public void deleteTicketTypeTestTwo() {
+        long countBefore = ticketTypeRepository.count();
+        TicketType ticketType = new TicketType("type1", "text", 5F, 0, LocalDateTime.now(), true);
+        ticketTypeRepository.save(ticketType);
+        TicketType ticketType2 = new TicketType("type1", "text", 5F, 0, LocalDateTime.now(), true);
+        ticketTypeRepository.save(ticketType2);
+        ticketService.deleteTicketType(ticketType);
+        assertEquals(countBefore + 1, ticketTypeRepository.count());
+    }
+
+    //endregion
 
     @Test
     public void addTicketOption() {
