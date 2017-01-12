@@ -265,6 +265,16 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
+    public TicketType updateTicketType(TicketType type) {
+        return ticketTypeRepository.save(type);
+    }
+
+    @Override
+    public void deleteTicketType(TicketType type) {
+        ticketTypeRepository.delete(type);
+    }
+
+    @Override
     public TicketOption addTicketOption(TicketOption option) {
         return ticketOptionRepository.save(option);
     }
