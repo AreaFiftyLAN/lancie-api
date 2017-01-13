@@ -133,7 +133,11 @@ public class TicketRestController {
     @PutMapping("/types/{typeId}")
     public ResponseEntity<?> updateTicketType(@PathVariable Long typeId, @RequestBody @Validated TicketType type) {
         TicketType ticketType = ticketService.updateTicketType(typeId, type);
-        return createResponseEntity(HttpStatus.OK, "TicketType successfully updated.", ticketType);
+        if (ticketType == null) {
+            return createResponseEntity(HttpStatus.BAD_REQUEST, "TicketType not found!");
+        } else {
+            return createResponseEntity(HttpStatus.OK, "TicketType successfully updated.", ticketType);
+        }
     }
 
     @PreAuthorize("hasRole('ADMIN')")

@@ -682,7 +682,7 @@ public class TicketServiceTest extends ServiceTest {
     public void updateTicketTypeTestNoneThere() {
         TicketType ticketType = new TicketType("type1", "text", 5F, 0, LocalDateTime.now(), false);
         ticketType = ticketService.updateTicketType(ticketType.getId(), ticketType);
-        assertFalse(ticketType.isBuyable());
+        assertNull(ticketType);
     }
 
     @Test

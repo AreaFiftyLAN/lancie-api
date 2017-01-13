@@ -266,6 +266,9 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public TicketType updateTicketType(Long typeId, TicketType type) {
+        if (typeId == null) {
+            return null;
+        }
         TicketType retrievedType = ticketTypeRepository.getOne(typeId);
         retrievedType.setName(type.getName());
         retrievedType.setText(type.getText());
