@@ -23,7 +23,7 @@ public interface CommitteeService {
      * @param id The given id.
      * @param committeeMember The new values of the CommitteeMember.
      */
-    void updateCommitteeMember(Long id, CommitteeMember committeeMember);
+    CommitteeMember updateCommitteeMember(Long id, CommitteeMember committeeMember);
 
     /**
      * Delete a CommitteeMember from the Repository if it exists.

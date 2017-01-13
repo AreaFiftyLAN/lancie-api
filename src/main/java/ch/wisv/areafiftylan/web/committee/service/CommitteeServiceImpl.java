@@ -28,13 +28,13 @@ public class CommitteeServiceImpl implements CommitteeService {
     }
 
     @Override
-    public void updateCommitteeMember(Long id, CommitteeMember committeeMember) {
+    public CommitteeMember updateCommitteeMember(Long id, CommitteeMember committeeMember) {
         CommitteeMember oldCommitteeMember = committeeMemberRepository.getOne(id);
         oldCommitteeMember.setOrder(committeeMember.getOrder());
         oldCommitteeMember.setName(committeeMember.getName());
         oldCommitteeMember.setFunction(committeeMember.getFunction());
         oldCommitteeMember.setIcon(committeeMember.getIcon());
-        committeeMemberRepository.saveAndFlush(committeeMember);
+        return committeeMemberRepository.saveAndFlush(oldCommitteeMember);
     }
 
     @Override

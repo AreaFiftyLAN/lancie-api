@@ -41,9 +41,8 @@ public class CommitteeRestController {
      * @return All CommitteeMembers.
      */
     @GetMapping
-    public ResponseEntity<?> readCommittee() {
-        Collection<CommitteeMember> committeeMembers = committeeService.getCommittee();
-        return ResponseEntityBuilder.createResponseEntity(HttpStatus.OK, "Committee members retrieved successfully.", committeeMembers);
+    public Collection<CommitteeMember> readCommittee() {
+        return committeeService.getCommittee();
     }
 
     /**
@@ -57,8 +56,8 @@ public class CommitteeRestController {
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{memberID}")
     public ResponseEntity<?> updateCommitteeMember(@PathVariable Long id, @RequestBody CommitteeMember committeeMember) {
-        committeeService.updateCommitteeMember(id, committeeMember);
-        return ResponseEntityBuilder.createResponseEntity(HttpStatus.ACCEPTED, "Committee member updated successfully.");
+        committeeMember = committeeService.updateCommitteeMember(id, committeeMember);
+        return ResponseEntityBuilder.createResponseEntity(HttpStatus.ACCEPTED, "Committee member updated successfully.", committeeMember);
     }
 
     /**
