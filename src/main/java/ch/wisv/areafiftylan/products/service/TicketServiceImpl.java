@@ -266,6 +266,13 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public TicketType updateTicketType(Long typeId, TicketType type) {
+        TicketType retrievedType = ticketTypeRepository.getOne(typeId);
+        retrievedType.setName(type.getName());
+        retrievedType.setText(type.getText());
+        retrievedType.setPrice(type.getPrice());
+        retrievedType.setDeadline(type.getDeadline());
+        retrievedType.setNumberAvailable(type.getNumberAvailable());
+        retrievedType.setBuyable(type.isBuyable());
         return ticketTypeRepository.save(type);
     }
 
