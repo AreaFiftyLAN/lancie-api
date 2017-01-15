@@ -26,6 +26,7 @@ import ch.wisv.areafiftylan.seats.model.SeatmapResponse;
 import ch.wisv.areafiftylan.teams.model.Team;
 import ch.wisv.areafiftylan.teams.service.TeamService;
 import ch.wisv.areafiftylan.users.model.User;
+import ch.wisv.areafiftylan.utils.mail.MailService;
 import lombok.Synchronized;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,12 +40,14 @@ public class SeatServiceImpl implements SeatService {
     private final SeatRepository seatRepository;
     private final TicketRepository ticketRepository;
     private final TeamService teamService;
+    private final MailService mailService;
 
     @Autowired
-    public SeatServiceImpl(SeatRepository seatRepository, TicketRepository ticketRepository, TeamService teamService) {
+    public SeatServiceImpl(SeatRepository seatRepository, TicketRepository ticketRepository, TeamService teamService, MailService mailService) {
         this.seatRepository = seatRepository;
         this.ticketRepository = ticketRepository;
         this.teamService = teamService;
+        this.mailService = mailService;
     }
 
     @Override
@@ -93,6 +96,7 @@ public class SeatServiceImpl implements SeatService {
      * Reserves a Seat, and sets the Ticket to ticketId's Ticket.
      * Also frees any previous Seat belonging to the Ticket.
      * This method ignores any current user assigned to the seat, that logic must be done before calling this class.
+     * If any user was assigned this seat before, send an email to let them know their seat was overridden.
      * This method is synchronized to prevent the extremely unlikely event of simultaneous requests.
      *
      * @param seat The Seat to reserve.
@@ -105,6 +109,9 @@ public class SeatServiceImpl implements SeatService {
             Ticket ticket = ticketRepository.findOne(ticketId);
             if (!ticket.isValid()) {
                 throw new InvalidTicketException("Unable to reserve seat for an invalid Ticket");
+            }
+            if (seat.getTicket().getOwner() != null) {
+                mailService.sendSeatOverrideMail(seat.getTicket().getOwner());
             }
             seat.setTicket(ticket);
         } else {
