@@ -104,5 +104,9 @@ public interface TicketService {
 
     Collection<TicketType> getAllTicketTypes();
 
+    TicketType updateTicketType(Long typeId, TicketType type);
+
+    void deleteTicketType(Long typeId);
+
     TicketOption addTicketOption(TicketOption option);
 }

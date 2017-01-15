@@ -265,6 +265,20 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
+    public TicketType updateTicketType(Long typeId, TicketType type) {
+        if (typeId == null || !ticketTypeRepository.exists(typeId)) {
+            throw new TicketTypeNotFoundException("with ID " + typeId);
+        }
+        type.setId(typeId);
+        return ticketTypeRepository.save(type);
+    }
+
+    @Override
+    public void deleteTicketType(Long typeId) {
+        ticketTypeRepository.delete(typeId);
+    }
+
+    @Override
     public TicketOption addTicketOption(TicketOption option) {
         return ticketOptionRepository.save(option);
     }

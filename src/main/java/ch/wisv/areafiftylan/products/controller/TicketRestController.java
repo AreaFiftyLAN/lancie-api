@@ -119,10 +119,28 @@ public class TicketRestController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/types")
     public ResponseEntity<?> addTicketType(@RequestBody @Validated TicketType type) {
-
         TicketType ticketType = ticketService.addTicketType(type);
-
         return createResponseEntity(HttpStatus.CREATED, "TicketType successfully added", ticketType);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/types")
+    public Collection<TicketType> readTicketTypes() {
+        return ticketService.getAllTicketTypes();
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/types/{typeId}")
+    public ResponseEntity<?> updateTicketType(@PathVariable Long typeId, @RequestBody @Validated TicketType type) {
+        TicketType ticketType = ticketService.updateTicketType(typeId, type);
+        return createResponseEntity(HttpStatus.OK, "TicketType successfully updated.", ticketType);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/types/{typeId}")
+    public ResponseEntity<?> deleteTicketType(@PathVariable Long typeId) {
+        ticketService.deleteTicketType(typeId);
+        return createResponseEntity(HttpStatus.OK, "TicketType successfully deleted.");
     }
 
     @PreAuthorize("hasRole('ADMIN')")

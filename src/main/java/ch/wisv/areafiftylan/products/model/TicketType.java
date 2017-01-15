@@ -40,6 +40,7 @@ public class TicketType {
     @Id
     @GeneratedValue
     @Getter
+    @Setter
     private Long id;
 
     @Getter
