@@ -680,9 +680,10 @@ public class TicketServiceTest extends ServiceTest {
 
     @Test
     public void updateTicketTypeTestNoneThere() {
+        thrown.expect(TicketTypeNotFoundException.class);
+        thrown.expectMessage("TicketType with ID null not found!");
         TicketType ticketType = new TicketType("type1", "text", 5F, 0, LocalDateTime.now(), false);
-        ticketType = ticketService.updateTicketType(ticketType.getId(), ticketType);
-        assertFalse(ticketType.isBuyable());
+        ticketService.updateTicketType(ticketType.getId(), ticketType);
     }
 
     @Test
