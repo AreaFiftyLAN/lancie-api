@@ -110,7 +110,7 @@ public class SeatServiceImpl implements SeatService {
             if (!ticket.isValid()) {
                 throw new InvalidTicketException("Unable to reserve seat for an invalid Ticket");
             }
-            if (seat.getTicket().getOwner() != null) {
+            if (seat.getTicket() != null && seat.getTicket().getOwner() != null) {
                 mailService.sendSeatOverrideMail(seat.getTicket().getOwner());
             }
             seat.setTicket(ticket);
