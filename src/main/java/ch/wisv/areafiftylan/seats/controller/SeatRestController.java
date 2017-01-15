@@ -131,11 +131,8 @@ public class SeatRestController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{group}/{number}")
     ResponseEntity<?> reserveSingleSeat(@PathVariable String group, @PathVariable Integer number) {
-        if (seatService.reserveSeat(group, number)) {
-            return createResponseEntity(HttpStatus.OK, "Seat successfully reserved");
-        } else {
-            return createResponseEntity(HttpStatus.CONFLICT, "Seat is already taken");
-        }
+        seatService.reserveSeatForAdmin(group, number);
+        return createResponseEntity(HttpStatus.OK, "Seat successfully reserved");
     }
 
     /**
