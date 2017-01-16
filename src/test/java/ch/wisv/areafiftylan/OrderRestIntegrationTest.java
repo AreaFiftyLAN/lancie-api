@@ -639,4 +639,22 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
             header("Location", containsString("http://newpaymentURL.com"));
         //@formatter:on
     }
+
+    @Test
+    public void testGetPaymentUrlOrderAssigned() {
+        User user = createUser();
+        Order order = addOrderForUser(user);
+        order.setStatus(OrderStatus.ASSIGNED);
+        orderRepository.save(order);
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+        when().
+            get(ORDER_ENDPOINT + order.getId() + "/url").
+        then().
+            statusCode(HttpStatus.SC_CONFLICT).
+            body("message", equalTo("Operation on Order " + order.getId() + " not permitted"));
+        //@formatter:on
+    }
 }
