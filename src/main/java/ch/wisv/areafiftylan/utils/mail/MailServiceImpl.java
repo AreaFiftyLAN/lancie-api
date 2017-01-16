@@ -173,7 +173,7 @@ public class MailServiceImpl implements MailService {
     @Override
     public void sendSeatOverrideMail(User user) {
         String subject = "Your seat was reset";
-        String message = "Unfortunately an admin had to reallocate your reserved seat.\n" +
+        String message = "Unfortunately we had to reallocate your reserved seat.\n" +
                          "Please contact us if you have any questions.\n" +
                          "You can reserve a new seat through <a href=\"https://areafiftylan.nl/my-area\">My Area</a>.";
         sendMail(user.getUsername(), user.getUsername(), subject, message);
