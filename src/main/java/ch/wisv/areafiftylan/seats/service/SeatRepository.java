@@ -30,7 +30,7 @@ public interface SeatRepository extends JpaRepository<Seat, Long> {
 
     List<Seat> findBySeatGroup(String seatGroup);
 
-    Seat findBySeatGroupAndSeatNumber(String seatGroup, int seatNumber);
+    Optional<Seat> findBySeatGroupAndSeatNumber(String seatGroup, int seatNumber);
 
     Optional<Seat> findByTicketId(Long ticketId);
 }

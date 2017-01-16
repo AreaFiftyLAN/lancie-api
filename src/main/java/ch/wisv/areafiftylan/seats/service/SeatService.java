@@ -33,7 +33,7 @@ public interface SeatService {
 
     boolean reserveSeatForTicket(String groupname, int seatnumber, Long ticketId);
 
-    boolean reserveSeat(String groupname, int seatnumber);
+    void reserveSeatForAdmin(String groupname, int seatnumber);
 
     Seat getSeatBySeatGroupAndSeatNumber(String groupName, int seatNumber);
 

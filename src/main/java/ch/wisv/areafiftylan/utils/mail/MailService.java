@@ -44,4 +44,6 @@ public interface MailService {
     void sendTicketTransferMail(User sender, User receiver, String url);
 
     void sendTeamInviteMail(User user, String teamName, User teamCaptain);
+
+    void sendSeatOverrideMail(User user);
 }

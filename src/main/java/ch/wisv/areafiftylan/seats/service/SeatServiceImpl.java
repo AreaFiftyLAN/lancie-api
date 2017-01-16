@@ -18,14 +18,17 @@
 package ch.wisv.areafiftylan.seats.service;
 
 import ch.wisv.areafiftylan.exception.InvalidTicketException;
+import ch.wisv.areafiftylan.exception.SeatNotFoundException;
 import ch.wisv.areafiftylan.products.model.Ticket;
-import ch.wisv.areafiftylan.products.service.repository.TicketRepository;
+import ch.wisv.areafiftylan.products.service.TicketService;
 import ch.wisv.areafiftylan.seats.model.Seat;
 import ch.wisv.areafiftylan.seats.model.SeatGroupDTO;
 import ch.wisv.areafiftylan.seats.model.SeatmapResponse;
 import ch.wisv.areafiftylan.teams.model.Team;
 import ch.wisv.areafiftylan.teams.service.TeamService;
 import ch.wisv.areafiftylan.users.model.User;
+import ch.wisv.areafiftylan.utils.mail.MailService;
+import lombok.Synchronized;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,16 +39,16 @@ import java.util.stream.Collectors;
 public class SeatServiceImpl implements SeatService {
 
     private final SeatRepository seatRepository;
-    private final TicketRepository ticketRepository;
     private final TeamService teamService;
-
-    private static final Object seatReservationLock = new Object();
+    private final TicketService ticketService;
+    private final MailService mailService;
 
     @Autowired
-    public SeatServiceImpl(SeatRepository seatRepository, TicketRepository ticketRepository, TeamService teamService) {
+    public SeatServiceImpl(SeatRepository seatRepository, TeamService teamService, TicketService ticketService, MailService mailService) {
         this.seatRepository = seatRepository;
-        this.ticketRepository = ticketRepository;
         this.teamService = teamService;
+        this.ticketService = ticketService;
+        this.mailService = mailService;
     }
 
     @Override
@@ -74,48 +77,55 @@ public class SeatServiceImpl implements SeatService {
     }
 
     @Override
-    public boolean reserveSeatForTicket(String groupname, int seatnumber, Long ticketId) {
-        Ticket ticket = ticketRepository.findOne(ticketId);
-
-        if (!ticket.isValid()) {
-            throw new InvalidTicketException("Unable to reserve seat for an invalid Ticket");
-        }
-
-        Optional<Seat> previousSeat = seatRepository.findByTicketId(ticketId);
-
-        // We can only reserve one seat at a time, to prevent the extremely unlikely event of simultaneous requests
-        synchronized (seatReservationLock) {
-            Seat seat = seatRepository.findBySeatGroupAndSeatNumber(groupname, seatnumber);
-            previousSeat.ifPresent(s -> s.setTicket(null));
-            if (!seat.isTaken()) {
-                seat.setTicket(ticket);
-                seatRepository.saveAndFlush(seat);
-                return true;
-            } else {
-                return false;
-            }
+    public boolean reserveSeatForTicket(String seatGroup, int seatNumber, Long ticketId) {
+        Seat seat = getSeatBySeatGroupAndSeatNumber(seatGroup, seatNumber);
+        if (seat.isTaken()) {
+            return false;
+        } else {
+            reserveSeat(seat, ticketId);
+            return true;
         }
     }
 
     @Override
-    public boolean reserveSeat(String groupname, int seatnumber) {
-        // We can only reserve one seat at a time, to prevent the extremely unlikely event of simultaneous requests
-        synchronized (seatReservationLock) {
-            Seat seat = seatRepository.findBySeatGroupAndSeatNumber(groupname, seatnumber);
+    public void reserveSeatForAdmin(String seatGroup, int seatNumber) {
+        Seat seat = getSeatBySeatGroupAndSeatNumber(seatGroup, seatNumber);
+        reserveSeat(seat, null);
+    }
 
-            if (!seat.isTaken()) {
-                seat.setTaken(true);
-                seatRepository.saveAndFlush(seat);
-                return true;
-            } else {
-                return false;
+    /**
+     * Reserves a Seat, and sets the Ticket to ticketId's Ticket.
+     * Also frees any previous Seat belonging to the Ticket.
+     * This method ignores any current user assigned to the seat, that logic must be done before calling this class.
+     * If any user was assigned this seat before, send an email to let them know their seat was overridden.
+     * This method is synchronized to prevent the extremely unlikely event of simultaneous requests.
+     *
+     * @param seat The Seat to reserve.
+     * @param ticketId The Id of the Ticket to be set to the Seat.
+     */
+    @Synchronized
+    private void reserveSeat(Seat seat, Long ticketId) {
+        if (ticketId != null) {
+            seatRepository.findByTicketId(ticketId).ifPresent(previousSeat -> previousSeat.setTicket(null));
+            Ticket ticket = ticketService.getTicketById(ticketId);
+            if (!ticket.isValid()) {
+                throw new InvalidTicketException("Unable to reserve seat for an invalid Ticket");
             }
+            if (seat.getTicket() != null && seat.getTicket().getOwner() != null) {
+                mailService.sendSeatOverrideMail(seat.getTicket().getOwner());
+            }
+            seat.setTicket(ticket);
+        } else {
+            seat.setTicket(null);
         }
+        seat.setTaken(true);
+        seatRepository.saveAndFlush(seat);
     }
 
     @Override
     public Seat getSeatBySeatGroupAndSeatNumber(String groupName, int seatNumber) {
-        return seatRepository.findBySeatGroupAndSeatNumber(groupName, seatNumber);
+        return seatRepository.findBySeatGroupAndSeatNumber(groupName, seatNumber)
+                .orElseThrow(SeatNotFoundException::new);
     }
 
     @Override
@@ -141,7 +151,7 @@ public class SeatServiceImpl implements SeatService {
 
     @Override
     public void clearSeat(String groupName, int seatNumber) {
-        Seat seat = seatRepository.findBySeatGroupAndSeatNumber(groupName, seatNumber);
+        Seat seat = getSeatBySeatGroupAndSeatNumber(groupName, seatNumber);
         seat.setTicket(null);
         seatRepository.save(seat);
     }

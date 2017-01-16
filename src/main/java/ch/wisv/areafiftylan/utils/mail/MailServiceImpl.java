@@ -171,6 +171,15 @@ public class MailServiceImpl implements MailService {
     }
 
     @Override
+    public void sendSeatOverrideMail(User user) {
+        String subject = "Your seat was reset";
+        String message = "Unfortunately we had to reallocate your reserved seat.\n" +
+                         "Please contact us if you have any questions.\n" +
+                         "You can reserve a new seat through <a href=\"https://areafiftylan.nl/my-area\">My Area</a>.";
+        sendMail(user.getUsername(), user.getUsername(), subject, message);
+    }
+
+    @Override
     public void sendTicketTransferMail(User sender, User receiver, String url) {
         String message = sender.getProfile().firstName +
                 " has sent you a ticket for AreaFiftyLAN! To accept this ticket please click on the following link: " +

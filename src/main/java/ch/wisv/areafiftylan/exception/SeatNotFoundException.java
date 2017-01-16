@@ -17,9 +17,12 @@
 
 package ch.wisv.areafiftylan.exception;
 
-class SeatNotFoundException extends RuntimeException {
+public class SeatNotFoundException extends RuntimeException {
     public SeatNotFoundException(String message) {
         super(message);
     }
 
+    public SeatNotFoundException() {
+        this("Could not find seat.");
+    }
 }
