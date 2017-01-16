@@ -38,4 +38,6 @@ public interface PaymentService {
      * @return The updated Order
      */
     Order updateStatus(String orderReference);
+
+    String getPaymentUrl(String orderReference);
 }

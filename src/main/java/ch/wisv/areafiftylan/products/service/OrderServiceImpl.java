@@ -262,4 +262,13 @@ public class OrderServiceImpl implements OrderService {
         }
         return ticketInfo;
     }
+
+    @Override
+    public String getPaymentUrl(Long orderId) {
+        Order order = getOrderById(orderId);
+        if(!order.getStatus().equals(OrderStatus.PENDING)){
+            throw new ImmutableOrderException(orderId);
+        }
+        return paymentService.getPaymentUrl(order.getReference());
+    }
 }

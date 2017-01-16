@@ -125,8 +125,7 @@ public class OrderRestController {
     @RequestMapping(value = "/orders/{orderId}/{ticketId}", method = RequestMethod.DELETE)
     @JsonView(View.OrderOverview.class)
     public ResponseEntity<?> removeFromOrder(@PathVariable Long orderId, @PathVariable Long ticketId) {
-        Order modifiedOrder = orderService
-                .removeTicketFromOrder(orderId, ticketId);
+        Order modifiedOrder = orderService.removeTicketFromOrder(orderId, ticketId);
         return createResponseEntity(HttpStatus.OK, "Ticket successfully removed from Order", modifiedOrder);
     }
 
@@ -160,6 +159,23 @@ public class OrderRestController {
     @RequestMapping(value = "/orders/{orderId}/checkout", method = RequestMethod.POST)
     public ResponseEntity<?> payOrder(@PathVariable Long orderId) throws URISyntaxException {
         String paymentUrl = orderService.requestPayment(orderId);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setLocation(new URI(paymentUrl));
+
+        return createResponseEntity(HttpStatus.OK, headers, "Please go to the url to finish your payment", paymentUrl);
+    }
+
+    /**
+     * This method gets the paymentURL for an order that was already registered at the paymentprovider.
+     *
+     * @param orderId The order to be continued
+     *
+     * @return The paymentURL from the paymentprovider
+     */
+    @PreAuthorize("@currentUserServiceImpl.canAccessOrder(principal, #orderId)")
+    @GetMapping(value = "/orders/{orderId}/url")
+    public ResponseEntity<?> getPaymentURL(@PathVariable Long orderId) throws URISyntaxException {
+        String paymentUrl = orderService.getPaymentUrl(orderId);
         HttpHeaders headers = new HttpHeaders();
         headers.setLocation(new URI(paymentUrl));
 

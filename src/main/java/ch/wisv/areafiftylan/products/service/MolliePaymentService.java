@@ -104,8 +104,6 @@ public class MolliePaymentService implements PaymentService {
         try {
             // Request a payment from Mollie
             ResponseOrError<Payment> molliePaymentStatus = mollie.payments().get(orderReference);
-            //            ResponseOrError<PaymentStatus> molliePaymentStatus = mollie.getPaymentStatus(apiKey,
-            // orderReference);
 
             // If the request was a success, we can update the order
             if (molliePaymentStatus.getSuccess()) {
@@ -143,6 +141,23 @@ public class MolliePaymentService implements PaymentService {
             // This indicates the HttpClient encountered some error
             throw new PaymentServiceConnectionException(e.getMessage());
         }
+    }
+
+    @Override
+    public String getPaymentUrl(String orderReference) {
+        try {
+            ResponseOrError<Payment> paymentResponseOrError = mollie.payments().get(orderReference);
+
+            if (paymentResponseOrError.getSuccess()) {
+                return paymentResponseOrError.getData().getLinks().getPaymentUrl();
+            } else {
+                handleMollieError(paymentResponseOrError);
+            }
+
+        } catch (IOException e) {
+            throw new PaymentServiceConnectionException(e.getMessage());
+        }
+        throw new PaymentException("Can't retrieve Payment URL for Order " + orderReference);
     }
 
     private void handleMollieError(ResponseOrError<?> mollieResponseWithError) {
