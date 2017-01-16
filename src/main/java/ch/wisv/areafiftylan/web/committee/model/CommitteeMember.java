@@ -15,41 +15,47 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.wisv.areafiftylan.web.model;
+package ch.wisv.areafiftylan.web.committee.model;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+
+@Entity
+@NoArgsConstructor
 public class CommitteeMember {
 
+    @Getter
+    @Setter
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
+    @Getter
+    @Setter
     private String name;
+
+    @Getter
+    @Setter
     private String function;
+
+    @Getter
+    @Setter
     private String icon;
 
-    public CommitteeMember(String name, String function, String icon) {
+    @Getter
+    @Setter
+    private Long order;
+
+    public CommitteeMember(String name, String function, String icon, Long order) {
         this.name = name;
         this.function = function;
         this.icon = icon;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getFunction() {
-        return function;
-    }
-
-    public void setFunction(String function) {
-        this.function = function;
-    }
-
-    public String getIcon() {
-        return icon;
-    }
-
-    public void setIcon(String icon) {
-        this.icon = icon;
+        this.order = order;
     }
 }
