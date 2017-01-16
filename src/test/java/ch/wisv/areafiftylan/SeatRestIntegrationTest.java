@@ -480,8 +480,8 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
 
-        Seat previousSeat = seatRepository.findBySeatGroupAndSeatNumber("A", 1);
-        Seat currentSeat = seatRepository.findBySeatGroupAndSeatNumber("A", 2);
+        Seat previousSeat = seatService.getSeatBySeatGroupAndSeatNumber("A", 1);
+        Seat currentSeat = seatService.getSeatBySeatGroupAndSeatNumber("A", 2);
 
         Assert.assertNull(previousSeat.getTicket());
         Assert.assertFalse(previousSeat.isTaken());
@@ -572,7 +572,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
 
-        Seat seat = seatRepository.findBySeatGroupAndSeatNumber("A", 1);
+        Seat seat = seatService.getSeatBySeatGroupAndSeatNumber("A", 1);
         Assert.assertNull(seat.getTicket());
     }
 }

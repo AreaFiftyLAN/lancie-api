@@ -18,8 +18,9 @@
 package ch.wisv.areafiftylan.seats.service;
 
 import ch.wisv.areafiftylan.exception.InvalidTicketException;
+import ch.wisv.areafiftylan.exception.SeatNotFoundException;
 import ch.wisv.areafiftylan.products.model.Ticket;
-import ch.wisv.areafiftylan.products.service.repository.TicketRepository;
+import ch.wisv.areafiftylan.products.service.TicketService;
 import ch.wisv.areafiftylan.seats.model.Seat;
 import ch.wisv.areafiftylan.seats.model.SeatGroupDTO;
 import ch.wisv.areafiftylan.seats.model.SeatmapResponse;
@@ -38,15 +39,15 @@ import java.util.stream.Collectors;
 public class SeatServiceImpl implements SeatService {
 
     private final SeatRepository seatRepository;
-    private final TicketRepository ticketRepository;
     private final TeamService teamService;
+    private final TicketService ticketService;
     private final MailService mailService;
 
     @Autowired
-    public SeatServiceImpl(SeatRepository seatRepository, TicketRepository ticketRepository, TeamService teamService, MailService mailService) {
+    public SeatServiceImpl(SeatRepository seatRepository, TeamService teamService, TicketService ticketService, MailService mailService) {
         this.seatRepository = seatRepository;
-        this.ticketRepository = ticketRepository;
         this.teamService = teamService;
+        this.ticketService = ticketService;
         this.mailService = mailService;
     }
 
@@ -77,7 +78,7 @@ public class SeatServiceImpl implements SeatService {
 
     @Override
     public boolean reserveSeatForTicket(String seatGroup, int seatNumber, Long ticketId) {
-        Seat seat = seatRepository.findBySeatGroupAndSeatNumber(seatGroup, seatNumber);
+        Seat seat = getSeatBySeatGroupAndSeatNumber(seatGroup, seatNumber);
         if (seat.isTaken()) {
             return false;
         } else {
@@ -88,7 +89,7 @@ public class SeatServiceImpl implements SeatService {
 
     @Override
     public void reserveSeatForAdmin(String seatGroup, int seatNumber) {
-        Seat seat = seatRepository.findBySeatGroupAndSeatNumber(seatGroup, seatNumber);
+        Seat seat = getSeatBySeatGroupAndSeatNumber(seatGroup, seatNumber);
         reserveSeat(seat, null);
     }
 
@@ -106,7 +107,7 @@ public class SeatServiceImpl implements SeatService {
     private void reserveSeat(Seat seat, Long ticketId) {
         if (ticketId != null) {
             seatRepository.findByTicketId(ticketId).ifPresent(previousSeat -> previousSeat.setTicket(null));
-            Ticket ticket = ticketRepository.findOne(ticketId);
+            Ticket ticket = ticketService.getTicketById(ticketId);
             if (!ticket.isValid()) {
                 throw new InvalidTicketException("Unable to reserve seat for an invalid Ticket");
             }
@@ -123,7 +124,8 @@ public class SeatServiceImpl implements SeatService {
 
     @Override
     public Seat getSeatBySeatGroupAndSeatNumber(String groupName, int seatNumber) {
-        return seatRepository.findBySeatGroupAndSeatNumber(groupName, seatNumber);
+        return seatRepository.findBySeatGroupAndSeatNumber(groupName, seatNumber)
+                .orElseThrow(SeatNotFoundException::new);
     }
 
     @Override
@@ -149,7 +151,7 @@ public class SeatServiceImpl implements SeatService {
 
     @Override
     public void clearSeat(String groupName, int seatNumber) {
-        Seat seat = seatRepository.findBySeatGroupAndSeatNumber(groupName, seatNumber);
+        Seat seat = getSeatBySeatGroupAndSeatNumber(groupName, seatNumber);
         seat.setTicket(null);
         seatRepository.save(seat);
     }
