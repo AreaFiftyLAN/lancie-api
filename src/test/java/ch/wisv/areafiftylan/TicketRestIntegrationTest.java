@@ -83,7 +83,7 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void testGetAllTicketsAsAdmin() {
-        User admin = createUser(true);
+        User admin = createAdmin();
 
         //@formatter:off
         given().
@@ -549,7 +549,7 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         // Very hard to check if all tickets have pickupservice, but
         // this is tested in the unit test as well
 
-        User admin = createUser(true);
+        User admin = createAdmin();
         createTicket(admin, Collections.singletonList(PICKUP_SERVICE));
 
         //@formatter:off

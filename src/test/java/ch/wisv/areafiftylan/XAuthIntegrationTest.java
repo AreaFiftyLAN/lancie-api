@@ -97,8 +97,8 @@ public abstract class XAuthIntegrationTest {
         return createUser(19, false);
     }
 
-    protected User createUser(boolean admin) {
-        return createUser(19, admin);
+    protected User createAdmin() {
+        return createUser(19, true);
     }
 
     protected User createUser(int age, boolean admin) {

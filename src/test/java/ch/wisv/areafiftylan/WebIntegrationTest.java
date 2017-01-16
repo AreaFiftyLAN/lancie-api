@@ -1,28 +1,31 @@
 package ch.wisv.areafiftylan;
 
-import ch.wisv.areafiftylan.utils.SessionData;
+import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.web.committee.model.CommitteeMember;
 import ch.wisv.areafiftylan.web.committee.service.CommitteeMemberRepository;
-import com.jayway.restassured.http.ContentType;
+import ch.wisv.areafiftylan.web.committee.service.CommitteeService;
 import org.apache.http.HttpStatus;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static com.jayway.restassured.RestAssured.given;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.hasItems;
+import static org.hamcrest.collection.IsEmptyCollection.empty;
 
 /**
  * This class tests the endpoints that provide our website with it's information.
  */
-public class WebIntegrationTest extends IntegrationTest {
+public class WebIntegrationTest extends XAuthIntegrationTest {
 
     @Autowired
     CommitteeMemberRepository committeeMemberRepository;
+    @Autowired
+    CommitteeService committeeService;
 
     private CommitteeMember committeeMember1 = new CommitteeMember(1L, "Lotte Bryan", "Chairman", "group");
     private CommitteeMember committeeMember2 = new CommitteeMember(2L, "Sterre Noorthoek", "Secretary", "male");
@@ -35,122 +38,18 @@ public class WebIntegrationTest extends IntegrationTest {
             committeeMember1, committeeMember2, committeeMember3, committeeMember4,
             committeeMember5, committeeMember6, committeeMember7));
 
-    @Before
-    public void initWebIntegrationTestMethod() {
-        committeeMemberRepository.save(committeeMemberList);
-    }
 
-    @After
-    public void cleanupWebIntegrationTestMethod() {
-        committeeMemberRepository.deleteAll();
-    }
-
-    @Test
-    public void testSetCommitteeAsUser() {
-        SessionData login = login(user.getUsername(), userCleartextPassword);
-
-        //@formatter:off
-        given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
-        when().
-            content(committeeMemberList).contentType(ContentType.JSON).
-            put("/web/committee").
-        then().
-            statusCode(HttpStatus.SC_FORBIDDEN).
-            body("message", equalTo("Access denied"));
-        //@formatter:on
-    }
-
-    @Test
-    public void testSetCommitteeAsAdmin() {
-        SessionData login = login(admin.getUsername(), adminCleartextPassword);
-
-        //@formatter:off
-        given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
-        when().
-            content(committeeMemberList).contentType(ContentType.JSON).
-            put("/web/committee").
-        then().
-            statusCode(HttpStatus.SC_CREATED).
-            body("message", equalTo("Committee saved successfully."));
-        //@formatter:on
-    }
-
-    @Test
-    public void testGetCommitteeAsUser() {
-        SessionData login = login(user.getUsername(), userCleartextPassword);
-
-        //@formatter:off
-        given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
-        when().
-            get("/web/committee").
-        then().
-            statusCode(HttpStatus.SC_OK);
-        //@formatter:on
-    }
-
-    @Test
-    public void testGetCommitteeAsAdmin() {
-        SessionData login = login(admin.getUsername(), adminCleartextPassword);
-
-        //@formatter:off
-        given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
-        when().
-            get("/web/committee").
-        then().
-            statusCode(HttpStatus.SC_OK);
-        //@formatter:on
-    }
-
-    @Test
-    public void testDeleteCommitteeAsUser() {
-        SessionData login = login(user.getUsername(), userCleartextPassword);
-
-        //@formatter:off
-        given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
-        when().
-            delete("/web/committee").
-        then().
-            statusCode(HttpStatus.SC_FORBIDDEN).
-            body("message", equalTo("Access denied"));
-        //@formatter:on
-    }
-
-    @Test
-    public void testDeleteCommitteeAsAdmin() {
-        SessionData login = login(admin.getUsername(), adminCleartextPassword);
-
-        //@formatter:off
-        given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
-        when().
-            delete("/web/committee").
-        then().
-            statusCode(HttpStatus.SC_OK).
-            body("message", equalTo("Committee deleted successfully."));
-        //@formatter:on
-    }
+    //region Committee
 
     @Test
     public void testAddCommitteeMemberAsUser() {
-        SessionData login = login(user.getUsername(), userCleartextPassword);
+        User user = createUser();
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+			header(getXAuthTokenHeaderForUser(user)).
         when().
-            content(committeeMember1).contentType(ContentType.JSON).
+            body(committeeMember1).
             put("/web/committee/1").
         then().
             statusCode(HttpStatus.SC_FORBIDDEN).
@@ -160,59 +59,103 @@ public class WebIntegrationTest extends IntegrationTest {
 
     @Test
     public void testAddCommitteeMemberAsAdmin() {
-        SessionData login = login(admin.getUsername(), adminCleartextPassword);
+        User admin = createAdmin();
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+			header(getXAuthTokenHeaderForUser(admin)).
         when().
-            content(committeeMember1).contentType(ContentType.JSON).
+            body(committeeMember1).
             put("/web/committee/1").
         then().
-            statusCode(HttpStatus.SC_ACCEPTED).
-            body("message", equalTo("Committee member added successfully."));
+            statusCode(HttpStatus.SC_CREATED).
+            body("message", equalTo("Committee member added successfully.")).
+            body("object.name", equalTo("Lotte Bryan"));
         //@formatter:on
     }
 
     @Test
-    public void testGetCommitteeMemberAsUser() {
-        SessionData login = login(user.getUsername(), userCleartextPassword);
+    public void testGetCommitteeAsUserEmpty() {
+        User user = createUser();
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+			header(getXAuthTokenHeaderForUser(user)).
         when().
-            get("/web/committee/1").
+            get("/web/committee").
         then().
-            statusCode(HttpStatus.SC_OK);
+            statusCode(HttpStatus.SC_OK).
+            body(empty());
         //@formatter:on
     }
 
     @Test
-    public void testGetCommitteeMemberAsAdmin() {
-        SessionData login = login(admin.getUsername(), adminCleartextPassword);
+    public void testGetCommitteeAsUserSingle() {
+        User user = createUser();
+        committeeService.addCommitteeMember(committeeMember1);
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+			header(getXAuthTokenHeaderForUser(user)).
         when().
-            get("/web/committee/1").
+            get("/web/committee").
         then().
-            statusCode(HttpStatus.SC_OK);
+            statusCode(HttpStatus.SC_OK).
+            body("name", containsString("Lotte Bryan"));
         //@formatter:on
+    }
+
+    @Test
+    public void testGetCommitteeAsUserMultiple() {
+        User user = createUser();
+        committeeService.addCommitteeMember(committeeMember1);
+        committeeService.addCommitteeMember(committeeMember2);
+
+        //@formatter:off
+        given().
+			header(getXAuthTokenHeaderForUser(user)).
+        when().
+            get("/web/committee").
+        then().
+            statusCode(HttpStatus.SC_OK).
+            body("name", hasItems("Lotte Bryan", "Sterre Noorthoek"));
+        //@formatter:on
+    }
+
+    @Test
+    public void testGetCommitteeAsAdmin() {
+        User admin = createAdmin();
+
+        //@formatter:off
+        given().
+			header(getXAuthTokenHeaderForUser(admin)).
+        when().
+            get("/web/committee").
+        then().
+            statusCode(HttpStatus.SC_OK).
+            body(empty());
+        //@formatter:on
+    }
+
+    @Test
+    public void testUpdateCommitteeMemberAsUser() {
+        User user = createUser();
+
+    }
+
+    @Test
+    public void testUpdateCommitteeMemberAsAdmin() {
+        User admin = createAdmin();
+
     }
 
     @Test
     public void testDeleteCommitteeMemberAsUser() {
-        SessionData login = login(user.getUsername(), userCleartextPassword);
+        User user = createUser();
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+			header(getXAuthTokenHeaderForUser(user)).
         when().
             delete("/web/committee/1").
         then().
@@ -223,12 +166,11 @@ public class WebIntegrationTest extends IntegrationTest {
 
     @Test
     public void testDeleteCommitteeMemberAsAdmin() {
-        SessionData login = login(admin.getUsername(), adminCleartextPassword);
+        User admin = createAdmin();
 
         //@formatter:off
         given().
-            filter(sessionFilter).
-            header(login.getCsrfHeader()).
+			header(getXAuthTokenHeaderForUser(admin)).
         when().
             delete("/web/committee/1").
         then().
@@ -236,5 +178,7 @@ public class WebIntegrationTest extends IntegrationTest {
             body("message", equalTo("Committee member deleted successfully."));
         //@formatter:on
     }
+
+    //endregion
 
 }

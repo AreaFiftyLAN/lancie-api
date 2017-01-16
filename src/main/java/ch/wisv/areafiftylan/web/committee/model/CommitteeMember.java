@@ -38,6 +38,10 @@ public class CommitteeMember {
 
     @Getter
     @Setter
+    private Long order;
+
+    @Getter
+    @Setter
     private String name;
 
     @Getter
@@ -48,14 +52,10 @@ public class CommitteeMember {
     @Setter
     private String icon;
 
-    @Getter
-    @Setter
-    private Long order;
-
-    public CommitteeMember(String name, String function, String icon, Long order) {
+    public CommitteeMember(Long order, String name, String function, String icon) {
+        this.order = order;
         this.name = name;
         this.function = function;
         this.icon = icon;
-        this.order = order;
     }
 }

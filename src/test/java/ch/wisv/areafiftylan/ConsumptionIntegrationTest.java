@@ -75,7 +75,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void getAllPossibleConsumptionsTestAsAdmin() {
-        User user = createUser(true);
+        User user = createAdmin();
         getOrPersistConsumption(CONSUMPTION);
 
         //@formatter:off
@@ -91,7 +91,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void getAllPossibleConsumptionsTestAsAdminMultiple() {
-        User user = createUser(true);
+        User user = createAdmin();
         getOrPersistConsumption(CONSUMPTION);
         String MILKSHAKE_CONSUMPTION = "Deliciously Cold Milkshake";
         getOrPersistConsumption(MILKSHAKE_CONSUMPTION);
@@ -124,7 +124,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void addAvailableConsumptionTestAsAdmin() {
-        User user = createUser(true);
+        User user = createAdmin();
         String consumption = "addAvailableConsumptionTestAsAdmin";
 
         //@formatter:off
@@ -141,7 +141,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void addAvailableConsumptionTestAsAdminDuplicate() {
-        User user = createUser(true);
+        User user = createAdmin();
         getOrPersistConsumption(CONSUMPTION);
 
         //@formatter:off
@@ -175,7 +175,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void removeAvailableConsumptionTestAsAdmin() {
-        User user = createUser(true);
+        User user = createAdmin();
         Consumption consumption = getOrPersistConsumption(CONSUMPTION);
 
         //@formatter:off
@@ -193,7 +193,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void removeAvailableConsumptionTestAsAdminNoneThere() {
-        User user = createUser(true);
+        User user = createAdmin();
 
         //@formatter:off
         given().
@@ -225,7 +225,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void consumptionsMadeTestAsAdmin() {
-        User user = createUser(true);
+        User user = createAdmin();
         Ticket ticket = createTicketForUser(user);
         Consumption consumption = getOrPersistConsumption(CONSUMPTION);
         consumptionService.consume(ticket.getId(), consumption.getId());
@@ -243,7 +243,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void consumptionsMadeTestAsAdminNoConsumptions() {
-        User user = createUser(true);
+        User user = createAdmin();
         Ticket ticket = createTicketForUser(user);
 
         //@formatter:off
@@ -259,7 +259,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void consumptionsMadeTestAsAdminInvalidTicket() {
-        User user = createUser(true);
+        User user = createAdmin();
         Ticket ticket = createTicketForUser(user);
         ticket.setValid(false);
         ticketRepository.saveAndFlush(ticket);
@@ -295,7 +295,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void consumeTestAsAdmin() {
-        User user = createUser(true);
+        User user = createAdmin();
         Ticket ticket = createTicketForUser(user);
         Consumption consumption = getOrPersistConsumption(CONSUMPTION);
 
@@ -314,7 +314,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void consumeTestAsAdminAlreadyConsumed() {
-        User user = createUser(true);
+        User user = createAdmin();
         Ticket ticket = createTicketForUser(user);
         Consumption consumption = getOrPersistConsumption(CONSUMPTION);
         consumptionService.consume(ticket.getId(), consumption.getId());
@@ -334,7 +334,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void consumeTestAsAdminDoesntExist() {
-        User user = createUser(true);
+        User user = createAdmin();
         Ticket ticket = createTicketForUser(user);
 
         //@formatter:off
@@ -351,7 +351,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void consumeTestAsAdminInvalidTicket() {
-        User user = createUser(true);
+        User user = createAdmin();
         Ticket ticket = createTicketForUser(user);
         ticket.setValid(false);
         ticketRepository.saveAndFlush(ticket);
@@ -372,7 +372,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void consumeTestAsAdminConsumedByOther() {
-        User user = createUser(true);
+        User user = createAdmin();
         Ticket ticket = createTicketForUser(user);
         Consumption consumption = getOrPersistConsumption(CONSUMPTION);
         consumptionService.consume(createTicketForUser(createUser()).getId(), consumption.getId());
@@ -411,7 +411,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void resetTestAsAdmin() {
-        User user = createUser(true);
+        User user = createAdmin();
         Ticket ticket = createTicketForUser(user);
         Consumption consumption = getOrPersistConsumption(CONSUMPTION);
         consumptionService.consume(ticket.getId(), consumption.getId());
@@ -431,7 +431,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void resetTestAsAdminDoesntExist() {
-        User user = createUser(true);
+        User user = createAdmin();
         Ticket ticket = createTicketForUser(user);
 
         //@formatter:off
@@ -449,7 +449,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void resetTestAsAdminInvalidTicket() {
-        User user = createUser(true);
+        User user = createAdmin();
         Ticket ticket = createTicketForUser(user);
         ticket.setValid(false);
         ticketRepository.saveAndFlush(ticket);

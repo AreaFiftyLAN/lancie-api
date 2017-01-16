@@ -174,7 +174,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void testCreateTeamAsAdminWithDifferentCaptain() {
-        User admin = createUser(true);
+        User admin = createAdmin();
         User captain = createUserWithTicket();
 
         Map<String, String> teamDTO = getTeamDTO(captain);
@@ -260,7 +260,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
     //region Test Get Team
     @Test
     public void getTeamAsAdmin() {
-        User admin = createUser(true);
+        User admin = createAdmin();
         User captain = createUserWithTicket();
         Team team = createTeamWithCaptain(captain);
         //@formatter:off
@@ -343,7 +343,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
     @Test
     public void testInviteMemberAsAdmin() {
         User captain = createUserWithTicket();
-        User admin = createUser(true);
+        User admin = createAdmin();
         User member = createUserWithTicket();
         Team team = createTeamWithCaptain(captain);
         //@formatter:off
@@ -364,7 +364,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
     @Test
     public void testAddMemberAsAdmin() {
         User captain = createUserWithTicket();
-        User admin = createUser(true);
+        User admin = createAdmin();
         User member = createUserWithTicket();
         Team team = createTeamWithCaptain(captain);
 
@@ -588,7 +588,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void testAddMemberAsAdminDuplicate() {
-        User admin = createUser(true);
+        User admin = createAdmin();
         User captain = createUserWithTicket();
         User member = createUserWithTicket();
         Team team = createTeamWithCaptain(captain);
@@ -670,7 +670,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
     @Test
     public void testViewTeamInvitesAsAdmin() {
         User captain = createUserWithTicket();
-        User admin = createUser(true);
+        User admin = createAdmin();
         User user = createUserWithTicket();
         Team team = createTeamWithCaptain(captain);
         teamInviteTokenRepository.save(new TeamInviteToken(user, team));
@@ -789,7 +789,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void testRemoveMemberAsAdmin() {
-        User admin = createUser(true);
+        User admin = createAdmin();
         User captain = createUserWithTicket();
         User member = createUserWithTicket();
         Team team = createTeamWithCaptain(captain);
@@ -917,7 +917,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void testDeleteTeamAsAdmin() {
-        User admin = createUser(true);
+        User admin = createAdmin();
         User captain = createUserWithTicket();
         User member = createUserWithTicket();
         Team team = createTeamWithCaptain(captain);

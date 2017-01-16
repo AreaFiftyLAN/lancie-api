@@ -32,7 +32,7 @@ public class CommitteeRestController {
     @PostMapping
     public ResponseEntity<?> addCommitteeMember(@RequestBody CommitteeMember committeeMember) {
         committeeService.addCommitteeMember(committeeMember);
-        return ResponseEntityBuilder.createResponseEntity(HttpStatus.CREATED, "Committee member added successfully.");
+        return ResponseEntityBuilder.createResponseEntity(HttpStatus.CREATED, "Committee member added successfully.", committeeMember);
     }
 
     /**
