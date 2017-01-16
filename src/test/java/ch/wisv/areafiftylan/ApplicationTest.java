@@ -73,6 +73,10 @@ public class ApplicationTest {
             return "http://paymentURL.com";
 
         });
+
+        Mockito.when(mockMolliePaymentService.getPaymentUrl(Mockito.anyString()))
+                .thenReturn("http://newpaymentURL.com");
+
         return mockMolliePaymentService;
     }
 

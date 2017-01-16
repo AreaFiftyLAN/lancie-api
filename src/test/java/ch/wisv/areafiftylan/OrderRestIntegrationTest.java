@@ -19,6 +19,7 @@ package ch.wisv.areafiftylan;
 
 import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.model.order.Order;
+import ch.wisv.areafiftylan.products.model.order.OrderStatus;
 import ch.wisv.areafiftylan.products.service.repository.OrderRepository;
 import ch.wisv.areafiftylan.products.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.users.model.User;
@@ -618,6 +619,42 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
         then().
             statusCode(HttpStatus.SC_OK).
             body("object", is(nullValue()));
+        //@formatter:on
+    }
+
+    @Test
+    public void testGetPaymentUrl() {
+        User user = createUser();
+        Order order = addOrderForUser(user);
+        order.setStatus(OrderStatus.PENDING);
+        orderRepository.save(order);
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+        when().
+            get(ORDER_ENDPOINT + order.getId() + "/url").
+        then().
+            statusCode(HttpStatus.SC_OK).
+            header("Location", containsString("http://newpaymentURL.com"));
+        //@formatter:on
+    }
+
+    @Test
+    public void testGetPaymentUrlOrderAssigned() {
+        User user = createUser();
+        Order order = addOrderForUser(user);
+        order.setStatus(OrderStatus.ASSIGNED);
+        orderRepository.save(order);
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+        when().
+            get(ORDER_ENDPOINT + order.getId() + "/url").
+        then().
+            statusCode(HttpStatus.SC_CONFLICT).
+            body("message", equalTo("Operation on Order " + order.getId() + " not permitted"));
         //@formatter:on
     }
 }

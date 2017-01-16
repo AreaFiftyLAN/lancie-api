@@ -37,6 +37,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -694,5 +695,33 @@ public class OrderServiceTest extends ServiceTest {
         verify(mailService, times(1)).sendOrderConfirmation(any(Order.class));
 
         reset(paymentService);
+    }
+
+    @Test
+    public void getPaymentURLPendingOrder() {
+        User user = persistUser();
+        Order order = new Order(user);
+        order.setReference("getPaymentURLPendingOrder");
+        order.setStatus(OrderStatus.PENDING);
+
+        order = testEntityManager.persist(order);
+
+        given(paymentService.getPaymentUrl(order.getReference())).willReturn("https://newpaymenturl.com");
+
+        String paymentUrl = orderService.getPaymentUrl(order.getId());
+
+        assertThat(paymentUrl).isEqualTo("https://newpaymenturl.com");
+    }
+
+    @Test
+    public void getPaymentURLAssignedOrder() {
+        thrown.expect(ImmutableOrderException.class);
+        User user = persistUser();
+        Order order = new Order(user);
+        order.setReference("getPaymentURLPendingOrder");
+
+        order = testEntityManager.persist(order);
+
+        orderService.getPaymentUrl(order.getId());
     }
 }

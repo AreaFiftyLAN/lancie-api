@@ -87,4 +87,6 @@ public interface OrderService {
      * @return A collection of TicketInformation objects
      */
     Collection<TicketInformationResponse> getAvailableTickets();
+
+    String getPaymentUrl(Long orderId);
 }
