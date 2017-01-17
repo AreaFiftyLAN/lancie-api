@@ -3,18 +3,14 @@ package ch.wisv.areafiftylan;
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.web.committee.model.CommitteeMember;
 import ch.wisv.areafiftylan.web.committee.service.CommitteeMemberRepository;
-import ch.wisv.areafiftylan.web.committee.service.CommitteeService;
 import org.apache.http.HttpStatus;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.hasItems;
+import static org.hamcrest.CoreMatchers.hasItem;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
 
 /**
@@ -23,21 +19,15 @@ import static org.hamcrest.collection.IsEmptyCollection.empty;
 public class WebIntegrationTest extends XAuthIntegrationTest {
 
     @Autowired
-    CommitteeMemberRepository committeeMemberRepository;
-    @Autowired
-    CommitteeService committeeService;
+    protected CommitteeMemberRepository committeeMemberRepository;
 
-    private CommitteeMember committeeMember1 = new CommitteeMember(1L, "Lotte Bryan", "Chairman", "group");
-    private CommitteeMember committeeMember2 = new CommitteeMember(2L, "Sterre Noorthoek", "Secretary", "male");
-    private CommitteeMember committeeMember3 = new CommitteeMember(3L, "Francis Behnen", "Treasurer", "money");
-    private CommitteeMember committeeMember4 = new CommitteeMember(4L, "Hilco van der Wilk", "Commissioner of Promo", "bullhorn");
-    private CommitteeMember committeeMember5 = new CommitteeMember(5L, "Lotte Millen van Osch", "Commissioner of Logistics", "truck");
-    private CommitteeMember committeeMember6 = new CommitteeMember(6L, "Matthijs Kok", "Commissioner of Systems", "cogs");
-    private CommitteeMember committeeMember7 = new CommitteeMember(7L, "Beer van der Drift", "Qualitate Qua", "heart");
-    private ArrayList<CommitteeMember> committeeMemberList = new ArrayList<>(Arrays.asList(
-            committeeMember1, committeeMember2, committeeMember3, committeeMember4,
-            committeeMember5, committeeMember6, committeeMember7));
+//    private CommitteeMember committeeMember1 = new CommitteeMember(1L, "Lotte Bryan", "Chairman", "group");
+//    private CommitteeMember committeeMember2 = new CommitteeMember(2L, "Sterre Noorthoek", "Secretary", "male");
 
+    private CommitteeMember createCommitteeMember() {
+        CommitteeMember committeeMember = new CommitteeMember(1L, "Lotte Bryan", "Chairman", "group");
+        return committeeMemberRepository.save(committeeMember);
+    }
 
     //region Committee
 
@@ -49,8 +39,8 @@ public class WebIntegrationTest extends XAuthIntegrationTest {
         given().
 			header(getXAuthTokenHeaderForUser(user)).
         when().
-            body(committeeMember1).
-            put("/web/committee/1").
+            body(createCommitteeMember()).
+            post("/web/committee").
         then().
             statusCode(HttpStatus.SC_FORBIDDEN).
             body("message", equalTo("Access denied"));
@@ -60,13 +50,14 @@ public class WebIntegrationTest extends XAuthIntegrationTest {
     @Test
     public void testAddCommitteeMemberAsAdmin() {
         User admin = createAdmin();
+        CommitteeMember committeeMember = createCommitteeMember();
 
         //@formatter:off
         given().
 			header(getXAuthTokenHeaderForUser(admin)).
         when().
-            body(committeeMember1).
-            put("/web/committee/1").
+            body(committeeMember).
+            post("/web/committee").
         then().
             statusCode(HttpStatus.SC_CREATED).
             body("message", equalTo("Committee member added successfully.")).
@@ -92,7 +83,7 @@ public class WebIntegrationTest extends XAuthIntegrationTest {
     @Test
     public void testGetCommitteeAsUserSingle() {
         User user = createUser();
-        committeeService.addCommitteeMember(committeeMember1);
+        createCommitteeMember();
 
         //@formatter:off
         given().
@@ -101,15 +92,16 @@ public class WebIntegrationTest extends XAuthIntegrationTest {
             get("/web/committee").
         then().
             statusCode(HttpStatus.SC_OK).
-            body("name", containsString("Lotte Bryan"));
+            body("name", hasItem("Lotte Bryan")).
+            body("$", hasSize(1));
         //@formatter:on
     }
 
     @Test
     public void testGetCommitteeAsUserMultiple() {
         User user = createUser();
-        committeeService.addCommitteeMember(committeeMember1);
-        committeeService.addCommitteeMember(committeeMember2);
+        CommitteeMember committeeMember1 = createCommitteeMember();
+        CommitteeMember committeeMember2 = createCommitteeMember();
 
         //@formatter:off
         given().
@@ -118,7 +110,8 @@ public class WebIntegrationTest extends XAuthIntegrationTest {
             get("/web/committee").
         then().
             statusCode(HttpStatus.SC_OK).
-            body("name", hasItems("Lotte Bryan", "Sterre Noorthoek"));
+            body("name", hasItem("Lotte Bryan")).
+            body("$", hasSize(2));
         //@formatter:on
     }
 
@@ -140,13 +133,36 @@ public class WebIntegrationTest extends XAuthIntegrationTest {
     @Test
     public void testUpdateCommitteeMemberAsUser() {
         User user = createUser();
+        CommitteeMember committeeMember1 = createCommitteeMember();
 
+        //@formatter:off
+        given().
+			header(getXAuthTokenHeaderForUser(user)).
+        when().
+            body(committeeMember1).
+            put("/web/committee/" + committeeMember1.getId()).
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN).
+            body("message", equalTo("Access denied"));
+        //@formatter:on
     }
 
     @Test
     public void testUpdateCommitteeMemberAsAdmin() {
         User admin = createAdmin();
+        CommitteeMember committeeMember1 = createCommitteeMember();
 
+        //@formatter:off
+        given().
+			header(getXAuthTokenHeaderForUser(admin)).
+        when().
+            body(committeeMember1).
+            put("/web/committee").
+        then().
+            statusCode(HttpStatus.SC_CREATED).
+            body("message", equalTo("Committee member added successfully.")).
+            body("object.name", equalTo("Lotte Bryan"));
+        //@formatter:on
     }
 
     @Test
