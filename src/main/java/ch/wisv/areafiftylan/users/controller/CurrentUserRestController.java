@@ -185,4 +185,10 @@ public class CurrentUserRestController {
     public List<Seat> getCurrentUserSeat(@AuthenticationPrincipal User user) {
         return seatService.getSeatsByUsername(user.getUsername());
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin")
+    public ResponseEntity<?> adminCheck() {
+        return createResponseEntity(HttpStatus.OK, "You are an admin.");
+    }
 }

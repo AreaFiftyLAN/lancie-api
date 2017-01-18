@@ -754,6 +754,35 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         //@formatter:on
     }
 
+    @Test
+    public void testAdminCheckAsUser() {
+        User user = createUser();
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+        when().
+            get("/users/current/admin").
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
+    }
+
+    @Test
+    public void testAdminCheckAsAdmin() {
+        User admin = createUser(true);
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(admin)).
+        when().
+            get("/users/current/admin").
+        then().
+            statusCode(HttpStatus.SC_OK).
+            body("message", equalTo("You are an admin."));
+        //@formatter:on
+    }
+
 
     //TODO: Move to SchedulerTest
 /*    @Test
