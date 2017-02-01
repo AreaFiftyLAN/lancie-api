@@ -44,7 +44,6 @@ spring.data.jpa.repositories.enabled=true
 # Set to false in production to prevent spamming of console
 spring.jpa.show-sql=false
 spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
-spring.jpa.database=postgresql
 spring.jpa.generate-ddl=true
 
 # This setting defines the database creation/update behaviour. Change with caution.
