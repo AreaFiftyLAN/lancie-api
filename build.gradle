@@ -2,7 +2,7 @@ import org.springframework.boot.gradle.run.BootRunTask
 
 buildscript {
     ext {
-        springBootVersion = '1.4.3.RELEASE'
+        springBootVersion = '1.5.1.RELEASE'
     }
     repositories {
         mavenCentral()
@@ -57,7 +57,7 @@ dependencies {
 
     compile("org.projectlombok:lombok:1.16.12")
     compile("com.google.guava:guava:19.0")
-    compile("nl.stil4m:mollie-api:2.4.0")
+    compile("nl.stil4m:mollie-api:2.6.0")
     compile("org.apache.logging.log4j:log4j-core:2.6.2")
     compile("org.apache.logging.log4j:log4j-api:2.6.2")
 
@@ -65,7 +65,7 @@ dependencies {
     runtime("org.postgresql:postgresql")
 
     testCompile("org.springframework.boot:spring-boot-starter-test")
-    testCompile("io.rest-assured:rest-assured:3.0.1")
+    testCompile("io.rest-assured:rest-assured:3.0.2")
 }
 
 eclipse {
