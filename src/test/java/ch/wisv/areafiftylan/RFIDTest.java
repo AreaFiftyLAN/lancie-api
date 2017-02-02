@@ -80,7 +80,7 @@ public class RFIDTest extends XAuthIntegrationTest {
 
     @Test
     public void testGetRFIDLinksNoneAsAdmin() {
-        User user = createUser(true);
+        User user = createAdmin();
 
         //@formatter:off
         given().
@@ -95,7 +95,7 @@ public class RFIDTest extends XAuthIntegrationTest {
 
     @Test
     public void testGetRFIDLinksSingleAsAdmin() {
-        User admin = createUser(true);
+        User admin = createAdmin();
         Ticket ticket = createTicketForUser(admin);
         RFIDLink rfidLink = createRfidLink(ticket);
 
@@ -113,7 +113,7 @@ public class RFIDTest extends XAuthIntegrationTest {
 
     @Test
     public void testGetRFIDLinksMultipleAsAdmin() {
-        User admin = createUser(true);
+        User admin = createAdmin();
         User user = createUser();
 
         Ticket ticket1 = createTicketForUser(admin);
@@ -136,7 +136,7 @@ public class RFIDTest extends XAuthIntegrationTest {
 
     @Test
     public void testGetTicketIdByRFIDAsAdmin() {
-        User user = createUser(true);
+        User user = createAdmin();
         Ticket ticket = createTicketForUser(user);
         RFIDLink link = createRfidLink(ticket);
 
@@ -153,7 +153,7 @@ public class RFIDTest extends XAuthIntegrationTest {
 
     @Test
     public void testGetTicketIdInvalidRFIDAsAdmin() {
-        User user = createUser(true);
+        User user = createAdmin();
 
         //@formatter:off
         given().
@@ -167,7 +167,7 @@ public class RFIDTest extends XAuthIntegrationTest {
 
     @Test
     public void testGetTicketIdUnusedRFIDAsAdmin() {
-        User user = createUser(true);
+        User user = createAdmin();
         Ticket ticket = createTicketForUser(user);
         RFIDLink link = createRfidLink(ticket);
         String unused = String.valueOf(Long.valueOf(link.getRFID()) + 1);
@@ -184,7 +184,7 @@ public class RFIDTest extends XAuthIntegrationTest {
 
     @Test
     public void testAddRFIDLinkAsAdmin() {
-        User user = createUser(true);
+        User user = createAdmin();
         Ticket ticket = createTicketForUser(user);
         HashMap<String, String> rfidLinkDTO = makeRFIDLinkDTO(ticket);
 
@@ -206,7 +206,7 @@ public class RFIDTest extends XAuthIntegrationTest {
 
     @Test
     public void testAddRFIDLinkInvalidRFIDAsAdmin() {
-        User user = createUser(true);
+        User user = createAdmin();
         Ticket ticket = createTicketForUser(user);
         String invalid = "1234";
 
@@ -229,7 +229,7 @@ public class RFIDTest extends XAuthIntegrationTest {
 
     @Test
     public void testAddRFIDLinkRFIDTakenAsAdmin() {
-        User admin = createUser(true);
+        User admin = createAdmin();
         User user = createUser();
         Ticket ticket1 = createTicketForUser(admin);
         Ticket ticket2 = createTicketForUser(user);
@@ -255,7 +255,7 @@ public class RFIDTest extends XAuthIntegrationTest {
 
     @Test
     public void testAddRFIDLinkTicketTakenAsAdmin() {
-        User user = createUser(true);
+        User user = createAdmin();
         Ticket ticket = createTicketForUser(user);
         createRfidLink(ticket);
         HashMap<String, String> rfidLinkDTO = makeRFIDLinkDTO(ticket);
@@ -276,7 +276,7 @@ public class RFIDTest extends XAuthIntegrationTest {
 
     @Test
     public void testAddRFIDLinkTicketInvalidAsAdmin() {
-        User admin = createUser(true);
+        User admin = createAdmin();
         Ticket ticket = createTicketForUser(admin);
 
         ticket.setValid(false);
@@ -296,7 +296,7 @@ public class RFIDTest extends XAuthIntegrationTest {
 
     @Test
     public void testAddRFIDLinkTicketDoesntExistAsAdmin() {
-        User user = createUser(true);
+        User user = createAdmin();
         Ticket ticket = createTicketForUser(user);
 
         HashMap<String, String> rfidLinkDTO = makeRFIDLinkDTO(ticket);
@@ -318,7 +318,7 @@ public class RFIDTest extends XAuthIntegrationTest {
 
     @Test
     public void testRemoveRFIDLinkByRFIDAsAdmin() {
-        User user = createUser(true);
+        User user = createAdmin();
         Ticket ticket = createTicketForUser(user);
         RFIDLink link = createRfidLink(ticket);
 
@@ -337,7 +337,7 @@ public class RFIDTest extends XAuthIntegrationTest {
 
     @Test
     public void testRemoveRFIDLinkByTicketIdAsAdmin() {
-        User user = createUser(true);
+        User user = createAdmin();
         Ticket ticket = createTicketForUser(user);
         RFIDLink rfidLink = createRfidLink(ticket);
 
@@ -356,7 +356,7 @@ public class RFIDTest extends XAuthIntegrationTest {
 
     @Test
     public void testRemoveRFIDLinkLinkNotFoundAsAdmin() {
-        User user = createUser(true);
+        User user = createAdmin();
         Ticket ticket = createTicketForUser(user);
         RFIDLink link = createRfidLink(ticket);
         String unused = String.valueOf(Long.valueOf(link.getRFID()) + 1);
@@ -375,7 +375,7 @@ public class RFIDTest extends XAuthIntegrationTest {
 
     @Test
     public void testRemoveRFIDLinkInvalidRFIDAsAdmin() {
-        User user = createUser(true);
+        User user = createAdmin();
 
         //@formatter:off
         given().
