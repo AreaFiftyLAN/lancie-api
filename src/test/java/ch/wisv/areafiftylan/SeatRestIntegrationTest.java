@@ -382,7 +382,8 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
     public void reserveSeatAsOtherUser() {
         User user1 = createUser();
         Ticket ticket = createTicketForUser(user1);
-        User user2 = createUserWithTicket();
+        User user2 = createUser();
+        createTicketForUser(user2);
 
         //@formatter:off
         given().
