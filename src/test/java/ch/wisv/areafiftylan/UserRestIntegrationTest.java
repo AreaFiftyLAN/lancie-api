@@ -108,7 +108,7 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
     @Test
     public void testGetAllUsersAsAdmin() {
         User user = createUser();
-        User admin = createUser(true);
+        User admin = createAdmin();
 
         //@formatter:off
         given().
@@ -152,7 +152,7 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void testGetCurrentUserAsAdmin() {
-        User admin = createUser(true);
+        User admin = createAdmin();
 
         //@formatter:off
         given().
@@ -193,7 +193,7 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
     public void testGetOtherUserAsAdmin() {
         User user = createUser();
         long userId = user.getId();
-        User admin = createUser(true);
+        User admin = createAdmin();
 
         //@formatter:off
         given().
@@ -445,7 +445,7 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         user.resetProfile();
         user = userRepository.save(user);
 
-        User admin = createUser(true);
+        User admin = createAdmin();
 
         Map<String, String> profileDTO = getProfileDTO();
         profileDTO.put("displayName", "TestdisplayName" + user.getId());
@@ -585,7 +585,7 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
     @Test
     public void deleteUserAsAdmin() {
         User user = createUser();
-        User admin = createUser(true);
+        User admin = createAdmin();
 
         //@formatter:off
         given().
@@ -643,7 +643,7 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void testAlcoholCheckAsAdminUnderage() {
-        User admin = createUser(true);
+        User admin = createAdmin();
         User user = createUser(17, false);
 
         //@formatter:off
@@ -659,7 +659,7 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void testAlcoholCheckAsAdminOverage() {
-        User admin = createUser(true);
+        User admin = createAdmin();
         User user = createUser(19, false);
 
         //@formatter:off

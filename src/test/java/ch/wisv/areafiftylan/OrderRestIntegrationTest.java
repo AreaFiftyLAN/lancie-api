@@ -98,7 +98,7 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
     @Test
     public void testGetAllOrdersAsAdmin() {
         insertAnonOrder();
-        User admin = createUser(true);
+        User admin = createAdmin();
 
         //@formatter:off
         given().
@@ -257,7 +257,7 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
     @Test
     public void testAddTicketToAssignedOrderAsAdmin() {
         User user = createUser();
-        User admin = createUser(true);
+        User admin = createAdmin();
         Order order = addOrderForUser(user);
 
         Map<String, Object> orderDTO = new HashMap<>();
@@ -326,7 +326,7 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
     @Test
     public void testGetAnonOrderAsAdmin() {
         Order order = insertAnonOrder();
-        User user = createUser(true);
+        User user = createAdmin();
 
         //@formatter:off
         given().
@@ -399,7 +399,7 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
     @Test
     public void testGetAssignedOrderAsAdmin() {
         User user = createUser();
-        User admin = createUser(true);
+        User admin = createAdmin();
         Order order = addOrderForUser(user);
 
         //@formatter:off
@@ -480,7 +480,7 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void testAssignAssignedOrderAsAdmin() {
-        User admin = createUser(true);
+        User admin = createAdmin();
         User user = createUser();
         Order order = addOrderForUser(user);
 
@@ -545,7 +545,7 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
     @Test
     public void testCheckoutAssignedOrderAsAdmin() {
         User user = createUser();
-        User admin = createUser(true);
+        User admin = createAdmin();
         Order order = addOrderForUser(user);
 
         //@formatter:off
@@ -608,7 +608,7 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
     @Test
     public void testApproveOrderAsAdmin() {
         User user = createUser();
-        User admin = createUser(true);
+        User admin = createAdmin();
         Order order = addOrderForUser(user);
 
         //@formatter:off

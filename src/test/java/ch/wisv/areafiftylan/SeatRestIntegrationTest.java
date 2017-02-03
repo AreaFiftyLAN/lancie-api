@@ -119,7 +119,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void getAllSeatsAdminViewAsAdmin() {
-        User admin = createUser(true);
+        User admin = createAdmin();
         Ticket ticket = createTicketForUser(admin);
         setTicketOnA1(ticket);
 
@@ -179,7 +179,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void getSeatGroupAdminViewAsAdmin() {
-        User admin = createUser(true);
+        User admin = createAdmin();
         Ticket ticket = createTicketForUser(admin);
         setTicketOnA1(ticket);
 
@@ -327,7 +327,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void addSeatGroupAsAdmin() {
-        User admin = createUser(true);
+        User admin = createAdmin();
         Map<String, String> seatGroupDTO = new HashMap<>();
         seatGroupDTO.put("seatGroupName", "testGroup");
         seatGroupDTO.put("numberOfSeats", "5");
@@ -382,7 +382,8 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
     public void reserveSeatAsOtherUser() {
         User user1 = createUser();
         Ticket ticket = createTicketForUser(user1);
-        User user2 = createUserWithTicket();
+        User user2 = createUser();
+        createTicketForUser(user2);
 
         //@formatter:off
         given().
@@ -417,7 +418,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
     public void reserveSeatForUserAsAdmin() {
         User user = createUser();
         Ticket userTicket = createTicketForUser(user);
-        User admin = createUser(true);
+        User admin = createAdmin();
 
         //@formatter:off
         given().
@@ -494,7 +495,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         User user = createUser();
         Ticket ticket = createTicketForUser(user);
         setTicketOnA1(ticket);
-        User admin = createUser(true);
+        User admin = createAdmin();
 
         //@formatter:off
         given().
@@ -565,7 +566,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
 
         //@formatter:off
         given().
-            header(getXAuthTokenHeaderForUser(createUser(true))).
+            header(getXAuthTokenHeaderForUser(createAdmin())).
         when().
             delete(SEAT_ENDPOINT + "/A/1").
         then().

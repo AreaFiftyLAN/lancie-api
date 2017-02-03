@@ -87,18 +87,12 @@ public abstract class XAuthIntegrationTest {
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
     }
 
-    protected User createUserWithTicket() {
-        User user = createUser();
-        createTicketForUser(user);
-        return user;
-    }
-
     protected User createUser() {
         return createUser(19, false);
     }
 
-    protected User createUser(boolean admin) {
-        return createUser(19, admin);
+    protected User createAdmin() {
+        return createUser(19, true);
     }
 
     protected User createUser(int age, boolean admin) {
