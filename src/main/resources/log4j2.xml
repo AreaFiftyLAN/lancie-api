@@ -18,7 +18,7 @@
 
 <Configuration status="WARN">
     <Properties>
-        <Property name="PATTERN">%clr{%d{yyyy-MM-dd HH:mm:ss.SSS}}{faint} %clr{%5p} %clr{[%15.15t]}{faint} %clr{%-40.40c{1.}}{yellow} %clr{:}{faint} %m%n%wEx</Property>
+        <Property name="PATTERN">%clr{%d{DEFAULT}}{faint} %clr{%5p} %clr{[%15.15t]}{faint} %clr{%-40.40c{1.}}{yellow} %clr{:}{faint} %m%n%wEx</Property>
     </Properties>
     <CustomLevels>
         <CustomLevel name="A5L" intLevel="350" />

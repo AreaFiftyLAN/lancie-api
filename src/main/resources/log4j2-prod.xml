@@ -18,7 +18,7 @@
 
 <Configuration status="WARN">
     <Properties>
-        <Property name="PATTERN">%d{HH:mm:ss.SSS} [%t] %-5level %class.%method - %msg%n</Property>
+        <Property name="PATTERN">%d{DEFAULT} [%t] %-5level %class.%method - %msg%n</Property>
     </Properties>
     <CustomLevels>
         <CustomLevel name="A5L" intLevel="350" />
