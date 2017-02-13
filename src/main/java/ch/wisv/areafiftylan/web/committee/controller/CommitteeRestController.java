@@ -54,7 +54,7 @@ public class CommitteeRestController {
      * @return The status of the update.
      */
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/{memberID}")
+    @PutMapping("/{id}")
     public ResponseEntity<?> updateCommitteeMember(@PathVariable Long id, @RequestBody CommitteeMember committeeMember) {
         committeeMember = committeeService.updateCommitteeMember(id, committeeMember);
         return ResponseEntityBuilder.createResponseEntity(HttpStatus.ACCEPTED, "Committee member updated successfully.", committeeMember);
@@ -67,7 +67,7 @@ public class CommitteeRestController {
      * @return The status of the deletion.
      */
     @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/{memberID}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteCommitteeMember(@PathVariable Long id) {
         committeeService.deleteCommitteeMember(id);
         return ResponseEntityBuilder.createResponseEntity(HttpStatus.OK, "Committee member deleted successfully.");
