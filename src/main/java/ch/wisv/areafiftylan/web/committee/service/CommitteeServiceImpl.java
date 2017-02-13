@@ -30,7 +30,7 @@ public class CommitteeServiceImpl implements CommitteeService {
     @Override
     public CommitteeMember updateCommitteeMember(Long id, CommitteeMember committeeMember) {
         CommitteeMember oldCommitteeMember = committeeMemberRepository.getOne(id);
-        oldCommitteeMember.setOrder(committeeMember.getOrder());
+        oldCommitteeMember.setPositionNumber(committeeMember.getPositionNumber());
         oldCommitteeMember.setName(committeeMember.getName());
         oldCommitteeMember.setFunction(committeeMember.getFunction());
         oldCommitteeMember.setIcon(committeeMember.getIcon());

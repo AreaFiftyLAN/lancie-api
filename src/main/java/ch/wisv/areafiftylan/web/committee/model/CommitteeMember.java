@@ -38,7 +38,7 @@ public class CommitteeMember {
 
     @Getter
     @Setter
-    private Long order;
+    private Long positionNumber;
 
     @Getter
     @Setter
@@ -52,8 +52,8 @@ public class CommitteeMember {
     @Setter
     private String icon;
 
-    public CommitteeMember(Long order, String name, String function, String icon) {
-        this.order = order;
+    public CommitteeMember(Long positionNumber, String name, String function, String icon) {
+        this.positionNumber = positionNumber;
         this.name = name;
         this.function = function;
         this.icon = icon;
