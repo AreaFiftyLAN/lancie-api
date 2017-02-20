@@ -34,7 +34,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.CoreMatchers.any;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.core.IsEqual.equalTo;
 
@@ -59,6 +58,7 @@ public class TokenAuthenticationTest extends XAuthIntegrationTest {
 
         //@formatter:off
         Response response = given().
+                header("Origin", "rest-assured").
         when().
             body(userDTO).contentType(ContentType.JSON).
             post("/login");
@@ -71,7 +71,7 @@ public class TokenAuthenticationTest extends XAuthIntegrationTest {
         response.then().
                 statusCode(HttpStatus.SC_OK).
                 header("X-Auth-Token", containsString(authenticationToken.get().getToken())).
-                header("Access-Control-Allow-Origin", any(String.class));
+                header("Access-Control-Allow-Origin", "rest-assured");
         //@formatter:on
     }
 

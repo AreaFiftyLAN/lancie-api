@@ -43,7 +43,8 @@ public class JsonLoginFilter extends UsernamePasswordAuthenticationFilter {
     private AuthenticationManager authenticationManager;
     private JsonLoginAuthenticationSuccessHandler successHandler;
 
-    public JsonLoginFilter(AuthenticationManager authenticationManager, JsonLoginAuthenticationSuccessHandler successHandler) {
+    public JsonLoginFilter(AuthenticationManager authenticationManager,
+                           JsonLoginAuthenticationSuccessHandler successHandler) {
         super();
         this.authenticationManager = authenticationManager;
         this.successHandler = successHandler;
@@ -60,7 +61,6 @@ public class JsonLoginFilter extends UsernamePasswordAuthenticationFilter {
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
                                             Authentication authResult) throws IOException, ServletException {
         successHandler.onAuthenticationSuccess(request, response, authResult);
-        chain.doFilter(request, response);
     }
 
     private UserDTO getUserDTO(HttpServletRequest request) {
