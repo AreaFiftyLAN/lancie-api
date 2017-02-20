@@ -43,7 +43,8 @@ public class JsonLoginFilter extends UsernamePasswordAuthenticationFilter {
     private AuthenticationManager authenticationManager;
     private JsonLoginAuthenticationSuccessHandler successHandler;
 
-    public JsonLoginFilter(AuthenticationManager authenticationManager, JsonLoginAuthenticationSuccessHandler successHandler) {
+    public JsonLoginFilter(AuthenticationManager authenticationManager,
+                           JsonLoginAuthenticationSuccessHandler successHandler) {
         super();
         this.authenticationManager = authenticationManager;
         this.successHandler = successHandler;

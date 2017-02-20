@@ -58,6 +58,7 @@ public class TokenAuthenticationTest extends XAuthIntegrationTest {
 
         //@formatter:off
         Response response = given().
+                header("Origin", "rest-assured").
         when().
             body(userDTO).contentType(ContentType.JSON).
             post("/login");
@@ -67,8 +68,11 @@ public class TokenAuthenticationTest extends XAuthIntegrationTest {
 
         Assert.assertTrue(authenticationToken.isPresent());
 
-        response.then().statusCode(HttpStatus.SC_OK).header("X-Auth-Token", containsString(authenticationToken.get().getToken()));
-
+        response.then().
+                statusCode(HttpStatus.SC_OK).
+                header("X-Auth-Token", containsString(authenticationToken.get().getToken())).
+                header("Access-Control-Allow-Origin", "rest-assured");
+        //@formatter:on
     }
 
     @Test
