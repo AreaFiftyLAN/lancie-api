@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.CoreMatchers.any;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.core.IsEqual.equalTo;
 
@@ -67,8 +68,11 @@ public class TokenAuthenticationTest extends XAuthIntegrationTest {
 
         Assert.assertTrue(authenticationToken.isPresent());
 
-        response.then().statusCode(HttpStatus.SC_OK).header("X-Auth-Token", containsString(authenticationToken.get().getToken()));
-
+        response.then().
+                statusCode(HttpStatus.SC_OK).
+                header("X-Auth-Token", containsString(authenticationToken.get().getToken())).
+                header("Access-Control-Allow-Origin", any(String.class));
+        //@formatter:on
     }
 
     @Test
