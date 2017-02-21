@@ -58,8 +58,6 @@ dependencies {
     compile("org.projectlombok:lombok:1.16.12")
     compile("com.google.guava:guava:19.0")
     compile("nl.stil4m:mollie-api:2.6.0")
-    compile("org.apache.logging.log4j:log4j-core:2.6.2")
-    compile("org.apache.logging.log4j:log4j-api:2.6.2")
 
     runtime("org.hsqldb:hsqldb")
     runtime("org.postgresql:postgresql")
