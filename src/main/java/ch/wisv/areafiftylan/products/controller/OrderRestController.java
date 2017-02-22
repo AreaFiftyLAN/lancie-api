@@ -18,6 +18,7 @@
 package ch.wisv.areafiftylan.products.controller;
 
 import ch.wisv.areafiftylan.exception.ImmutableOrderException;
+import ch.wisv.areafiftylan.exception.OrderNotFoundException;
 import ch.wisv.areafiftylan.exception.TicketNotFoundException;
 import ch.wisv.areafiftylan.exception.TicketUnavailableException;
 import ch.wisv.areafiftylan.products.model.TicketDTO;
@@ -25,6 +26,8 @@ import ch.wisv.areafiftylan.products.model.order.Order;
 import ch.wisv.areafiftylan.products.service.OrderService;
 import ch.wisv.areafiftylan.utils.view.View;
 import com.fasterxml.jackson.annotation.JsonView;
+import lombok.extern.log4j.Log4j2;
+import org.apache.logging.log4j.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -42,6 +45,7 @@ import java.util.Collection;
 import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEntity;
 
 @RestController
+@Log4j2
 public class OrderRestController {
 
     private final OrderService orderService;
@@ -209,7 +213,12 @@ public class OrderRestController {
      */
     @RequestMapping(value = "/orders/status", method = RequestMethod.POST)
     public ResponseEntity<?> updateOrderStatus(@RequestParam(name = "id") String orderReference) {
-        orderService.updateOrderStatusByReference(orderReference);
+        log.log(Level.getLevel("A5L"), "Incoming paymentprovicer webhook for reference: {}", orderReference);
+        try {
+            orderService.updateOrderStatusByReference(orderReference);
+        } catch (OrderNotFoundException e) {
+            log.log(Level.getLevel("A5L"), "Paymentprovider webhook reference could not be found: {}", orderReference);
+        }
         return createResponseEntity(HttpStatus.OK, "Status is being updated");
     }
 

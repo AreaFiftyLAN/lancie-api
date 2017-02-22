@@ -42,8 +42,6 @@ public class MolliePaymentService implements PaymentService {
 
     private final OrderRepository orderRepository;
 
-    private final Client mollie;
-
     @Value("${a5l.molliekey:null}")
     String apiKey;
 
@@ -51,20 +49,19 @@ public class MolliePaymentService implements PaymentService {
     String returnUrl;
 
     @Autowired
-    public MolliePaymentService(OrderRepository orderRepository, @Value("${a5l.molliekey:null}") String apiKey) {
+    public MolliePaymentService(OrderRepository orderRepository) {
         this.orderRepository = orderRepository;
-        this.mollie = new ClientBuilder().withApiKey(apiKey).build();
     }
 
     @Override
     public String registerOrder(Order order) {
+        Client mollie =  new ClientBuilder().withApiKey(apiKey).build();
         Map<String, Object> metadata = new HashMap<>();
         metadata.put("A5LId", order.getId());
 
         Optional<String> method = Optional.of("ideal");
         CreatePayment payment = new CreatePayment(method, (double) order.getAmount(), "Area FiftyLAN Ticket",
                 returnUrl + "?order=" + order.getId(), Optional.empty(), metadata);
-
 
         //First try is for IOExceptions coming from the Mollie Client.
         try {
@@ -92,11 +89,13 @@ public class MolliePaymentService implements PaymentService {
         order.setStatus(OrderStatus.PENDING);
 
         // Save the changes to the order
-        orderRepository.save(order);
+        orderRepository.saveAndFlush(order);
     }
 
     @Override
     public Order updateStatus(String orderReference) {
+        Client mollie =  new ClientBuilder().withApiKey(apiKey).build();
+
         Order order = orderRepository.findByReference(orderReference)
                 .orElseThrow(() -> new OrderNotFoundException("Order with reference " + orderReference + " not found"));
 
@@ -145,6 +144,8 @@ public class MolliePaymentService implements PaymentService {
 
     @Override
     public String getPaymentUrl(String orderReference) {
+        Client mollie =  new ClientBuilder().withApiKey(apiKey).build();
+
         try {
             ResponseOrError<Payment> paymentResponseOrError = mollie.payments().get(orderReference);
 
