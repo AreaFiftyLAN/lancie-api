@@ -128,7 +128,7 @@ public class MailServiceImpl implements MailService {
 
     @Override
     public void sendTemplateMailToUser(User user, MailDTO mailDTO) {
-        sendMail(user.getUsername(), user.getProfile().getFirstName(), mailDTO.getSubject(), mailDTO.getMessage());
+        sendMail(user.getUsername(), user.getProfile().getFirstName() + " " + user.getProfile().getLastName(), mailDTO.getSubject(), mailDTO.getMessage());
     }
 
     @Override
@@ -137,7 +137,7 @@ public class MailServiceImpl implements MailService {
                 "Please click on the following link to complete your registration: <a href=\"" + url + "\">" + url +
                         "</a><br /><br />If the link does not work, please copy the link and" +
                         " paste it into your browser.";
-        sendMail(user.getUsername(), user.getUsername(), "Confirm your registration", message);
+        sendMail(user.getUsername(), user.getProfile().getFirstName() + " " + user.getProfile().getLastName(), "Confirm your registration", message);
     }
 
     @Override
@@ -156,7 +156,7 @@ public class MailServiceImpl implements MailService {
     public void sendPasswordResetMail(User user, String url) {
         String message = "Please click on the following link to reset your password: <a href=\"" + url + "\">" + url +
                 "</a><br /><br />If the link does not work, please copy the link and" + " paste it into your browser.";
-        sendMail(user.getUsername(), user.getUsername(), "Password reset requested", message);
+        sendMail(user.getUsername(), user.getProfile().getFirstName() + " " + user.getProfile().getLastName(), "Password reset requested", message);
     }
 
     @Override
@@ -167,7 +167,7 @@ public class MailServiceImpl implements MailService {
                         " " + teamCaptain.getProfile().getLastName() +
                         "! Please log in to My Area to accept the invitation.";
 
-        sendMail(user.getUsername(), user.getUsername(), "You've been invited to \"Team " + teamName + "\"", message);
+        sendMail(user.getUsername(), user.getProfile().getFirstName() + " " + user.getProfile().getLastName(), "You've been invited to \"Team " + teamName + "\"", message);
     }
 
     @Override
@@ -176,7 +176,7 @@ public class MailServiceImpl implements MailService {
         String message = "Unfortunately we had to reallocate your reserved seat.\n" +
                          "Please contact us if you have any questions.\n" +
                          "You can reserve a new seat through <a href=\"https://areafiftylan.nl/my-area\">My Area</a>.";
-        sendMail(user.getUsername(), user.getUsername(), subject, message);
+        sendMail(user.getUsername(), user.getProfile().getFirstName() + " " + user.getProfile().getLastName(), subject, message);
     }
 
     @Override
