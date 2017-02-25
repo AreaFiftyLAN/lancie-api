@@ -26,6 +26,8 @@ public interface RFIDService {
 
     Long getTicketIdByRFID(String rfid);
 
+    Long getUserIdByRFID(String rfid);
+
     boolean isRFIDUsed(String rfid);
 
     boolean isTicketLinked(Long ticketId);

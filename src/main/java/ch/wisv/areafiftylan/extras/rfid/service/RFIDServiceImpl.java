@@ -50,6 +50,11 @@ public class RFIDServiceImpl implements RFIDService {
     }
 
     @Override
+    public Long getUserIdByRFID(String rfid) {
+        return getLinkByRFID(rfid).getTicket().getOwner().getId();
+    }
+
+    @Override
     public boolean isRFIDUsed(String rfid) {
         return rfidLinkRepository.findByRfid(rfid).isPresent();
     }

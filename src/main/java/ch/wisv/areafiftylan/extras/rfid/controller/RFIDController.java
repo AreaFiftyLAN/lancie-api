@@ -45,29 +45,34 @@ public class RFIDController {
         this.rfidService = rfidService;
     }
 
-    @RequestMapping(method = RequestMethod.GET)
+    @GetMapping
     public Collection<RFIDLink> getRFIDLinks() {
         return rfidService.getAllRFIDLinks();
     }
 
-    @RequestMapping(value = "/{rfid}/ticketId", method = RequestMethod.GET)
+    @GetMapping("/{rfid}/ticketId")
     public Long getTicketId(@PathVariable String rfid) {
         return rfidService.getTicketIdByRFID(rfid);
     }
 
-    @RequestMapping(method = RequestMethod.POST)
+    @GetMapping("/{rfid}/userId")
+    public Long getUserId(@PathVariable String rfid) {
+        return rfidService.getUserIdByRFID(rfid);
+    }
+
+    @PostMapping
     public ResponseEntity<?> addRFIDLink(@RequestBody RFIDLinkDTO rfidLinkDTO) {
         rfidService.addRFIDLink(rfidLinkDTO.getRfid(), rfidLinkDTO.getTicketId());
 
         return createResponseEntity(HttpStatus.OK, "Succesfully linked RFID with Ticket");
     }
 
-    @RequestMapping(value = "/{rfid}", method = RequestMethod.DELETE)
+    @DeleteMapping("/{rfid}")
     public RFIDLink removeRFIDLinkByRFID(@PathVariable String rfid) {
         return rfidService.removeRFIDLink(rfid);
     }
 
-    @RequestMapping(value = "/tickets/{ticketId}", method = RequestMethod.DELETE)
+    @DeleteMapping("/tickets/{ticketId}")
     public RFIDLink deleteRFIDByTicketId(@PathVariable Long ticketId) {
         return rfidService.removeRFIDLink(ticketId);
     }
