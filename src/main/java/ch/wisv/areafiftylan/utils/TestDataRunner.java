@@ -17,6 +17,10 @@
 
 package ch.wisv.areafiftylan.utils;
 
+import ch.wisv.areafiftylan.extras.consumption.model.Consumption;
+import ch.wisv.areafiftylan.extras.consumption.model.ConsumptionMapsRepository;
+import ch.wisv.areafiftylan.extras.consumption.model.PossibleConsumptionsRepository;
+import ch.wisv.areafiftylan.extras.consumption.service.ConsumptionService;
 import ch.wisv.areafiftylan.extras.rfid.model.RFIDLink;
 import ch.wisv.areafiftylan.extras.rfid.model.RFIDLinkRepository;
 import ch.wisv.areafiftylan.products.model.Ticket;
@@ -52,12 +56,16 @@ public class TestDataRunner implements CommandLineRunner {
     private final TicketOptionRepository ticketOptionRepository;
     private final TicketTypeRepository ticketTypeRepository;
     private final RFIDLinkRepository rfidLinkRepository;
+    private final PossibleConsumptionsRepository consumptionsRepository;
+    private final ConsumptionMapsRepository consumptionMapsRepository;
+    private final ConsumptionService consumptionService;
 
     @Autowired
     public TestDataRunner(UserRepository accountRepository, TicketRepository ticketRepository,
                           TeamRepository teamRepository, SeatService seatService,
                           TicketOptionRepository ticketOptionRepository, TicketTypeRepository ticketTypeRepository,
-                          RFIDLinkRepository rfidLinkRepository) {
+                          RFIDLinkRepository rfidLinkRepository, PossibleConsumptionsRepository consumptionsRepository,
+                          ConsumptionMapsRepository consumptionMapsRepository, ConsumptionService consumptionService) {
         this.accountRepository = accountRepository;
         this.ticketRepository = ticketRepository;
         this.seatService = seatService;
@@ -65,6 +73,9 @@ public class TestDataRunner implements CommandLineRunner {
         this.ticketOptionRepository = ticketOptionRepository;
         this.ticketTypeRepository = ticketTypeRepository;
         this.rfidLinkRepository = rfidLinkRepository;
+        this.consumptionsRepository = consumptionsRepository;
+        this.consumptionMapsRepository = consumptionMapsRepository;
+        this.consumptionService = consumptionService;
     }
 
     @Override
@@ -124,6 +135,15 @@ public class TestDataRunner implements CommandLineRunner {
         rfidLinkRepository.saveAndFlush(rfidLink2);
         RFIDLink rfidLink3 = new RFIDLink("0000000003", ticket3);
         rfidLinkRepository.saveAndFlush(rfidLink3);
+
+        Consumption consumption1 = new Consumption("Bier");
+        consumption1 = consumptionsRepository.saveAndFlush(consumption1);
+        Consumption consumption2 = new Consumption("Wijn");
+        consumption2 = consumptionsRepository.saveAndFlush(consumption2);
+
+        consumptionService.consume(ticket.getId(), consumption1.getId());
+        consumptionService.consume(ticket.getId(), consumption2.getId());
+        consumptionService.consume(ticket2.getId(), consumption1.getId());
 
         Team team = new Team("testTeam", testUser1);
         team.addMember(testUser2);
