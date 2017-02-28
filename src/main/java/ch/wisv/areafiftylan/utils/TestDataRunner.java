@@ -17,6 +17,8 @@
 
 package ch.wisv.areafiftylan.utils;
 
+import ch.wisv.areafiftylan.extras.rfid.model.RFIDLink;
+import ch.wisv.areafiftylan.extras.rfid.model.RFIDLinkRepository;
 import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.model.TicketOption;
 import ch.wisv.areafiftylan.products.model.TicketType;
@@ -49,17 +51,20 @@ public class TestDataRunner implements CommandLineRunner {
     private final TeamRepository teamRepository;
     private final TicketOptionRepository ticketOptionRepository;
     private final TicketTypeRepository ticketTypeRepository;
+    private final RFIDLinkRepository rfidLinkRepository;
 
     @Autowired
     public TestDataRunner(UserRepository accountRepository, TicketRepository ticketRepository,
                           TeamRepository teamRepository, SeatService seatService,
-                          TicketOptionRepository ticketOptionRepository, TicketTypeRepository ticketTypeRepository) {
+                          TicketOptionRepository ticketOptionRepository, TicketTypeRepository ticketTypeRepository,
+                          RFIDLinkRepository rfidLinkRepository) {
         this.accountRepository = accountRepository;
         this.ticketRepository = ticketRepository;
         this.seatService = seatService;
         this.teamRepository = teamRepository;
         this.ticketOptionRepository = ticketOptionRepository;
         this.ticketTypeRepository = ticketTypeRepository;
+        this.rfidLinkRepository = rfidLinkRepository;
     }
 
     @Override
@@ -69,7 +74,7 @@ public class TestDataRunner implements CommandLineRunner {
         User testUser1 = new User("user@mail.com", new BCryptPasswordEncoder().encode("password"));
         testUser1.addRole(Role.ROLE_ADMIN);
         testUser1.getProfile()
-                .setAllFields("Jan", "de Groot", "MonsterKiller9001", localDate, Gender.MALE, "Mekelweg 4", "2826CD",
+                .setAllFields("Jan", "de Groot", "MonsterKiller9001", LocalDate.of(1990, 2, 1), Gender.MALE, "Mekelweg 4", "2826CD",
                         "Delft", "0906-0666", null);
         User testUser2 = new User("bert@mail.com", new BCryptPasswordEncoder().encode("password"));
         testUser2.getProfile()
@@ -112,6 +117,11 @@ public class TestDataRunner implements CommandLineRunner {
         ticketRepository.save(ticket);
         ticketRepository.save(ticket2);
         ticketRepository.save(ticket3);
+
+        RFIDLink rfidLink1 = new RFIDLink("0000000001", ticket);
+        rfidLinkRepository.saveAndFlush(rfidLink1);
+        RFIDLink rfidLink2 = new RFIDLink("0000000002", ticket2);
+        rfidLinkRepository.saveAndFlush(rfidLink2);
 
         Team team = new Team("testTeam", testUser1);
         team.addMember(testUser2);
