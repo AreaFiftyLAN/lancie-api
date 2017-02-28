@@ -17,6 +17,12 @@
 
 package ch.wisv.areafiftylan.utils;
 
+import ch.wisv.areafiftylan.extras.consumption.model.Consumption;
+import ch.wisv.areafiftylan.extras.consumption.model.ConsumptionMapsRepository;
+import ch.wisv.areafiftylan.extras.consumption.model.PossibleConsumptionsRepository;
+import ch.wisv.areafiftylan.extras.consumption.service.ConsumptionService;
+import ch.wisv.areafiftylan.extras.rfid.model.RFIDLink;
+import ch.wisv.areafiftylan.extras.rfid.model.RFIDLinkRepository;
 import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.model.TicketOption;
 import ch.wisv.areafiftylan.products.model.TicketType;
@@ -49,17 +55,27 @@ public class TestDataRunner implements CommandLineRunner {
     private final TeamRepository teamRepository;
     private final TicketOptionRepository ticketOptionRepository;
     private final TicketTypeRepository ticketTypeRepository;
+    private final RFIDLinkRepository rfidLinkRepository;
+    private final PossibleConsumptionsRepository consumptionsRepository;
+    private final ConsumptionMapsRepository consumptionMapsRepository;
+    private final ConsumptionService consumptionService;
 
     @Autowired
     public TestDataRunner(UserRepository accountRepository, TicketRepository ticketRepository,
                           TeamRepository teamRepository, SeatService seatService,
-                          TicketOptionRepository ticketOptionRepository, TicketTypeRepository ticketTypeRepository) {
+                          TicketOptionRepository ticketOptionRepository, TicketTypeRepository ticketTypeRepository,
+                          RFIDLinkRepository rfidLinkRepository, PossibleConsumptionsRepository consumptionsRepository,
+                          ConsumptionMapsRepository consumptionMapsRepository, ConsumptionService consumptionService) {
         this.accountRepository = accountRepository;
         this.ticketRepository = ticketRepository;
         this.seatService = seatService;
         this.teamRepository = teamRepository;
         this.ticketOptionRepository = ticketOptionRepository;
         this.ticketTypeRepository = ticketTypeRepository;
+        this.rfidLinkRepository = rfidLinkRepository;
+        this.consumptionsRepository = consumptionsRepository;
+        this.consumptionMapsRepository = consumptionMapsRepository;
+        this.consumptionService = consumptionService;
     }
 
     @Override
@@ -69,7 +85,7 @@ public class TestDataRunner implements CommandLineRunner {
         User testUser1 = new User("user@mail.com", new BCryptPasswordEncoder().encode("password"));
         testUser1.addRole(Role.ROLE_ADMIN);
         testUser1.getProfile()
-                .setAllFields("Jan", "de Groot", "MonsterKiller9001", localDate, Gender.MALE, "Mekelweg 4", "2826CD",
+                .setAllFields("Jan", "de Groot", "MonsterKiller9001", LocalDate.of(1990, 2, 1), Gender.MALE, "Mekelweg 4", "2826CD",
                         "Delft", "0906-0666", null);
         User testUser2 = new User("bert@mail.com", new BCryptPasswordEncoder().encode("password"));
         testUser2.getProfile()
@@ -112,6 +128,24 @@ public class TestDataRunner implements CommandLineRunner {
         ticketRepository.save(ticket);
         ticketRepository.save(ticket2);
         ticketRepository.save(ticket3);
+
+        RFIDLink rfidLink1 = new RFIDLink("0000000001", ticket);
+        rfidLinkRepository.saveAndFlush(rfidLink1);
+        RFIDLink rfidLink2 = new RFIDLink("0000000002", ticket2);
+        rfidLinkRepository.saveAndFlush(rfidLink2);
+        RFIDLink rfidLink3 = new RFIDLink("0000000003", ticket3);
+        rfidLinkRepository.saveAndFlush(rfidLink3);
+        RFIDLink rfidLink4 = new RFIDLink("0000000004", null);
+        rfidLinkRepository.saveAndFlush(rfidLink4);
+
+        Consumption consumption1 = new Consumption("Bier");
+        consumption1 = consumptionsRepository.saveAndFlush(consumption1);
+        Consumption consumption2 = new Consumption("Wijn");
+        consumption2 = consumptionsRepository.saveAndFlush(consumption2);
+
+        consumptionService.consume(ticket.getId(), consumption1.getId());
+        consumptionService.consume(ticket.getId(), consumption2.getId());
+        consumptionService.consume(ticket2.getId(), consumption1.getId());
 
         Team team = new Team("testTeam", testUser1);
         team.addMember(testUser2);
