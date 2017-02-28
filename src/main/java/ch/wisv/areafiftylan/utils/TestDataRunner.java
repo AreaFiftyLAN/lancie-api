@@ -122,6 +122,8 @@ public class TestDataRunner implements CommandLineRunner {
         rfidLinkRepository.saveAndFlush(rfidLink1);
         RFIDLink rfidLink2 = new RFIDLink("0000000002", ticket2);
         rfidLinkRepository.saveAndFlush(rfidLink2);
+        RFIDLink rfidLink3 = new RFIDLink("0000000003", ticket3);
+        rfidLinkRepository.saveAndFlush(rfidLink3);
 
         Team team = new Team("testTeam", testUser1);
         team.addMember(testUser2);
