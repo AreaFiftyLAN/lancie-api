@@ -37,7 +37,7 @@ import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
 import static org.hamcrest.Matchers.*;
 
-public class RFIDTest extends XAuthIntegrationTest {
+public class RFIDIntegrationTest extends XAuthIntegrationTest {
     private final String RFID_ENDPOINT = "/rfid";
     private final String RFID_TICKET_ENDPOINT = RFID_ENDPOINT + "/tickets";
 
@@ -179,6 +179,41 @@ public class RFIDTest extends XAuthIntegrationTest {
             .get(RFID_ENDPOINT + "/" + unused + "/ticketId").
         then()
             .statusCode(HttpStatus.SC_NOT_FOUND);
+        //@formatter:on
+    }
+
+    @Test
+    public void testGetUserByRFID(){
+        User user = createAdmin();
+        Ticket ticket = createTicketForUser(user);
+        RFIDLink link = createRfidLink(ticket);
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+        when()
+            .get(RFID_ENDPOINT + "/" + link.getRFID() + "/user").
+        then()
+            .statusCode(HttpStatus.SC_OK)
+            .body("username", equalTo(user.getUsername()))
+            .body("profile.displayName", equalTo(user.getProfile().getDisplayName()))
+            .body("id", equalTo(user.getId().intValue()));
+        //@formatter:on
+    }
+
+    @Test
+    public void testGetUserByInvalidRFID(){
+        User user = createAdmin();
+        Ticket ticket = createTicketForUser(user);
+        RFIDLink link = createRfidLink(ticket);
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+        when()
+            .get(RFID_ENDPOINT + "/" + "123" + "/user").
+        then()
+            .statusCode(HttpStatus.SC_BAD_REQUEST);
         //@formatter:on
     }
 

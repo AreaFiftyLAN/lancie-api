@@ -23,6 +23,7 @@ import ch.wisv.areafiftylan.exception.RFIDTakenException;
 import ch.wisv.areafiftylan.extras.rfid.model.RFIDLink;
 import ch.wisv.areafiftylan.extras.rfid.model.RFIDLinkDTO;
 import ch.wisv.areafiftylan.extras.rfid.service.RFIDService;
+import ch.wisv.areafiftylan.users.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -55,9 +56,9 @@ public class RFIDController {
         return rfidService.getTicketIdByRFID(rfid);
     }
 
-    @GetMapping("/{rfid}/userId")
-    public Long getUserId(@PathVariable String rfid) {
-        return rfidService.getUserIdByRFID(rfid);
+    @GetMapping("/{rfid}/user")
+    public User getUserId(@PathVariable String rfid) {
+        return rfidService.getUserByRFID(rfid);
     }
 
     @PostMapping

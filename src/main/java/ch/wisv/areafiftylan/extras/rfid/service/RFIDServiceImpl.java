@@ -22,6 +22,7 @@ import ch.wisv.areafiftylan.extras.rfid.model.RFIDLink;
 import ch.wisv.areafiftylan.extras.rfid.model.RFIDLinkRepository;
 import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.service.TicketService;
+import ch.wisv.areafiftylan.users.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -50,8 +51,8 @@ public class RFIDServiceImpl implements RFIDService {
     }
 
     @Override
-    public Long getUserIdByRFID(String rfid) {
-        return getLinkByRFID(rfid).getTicket().getOwner().getId();
+    public User getUserByRFID(String rfid) {
+        return getLinkByRFID(rfid).getTicket().getOwner();
     }
 
     @Override
