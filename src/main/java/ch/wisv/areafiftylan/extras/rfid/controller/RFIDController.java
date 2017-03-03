@@ -23,6 +23,7 @@ import ch.wisv.areafiftylan.exception.RFIDTakenException;
 import ch.wisv.areafiftylan.extras.rfid.model.RFIDLink;
 import ch.wisv.areafiftylan.extras.rfid.model.RFIDLinkDTO;
 import ch.wisv.areafiftylan.extras.rfid.service.RFIDService;
+import ch.wisv.areafiftylan.users.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,29 +46,34 @@ public class RFIDController {
         this.rfidService = rfidService;
     }
 
-    @RequestMapping(method = RequestMethod.GET)
+    @GetMapping
     public Collection<RFIDLink> getRFIDLinks() {
         return rfidService.getAllRFIDLinks();
     }
 
-    @RequestMapping(value = "/{rfid}/ticketId", method = RequestMethod.GET)
+    @GetMapping("/{rfid}/ticketId")
     public Long getTicketId(@PathVariable String rfid) {
         return rfidService.getTicketIdByRFID(rfid);
     }
 
-    @RequestMapping(method = RequestMethod.POST)
+    @GetMapping("/{rfid}/user")
+    public User getUserId(@PathVariable String rfid) {
+        return rfidService.getUserByRFID(rfid);
+    }
+
+    @PostMapping
     public ResponseEntity<?> addRFIDLink(@RequestBody RFIDLinkDTO rfidLinkDTO) {
         rfidService.addRFIDLink(rfidLinkDTO.getRfid(), rfidLinkDTO.getTicketId());
 
         return createResponseEntity(HttpStatus.OK, "Succesfully linked RFID with Ticket");
     }
 
-    @RequestMapping(value = "/{rfid}", method = RequestMethod.DELETE)
+    @DeleteMapping("/{rfid}")
     public RFIDLink removeRFIDLinkByRFID(@PathVariable String rfid) {
         return rfidService.removeRFIDLink(rfid);
     }
 
-    @RequestMapping(value = "/tickets/{ticketId}", method = RequestMethod.DELETE)
+    @DeleteMapping("/tickets/{ticketId}")
     public RFIDLink deleteRFIDByTicketId(@PathVariable Long ticketId) {
         return rfidService.removeRFIDLink(ticketId);
     }

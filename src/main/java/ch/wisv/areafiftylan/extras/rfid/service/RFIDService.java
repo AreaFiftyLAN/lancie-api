@@ -18,6 +18,7 @@
 package ch.wisv.areafiftylan.extras.rfid.service;
 
 import ch.wisv.areafiftylan.extras.rfid.model.RFIDLink;
+import ch.wisv.areafiftylan.users.model.User;
 
 import java.util.Collection;
 
@@ -25,6 +26,8 @@ public interface RFIDService {
     Collection<RFIDLink> getAllRFIDLinks();
 
     Long getTicketIdByRFID(String rfid);
+
+    User getUserByRFID(String rfid);
 
     boolean isRFIDUsed(String rfid);
 
