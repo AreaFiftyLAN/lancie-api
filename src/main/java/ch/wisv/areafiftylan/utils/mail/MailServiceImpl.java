@@ -128,7 +128,11 @@ public class MailServiceImpl implements MailService {
 
     @Override
     public void sendTemplateMailToUser(User user, MailDTO mailDTO) {
-        sendMail(user.getUsername(), user.getProfile().getFirstName() + " " + user.getProfile().getLastName(), mailDTO.getSubject(), mailDTO.getMessage());
+        if (user.getProfile() != null) {
+            sendMail(user.getUsername(), user.getProfile().getFirstName() + " " + user.getProfile().getLastName(), mailDTO.getSubject(), mailDTO.getMessage());
+        } else {
+            sendMail(user.getUsername(), user.getUsername(), mailDTO.getSubject(), mailDTO.getMessage());
+        }
     }
 
     @Override
@@ -137,7 +141,11 @@ public class MailServiceImpl implements MailService {
                 "Please click on the following link to complete your registration: <a href=\"" + url + "\">" + url +
                         "</a><br /><br />If the link does not work, please copy the link and" +
                         " paste it into your browser.";
-        sendMail(user.getUsername(), user.getProfile().getFirstName() + " " + user.getProfile().getLastName(), "Confirm your registration", message);
+        if (user.getProfile() != null) {
+            sendMail(user.getUsername(), user.getProfile().getFirstName() + " " + user.getProfile().getLastName(), "Confirm your registration", message);
+        } else {
+            sendMail(user.getUsername(), user.getUsername(), "Confirm your registration", message);
+        }
     }
 
     @Override
@@ -156,7 +164,11 @@ public class MailServiceImpl implements MailService {
     public void sendPasswordResetMail(User user, String url) {
         String message = "Please click on the following link to reset your password: <a href=\"" + url + "\">" + url +
                 "</a><br /><br />If the link does not work, please copy the link and" + " paste it into your browser.";
-        sendMail(user.getUsername(), user.getProfile().getFirstName() + " " + user.getProfile().getLastName(), "Password reset requested", message);
+        if (user.getProfile() != null) {
+            sendMail(user.getUsername(), user.getProfile().getFirstName() + " " + user.getProfile().getLastName(), "Password reset requested", message);
+        } else {
+            sendMail(user.getUsername(), user.getUsername(), "Password reset requested", message);
+        }
     }
 
     @Override
@@ -167,7 +179,11 @@ public class MailServiceImpl implements MailService {
                         " " + teamCaptain.getProfile().getLastName() +
                         "! Please log in to My Area to accept the invitation.";
 
-        sendMail(user.getUsername(), user.getProfile().getFirstName() + " " + user.getProfile().getLastName(), "You've been invited to \"Team " + teamName + "\"", message);
+        if (user.getProfile() != null) {
+            sendMail(user.getUsername(), user.getProfile().getFirstName() + " " + user.getProfile().getLastName(), "You've been invited to \"Team " + teamName + "\"", message);
+        } else {
+            sendMail(user.getUsername(), user.getUsername(), "You've been invited to \"Team " + teamName + "\"", message);
+        }
     }
 
     @Override
@@ -176,7 +192,11 @@ public class MailServiceImpl implements MailService {
         String message = "Unfortunately we had to reallocate your reserved seat.\n" +
                          "Please contact us if you have any questions.\n" +
                          "You can reserve a new seat through <a href=\"https://areafiftylan.nl/my-area\">My Area</a>.";
-        sendMail(user.getUsername(), user.getProfile().getFirstName() + " " + user.getProfile().getLastName(), subject, message);
+        if (user.getProfile() != null) {
+            sendMail(user.getUsername(), user.getProfile().getFirstName() + " " + user.getProfile().getLastName(), subject, message);
+        } else {
+            sendMail(user.getUsername(), user.getUsername(), subject, message);
+        }
     }
 
     @Override
@@ -184,8 +204,12 @@ public class MailServiceImpl implements MailService {
         String message = sender.getProfile().firstName +
                 " has sent you a ticket for AreaFiftyLAN! To accept this ticket please click on the following link: " +
                 "<a href=\"" + url + "\">" + url + "</a>";
-        sendMail(receiver.getUsername(),
-                receiver.getProfile().getFirstName() + " " + receiver.getProfile().getLastName(),
-                "A ticket for AreaFiftyLAN has been sent to you!", message);
+        if (receiver.getProfile() != null) {
+            sendMail(receiver.getUsername(),
+                    receiver.getProfile().getFirstName() + " " + receiver.getProfile().getLastName(),
+                    "A ticket for AreaFiftyLAN has been sent to you!", message);
+        } else {
+            sendMail(receiver.getUsername(), receiver.getUsername(),"A ticket for AreaFiftyLAN has been sent to you!", message);
+        }
     }
 }
