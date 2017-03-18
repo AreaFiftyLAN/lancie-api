@@ -34,12 +34,12 @@ public class MailTemplateInjectionsServiceImpl implements MailTemplateInjections
     }
 
     @Override
-    public void removeMailTemplateInjectionsById(Long id) {
+    public void deleteMailTemplateInjectionsById(Long id) {
         injectionsRepository.delete(id);
     }
 
     @Override
-    public MailTemplateInjections removeMailTemplateInjectionsByTemplateName(String templateName) {
+    public MailTemplateInjections deleteMailTemplateInjectionsByTemplateName(String templateName) {
         MailTemplateInjections injections = getMailTemplateInjectionsByTemplateName(templateName);
         injectionsRepository.delete(injections);
         return injections;

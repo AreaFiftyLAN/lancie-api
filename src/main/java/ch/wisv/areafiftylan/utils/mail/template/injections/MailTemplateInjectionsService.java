@@ -10,7 +10,7 @@ public interface MailTemplateInjectionsService {
 
     MailTemplateInjections getMailTemplateInjectionsByTemplateName(String templateName);
 
-    void removeMailTemplateInjectionsById(Long id);
+    void deleteMailTemplateInjectionsById(Long id);
 
-    MailTemplateInjections removeMailTemplateInjectionsByTemplateName(String templateName);
+    MailTemplateInjections deleteMailTemplateInjectionsByTemplateName(String templateName);
 }

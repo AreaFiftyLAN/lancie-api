@@ -114,7 +114,7 @@ public class MailServiceImpl implements MailService {
 
     @Override
     public void sendTemplateMail(User recipient, String templateName) {
-        MailTemplate mailTemplate = templateService.getMailTemplateByName(templateName);
+        MailTemplate mailTemplate = templateService.getMailTemplateByTemplateName(templateName);
         MailTemplateInjections injections = injectionsService.getMailTemplateInjectionsByTemplateName(templateName);
         //TODO Fill injectionsMap with values specific to the user.
         mailTemplate = injectMailTemplate(mailTemplate, injections);

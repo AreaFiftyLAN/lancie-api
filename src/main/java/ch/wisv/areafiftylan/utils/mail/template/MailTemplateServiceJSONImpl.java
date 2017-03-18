@@ -2,13 +2,22 @@ package ch.wisv.areafiftylan.utils.mail.template;
 
 import ch.wisv.areafiftylan.exception.MailTemplateNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.stereotype.Service;
 
 import java.io.FileReader;
 import java.io.IOException;
 
-@Service
+//@Service
 public class MailTemplateServiceJSONImpl implements MailTemplateService {
+
+    @Override
+    public MailTemplate addMailTemplate(String templateName, String subject, String message) {
+        return null;
+    }
+
+    @Override
+    public MailTemplate getMailTemplateById(Long id) {
+        return null;
+    }
 
     /**
      * Reads a JSON file and casts it to a MailTemplate.
@@ -18,7 +27,7 @@ public class MailTemplateServiceJSONImpl implements MailTemplateService {
      * @return MailTemplate if successful, null otherwise.
      */
     @Override
-    public MailTemplate getMailTemplateByName(String templateName) {
+    public MailTemplate getMailTemplateByTemplateName(String templateName) {
         MailTemplate mailTemplate;
         try {
             Object object = new ObjectMapper().readValue(new FileReader("config/mail/" + templateName + ".json"), Object.class);
@@ -27,5 +36,15 @@ public class MailTemplateServiceJSONImpl implements MailTemplateService {
             throw new MailTemplateNotFoundException(templateName);
         }
         return mailTemplate;
+    }
+
+    @Override
+    public void deleteMailTemplateById(Long id) {
+
+    }
+
+    @Override
+    public MailTemplate deleteMailTemplateByTemplateName(String templateName) {
+        return null;
     }
 }
