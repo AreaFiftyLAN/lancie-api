@@ -1,8 +1,7 @@
 package ch.wisv.areafiftylan.utils.mail;
 
 import ch.wisv.areafiftylan.exception.MailTemplateNotFoundException;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 
 import java.io.FileReader;
@@ -21,11 +20,10 @@ public class MailTemplateServiceJSONImpl implements MailTemplateService {
     @Override
     public MailTemplate getMailTemplateByName(String templateName) {
         MailTemplate mailTemplate;
-        JSONParser jsonParser = new JSONParser();
         try {
-            Object object = jsonParser.parse(new FileReader("config/mail/" + templateName + ".json"));
+            Object object = new ObjectMapper().readValue(new FileReader("config/mail/" + templateName + ".json"), Object.class);
             mailTemplate = (MailTemplate) object;
-        } catch (IOException | ParseException e) {
+        } catch (IOException e) {
             throw new MailTemplateNotFoundException(templateName);
         }
         return mailTemplate;
