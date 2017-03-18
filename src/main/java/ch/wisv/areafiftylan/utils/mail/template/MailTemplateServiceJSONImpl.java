@@ -1,4 +1,4 @@
-package ch.wisv.areafiftylan.utils.mail;
+package ch.wisv.areafiftylan.utils.mail.template;
 
 import ch.wisv.areafiftylan.exception.MailTemplateNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;

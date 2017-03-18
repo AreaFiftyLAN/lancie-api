@@ -20,6 +20,10 @@ package ch.wisv.areafiftylan.utils.mail;
 import ch.wisv.areafiftylan.products.model.order.Order;
 import ch.wisv.areafiftylan.teams.model.Team;
 import ch.wisv.areafiftylan.users.model.User;
+import ch.wisv.areafiftylan.utils.mail.template.MailTemplate;
+import ch.wisv.areafiftylan.utils.mail.template.MailTemplateService;
+import ch.wisv.areafiftylan.utils.mail.template.injections.MailTemplateInjections;
+import ch.wisv.areafiftylan.utils.mail.template.injections.MailTemplateInjectionsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
@@ -35,14 +39,14 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.util.Collection;
 import java.util.Locale;
-import java.util.Map;
 
 @SuppressWarnings("SpringJavaAutowiringInspection")
 @Service
 public class MailServiceImpl implements MailService {
 
     private final JavaMailSender mailSender;
-    private final MailTemplateService mailTemplateService;
+    private final MailTemplateService templateService;
+    private final MailTemplateInjectionsService injectionsService;
     private final SpringTemplateEngine templateEngine;
 
     @Value("${a5l.mail.sender}")
@@ -52,9 +56,11 @@ public class MailServiceImpl implements MailService {
     String contact;
 
     @Autowired
-    public MailServiceImpl(JavaMailSender mailSender, MailTemplateService mailTemplateService, SpringTemplateEngine templateEngine) {
+    public MailServiceImpl(JavaMailSender mailSender, MailTemplateService mailTemplateService,
+                           MailTemplateInjectionsService mailTemplateInjectionsService, SpringTemplateEngine templateEngine) {
         this.mailSender = mailSender;
-        this.mailTemplateService = mailTemplateService;
+        this.templateService = mailTemplateService;
+        this.injectionsService = mailTemplateInjectionsService;
         this.templateEngine = templateEngine;
     }
 
@@ -107,8 +113,10 @@ public class MailServiceImpl implements MailService {
     }
 
     @Override
-    public void sendTemplateMail(User recipient, String templateName, Map<String, String> injections) {
-        MailTemplate mailTemplate = mailTemplateService.getMailTemplateByName(templateName);
+    public void sendTemplateMail(User recipient, String templateName) {
+        MailTemplate mailTemplate = templateService.getMailTemplateByName(templateName);
+        MailTemplateInjections injections = injectionsService.getMailTemplateInjectionsByTemplateName(templateName);
+        //TODO Fill injectionsMap with values specific to the user.
         mailTemplate = injectMailTemplate(mailTemplate, injections);
         String htmlContent = prepareHtmlContent(formatRecipient(recipient), mailTemplate.getMessage());
         sendMailWithContent(recipient.getUsername(), mailTemplate.getSubject(), htmlContent);
@@ -123,9 +131,9 @@ public class MailServiceImpl implements MailService {
      * @param injections The Strings to inject.
      * @return The injected MailTemplate.
      */
-    private MailTemplate injectMailTemplate(MailTemplate mailTemplate, Map<String, String> injections) {
+    private MailTemplate injectMailTemplate(MailTemplate mailTemplate, MailTemplateInjections injections) {
         String message = mailTemplate.getMessage();
-        injections.forEach(message::replaceAll);
+        injections.getInjections().forEach(message::replaceAll);
         mailTemplate.setMessage(message);
         return mailTemplate;
     }
@@ -148,6 +156,9 @@ public class MailServiceImpl implements MailService {
         }
     }
 
+    // TODO Remove this.
+    // The team logic should not be done inside a mailService, instead only take one user or a collection.
+    // The team should be added to a collection in the team code that calls this service.
     @Override
     public void sendTemplateMailToTeam(Team team, MailDTO mailDTO) {
         for (User user : team.getMembers()) {

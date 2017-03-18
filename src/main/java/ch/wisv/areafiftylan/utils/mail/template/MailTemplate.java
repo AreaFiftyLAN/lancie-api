@@ -1,4 +1,4 @@
-package ch.wisv.areafiftylan.utils.mail;
+package ch.wisv.areafiftylan.utils.mail.template;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
