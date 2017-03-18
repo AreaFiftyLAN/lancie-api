@@ -22,12 +22,13 @@ import ch.wisv.areafiftylan.teams.model.Team;
 import ch.wisv.areafiftylan.users.model.User;
 
 import java.util.Collection;
+import java.util.Map;
 
 public interface MailService {
 
     void sendMail(String recipientEmail, String recipientName, String subject, String message);
 
-    void sendTemplateMail(User recipient, String templateName);
+    void sendTemplateMail(User recipient, String templateName, Map<String, String> injections);
 
     void sendContactMail(String senderEmail, String subject, String message);
 

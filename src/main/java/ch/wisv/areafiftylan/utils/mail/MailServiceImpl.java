@@ -35,6 +35,7 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.util.Collection;
 import java.util.Locale;
+import java.util.Map;
 
 @SuppressWarnings("SpringJavaAutowiringInspection")
 @Service
@@ -106,10 +107,27 @@ public class MailServiceImpl implements MailService {
     }
 
     @Override
-    public void sendTemplateMail(User recipient, String templateName) {
+    public void sendTemplateMail(User recipient, String templateName, Map<String, String> injections) {
         MailTemplate mailTemplate = mailTemplateService.getMailTemplateByName(templateName);
+        mailTemplate = injectMailTemplate(mailTemplate, injections);
         String htmlContent = prepareHtmlContent(formatRecipient(recipient), mailTemplate.getMessage());
         sendMailWithContent(recipient.getUsername(), mailTemplate.getSubject(), htmlContent);
+    }
+
+    /**
+     * Replaces substrings in the message of the MailTemplate.
+     * Using a Map<K, V>, replace all K with V.
+     * Regex is allowed in the K values.
+     *
+     * @param mailTemplate The MailTemplate to inject.
+     * @param injections The Strings to inject.
+     * @return The injected MailTemplate.
+     */
+    private MailTemplate injectMailTemplate(MailTemplate mailTemplate, Map<String, String> injections) {
+        String message = mailTemplate.getMessage();
+        injections.forEach(message::replaceAll);
+        mailTemplate.setMessage(message);
+        return mailTemplate;
     }
 
     private String prepareHtmlContent(String name, String message) {
