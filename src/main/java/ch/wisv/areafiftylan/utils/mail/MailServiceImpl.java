@@ -139,10 +139,12 @@ public class MailServiceImpl implements MailService {
     }
 
     private String formatRecipient(User user) {
-        if (user.getProfile() != null) {
-            return user.getProfile().getFirstName() + " " + user.getProfile().getLastName();
-        } else {
+        if (user.getProfile() == null ||
+            user.getProfile().getFirstName().equals("") ||
+            user.getProfile().getLastName().equals("")) {
             return user.getUsername();
+        } else {
+            return user.getProfile().getFirstName() + " " + user.getProfile().getLastName();
         }
     }
 
