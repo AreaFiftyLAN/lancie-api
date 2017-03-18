@@ -41,7 +41,7 @@ import java.util.Locale;
 public class MailServiceImpl implements MailService {
 
     private final JavaMailSender mailSender;
-
+    private final MailTemplateService mailTemplateService;
     private final SpringTemplateEngine templateEngine;
 
     @Value("${a5l.mail.sender}")
@@ -51,9 +51,29 @@ public class MailServiceImpl implements MailService {
     String contact;
 
     @Autowired
-    public MailServiceImpl(JavaMailSender mailSender, SpringTemplateEngine templateEngine) {
+    public MailServiceImpl(JavaMailSender mailSender, MailTemplateService mailTemplateService, SpringTemplateEngine templateEngine) {
         this.mailSender = mailSender;
+        this.mailTemplateService = mailTemplateService;
         this.templateEngine = templateEngine;
+    }
+
+    @Override
+    public void sendContactMail(String senderEmail, String subject, String messageString) {
+        MimeMessage mimeMessage = this.mailSender.createMimeMessage();
+        MimeMessageHelper message;
+
+        try {
+            message = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+            message.setSubject("[Contact] " + subject);
+            message.setFrom(senderEmail);
+            message.setTo(contact);
+
+            message.setText(messageString);
+
+            this.mailSender.send(mimeMessage);
+        } catch (MessagingException m) {
+            throw new MailSendException("Unable to send email", m.getCause());
+        }
     }
 
     private void sendMailWithContent(String recipientEmail, String subject, String content) {
@@ -86,22 +106,10 @@ public class MailServiceImpl implements MailService {
     }
 
     @Override
-    public void sendContactMail(String senderEmail, String subject, String messageString) {
-        MimeMessage mimeMessage = this.mailSender.createMimeMessage();
-        MimeMessageHelper message;
-
-        try {
-            message = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-            message.setSubject("[Contact] " + subject);
-            message.setFrom(senderEmail);
-            message.setTo(contact);
-
-            message.setText(messageString);
-
-            this.mailSender.send(mimeMessage);
-        } catch (MessagingException m) {
-            throw new MailSendException("Unable to send email", m.getCause());
-        }
+    public void sendTemplateMail(User recipient, String templateName) {
+        MailTemplate mailTemplate = mailTemplateService.getMailTemplateByName(templateName);
+        String htmlContent = prepareHtmlContent(formatRecipient(recipient), mailTemplate.getMessage());
+        sendMailWithContent(recipient.getUsername(), mailTemplate.getSubject(), htmlContent);
     }
 
     private String prepareHtmlContent(String name, String message) {

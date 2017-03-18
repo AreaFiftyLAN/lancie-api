@@ -59,6 +59,8 @@ dependencies {
     compile("com.google.guava:guava:19.0")
     compile("nl.stil4m:mollie-api:2.6.0")
 
+    compile group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1'
+
     runtime("org.hsqldb:hsqldb")
     runtime("org.postgresql:postgresql")
 

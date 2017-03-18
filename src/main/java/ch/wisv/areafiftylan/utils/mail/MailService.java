@@ -27,6 +27,8 @@ public interface MailService {
 
     void sendMail(String recipientEmail, String recipientName, String subject, String message);
 
+    void sendTemplateMail(User recipient, String templateName);
+
     void sendContactMail(String senderEmail, String subject, String message);
 
     void sendTemplateMailToTeam(Team team, MailDTO mailDTO);
