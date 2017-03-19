@@ -1,4 +1,4 @@
-package ch.wisv.areafiftylan.utils.mail.template.injections;
+package ch.wisv.areafiftylan.utils.mail.template;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

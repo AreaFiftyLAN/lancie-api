@@ -22,8 +22,7 @@ import ch.wisv.areafiftylan.teams.model.Team;
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.utils.mail.template.MailTemplate;
 import ch.wisv.areafiftylan.utils.mail.template.MailTemplateService;
-import ch.wisv.areafiftylan.utils.mail.template.injections.MailTemplateInjections;
-import ch.wisv.areafiftylan.utils.mail.template.injections.MailTemplateInjectionsService;
+import ch.wisv.areafiftylan.utils.mail.template.MailTemplateInjections;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
@@ -46,7 +45,6 @@ public class MailServiceImpl implements MailService {
 
     private final JavaMailSender mailSender;
     private final MailTemplateService templateService;
-    private final MailTemplateInjectionsService injectionsService;
     private final SpringTemplateEngine templateEngine;
 
     @Value("${a5l.mail.sender}")
@@ -56,11 +54,9 @@ public class MailServiceImpl implements MailService {
     String contact;
 
     @Autowired
-    public MailServiceImpl(JavaMailSender mailSender, MailTemplateService mailTemplateService,
-                           MailTemplateInjectionsService mailTemplateInjectionsService, SpringTemplateEngine templateEngine) {
+    public MailServiceImpl(JavaMailSender mailSender, MailTemplateService mailTemplateService, SpringTemplateEngine templateEngine) {
         this.mailSender = mailSender;
         this.templateService = mailTemplateService;
-        this.injectionsService = mailTemplateInjectionsService;
         this.templateEngine = templateEngine;
     }
 
@@ -115,7 +111,7 @@ public class MailServiceImpl implements MailService {
     @Override
     public void sendTemplateMail(User recipient, String templateName) {
         MailTemplate mailTemplate = templateService.getMailTemplateByTemplateName(templateName);
-        MailTemplateInjections injections = injectionsService.getMailTemplateInjectionsByTemplateName(templateName);
+        MailTemplateInjections injections = templateService.getMailTemplateInjectionsByTemplateName(templateName);
         //TODO Fill injectionsMap with values specific to the user.
         mailTemplate = injectMailTemplate(mailTemplate, injections);
         String htmlContent = prepareHtmlContent(formatRecipient(recipient), mailTemplate.getMessage());

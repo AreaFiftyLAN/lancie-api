@@ -1,4 +1,4 @@
-package ch.wisv.areafiftylan.utils.mail.template.injections;
+package ch.wisv.areafiftylan.utils.mail.template;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
