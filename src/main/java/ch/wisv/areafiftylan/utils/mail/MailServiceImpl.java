@@ -112,10 +112,14 @@ public class MailServiceImpl implements MailService {
     public void sendTemplateMail(User recipient, String templateName) {
         MailTemplate mailTemplate = templateService.getMailTemplateByTemplateName(templateName);
         MailTemplateInjections injections = templateService.getMailTemplateInjectionsByTemplateName(templateName);
-        //TODO Fill injectionsMap with values specific to the user.
+        injections = fillInjections(injections);
         mailTemplate = injectMailTemplate(mailTemplate, injections);
         String htmlContent = prepareHtmlContent(formatRecipient(recipient), mailTemplate.getMessage());
         sendMailWithContent(recipient.getUsername(), mailTemplate.getSubject(), htmlContent);
+    }
+
+    public MailTemplateInjections fillInjections(MailTemplateInjections injections) {
+        return null;
     }
 
     /**
