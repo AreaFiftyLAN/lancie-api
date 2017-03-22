@@ -377,7 +377,7 @@ public class TicketServiceTest extends ServiceTest {
         ticketService.transferTicket(token);
 
         assertEquals(goalUser, ticket.getOwner());
-        assertFalse(ttt.isUnused());
+        assertTrue(ttt.isUsed());
     }
 
     @Test
@@ -443,7 +443,7 @@ public class TicketServiceTest extends ServiceTest {
         ticketService.cancelTicketTransfer(token);
 
         assertFalse(ttt.isValid());
-        assertTrue(ttt.isUnused());
+        assertFalse(ttt.isUsed());
         assertNotEquals(goalUser, ticket.getOwner());
     }
 

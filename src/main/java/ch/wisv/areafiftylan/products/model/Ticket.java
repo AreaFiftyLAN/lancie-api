@@ -21,6 +21,7 @@ import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.utils.view.View;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
@@ -28,6 +29,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
+@NoArgsConstructor
 public class Ticket {
 
     @Id
@@ -72,10 +74,6 @@ public class Ticket {
 
     public boolean addOption(TicketOption option) {
         return type.getPossibleOptions().contains(option) && enabledOptions.add(option);
-    }
-
-    public Ticket() {
-        //JPA Only
     }
 
     @JsonView(View.OrderOverview.class)

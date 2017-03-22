@@ -21,7 +21,6 @@ import ch.wisv.areafiftylan.products.model.order.Order;
 import ch.wisv.areafiftylan.products.model.order.OrderStatus;
 import ch.wisv.areafiftylan.products.service.OrderService;
 import ch.wisv.areafiftylan.products.service.repository.OrderRepository;
-import ch.wisv.areafiftylan.security.token.Token;
 import ch.wisv.areafiftylan.security.token.VerificationToken;
 import ch.wisv.areafiftylan.security.token.repository.VerificationTokenRepository;
 import ch.wisv.areafiftylan.users.service.UserRepository;
@@ -82,7 +81,7 @@ public class TaskScheduler {
         LocalDateTime now = LocalDateTime.now();
         List<VerificationToken> allExpiredVerificationTokens =
                 verificationTokenRepository.findAllByExpiryDateBefore(now);
-        allExpiredVerificationTokens.stream().filter(Token::isUnused).forEach(this::handleExpiredVerificationToken);
+        allExpiredVerificationTokens.stream().filter((verificationToken) -> !verificationToken.isUsed()).forEach(this::handleExpiredVerificationToken);
     }
 
     private static Predicate<Order> isExpired() {

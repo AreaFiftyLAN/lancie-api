@@ -18,15 +18,13 @@
 package ch.wisv.areafiftylan.security.token;
 
 import ch.wisv.areafiftylan.users.model.User;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.Entity;
 
 @Entity
+@NoArgsConstructor
 public class PasswordResetToken extends Token {
-
-
-    public PasswordResetToken() {
-    }
 
     public PasswordResetToken(User user) {
         super(user);

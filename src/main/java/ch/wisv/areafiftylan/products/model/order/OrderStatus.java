@@ -18,10 +18,10 @@
 package ch.wisv.areafiftylan.products.model.order;
 
 public enum OrderStatus {
-    ANONYMOUS, // Initial creating status
-    ASSIGNED,  // Has a User assigned
-    PENDING,  // Sent to the payment provider
-    PAID,  // Confirmed paid by payment provider
-    EXPIRED, // Payment attempted, but expired
-    CANCELLED // Payment attempted, but manually cancelled
+    ANONYMOUS,  // Initial creating status
+    ASSIGNED,   // Has a User assigned
+    PENDING,    // Sent to the payment provider
+    PAID,       // Confirmed paid by payment provider
+    EXPIRED,    // Payment attempted, but expired
+    CANCELLED   // Payment attempted, but manually cancelled
 }

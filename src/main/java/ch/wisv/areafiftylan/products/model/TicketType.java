@@ -19,9 +19,10 @@ package ch.wisv.areafiftylan.products.model;
 
 import ch.wisv.areafiftylan.utils.view.View;
 import com.fasterxml.jackson.annotation.JsonView;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -29,6 +30,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
+@Data
+@RequiredArgsConstructor
 @NoArgsConstructor
 public class TicketType {
     //    EARLY_FULL("Early Bird", 37.50F, 50, LocalDateTime.of(2016, 6, 3, 0, 0), true),
@@ -39,58 +42,38 @@ public class TicketType {
 
     @Id
     @GeneratedValue
-    @Getter
-    @Setter
     private Long id;
 
-    @Getter
-    @Setter
+    @NonNull
     @JsonView(View.OrderOverview.class)
     private String name;
 
-    @Getter
-    @Setter
+    @NonNull
+    @JsonView(View.OrderOverview.class)
+    private String text;
+
+    @NonNull
     private float price;
 
     /**
      * The maximum amount of tickets of this type that can be sold.
      * Will be 0 if no maximum amount is set.
      */
-    @Getter
-    @Setter
+    @NonNull
     private int numberAvailable;
-
-    @Getter
-    @Setter
-    @JsonView(View.OrderOverview.class)
-    private String text;
 
     /**
      * A time after which no more tickets of this type can be sold.
      * Will be null if no deadline is set.
      */
-    @Getter
-    @Setter
+    @NonNull
     private LocalDateTime deadline;
 
-    @Getter
-    @Setter
+    @NonNull
     private boolean buyable;
     
     @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
-    @Getter
-    Set<TicketOption> possibleOptions;
-
-    public TicketType(String name, String text, float price, int numberAvailable, LocalDateTime deadline,
-                      boolean buyable) {
-        this.name = name;
-        this.text = text;
-        this.price = price;
-        this.numberAvailable = numberAvailable;
-        this.deadline = deadline;
-        this.buyable = buyable;
-        this.possibleOptions = new HashSet<>();
-    }
+    Set<TicketOption> possibleOptions = new HashSet<>();
 
     public void addPossibleOption(TicketOption option) {
         this.possibleOptions.add(option);

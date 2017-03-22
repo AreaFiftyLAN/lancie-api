@@ -144,7 +144,7 @@ public class RFIDIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(user)).
         when()
-            .get(RFID_ENDPOINT + "/" + link.getRFID() + "/ticketId").
+            .get(RFID_ENDPOINT + "/" + link.getRfid() + "/ticketId").
         then()
             .statusCode(HttpStatus.SC_OK)
             .body(equalTo(ticket.getId().toString()));
@@ -170,7 +170,7 @@ public class RFIDIntegrationTest extends XAuthIntegrationTest {
         User user = createAdmin();
         Ticket ticket = createTicketForUser(user);
         RFIDLink link = createRfidLink(ticket);
-        String unused = String.valueOf(Long.valueOf(link.getRFID()) + 1);
+        String unused = String.valueOf(Long.valueOf(link.getRfid()) + 1);
 
         //@formatter:off
         given().
@@ -192,7 +192,7 @@ public class RFIDIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(user)).
         when()
-            .get(RFID_ENDPOINT + "/" + link.getRFID() + "/user").
+            .get(RFID_ENDPOINT + "/" + link.getRfid() + "/user").
         then()
             .statusCode(HttpStatus.SC_OK)
             .body("username", equalTo(user.getUsername()))
@@ -270,7 +270,7 @@ public class RFIDIntegrationTest extends XAuthIntegrationTest {
         Ticket ticket2 = createTicketForUser(user);
         RFIDLink rfidLink = createRfidLink(ticket1);
         HashMap<String, String> rfidLinkDTO = makeRFIDLinkDTO(ticket2);
-        rfidLinkDTO.put("rfid", rfidLink.getRFID());
+        rfidLinkDTO.put("rfid", rfidLink.getRfid());
 
         //@formatter:off
         given().
@@ -283,7 +283,7 @@ public class RFIDIntegrationTest extends XAuthIntegrationTest {
             .statusCode(HttpStatus.SC_CONFLICT);
         //@formatter:on
 
-        Optional<RFIDLink> queryResult = rfidLinkRepository.findByRfid(rfidLink.getRFID());
+        Optional<RFIDLink> queryResult = rfidLinkRepository.findByRfid(rfidLink.getRfid());
         Assert.assertTrue(queryResult.isPresent());
         Assert.assertEquals(queryResult.get().getTicket().getId(), ticket1.getId());
     }
@@ -361,13 +361,13 @@ public class RFIDIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(user)).
         when()
-            .delete(RFID_ENDPOINT + "/" + link.getRFID()).
+            .delete(RFID_ENDPOINT + "/" + link.getRfid()).
         then()
             .statusCode(HttpStatus.SC_OK)
             .body("ticket.id", equalTo(ticket.getId().intValue()));
         //@formatter:on
 
-        Assert.assertFalse(rfidLinkRepository.findByRfid(link.getRFID()).isPresent());
+        Assert.assertFalse(rfidLinkRepository.findByRfid(link.getRfid()).isPresent());
     }
 
     @Test
@@ -386,7 +386,7 @@ public class RFIDIntegrationTest extends XAuthIntegrationTest {
             .body("ticket.id", equalTo(ticket.getId().intValue()));
         //@formatter:on
 
-        Assert.assertFalse(rfidLinkRepository.findByRfid(rfidLink.getRFID()).isPresent());
+        Assert.assertFalse(rfidLinkRepository.findByRfid(rfidLink.getRfid()).isPresent());
     }
 
     @Test
@@ -394,7 +394,7 @@ public class RFIDIntegrationTest extends XAuthIntegrationTest {
         User user = createAdmin();
         Ticket ticket = createTicketForUser(user);
         RFIDLink link = createRfidLink(ticket);
-        String unused = String.valueOf(Long.valueOf(link.getRFID()) + 1);
+        String unused = String.valueOf(Long.valueOf(link.getRfid()) + 1);
 
         //@formatter:off
         given().
@@ -405,7 +405,7 @@ public class RFIDIntegrationTest extends XAuthIntegrationTest {
             .statusCode(HttpStatus.SC_NOT_FOUND);
         //@formatter:on
 
-        Assert.assertTrue(rfidLinkRepository.findByRfid(link.getRFID()).isPresent());
+        Assert.assertTrue(rfidLinkRepository.findByRfid(link.getRfid()).isPresent());
     }
 
     @Test

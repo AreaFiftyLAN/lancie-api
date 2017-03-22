@@ -19,6 +19,8 @@ package ch.wisv.areafiftylan.security.token;
 
 import ch.wisv.areafiftylan.teams.model.Team;
 import ch.wisv.areafiftylan.users.model.User;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -26,22 +28,16 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 
 @Entity
+@NoArgsConstructor
 public class TeamInviteToken extends Token {
 
+    @Getter
     @OneToOne(targetEntity = Team.class, fetch = FetchType.EAGER)
     @JoinColumn(nullable = false)
     private Team team;
 
-    public TeamInviteToken() {
-        //JPA Only
-    }
-
     public TeamInviteToken(User user, Team team) {
         super(user, 0);
         this.team = team;
-    }
-
-    public Team getTeam() {
-        return team;
     }
 }

@@ -19,23 +19,30 @@ package ch.wisv.areafiftylan.extras.rfid.model;
 
 import ch.wisv.areafiftylan.exception.InvalidRFIDException;
 import ch.wisv.areafiftylan.products.model.Ticket;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
 
 @Entity
+@Data
+@NoArgsConstructor
 public class RFIDLink {
+
     @Id
     @GeneratedValue
     private Long id;
 
+    @NonNull
+    @Length(min = RFID_CHAR_COUNT, max = RFID_CHAR_COUNT)
     private String rfid;
 
+    @NonNull
     @OneToOne(cascade = CascadeType.MERGE)
     private Ticket ticket;
 
-    public RFIDLink() {
-        //JPA Only
-    }
 
     public RFIDLink(String rfid, Ticket ticket) {
         if (isInvalidRFID(rfid)) {
@@ -44,14 +51,6 @@ public class RFIDLink {
 
         this.rfid = rfid;
         this.ticket = ticket;
-    }
-
-    public String getRFID() {
-        return rfid;
-    }
-
-    public Ticket getTicket() {
-        return ticket;
     }
 
     //Static Content

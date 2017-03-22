@@ -18,18 +18,16 @@
 package ch.wisv.areafiftylan.security.token;
 
 import ch.wisv.areafiftylan.users.model.User;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.Entity;
 
 @Entity
+@NoArgsConstructor
 public class AuthenticationToken extends Token {
 
     // Default 5 days validity
     private static final int EXPIRATION = 60 * 24 * 5;
-
-    public AuthenticationToken() {
-        // JPA ONLY
-    }
 
     public AuthenticationToken(User user) {
         super(user, EXPIRATION);

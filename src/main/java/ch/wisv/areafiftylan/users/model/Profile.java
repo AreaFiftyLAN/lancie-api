@@ -19,6 +19,9 @@ package ch.wisv.areafiftylan.users.model;
 
 import ch.wisv.areafiftylan.utils.view.View;
 import com.fasterxml.jackson.annotation.JsonView;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -27,174 +30,44 @@ import java.io.Serializable;
 import java.time.LocalDate;
 
 @Entity
+@Data
+@NoArgsConstructor
 public class Profile implements Serializable {
-
-    public String firstName;
-    private String lastName;
-
-    @JsonView(View.Public.class)
-    private String displayName;
-
-    private LocalDate birthday;
-
-    private Gender gender;
-    private String address;
-    private String zipcode;
-    private String city;
-    private String phoneNumber;
-    private String notes;
 
     @Id
     @GeneratedValue
     private Long id;
 
-    Profile() {
+    @NonNull
+    private String firstName;
 
-    }
+    @NonNull
+    private String lastName;
 
-    public Profile(String firstName, String lastName, String displayName, LocalDate birthday, Gender gender, String address, String zipcode,
-                   String city, String phoneNumber, String notes) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.displayName = displayName;
-        this.birthday = birthday;
-        this.gender = gender;
-        this.address = address;
-        this.zipcode = zipcode;
-        this.city = city;
-        this.phoneNumber = phoneNumber;
-        this.notes = notes;
-    }
+    @JsonView(View.Public.class)
+    @NonNull
+    private String displayName;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof Profile)) {
-            return false;
-        }
+    @NonNull
+    private LocalDate birthday;
 
-        Profile profile = (Profile) o;
+    @NonNull
+    private Gender gender;
 
-        if (firstName != null ? !firstName.equals(profile.firstName) : profile.firstName != null) {
-            return false;
-        }
-        if (lastName != null ? !lastName.equals(profile.lastName) : profile.lastName != null) {
-            return false;
-        }
-        if (displayName != null ? !displayName.equals(profile.displayName) : profile.displayName != null) {
-            return false;
-        }
-        if (gender != profile.gender) {
-            return false;
-        }
-        if (address != null ? !address.equals(profile.address) : profile.address != null) {
-            return false;
-        }
-        if (zipcode != null ? !zipcode.equals(profile.zipcode) : profile.zipcode != null) {
-            return false;
-        }
-        return (city != null ? city.equals(profile.city) : profile.city == null) &&
-                (phoneNumber != null ? phoneNumber.equals(profile.phoneNumber) : profile.phoneNumber == null) &&
-                !(notes != null ? !notes.equals(profile.notes) : profile.notes != null);
+    @NonNull
+    private String address;
 
-    }
+    @NonNull
+    private String zipcode;
 
-    @Override
-    public int hashCode() {
-        int result = firstName != null ? firstName.hashCode() : 0;
-        result = 31 * result + (lastName != null ? lastName.hashCode() : 0);
-        result = 31 * result + (displayName != null ? displayName.hashCode() : 0);
-        result = 31 * result + (birthday != null ? birthday.hashCode() : 0);
-        result = 31 * result + (gender != null ? gender.hashCode() : 0);
-        result = 31 * result + (address != null ? address.hashCode() : 0);
-        result = 31 * result + (zipcode != null ? zipcode.hashCode() : 0);
-        result = 31 * result + (city != null ? city.hashCode() : 0);
-        result = 31 * result + (phoneNumber != null ? phoneNumber.hashCode() : 0);
-        result = 31 * result + (notes != null ? notes.hashCode() : 0);
-        return result;
-    }
+    @NonNull
+    private String city;
 
-    public LocalDate getBirthday() {
-        return birthday;
-    }
+    @NonNull
+    private String phoneNumber;
 
-    public void setBirthday(LocalDate birthday) {
-        this.birthday = birthday;
-    }
-
-    public Gender getGender() {
-        return gender;
-    }
-
-    public void setGender(Gender gender) {
-        this.gender = gender;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public String getZipcode() {
-        return zipcode;
-    }
-
-    public void setZipcode(String zipcode) {
-        this.zipcode = zipcode;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
-    public String getNotes() {
-        return notes;
-    }
-
-    public void setNotes(String notes) {
-        this.notes = notes;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
+    @NonNull
+    private String notes;
 
     public void setAllFields(String firstName, String lastName, String displayName, LocalDate birthday, Gender gender, String address,
                              String zipcode, String city, String phoneNumber, String notes) {

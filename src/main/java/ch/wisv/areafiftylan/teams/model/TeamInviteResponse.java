@@ -17,22 +17,18 @@
 
 package ch.wisv.areafiftylan.teams.model;
 
-import lombok.Getter;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
+@Data
+@AllArgsConstructor
 public class TeamInviteResponse {
-    @Getter
-    private Long teamId;
-    @Getter
-    String teamName;
-    @Getter
-    String token;
-    @Getter
-    String username;
 
-    public TeamInviteResponse(Long teamId, String teamName, String token, String username) {
-        this.teamId = teamId;
-        this.teamName = teamName;
-        this.token = token;
-        this.username = username;
-    }
+    private Long teamId;
+
+    private String teamName;
+
+    private String token;
+
+    private String username;
 }
