@@ -18,24 +18,20 @@
 package ch.wisv.areafiftylan.utils.mail;
 
 import ch.wisv.areafiftylan.products.model.order.Order;
-import ch.wisv.areafiftylan.teams.model.Team;
 import ch.wisv.areafiftylan.users.model.User;
 
 import java.util.Collection;
+import java.util.HashMap;
 
 public interface MailService {
 
-    void sendMail(String recipientEmail, String recipientName, String subject, String message);
+    void sendTemplateMail(User recipient, String templateName, HashMap<String, String> injections);
 
-    void sendTemplateMail(User recipient, String templateName);
+    void sendTemplateMailToCollection(Collection<User> recipients, String templateName, HashMap<String, String> injections);
 
-    void sendContactMail(String senderEmail, String subject, String message);
+    void sendCustomMail(User user, MailDTO mailDTO);
 
-    void sendTemplateMailToTeam(Team team, MailDTO mailDTO);
-
-    void sendTemplateMailToAll(Collection<User> users, MailDTO mailDTO);
-
-    void sendTemplateMailToUser(User user, MailDTO mailDTO);
+    void sendCustomMailToCollection(Collection<User> recipients, MailDTO mailDTO);
 
     void sendVerificationmail(User user, String url);
 

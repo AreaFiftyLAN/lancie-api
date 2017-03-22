@@ -18,11 +18,9 @@
 package ch.wisv.areafiftylan.utils.mail;
 
 import ch.wisv.areafiftylan.products.model.order.Order;
-import ch.wisv.areafiftylan.teams.model.Team;
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.utils.mail.template.MailTemplate;
 import ch.wisv.areafiftylan.utils.mail.template.MailTemplateService;
-import ch.wisv.areafiftylan.utils.mail.template.MailTemplateInjections;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
@@ -37,6 +35,7 @@ import org.thymeleaf.spring4.SpringTemplateEngine;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Locale;
 
 @SuppressWarnings("SpringJavaAutowiringInspection")
@@ -60,33 +59,14 @@ public class MailServiceImpl implements MailService {
         this.templateEngine = templateEngine;
     }
 
-    @Override
-    public void sendContactMail(String senderEmail, String subject, String messageString) {
-        MimeMessage mimeMessage = this.mailSender.createMimeMessage();
-        MimeMessageHelper message;
-
-        try {
-            message = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-            message.setSubject("[Contact] " + subject);
-            message.setFrom(senderEmail);
-            message.setTo(contact);
-
-            message.setText(messageString);
-
-            this.mailSender.send(mimeMessage);
-        } catch (MessagingException m) {
-            throw new MailSendException("Unable to send email", m.getCause());
-        }
-    }
-
-    private void sendMailWithContent(String recipientEmail, String subject, String content) {
+    private void sendMimeMail(String recipientEmail, String subject, String content) {
         // Prepare message using a Spring helper
         MimeMessage mimeMessage = this.mailSender.createMimeMessage();
         MimeMessageHelper message;
 
         try {
             message = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-            message.setSubject("[Area FiftyLAN] " + subject);
+            message.setSubject(subject);
             message.setFrom(sender);
             message.setTo(recipientEmail);
 
@@ -102,48 +82,20 @@ public class MailServiceImpl implements MailService {
         }
     }
 
-    @Override
-    public void sendMail(String recipientEmail, String recipientName, String subject, String messageString) {
-        String htmlContent = prepareHtmlContent(recipientName, messageString);
-        sendMailWithContent(recipientEmail, subject, htmlContent);
-    }
-
-    @Override
-    public void sendTemplateMail(User recipient, String templateName) {
-        MailTemplate mailTemplate = templateService.getMailTemplateByTemplateName(templateName);
-        MailTemplateInjections injections = templateService.getMailTemplateInjectionsByTemplateName(templateName);
-        injections = fillInjections(injections);
-        mailTemplate = injectMailTemplate(mailTemplate, injections);
-        String htmlContent = prepareHtmlContent(formatRecipient(recipient), mailTemplate.getMessage());
-        sendMailWithContent(recipient.getUsername(), mailTemplate.getSubject(), htmlContent);
-    }
-
-    public MailTemplateInjections fillInjections(MailTemplateInjections injections) {
-        return null;
-    }
-
     /**
      * Replaces substrings in the message of the MailTemplate.
-     * Using a Map<K, V>, replace all K with V.
+     * Using a HashMap<K, V>, replace all K with V.
      * Regex is allowed in the K values.
      *
      * @param mailTemplate The MailTemplate to inject.
      * @param injections The Strings to inject.
      * @return The injected MailTemplate.
      */
-    private MailTemplate injectMailTemplate(MailTemplate mailTemplate, MailTemplateInjections injections) {
+    private MailTemplate injectMailTemplate(MailTemplate mailTemplate, HashMap<String, String> injections) {
         String message = mailTemplate.getMessage();
-        injections.getInjections().forEach(message::replaceAll);
+        injections.forEach(message::replaceAll);
         mailTemplate.setMessage(message);
         return mailTemplate;
-    }
-
-    private String prepareHtmlContent(String name, String message) {
-        // Prepare the evaluation context
-        final Context ctx = new Context(new Locale("en"));
-        ctx.setVariable("name", name);
-        ctx.setVariable("message", message);
-        return this.templateEngine.process("mailTemplate", ctx);
     }
 
     private String formatRecipient(User user) {
@@ -156,35 +108,43 @@ public class MailServiceImpl implements MailService {
         }
     }
 
-    // TODO Remove this.
-    // The team logic should not be done inside a mailService, instead only take one user or a collection.
-    // The team should be added to a collection in the team code that calls this service.
     @Override
-    public void sendTemplateMailToTeam(Team team, MailDTO mailDTO) {
-        for (User user : team.getMembers()) {
-            sendTemplateMailToUser(user, mailDTO);
+    public void sendTemplateMail(User recipient, String templateName, HashMap<String, String> injections) {
+        MailTemplate mailTemplate = templateService.getMailTemplateByTemplateName(templateName);
+        mailTemplate = injectMailTemplate(mailTemplate, injections);
+        sendMimeMail(recipient.getUsername(), mailTemplate.getSubject(), mailTemplate.getMessage());
+    }
+
+    @Override
+    public void sendTemplateMailToCollection(Collection<User> recipients, String templateName, HashMap<String, String> injections) {
+        for (User recipient : recipients) {
+            sendTemplateMail(recipient, templateName, injections);
         }
     }
 
     @Override
-    public void sendTemplateMailToAll(Collection<User> users, MailDTO mailDTO) {
-        for (User user : users) {
-            sendTemplateMailToUser(user, mailDTO);
-        }
+    public void sendCustomMail(User recipient, MailDTO mailDTO) {
+        sendMimeMail(recipient.getUsername(), mailDTO.getSubject(), mailDTO.getMessage());
     }
 
     @Override
-    public void sendTemplateMailToUser(User user, MailDTO mailDTO) {
-        sendMail(user.getUsername(), formatRecipient(user), mailDTO.getSubject(), mailDTO.getMessage());
+    public void sendCustomMailToCollection(Collection<User> recipients, MailDTO mailDTO) {
+        for (User recipient : recipients) {
+            sendMimeMail(recipient.getUsername(), mailDTO.getSubject(), mailDTO.getMessage());
+        }
     }
 
     @Override
     public void sendVerificationmail(User user, String url) {
+        HashMap<String, String> injections = new HashMap<>();
+        injections.put("custom regex to replace in the mail", url);
+
+        sendTemplateMail(user, "verificationMail", injections);
         String message =
                 "Please click on the following link to complete your registration: <a href=\"" + url + "\">" + url +
                         "</a><br /><br />If the link does not work, please copy the link and" +
                         " paste it into your browser.";
-        sendMail(user.getUsername(), formatRecipient(user), "Confirm your registration", message);
+        //sendMail(user.getUsername(), formatRecipient(user), "Confirm your registration", message);
     }
 
     @Override
@@ -196,7 +156,7 @@ public class MailServiceImpl implements MailService {
         ctx.setVariable("order", order);
         String content = this.templateEngine.process("orderConfirmation", ctx);
 
-        sendMailWithContent(order.getUser().getUsername(), "Order Confirmation", content);
+        sendMimeMail(order.getUser().getUsername(), "Order Confirmation", content);
     }
 
     @Override
