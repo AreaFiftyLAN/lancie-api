@@ -24,6 +24,15 @@ public class MailTemplateServiceImpl implements MailTemplateService {
     }
 
     @Override
+    public MailTemplate updateMailTemplate(Long id, MailTemplateDTO mailTemplateDTO) {
+        MailTemplate mailTemplate = getMailTemplateById(id);
+        mailTemplate.setTemplateName(mailTemplateDTO.getTemplateName());
+        mailTemplate.setSubject(mailTemplateDTO.getSubject());
+        mailTemplate.setMessage(mailTemplateDTO.getMessage());
+        return templateRepository.save(mailTemplate);
+    }
+
+    @Override
     public Collection<MailTemplate> getAllMailTemplates() {
         return templateRepository.findAll();
     }

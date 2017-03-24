@@ -19,10 +19,16 @@ public class MailTemplateController {
     }
 
     @PostMapping
-    ResponseEntity<?> addMailTemplate(MailTemplateDTO mailTemplateDTO) {
+    ResponseEntity<?> addMailTemplate(@RequestBody MailTemplateDTO mailTemplateDTO) {
         templateService.addMailTemplate(mailTemplateDTO.getTemplateName(),
                 mailTemplateDTO.getSubject(), mailTemplateDTO.getMessage());
         return createResponseEntity(HttpStatus.OK, "MailTemplate successfully added.");
+    }
+
+    @PutMapping("/{id}")
+    ResponseEntity<?> updateMailTemplate(@PathVariable Long id, @RequestBody MailTemplateDTO mailTemplateDTO) {
+        MailTemplate template = templateService.updateMailTemplate(id, mailTemplateDTO);
+        return createResponseEntity(HttpStatus.OK, "MailTemplate successfully updated.", template);
     }
 
     @GetMapping("/{id}")

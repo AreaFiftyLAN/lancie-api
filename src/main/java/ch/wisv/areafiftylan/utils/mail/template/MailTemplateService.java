@@ -6,6 +6,8 @@ public interface MailTemplateService {
 
     MailTemplate addMailTemplate(String templateName, String subject, String message);
 
+    MailTemplate updateMailTemplate(Long id, MailTemplateDTO mailTemplateDTO);
+
     Collection<MailTemplate> getAllMailTemplates();
 
     MailTemplate getMailTemplateById(Long id);
