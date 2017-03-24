@@ -1,0 +1,6 @@
+{
+  "templateName": "verification",
+  "subject": "[AreaFiftyLAN] Confirm your registration",
+  "message": "<!DOCTYPE html><html xmlns:th=\"http://www.thymeleaf.org\" lang=\"en\" style=\"margin: 0; background-color: #EEECED; color: #212121; font-family: 'Helvetica Neue', 'Calibri Light', Roboto, sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; letter-spacing: 0.02em;\"><head lang=\"en\"><title>Area FiftyLAN Mail</title></head><body><div style=\"max-width: 800px; margin: 0 auto 32px; box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);\"><div style=\"background-color: #1a2a43;\"><div style=\"padding: 8px;\"><img style=\"width: 100%;\" src=\"https://areafiftylan.nl/images-optimized/lancie/logo_without_date.png\" /></div></div><div style=\"background-color: white; padding: 32px;\"><p>Dear ${addressee},</p><p>Please click on the following link to complete your registration: <a href=\"${url}\"> ${url} </a><br /><br />If the link does not work, please copy the link and paste it into your browser.</p><p>Best Regards,<br />LANcie 2017</p></div></div></body></html>"
+}
+

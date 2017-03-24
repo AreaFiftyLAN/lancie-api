@@ -692,7 +692,7 @@ public class OrderServiceTest extends ServiceTest {
 
         orderService.updateOrderStatusByReference("updateOrderStatusToPaid");
 
-        verify(mailService, times(1)).sendOrderConfirmation(any(Order.class));
+        verify(mailService, times(1)).sendOrderConfirmationMail(any(Order.class));
 
         reset(paymentService);
     }

@@ -202,7 +202,7 @@ public class OrderServiceImpl implements OrderService {
         // Set all tickets from this Order to valid
         validateTicketsIfPaid(order);
         if (statusBefore != OrderStatus.PAID && order.getStatus().equals(OrderStatus.PAID)) {
-            mailService.sendOrderConfirmation(order);
+            mailService.sendOrderConfirmationMail(order);
         }
         return order;
     }

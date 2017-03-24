@@ -135,7 +135,7 @@ public class TeamServiceImpl implements TeamService {
             TeamInviteToken inviteToken = new TeamInviteToken(user, team);
             teamInviteTokenRepository.save(inviteToken);
 
-            mailService.sendTeamInviteMail(user, team.getTeamName(), team.getCaptain());
+            mailService.sendTeamInviteMail(user, team);
             return inviteToken;
         } else {
             throw new IllegalArgumentException("User already invited");

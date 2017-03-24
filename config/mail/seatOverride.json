@@ -1,5 +1,5 @@
 {
   "templateName": "seatOverride",
-  "subject": "Your seat was reset",
+  "subject": "[AreaFiftyLAN] Your seat was reset",
   "message": "Unfortunately we had to reallocate your reserved seat.\nPlease contact us if you have any questions.\nYou can reserve a new seat through <a href='https://areafiftylan.nl/my-area'>My Area</a>."
 }
