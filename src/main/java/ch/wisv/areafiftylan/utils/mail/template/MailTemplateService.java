@@ -1,8 +1,12 @@
 package ch.wisv.areafiftylan.utils.mail.template;
 
+import java.util.Collection;
+
 public interface MailTemplateService {
 
     MailTemplate addMailTemplate(String templateName, String subject, String message);
+
+    Collection<MailTemplate> getAllMailTemplates();
 
     MailTemplate getMailTemplateById(Long id);
 
