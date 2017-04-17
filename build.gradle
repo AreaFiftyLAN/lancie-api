@@ -21,6 +21,11 @@ jar {
     baseName = 'lancie-api'
     version = '2017.1.6'
 }
+
+springBoot {
+    executable = true
+}
+
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
