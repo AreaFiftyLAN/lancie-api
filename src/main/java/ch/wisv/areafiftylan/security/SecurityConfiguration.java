@@ -82,6 +82,8 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         // We use custom Authentication Tokens, making csrf redundant
         http.csrf().disable();
 
+        http.authorizeRequests().antMatchers("/management/**").hasRole("ADMIN");
+
         // Add the default headers first
         http.addFilterBefore(new CORSFilter(), JsonLoginFilter.class);
         // Set the login point to get X-Auth-Tokens
