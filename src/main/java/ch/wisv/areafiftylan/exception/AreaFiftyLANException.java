@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AreaFiftyLANException extends RuntimeException {
 
     public AreaFiftyLANException(AreaFiftyLANExceptionLogLevelEnum logLevelEnum, String message) {
-        super("[" + logLevelEnum.toString() + "] " + message);
+        super(message);
         switch (logLevelEnum) {
             case ERROR:
                 log.error(message);
