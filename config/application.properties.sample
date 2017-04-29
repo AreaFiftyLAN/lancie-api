@@ -1,86 +1,17 @@
-############## Production properties #############################################################
-# This is the default property file which can be used as a template for default configuration.   #
-# Copy this file to `/config/application.properties`, with the runnable jar in the `/` directory #
-##################################################################################################
-
-## SPRING SETTINGS
-# Mail server information.
 spring.mail.host=
 spring.mail.port=
-#spring.mail.username=
-#spring.mail.password=
-
-#GMAIL SETTINGS
-#spring.mail.host=smtp.gmail.com
-#spring.mail.username=XXX@gmail.com
-#spring.mail.password=XXX
-#spring.mail.properties.mail.smtp.auth = true
-#spring.mail.properties.mail.smtp.socketFactory.port = 465
-#spring.mail.properties.mail.smtp.socketFactory.class = javax.net.ssl.SSLSocketFactory
-#spring.mail.properties.mail.smtp.socketFactory.fallback = false
-#spring.mail.properties.mail.smtp.ssl.enable = true
-
-# THYMELEAF (ThymeleafAutoConfiguration)
-spring.thymeleaf.check-template-location=true
-spring.thymeleaf.prefix=classpath:/templates/
-spring.thymeleaf.suffix=.html
-spring.thymeleaf.mode=HTML5
-spring.thymeleaf.encoding=UTF-8
-spring.thymeleaf.content-type=text/html
-
-# DATABASE PROPERTIES
-spring.datasource.driverClassName=org.postgresql.Driver
-# Change <MyDB> with the name of your database name
-spring.datasource.url=jdbc:postgresql://localhost:5432/<MyDB>
-
-# Username to log in to the database
-# It's recommended to create a dedicated Database user instead of using the default postgres user
-spring.datasource.username=<dbUser>
-
-# Password to log in with <dbUser> in database <MyDB>
-spring.datasource.password=<dbUserPassword>
-spring.data.jpa.repositories.enabled=true
-
-# Set to false in production to prevent spamming of console
-spring.jpa.show-sql=false
-spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
-spring.jpa.generate-ddl=true
-
-# This setting defines the database creation/update behaviour. Change with caution.
-spring.jpa.properties.hibernate.default_schema=public
-# Database migration automation. Set to false for development
-flyway.enabled=true
-spring.jpa.properties.hibernate.hbm2ddl.auto=none
-
-#DEVELOPMENT ONLY : DELETES DATA ON STARTUP:
-#spring.jpa.hibernate.ddl-auto=create
-
-# The date format we use
-spring.jackson.date-format=com.fasterxml.jackson.databind.util.ISO8601DateFormat
-
-# Default port used by frontend
-server.port=9000
-server.context-path=/api/v1
-
-#Log settings for production. Change to log4j2.xml for dev
-logging.config=classpath:log4j2-prod.xml
-
-## AREA FIFTYLAN SETTINGS
-# Key for sending a paymentrequest to the Mollie api
+spring.datasource.url=jdbc:postgresql://localhost:5432/lancie
+spring.datasource.username=lancie
+spring.datasource.password=lancie
 a5l.molliekey=[CHANGE ME]
-# The return url for the frontend that displays the success message
-a5l.paymentReturnUrl=https://areafiftylan.nl/order-check
-# The return url for the frontend that confirms a registration
-a5l.mail.confirmUrl=https://areafiftylan.nl/register-confirm
-# The url for the frontend to change the users password
-a5l.user.resetUrl=https://areafiftylan.nl/password-reset
-# The url for the frontend to accept a ticket transfer
-a5l.user.acceptTransferUrl=https://areafiftylan.nl/transfer-accept
-# E-mail address used for sending e-mails
+a5l.googleMapsAPIkey=[CHANGE ME]
+
+a5l.paymentReturnUrl=https://localhost:5100/order-check
+a5l.mail.confirmUrl=https://localhost:5100/register-confirm
+a5l.user.resetUrl=https://localhost:5100/password-reset
+a5l.user.acceptTransferUrl=https://localhost:5100/transfer-accept
 a5l.mail.sender=LANcie <lancie@ch.tudelft.nl>
 a5l.mail.contact=LANcie <lancie@ch.tudelft.nl>
 a5l.orderLimit=5
 a5l.ticketLimit=200
 a5l.orderKeepAlive=15
-# API key for Google Maps
-a5l.googleMapsAPIkey=[CHANGE ME]
