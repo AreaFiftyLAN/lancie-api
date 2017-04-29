@@ -39,6 +39,9 @@
             <PatternLayout pattern="${PATTERN}"/>
             <SizeBasedTriggeringPolicy/>
         </RollingFile>
+        <RollingFile name="info" fileName="logs/json.log" filePattern="logs/json_%d{yyyy-MM-dd-hh-mm}.log">
+            <JsonLayout complete="true" compact="true"/>
+        </RollingFile>
     </Appenders>
     <Loggers>
         <Root level="TRACE">

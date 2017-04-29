@@ -27,10 +27,14 @@
         <Console name="STDOUT" target="SYSTEM_OUT">
             <PatternLayout pattern="${PATTERN}"/>
         </Console>
+        <File name="a5l" fileName="logs/json.log">
+            <JsonLayout complete="true" compact="true"/>
+        </File>
     </Appenders>
     <Loggers>
         <Root level="TRACE">
             <AppenderRef ref="STDOUT" level="INFO"/>
+            <AppenderRef ref="a5l" level="INFO"/>
         </Root>
     </Loggers>
 </Configuration>

@@ -62,13 +62,17 @@ spring.jackson.date-format=com.fasterxml.jackson.databind.util.ISO8601DateFormat
 server.port=9000
 server.context-path=/api/v1
 
-#Log settings for production. Change to log4j2.xml for dev
-logging.config=classpath:log4j2-prod.xml
-logging.file=logs/log.1
+# Log settings for production. Change to log4j2.xml for dev
+#logging.config=classpath:log4j2-prod.xml
+logging.file=logs/json.log
 
 #Spring Boot Actuator endpoint settings
 management.context-path=/management
 management.security.roles=ROLE_ADMIN
+# Disable all endpoints except logfile and health
+endpoints.enabled=false
+endpoints.health.enabled=true
+endpoints.logfile.enabled=true
 
 ## AREA FIFTYLAN SETTINGS
 # Key for sending a paymentrequest to the Mollie api
