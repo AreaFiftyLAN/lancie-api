@@ -22,7 +22,7 @@ spring.mail.port=
 
 # THYMELEAF (ThymeleafAutoConfiguration)
 spring.thymeleaf.check-template-location=true
-spring.thymeleaf.prefix=:./config/templates/
+spring.thymeleaf.prefix=classpath:/templates/
 spring.thymeleaf.suffix=.html
 spring.thymeleaf.mode=HTML5
 spring.thymeleaf.encoding=UTF-8

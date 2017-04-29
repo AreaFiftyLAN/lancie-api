@@ -33,21 +33,21 @@
       <p>Order ID: <span th:text="${order.getId()}">#reference</span></p>
       <div style="background-color: white; margin: 0 auto; border-top: 1px solid #e8e8e8;">
         <div style="display: flex; padding: 16px 8px; border-bottom: 1px solid #e8e8e8; background-color: #EEECED; font-weight: 600;">
-          <span style="flex: 1;">Ticket</span>
-          <span style="flex: 2;">Options</span>
-          <span style="min-width: 100px;">Price</span>
+          <span style="width: 20%;">Ticket</span>
+          <span style="width: 60%;">Options</span>
+          <span style="width: 20%;">Price</span>
         </div>
         <div th:each="ticket : ${order.getTickets()}" style="display: flex; padding: 16px 8px; border-bottom: 1px solid #e8e8e8;">
-          <div th:text="${ticket.getType().getText()}" style="flex: 1;">Ticket Type</div>
-          <div class="options" style="flex: 2;">
+          <div th:text="${ticket.getType().getText()}" style="width: 20%;">Ticket Type</div>
+          <div class="options" style="width: 60%;">
             <span th:each="option, iter : ${ticket.getEnabledOptions()}" th:text="!${iter.last} ? ${option.getName()} + ', ' : ${option.getName()}">Options</span>
           </div>
-          <div th:text="${'&euro;' + #numbers.formatDecimal(ticket.getPrice(), 0, 'COMMA', 2, 'POINT')}" style="min-width: 100px;">Ticket price</div>
+          <div th:text="${'&euro;' + #numbers.formatDecimal(ticket.getPrice(), 0, 'COMMA', 2, 'POINT')}" style="width: 20%;">Ticket price</div>
         </div>
         <div style="display: flex; padding: 16px 8px; border-bottom: 1px solid #e8e8e8;">
-          <span>Order total: </span>
-          <div style="flex: 1;"></div>
-          <span th:text="${'&euro;' + #numbers.formatDecimal(order.getAmount(), 0, 'COMMA', 2, 'POINT')}" style="min-width: 100px;">price</span>
+          <span style="width: 20%;">Order total: </span>
+          <div style="width: 60%;"></div>
+          <span th:text="${'&euro;' + #numbers.formatDecimal(order.getAmount(), 0, 'COMMA', 2, 'POINT')}" style="width: 20%;">price</span>
         </div>
       </div>
       <p>Best Regards,<br />LANcie 2017</p>
