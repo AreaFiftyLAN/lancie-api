@@ -2,14 +2,12 @@ package ch.wisv.areafiftylan.exception;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Arrays;
-
 @Slf4j
 public class AreaFiftyLANException extends RuntimeException {
 
-    public AreaFiftyLANException(AreaFiftyLANExceptionLogLevelEnum logLevelEnum, String message) {
+    public AreaFiftyLANException(AreaFiftyLANExceptionLogLevelEnum logEnum, String message) {
         super(message);
-        logLevelEnum.getConsumer().accept(message);
+        logEnum.apply(message);
     }
 
     public AreaFiftyLANException(String message) {
