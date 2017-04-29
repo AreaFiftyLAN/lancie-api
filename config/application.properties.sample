@@ -66,9 +66,9 @@ server.context-path=/api/v1
 logging.config=classpath:log4j2-prod.xml
 logging.file=logs/log.1
 
-#Spring Boot Actuator endpoint settings. Security through SecurityConfiguration.java
-management.security.enabled=false
+#Spring Boot Actuator endpoint settings
 management.context-path=/management
+management.security.roles=ROLE_ADMIN
 
 ## AREA FIFTYLAN SETTINGS
 # Key for sending a paymentrequest to the Mollie api
