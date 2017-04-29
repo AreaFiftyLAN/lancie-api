@@ -27,8 +27,7 @@ import ch.wisv.areafiftylan.security.token.repository.VerificationTokenRepositor
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.users.service.UserService;
 import com.google.common.base.Strings;
-import lombok.extern.log4j.Log4j2;
-import org.apache.logging.log4j.Level;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -49,7 +48,7 @@ import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEnt
  * respective repositories.
  */
 @Controller
-@Log4j2
+@Slf4j
 public class AuthenticationController {
 
     private final UserService userService;
@@ -96,7 +95,6 @@ public class AuthenticationController {
      *
      * @param request The HttpServletRequest of the call
      * @param body    The body, should only contain an email parameter TODO: This can be done more elegantly
-     *
      * @return A status message telling whether the action was successful
      */
     @RequestMapping(value = "/requestResetPassword", method = RequestMethod.POST)
@@ -104,13 +102,13 @@ public class AuthenticationController {
     public ResponseEntity<?> requestResetPassword(HttpServletRequest request, @RequestBody Map<String, String> body) {
         String username = body.get("username");
 
-        log.log(Level.getLevel("A5L"), "Requesting password reset on email {}.", username);
+//        log.log(Level.getLevel("A5L"), "Requesting password reset on email {}.", username);
 
         User user = userService.getUserByUsername(username);
 
         userService.requestResetPassword(user, request);
 
-        log.log(Level.getLevel("A5L"), "Successfully requested password reset on email {}.", username);
+//        log.log(Level.getLevel("A5L"), "Successfully requested password reset on email {}.", username);
 
         return createResponseEntity(HttpStatus.OK, "Password reset link sent to " + username);
     }
@@ -120,7 +118,6 @@ public class AuthenticationController {
      * token and a password. The user is derived from the token.
      *
      * @param body The body, containing a token and password parameter. TODO: This should be validated
-     *
      * @return A status message telling whethere the action was successful
      */
     @RequestMapping(value = "/resetPassword", method = RequestMethod.POST)
@@ -162,9 +159,7 @@ public class AuthenticationController {
      * TODO: Token logic could be moved to a dedicated service
      *
      * @param token The token as generated for the user opon registration
-     *
      * @return A status message containing information about the operation
-     *
      * @throws TokenNotFoundException if the token can't be found
      */
     @RequestMapping(value = "/confirmRegistration", method = RequestMethod.GET)

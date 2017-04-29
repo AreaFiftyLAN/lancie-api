@@ -26,8 +26,7 @@ import ch.wisv.areafiftylan.products.model.order.Order;
 import ch.wisv.areafiftylan.products.service.OrderService;
 import ch.wisv.areafiftylan.utils.view.View;
 import com.fasterxml.jackson.annotation.JsonView;
-import lombok.extern.log4j.Log4j2;
-import org.apache.logging.log4j.Level;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -45,8 +44,10 @@ import java.util.Collection;
 import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEntity;
 
 @RestController
-@Log4j2
+@Slf4j
 public class OrderRestController {
+
+//    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OrderRestController.class);
 
     private final OrderService orderService;
 
@@ -69,7 +70,6 @@ public class OrderRestController {
      * location provided.
      *
      * @param ticketDTO Object containing information about the Ticket that is being ordered.
-     *
      * @return A message informing about the result of the request
      */
     @RequestMapping(value = "/orders", method = RequestMethod.POST)
@@ -90,7 +90,6 @@ public class OrderRestController {
      * This method handles GET requests on a specific Order.
      *
      * @param orderId Id of the Order that is requested
-     *
      * @return The requested Order.
      */
     @PreAuthorize("@currentUserServiceImpl.canAccessOrder(principal, #orderId)")
@@ -106,7 +105,6 @@ public class OrderRestController {
      *
      * @param orderId   Id of the Order
      * @param ticketDTO TicketDTO of the Ticket to be added to the Order
-     *
      * @return Message about the result of the request
      */
     @PreAuthorize("@currentUserServiceImpl.canAccessOrder(principal, #orderId)")
@@ -122,7 +120,6 @@ public class OrderRestController {
      *
      * @param orderId   Id of the Order
      * @param ticketDTO TicketDTO of the Ticket to be removed to the Order
-     *
      * @return Message about the result of the request
      */
     @PreAuthorize("@currentUserServiceImpl.canAccessOrder(principal, #orderId)")
@@ -139,7 +136,6 @@ public class OrderRestController {
      *
      * @param auth    The Spring Authentication object
      * @param orderId Id of the Order to be assigned to the currently logged in user
-     *
      * @return The assigned order
      */
     @PreAuthorize("isAuthenticated() and @currentUserServiceImpl.canAccessOrder(principal, #orderId)")
@@ -156,7 +152,6 @@ public class OrderRestController {
      * Depending on PaymentService.
      *
      * @param orderId The order to be paid
-     *
      * @return Instructions on how to proceed.
      */
     @PreAuthorize("@currentUserServiceImpl.canAccessOrder(principal, #orderId)")
@@ -173,7 +168,6 @@ public class OrderRestController {
      * This method gets the paymentURL for an order that was already registered at the paymentprovider.
      *
      * @param orderId The order to be continued
-     *
      * @return The paymentURL from the paymentprovider
      */
     @PreAuthorize("@currentUserServiceImpl.canAccessOrder(principal, #orderId)")
@@ -191,7 +185,6 @@ public class OrderRestController {
      * appoint free tickets or manually approve other orders.
      *
      * @param orderId Order to be approved
-     *
      * @return Status message
      */
     @PreAuthorize("hasRole('ADMIN')")
@@ -208,22 +201,21 @@ public class OrderRestController {
      * reference
      *
      * @param orderReference Id of the order at the paymentprovider, stored in the reference field
-     *
      * @return Statusmessage
      */
     @RequestMapping(value = "/orders/status", method = RequestMethod.POST)
     public ResponseEntity<?> updateOrderStatus(@RequestParam(name = "id") String orderReference) {
-        log.log(Level.getLevel("A5L"), "Incoming paymentprovicer webhook for reference: {}", orderReference);
+//        log.log(Level.getLevel("A5L"), "Incoming paymentprovicer webhook for reference: {}", orderReference);
         try {
             orderService.updateOrderStatusByReference(orderReference);
         } catch (OrderNotFoundException e) {
-            log.log(Level.getLevel("A5L"), "Paymentprovider webhook reference could not be found: {}", orderReference);
+//            log.log(Level.getLevel("A5L"), "Paymentprovider webhook reference could not be found: {}", orderReference);
         }
         return createResponseEntity(HttpStatus.OK, "Status is being updated");
     }
 
-    @RequestMapping(value = "/orders/status", method = { RequestMethod.GET,
-            RequestMethod.POST }, params = "testByMollie")
+    @RequestMapping(value = "/orders/status", method = {RequestMethod.GET,
+            RequestMethod.POST}, params = "testByMollie")
     public ResponseEntity<?> handleMollieTestCall() {
         return createResponseEntity(HttpStatus.OK, "Mollie webhook available");
     }
@@ -233,7 +225,6 @@ public class OrderRestController {
      * so the status is always current
      *
      * @param orderId OrderId of the Order to be updated
-     *
      * @return The Order with an up-to-date status
      */
     @PreAuthorize("@currentUserServiceImpl.canAccessOrder(principal, #orderId)")
