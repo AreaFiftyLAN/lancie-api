@@ -1,6 +1,6 @@
 spring.mail.host=
 spring.mail.port=
-spring.datasource.url=jdbc:postgresql://localhost:5432/
+spring.datasource.url=jdbc:postgresql://localhost:5432/[DATABASENAME]
 spring.datasource.username=
 spring.datasource.password=
 a5l.molliekey=[CHANGE ME]
