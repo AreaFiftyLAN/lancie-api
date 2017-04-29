@@ -17,11 +17,8 @@
 
 package ch.wisv.areafiftylan.exception;
 
-public class TicketUnavailableException extends RuntimeException {
-
+public class TicketUnavailableException extends AreaFiftyLANException {
     public TicketUnavailableException() {
         super("Ticket is no longer available.");
     }
-
-
 }

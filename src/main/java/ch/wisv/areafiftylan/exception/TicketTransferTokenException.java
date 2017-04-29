@@ -17,7 +17,7 @@
 
 package ch.wisv.areafiftylan.exception;
 
-public class TicketTransferTokenException extends RuntimeException {
+public class TicketTransferTokenException extends AreaFiftyLANException {
     public TicketTransferTokenException(String message) {
         super(message);
     }

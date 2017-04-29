@@ -17,7 +17,7 @@
 
 package ch.wisv.areafiftylan.exception;
 
-public class InvalidTicketException extends RuntimeException {
+public class InvalidTicketException extends AreaFiftyLANException {
     public InvalidTicketException(String message) {
         super(message);
     }

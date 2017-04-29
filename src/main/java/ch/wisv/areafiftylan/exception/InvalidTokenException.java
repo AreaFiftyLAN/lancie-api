@@ -17,7 +17,7 @@
 
 package ch.wisv.areafiftylan.exception;
 
-public class InvalidTokenException extends RuntimeException {
+public class InvalidTokenException extends AreaFiftyLANException {
     public InvalidTokenException() {
         super("Token is expired, has been already used or has been revoked.");
     }

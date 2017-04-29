@@ -17,7 +17,7 @@
 
 package ch.wisv.areafiftylan.exception;
 
-public class TicketAlreadyLinkedException extends RuntimeException {
+public class TicketAlreadyLinkedException extends AreaFiftyLANException {
     public TicketAlreadyLinkedException() {
         super("Ticket has already been linked to a RFID");
     }

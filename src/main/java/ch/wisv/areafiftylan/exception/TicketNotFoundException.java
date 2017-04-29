@@ -17,8 +17,7 @@
 
 package ch.wisv.areafiftylan.exception;
 
-public class TicketNotFoundException extends RuntimeException {
-
+public class TicketNotFoundException extends AreaFiftyLANException {
     public TicketNotFoundException() {
         super("Ticket not found");
     }
