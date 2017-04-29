@@ -47,8 +47,6 @@ import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEnt
 @Slf4j
 public class OrderRestController {
 
-//    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OrderRestController.class);
-
     private final OrderService orderService;
 
     @Autowired
@@ -205,11 +203,10 @@ public class OrderRestController {
      */
     @RequestMapping(value = "/orders/status", method = RequestMethod.POST)
     public ResponseEntity<?> updateOrderStatus(@RequestParam(name = "id") String orderReference) {
-//        log.log(Level.getLevel("A5L"), "Incoming paymentprovicer webhook for reference: {}", orderReference);
         try {
             orderService.updateOrderStatusByReference(orderReference);
         } catch (OrderNotFoundException e) {
-//            log.log(Level.getLevel("A5L"), "Paymentprovider webhook reference could not be found: {}", orderReference);
+            // TODO: Add log entry
         }
         return createResponseEntity(HttpStatus.OK, "Status is being updated");
     }

@@ -102,13 +102,13 @@ public class AuthenticationController {
     public ResponseEntity<?> requestResetPassword(HttpServletRequest request, @RequestBody Map<String, String> body) {
         String username = body.get("username");
 
-//        log.log(Level.getLevel("A5L"), "Requesting password reset on email {}.", username);
+        log.debug("Requesting password reset on email {}.", username);
 
         User user = userService.getUserByUsername(username);
 
         userService.requestResetPassword(user, request);
 
-//        log.log(Level.getLevel("A5L"), "Successfully requested password reset on email {}.", username);
+        log.debug("Successfully requested password reset on email {}.", username);
 
         return createResponseEntity(HttpStatus.OK, "Password reset link sent to " + username);
     }
