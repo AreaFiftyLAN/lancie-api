@@ -42,7 +42,7 @@ crashlytics.properties
 crashlytics-build.properties
 
 application.properties
-application-dev.properties
+!/src/main/resources/config/application.properties
 
 node_modules
 dist
