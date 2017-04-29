@@ -5,13 +5,3 @@ spring.datasource.username=
 spring.datasource.password=
 a5l.molliekey=[CHANGE ME]
 a5l.googleMapsAPIkey=[CHANGE ME]
-
-a5l.paymentReturnUrl=https://localhost:5100/order-check
-a5l.mail.confirmUrl=https://localhost:5100/register-confirm
-a5l.user.resetUrl=https://localhost:5100/password-reset
-a5l.user.acceptTransferUrl=https://localhost:5100/transfer-accept
-a5l.mail.sender=LANcie <lancie@ch.tudelft.nl>
-a5l.mail.contact=LANcie <lancie@ch.tudelft.nl>
-a5l.orderLimit=5
-a5l.ticketLimit=200
-a5l.orderKeepAlive=15
