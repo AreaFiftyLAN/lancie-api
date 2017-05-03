@@ -2,7 +2,7 @@ import org.springframework.boot.gradle.run.BootRunTask
 
 buildscript {
     ext {
-        springBootVersion = '1.5.1.RELEASE'
+        springBootVersion = '1.5.3.RELEASE'
     }
     repositories {
         mavenCentral()
@@ -39,8 +39,6 @@ repositories {
 
 
 configurations {
-    // We're using Jetty instead
-    compile.exclude module: "spring-boot-starter-tomcat"
     // We're using HikariCP instead
     compile.exclude module: "tomcat-jdbc"
     // We're using Log4j2 instead
@@ -52,7 +50,6 @@ dependencies {
     // https://docs.spring.io/spring-boot/docs/current/reference/html/appendix-dependency-versions.html
     compile("org.springframework.boot:spring-boot-starter-data-jpa")
     compile("org.springframework.boot:spring-boot-starter-security")
-    compile("org.springframework.boot:spring-boot-starter-jetty")
     compile("org.springframework.boot:spring-boot-starter-mail")
     compile("org.springframework.boot:spring-boot-starter-thymeleaf")
     compile("org.springframework.boot:spring-boot-devtools")
@@ -60,11 +57,11 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-actuator")
     compile("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     compile("com.zaxxer:HikariCP")
-    compile("org.flywaydb:flyway-core:4.0.3")
+    compile("org.flywaydb:flyway-core:4.1.2")
 
-    compile("org.projectlombok:lombok:1.16.12")
-    compile("com.google.guava:guava:19.0")
-    compile("nl.stil4m:mollie-api:2.6.0")
+    compile("org.projectlombok:lombok:1.16.16")
+    compile("com.google.guava:guava:21.0")
+    compile("nl.stil4m:mollie-api:2.6.2")
 
     runtime("org.hsqldb:hsqldb")
     runtime("org.postgresql:postgresql")
@@ -81,7 +78,7 @@ eclipse {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '3.2.1'
+    gradleVersion = '3.5'
 }
 
 task bootRunDev(type: BootRunTask) {
