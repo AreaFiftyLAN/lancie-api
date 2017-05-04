@@ -17,7 +17,7 @@
 
 package ch.wisv.areafiftylan.exception;
 
-public class RFIDTakenException extends RuntimeException {
+public class RFIDTakenException extends AreaFiftyLANException {
     public RFIDTakenException(String rfid) {
         super("The RFID " + rfid + " has already been taken.");
     }

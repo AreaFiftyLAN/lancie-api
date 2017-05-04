@@ -17,8 +17,8 @@
 
 package ch.wisv.areafiftylan.exception;
 
-public class OrderNotFoundException extends RuntimeException {
-    public OrderNotFoundException(String s) {
-        super(s);
+public class OrderNotFoundException extends AreaFiftyLANException {
+    public OrderNotFoundException(String message) {
+        super(message);
     }
 }

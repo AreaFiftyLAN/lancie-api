@@ -17,8 +17,7 @@
 
 package ch.wisv.areafiftylan.exception;
 
-public class UnassignedOrderException extends RuntimeException {
-
+public class UnassignedOrderException extends AreaFiftyLANException {
     public UnassignedOrderException(Long orderId) {
         super("Order " + orderId + " is not assigned yet");
     }

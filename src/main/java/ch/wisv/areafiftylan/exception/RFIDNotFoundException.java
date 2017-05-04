@@ -17,7 +17,7 @@
 
 package ch.wisv.areafiftylan.exception;
 
-public class RFIDNotFoundException extends RuntimeException {
+public class RFIDNotFoundException extends AreaFiftyLANException {
     public RFIDNotFoundException() {
         super("Failed to find RFID");
     }
