@@ -88,7 +88,7 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public Collection<Team> getTeamsByEmail(String email) {
-        return teamRepository.findAllByMembersUsernameIgnoreCase(email);
+        return teamRepository.findAllByMembersEmailIgnoreCase(email);
     }
 
     @Override
@@ -100,10 +100,10 @@ public class TeamServiceImpl implements TeamService {
             current.setTeamName(input.getTeamName());
         }
 
-        // If the Captain username is set and different from the current captain, change the Captain
-        String captainUsername = input.getCaptainUsername();
-        if (!Strings.isNullOrEmpty(captainUsername) && !captainUsername.equals(current.getCaptain().getUsername())) {
-            User captain = userService.getUserByEmail(captainUsername);
+        // If the Captain email is set and different from the current captain, change the Captain
+        String captainEmail = input.getCaptainEmail();
+        if (!Strings.isNullOrEmpty(captainEmail) && !captainEmail.equals(current.getCaptain().getEmail())) {
+            User captain = userService.getUserByEmail(captainEmail);
             current.setCaptain(captain);
         }
 
@@ -142,9 +142,9 @@ public class TeamServiceImpl implements TeamService {
         }
     }
 
-    private boolean isUserAlreadyInvited(String username, Team team) {
+    private boolean isUserAlreadyInvited(String email, Team team) {
         // Check if the member isn't already invited
-        return teamInviteTokenRepository.findByUserUsernameIgnoreCase(username).stream().
+        return teamInviteTokenRepository.findByUserEmailIgnoreCase(email).stream().
                 filter(token -> token.getTeam().equals(team)).
                 noneMatch(TeamInviteToken::isValid);
     }
@@ -160,7 +160,7 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public List<TeamInviteResponse> findTeamInvitesByEmail(String email) {
-        Collection<TeamInviteToken> inviteTokens = teamInviteTokenRepository.findByUserUsernameIgnoreCase(email);
+        Collection<TeamInviteToken> inviteTokens = teamInviteTokenRepository.findByUserEmailIgnoreCase(email);
 
         return teamInviteTokensToReponses(inviteTokens);
     }
@@ -178,7 +178,7 @@ public class TeamServiceImpl implements TeamService {
         return inviteTokens.stream().
                 filter(Token::isValid).
                 map(t -> new TeamInviteResponse(t.getTeam().getId(), t.getTeam().getTeamName(), t.getToken(),
-                        t.getUser().getUsername())).
+                        t.getUser().getEmail())).
                 collect(Collectors.toList());
     }
 
@@ -186,7 +186,7 @@ public class TeamServiceImpl implements TeamService {
     public void addMemberByInvite(String token) {
         TeamInviteToken teamInviteToken =
                 teamInviteTokenRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
-        addMember(teamInviteToken.getTeam().getId(), teamInviteToken.getUser().getUsername());
+        addMember(teamInviteToken.getTeam().getId(), teamInviteToken.getUser().getEmail());
         teamInviteToken.use();
         teamInviteTokenRepository.save(teamInviteToken);
     }

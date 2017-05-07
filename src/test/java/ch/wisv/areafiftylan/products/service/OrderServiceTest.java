@@ -74,33 +74,33 @@ public class OrderServiceTest extends ServiceTest {
     }
 
     @Test
-    public void findOrdersByUsername() {
+    public void findOrdersByEmail() {
         User user = persistUser();
 
         Order order = new Order();
         order.setUser(user);
         testEntityManager.persist(order);
 
-        Collection<Order> ordersByUsername = orderService.findOrdersByEmail(user.getUsername());
+        Collection<Order> ordersByEmail = orderService.findOrdersByEmail(user.getEmail());
 
-        assertEquals(1, ordersByUsername.size());
+        assertEquals(1, ordersByEmail.size());
     }
 
     @Test
-    public void findOrdersByUsernameUppercase() {
+    public void findOrdersByEmailUppercase() {
         User user = persistUser();
 
         Order order = new Order();
         order.setUser(user);
         testEntityManager.persist(order);
 
-        Collection<Order> ordersByUsername = orderService.findOrdersByEmail(user.getUsername().toUpperCase());
+        Collection<Order> ordersByEmail = orderService.findOrdersByEmail(user.getEmail().toUpperCase());
 
-        assertEquals(1, ordersByUsername.size());
+        assertEquals(1, ordersByEmail.size());
     }
 
     @Test
-    public void findOrdersByUsernameMultipleOrders() {
+    public void findOrdersByEmailMultipleOrders() {
         User user = persistUser();
 
         Order order = new Order();
@@ -110,22 +110,22 @@ public class OrderServiceTest extends ServiceTest {
         testEntityManager.persist(order);
         testEntityManager.persist(order2);
 
-        Collection<Order> ordersByUsername = orderService.findOrdersByEmail(user.getUsername());
+        Collection<Order> ordersByEmail = orderService.findOrdersByEmail(user.getEmail());
 
-        assertEquals(2, ordersByUsername.size());
+        assertEquals(2, ordersByEmail.size());
     }
 
     @Test
-    public void findOrdersByUsernameNull() {
+    public void findOrdersByEmailNull() {
         User user = persistUser();
 
         Order order = new Order();
         order.setUser(user);
         testEntityManager.persist(order);
 
-        Collection<Order> ordersByUsername = orderService.findOrdersByEmail(null);
+        Collection<Order> ordersByEmail = orderService.findOrdersByEmail(null);
 
-        assertEquals(0, ordersByUsername.size());
+        assertEquals(0, ordersByEmail.size());
     }
 
     @Test
@@ -140,7 +140,7 @@ public class OrderServiceTest extends ServiceTest {
         order2.setStatus(OrderStatus.PAID);
         testEntityManager.persist(order2);
 
-        List<Order> openOrders = orderService.getOpenOrders(user.getUsername());
+        List<Order> openOrders = orderService.getOpenOrders(user.getEmail());
 
         assertEquals(1, openOrders.size());
     }
@@ -158,7 +158,7 @@ public class OrderServiceTest extends ServiceTest {
         order2.setStatus(OrderStatus.CANCELLED);
         testEntityManager.persist(order2);
 
-        List<Order> openOrders = orderService.getOpenOrders(user.getUsername());
+        List<Order> openOrders = orderService.getOpenOrders(user.getEmail());
 
         assertEquals(0, openOrders.size());
     }
@@ -167,7 +167,7 @@ public class OrderServiceTest extends ServiceTest {
     public void getOpenOrdersNoOrders() {
         User user = persistUser();
 
-        List<Order> openOrders = orderService.getOpenOrders(user.getUsername());
+        List<Order> openOrders = orderService.getOpenOrders(user.getEmail());
 
         assertEquals(0, openOrders.size());
     }
@@ -302,7 +302,7 @@ public class OrderServiceTest extends ServiceTest {
 
         Long id = testEntityManager.persistAndGetId(order, Long.class);
 
-        orderService.assignOrderToUser(id, user.getUsername());
+        orderService.assignOrderToUser(id, user.getEmail());
 
         assertEquals(user, testEntityManager.find(Order.class, id).getUser());
     }
@@ -313,7 +313,7 @@ public class OrderServiceTest extends ServiceTest {
 
         User user = persistUser();
 
-        orderService.assignOrderToUser(9999L, user.getUsername());
+        orderService.assignOrderToUser(9999L, user.getEmail());
     }
 
     @Test
@@ -324,11 +324,11 @@ public class OrderServiceTest extends ServiceTest {
         Order order = new Order();
         testEntityManager.persistAndGetId(order, Long.class);
 
-        orderService.assignOrderToUser(null, user.getUsername());
+        orderService.assignOrderToUser(null, user.getEmail());
     }
 
     @Test
-    public void assignOrderToUserUsernameNotFound() {
+    public void assignOrderToUserEmailNotFound() {
         thrown.expect(UsernameNotFoundException.class);
 
         Long id = testEntityManager.persistAndGetId(new Order(), Long.class);
@@ -337,7 +337,7 @@ public class OrderServiceTest extends ServiceTest {
     }
 
     @Test
-    public void assignOrderToUserUsernameNull() {
+    public void assignOrderToUserEmailNull() {
         thrown.expect(UsernameNotFoundException.class);
 
         Long id = testEntityManager.persistAndGetId(new Order(), Long.class);
@@ -354,7 +354,7 @@ public class OrderServiceTest extends ServiceTest {
         order.setStatus(OrderStatus.PENDING);
         testEntityManager.persist(order);
 
-        orderService.assignOrderToUser(order.getId(), user.getUsername());
+        orderService.assignOrderToUser(order.getId(), user.getEmail());
     }
 
     @Test
@@ -366,7 +366,7 @@ public class OrderServiceTest extends ServiceTest {
         order.setStatus(OrderStatus.CANCELLED);
         testEntityManager.persist(order);
 
-        orderService.assignOrderToUser(order.getId(), user.getUsername());
+        orderService.assignOrderToUser(order.getId(), user.getEmail());
     }
 
     @Test
@@ -378,7 +378,7 @@ public class OrderServiceTest extends ServiceTest {
         order.setStatus(OrderStatus.PAID);
         testEntityManager.persist(order);
 
-        orderService.assignOrderToUser(order.getId(), user.getUsername());
+        orderService.assignOrderToUser(order.getId(), user.getEmail());
     }
 
     @Test
@@ -390,7 +390,7 @@ public class OrderServiceTest extends ServiceTest {
         order.setStatus(OrderStatus.EXPIRED);
         testEntityManager.persist(order);
 
-        orderService.assignOrderToUser(order.getId(), user.getUsername());
+        orderService.assignOrderToUser(order.getId(), user.getEmail());
     }
 
     @Test
@@ -404,7 +404,7 @@ public class OrderServiceTest extends ServiceTest {
         order.addTicket(persistTicket());
         Long id = testEntityManager.persistAndGetId(order, Long.class);
 
-        orderService.assignOrderToUser(id, user2.getUsername());
+        orderService.assignOrderToUser(id, user2.getEmail());
 
         assertEquals(user, testEntityManager.find(Order.class, id).getUser());
     }

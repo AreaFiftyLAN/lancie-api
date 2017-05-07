@@ -136,11 +136,11 @@ public abstract class XAuthIntegrationTest {
     }
 
     protected Header getXAuthTokenHeaderForUser(User user) {
-        return getXAuthTokenHeaderForUser(user.getUsername());
+        return getXAuthTokenHeaderForUser(user.getEmail());
     }
 
-    protected Header getXAuthTokenHeaderForUser(String username) {
-        String authToken = authenticationService.createNewAuthToken(username);
+    protected Header getXAuthTokenHeaderForUser(String email) {
+        String authToken = authenticationService.createNewAuthToken(email);
         return new Header("X-Auth-Token", authToken);
     }
 

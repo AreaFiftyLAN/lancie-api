@@ -79,7 +79,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public Collection<User> getAllUsers() {
-        return userRepository.findAll(new Sort("username"));
+        return userRepository.findAll(new Sort("email"));
     }
 
     @Override
@@ -101,7 +101,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     private void handleDuplicateUserFields(UserDTO userDTO) throws DataIntegrityViolationException {
-        // Check if the username already exists
+        // Check if the email is already in use
         userRepository.findOneByEmailIgnoreCase(userDTO.getEmail()).ifPresent(u -> {
             throw new DataIntegrityViolationException("Email already in use");
         });
@@ -239,8 +239,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public Boolean checkEmailAvailable(String username) {
-        return !userRepository.findOneByEmailIgnoreCase(username).isPresent();
+    public Boolean checkEmailAvailable(String email) {
+        return !userRepository.findOneByEmailIgnoreCase(email).isPresent();
 
     }
 
@@ -262,8 +262,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findOneByEmailIgnoreCase(username)
-                .orElseThrow(() -> new UsernameNotFoundException(username));
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        return userRepository.findOneByEmailIgnoreCase(email)
+                .orElseThrow(() -> new UsernameNotFoundException(email));
     }
 }

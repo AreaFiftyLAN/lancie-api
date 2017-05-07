@@ -195,7 +195,7 @@ public class RFIDIntegrationTest extends XAuthIntegrationTest {
             .get(RFID_ENDPOINT + "/" + link.getRFID() + "/user").
         then()
             .statusCode(HttpStatus.SC_OK)
-            .body("username", equalTo(user.getUsername()))
+            .body("email", equalTo(user.getEmail()))
             .body("profile.displayName", equalTo(user.getProfile().getDisplayName()))
             .body("id", equalTo(user.getId().intValue()));
         //@formatter:on

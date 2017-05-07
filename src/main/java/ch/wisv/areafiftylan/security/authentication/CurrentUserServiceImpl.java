@@ -97,7 +97,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     @Override
     public boolean canRemoveFromTeam(Object principal, Long teamId, String email) {
         if (principal instanceof UserDetails) {
-            UserDetails currentUser = (UserDetails) principal;
+            User currentUser = (User) principal;
             Team team = teamService.getTeamById(teamId);
 
             // The Teamcaptain can't remove himself
@@ -107,9 +107,9 @@ public class CurrentUserServiceImpl implements CurrentUserService {
 
             // You can remove people from a Team if you're Admin, the Team Captain, or if you want to remove yourself
             // from the Team
-            return team.getCaptain().getEmail().equals(currentUser.getUsername()) ||
+            return team.getCaptain().getEmail().equals(currentUser.getEmail()) ||
                     currentUser.getAuthorities().contains(Role.ROLE_ADMIN) ||
-                    currentUser.getUsername().equals(email);
+                    currentUser.getEmail().equals(email);
         } else {
             return false;
         }

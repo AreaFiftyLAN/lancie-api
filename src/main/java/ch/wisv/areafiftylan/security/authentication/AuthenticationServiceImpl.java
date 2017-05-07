@@ -42,11 +42,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public String createNewAuthToken(String username) {
-        User user = userService.getUserByUsername(username);
+    public String createNewAuthToken(String email) {
+        User user = userService.getUserByEmail(email);
 
         // Delete the old Token
-        authenticationTokenRepository.findByUserUsername(username).ifPresent(authenticationTokenRepository::delete);
+        authenticationTokenRepository.findByUserEmail(email).ifPresent(authenticationTokenRepository::delete);
 
         return authenticationTokenRepository.save(new AuthenticationToken(user)).getToken();
     }

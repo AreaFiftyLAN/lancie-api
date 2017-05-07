@@ -103,19 +103,19 @@ public class AuthenticationController {
     @RequestMapping(value = "/requestResetPassword", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<?> requestResetPassword(HttpServletRequest request, @RequestBody Map<String, String> body) {
-        String username = body.get("username");
+        String email = body.get("email");
 
-        log.log(Level.getLevel("A5L"), "Requesting password reset on email {}.", username);
+        log.log(Level.getLevel("A5L"), "Requesting password reset on email {}.", email);
 
         try {
-            User user = userService.getUserByUsername(username);
+            User user = userService.getUserByEmail(email);
             userService.requestResetPassword(user, request);
-            log.log(Level.getLevel("A5L"), "Successfully requested password reset on email {}.", username);
+            log.log(Level.getLevel("A5L"), "Successfully requested password reset on email {}.", email);
         } catch (UsernameNotFoundException e) {
             log.warn("Password for {} can't be reset, User doesn't exist");
         }
 
-        return createResponseEntity(HttpStatus.OK, "If you're registered, a password reset link has been sent to " + username);
+        return createResponseEntity(HttpStatus.OK, "If you're registered, a password reset link has been sent to " + email);
     }
 
     /**
@@ -124,7 +124,7 @@ public class AuthenticationController {
      *
      * @param body The body, containing a token and password parameter. TODO: This should be validated
      *
-     * @return A status message telling whethere the action was successful
+     * @return A status message telling whether the action was successful
      */
     @RequestMapping(value = "/resetPassword", method = RequestMethod.POST)
     @ResponseBody
@@ -191,7 +191,7 @@ public class AuthenticationController {
         verificationTokenRepository.saveAndFlush(verificationToken);
 
         //Bind the order to the user
-        orderId.ifPresent(id -> orderService.assignOrderToUser(id, user.getUsername()));
+        orderId.ifPresent(id -> orderService.assignOrderToUser(id, user.getEmail()));
 
         return createResponseEntity(HttpStatus.OK, "Succesfully verified");
     }

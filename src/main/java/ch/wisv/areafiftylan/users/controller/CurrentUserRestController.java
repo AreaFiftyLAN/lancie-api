@@ -141,7 +141,7 @@ public class CurrentUserRestController {
     @RequestMapping(value = "/tickets", method = RequestMethod.GET)
     public Collection<Ticket> getAllTickets(Authentication auth) {
         User currentUser = (User) auth.getPrincipal();
-        return ticketService.findValidTicketsByOwnerUsername(currentUser.getEmail());
+        return ticketService.findValidTicketsByOwnerEmail(currentUser.getEmail());
     }
 
     /**
