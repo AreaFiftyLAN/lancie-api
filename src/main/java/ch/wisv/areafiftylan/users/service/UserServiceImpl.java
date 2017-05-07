@@ -218,6 +218,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public void resetPassword(Long userId, String password) {
         User user = userRepository.findOne(userId);
+        if (Strings.isNullOrEmpty(password)) {
+            throw new IllegalArgumentException("Password can't be empty");
+        }
         // The token is being checked in the authentication, so just set the password here
         user.setPasswordHash(new BCryptPasswordEncoder().encode(password));
         userRepository.saveAndFlush(user);

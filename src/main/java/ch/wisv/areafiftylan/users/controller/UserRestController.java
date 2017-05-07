@@ -176,22 +176,9 @@ public class UserRestController {
         return seatService.getSeatsByUsername(user.getUsername());
     }
 
-    /**
-     * Checks for the availability of a username. Returns false when another user is already registered with this
-     * username.
-     *
-     * @param username The username to be checked.
-     *
-     * @return Whether this username has already been registered.
-     */
-    @RequestMapping(value = "/checkUsername", method = RequestMethod.GET)
-    public Boolean checkUsernameExists(@RequestParam String username) {
-        return userService.checkUsernameAvailable(username);
-    }
-
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<?> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
-        return createResponseEntity(HttpStatus.CONFLICT, "Username or Email already taken!");
+        return createResponseEntity(HttpStatus.CONFLICT, "Email is already in use");
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
