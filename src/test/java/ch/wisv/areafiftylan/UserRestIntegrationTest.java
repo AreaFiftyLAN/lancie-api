@@ -62,24 +62,6 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         return profileDTO;
     }
 
-    @After
-    public void cleanupUserIntegrationTest() {
-        //        userRepository.deleteAll();
-    }
-
-    // CHECK AVAILABILITY
-    @Test
-    public void testUsernameTaken() {
-        User user = createUser();
-
-        when().get("/users/checkUsername?username=" + user.getUsername()).then().body(equalTo("false"));
-    }
-
-    @Test
-    public void testUsernameFree() {
-        when().get("/users/checkUsername?username=freeUsername@mail.com").then().body(equalTo("true"));
-    }
-
     @Test
     public void testGetAllUsersAsAnonymous() {
         //@formatter:off
@@ -701,6 +683,46 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         Map<String, String> userDTO = new HashMap<>();
         userDTO.put("username", user.getUsername());
         userDTO.put("password", newPassword);
+
+        //@formatter:off
+        given().
+            body(userDTO).
+        when().
+            post("/login").
+        then().
+            statusCode(HttpStatus.SC_OK).
+            header("X-Auth-Token", not(isEmptyOrNullString()));
+        //@formatter:on
+    }
+
+    @Test
+    public void testChangePasswordEmptyPassword() {
+        //TODO: Move to new AuthenticationTest
+        User user = createUser();
+
+        String newPassword = "";
+        Map<String, String> passwordDTO = new HashMap<>();
+        passwordDTO.put("oldPassword", cleartextPassword);
+        passwordDTO.put("newPassword", newPassword);
+
+        //@formatter:off
+        Header xAuthTokenHeader = getXAuthTokenHeaderForUser(user);
+
+        given().
+            header(xAuthTokenHeader).
+        when().
+            body(passwordDTO).
+            contentType(ContentType.JSON).
+            post("/users/current/password").
+        then().
+            statusCode(HttpStatus.SC_BAD_REQUEST);
+        //@formatter:on
+
+        removeXAuthToken(xAuthTokenHeader);
+
+        Map<String, String> userDTO = new HashMap<>();
+        userDTO.put("username", user.getUsername());
+        userDTO.put("password", cleartextPassword);
 
         //@formatter:off
         given().

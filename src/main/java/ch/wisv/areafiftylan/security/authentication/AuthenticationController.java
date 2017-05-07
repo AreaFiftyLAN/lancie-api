@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -106,13 +107,15 @@ public class AuthenticationController {
 
         log.log(Level.getLevel("A5L"), "Requesting password reset on email {}.", username);
 
-        User user = userService.getUserByUsername(username);
+        try {
+            User user = userService.getUserByUsername(username);
+            userService.requestResetPassword(user, request);
+            log.log(Level.getLevel("A5L"), "Successfully requested password reset on email {}.", username);
+        } catch (UsernameNotFoundException e) {
+            log.warn("Password for {} can't be reset, User doesn't exist");
+        }
 
-        userService.requestResetPassword(user, request);
-
-        log.log(Level.getLevel("A5L"), "Successfully requested password reset on email {}.", username);
-
-        return createResponseEntity(HttpStatus.OK, "Password reset link sent to " + username);
+        return createResponseEntity(HttpStatus.OK, "If you're registered, a password reset link has been sent to " + username);
     }
 
     /**
