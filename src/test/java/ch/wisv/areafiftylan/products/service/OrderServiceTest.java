@@ -81,7 +81,7 @@ public class OrderServiceTest extends ServiceTest {
         order.setUser(user);
         testEntityManager.persist(order);
 
-        Collection<Order> ordersByUsername = orderService.findOrdersByUsername(user.getUsername());
+        Collection<Order> ordersByUsername = orderService.findOrdersByEmail(user.getUsername());
 
         assertEquals(1, ordersByUsername.size());
     }
@@ -94,7 +94,7 @@ public class OrderServiceTest extends ServiceTest {
         order.setUser(user);
         testEntityManager.persist(order);
 
-        Collection<Order> ordersByUsername = orderService.findOrdersByUsername(user.getUsername().toUpperCase());
+        Collection<Order> ordersByUsername = orderService.findOrdersByEmail(user.getUsername().toUpperCase());
 
         assertEquals(1, ordersByUsername.size());
     }
@@ -110,7 +110,7 @@ public class OrderServiceTest extends ServiceTest {
         testEntityManager.persist(order);
         testEntityManager.persist(order2);
 
-        Collection<Order> ordersByUsername = orderService.findOrdersByUsername(user.getUsername());
+        Collection<Order> ordersByUsername = orderService.findOrdersByEmail(user.getUsername());
 
         assertEquals(2, ordersByUsername.size());
     }
@@ -123,7 +123,7 @@ public class OrderServiceTest extends ServiceTest {
         order.setUser(user);
         testEntityManager.persist(order);
 
-        Collection<Order> ordersByUsername = orderService.findOrdersByUsername(null);
+        Collection<Order> ordersByUsername = orderService.findOrdersByEmail(null);
 
         assertEquals(0, ordersByUsername.size());
     }

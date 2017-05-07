@@ -100,7 +100,7 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public Collection<Ticket> findValidTicketsByOwnerUsername(String username) {
-        return ticketRepository.findAllByOwnerUsernameIgnoreCase(username).stream().
+        return ticketRepository.findAllByOwnerEmailIgnoreCase(username).stream().
                 filter(Ticket::isValid).
                 collect(Collectors.toList());
     }
@@ -227,7 +227,7 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public Collection<TicketTransferToken> getValidTicketTransferTokensByUser(String username) {
-        return tttRepository.findAllByTicketOwnerUsernameIgnoreCase(username).stream().
+        return tttRepository.findAllByTicketOwnerEmailIgnoreCase(username).stream().
                 filter(TicketTransferToken::isValid).
                 collect(Collectors.toList());
     }
@@ -304,14 +304,14 @@ public class TicketServiceImpl implements TicketService {
         Collection<Team> captainedTeams = teamService.getTeamByCaptainId(user.getId());
 
         if (captainedTeams.isEmpty()) {
-            return ticketRepository.findAllByOwnerUsernameIgnoreCase(user.getUsername());
+            return ticketRepository.findAllByOwnerEmailIgnoreCase(user.getUsername());
         } else {
             return captainedTeams.stream().
                     // Get all team members, including the owner
                             flatMap(team -> team.getMembers().stream()).
                     // Find all tickets of those members and filter for validity
                             flatMap(
-                            member -> ticketRepository.findAllByOwnerUsernameIgnoreCase(member.getUsername()).stream()).
+                            member -> ticketRepository.findAllByOwnerEmailIgnoreCase(member.getUsername()).stream()).
                             filter(Ticket::isValid).
                             collect(Collectors.toSet());
         }

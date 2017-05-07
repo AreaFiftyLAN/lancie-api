@@ -52,7 +52,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
 
     private Map<String, String> getTeamDTO(User captain) {
         Map<String, String> team = new HashMap<>();
-        team.put("captainUsername", captain.getUsername());
+        team.put("captainEmail", captain.getEmail());
         team.put("teamName", "Team + " + captain.getId());
         return team;
 
@@ -89,7 +89,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
     public void testCreateTeamAsCaptainDifferentCase() {
         User captain = createUser();
         Map<String, String> teamDTO = getTeamDTO(captain);
-        teamDTO.put("captainUsername", captain.getUsername().toUpperCase());
+        teamDTO.put("captainUsername", captain.getEmail().toUpperCase());
 
         //@formatter:off
         Integer teamId =

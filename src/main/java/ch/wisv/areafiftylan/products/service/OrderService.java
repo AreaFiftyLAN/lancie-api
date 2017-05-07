@@ -31,9 +31,9 @@ public interface OrderService {
 
     List<Order> getAllOrders();
 
-    Collection<Order> findOrdersByUsername(String username);
+    Collection<Order> findOrdersByEmail(String email);
 
-    List<Order> getOpenOrders(String username);
+    List<Order> getOpenOrders(String email);
 
     /**
      * Create a new Order containing a single ticket
@@ -45,7 +45,7 @@ public interface OrderService {
      */
     Order addTicketToOrder(Long orderId, String type, List<String> options);
 
-    Order assignOrderToUser(Long orderId, String username);
+    Order assignOrderToUser(Long orderId, String email);
 
     /**
      * Removes a ticket with the given DTO from an order. Throws a NotFoundException when a ticket with such a DTO can't

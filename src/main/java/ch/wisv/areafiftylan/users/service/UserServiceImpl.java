@@ -72,9 +72,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public User getUserByUsername(String username) {
-        return userRepository.findOneByUsernameIgnoreCase(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User '" + username + "' not found"));
+    public User getUserByEmail(String email) {
+        return userRepository.findOneByEmailIgnoreCase(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User '" + email + "' not found"));
     }
 
     @Override
@@ -88,7 +88,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
         // Hash the plain password coming from the DTO
         String passwordHash = getPasswordHash(userDTO.getPassword());
-        User user = new User(userDTO.getUsername(), passwordHash);
+        User user = new User(userDTO.getEmail(), passwordHash);
         // All users that register through the service have to be verified
         user.setEnabled(false);
 
@@ -102,8 +102,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     private void handleDuplicateUserFields(UserDTO userDTO) throws DataIntegrityViolationException {
         // Check if the username already exists
-        userRepository.findOneByUsernameIgnoreCase(userDTO.getUsername()).ifPresent(u -> {
-            throw new DataIntegrityViolationException("username already in use");
+        userRepository.findOneByEmailIgnoreCase(userDTO.getEmail()).ifPresent(u -> {
+            throw new DataIntegrityViolationException("Email already in use");
         });
     }
 
@@ -124,7 +124,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public User replace(Long userId, UserDTO userDTO) {
         User user = userRepository.getOne(userId);
 
-        user.setUsername(userDTO.getUsername());
+        user.setEmail(userDTO.getEmail());
         user.setPasswordHash(getPasswordHash(userDTO.getPassword()));
         user.resetProfile();
 
@@ -140,8 +140,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public User edit(Long userId, UserDTO userDTO) {
         User user = userRepository.findOne(userId);
-        if (!Strings.isNullOrEmpty(userDTO.getUsername())) {
-            user.setUsername(userDTO.getUsername());
+        if (!Strings.isNullOrEmpty(userDTO.getEmail())) {
+            user.setEmail(userDTO.getEmail());
         }
         if (!Strings.isNullOrEmpty(userDTO.getPassword())) {
             user.setPasswordHash(getPasswordHash(userDTO.getPassword()));
@@ -239,8 +239,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public Boolean checkUsernameAvailable(String username) {
-        return !userRepository.findOneByUsernameIgnoreCase(username).isPresent();
+    public Boolean checkEmailAvailable(String username) {
+        return !userRepository.findOneByEmailIgnoreCase(username).isPresent();
 
     }
 
@@ -263,7 +263,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findOneByUsernameIgnoreCase(username)
+        return userRepository.findOneByEmailIgnoreCase(username)
                 .orElseThrow(() -> new UsernameNotFoundException(username));
     }
 }

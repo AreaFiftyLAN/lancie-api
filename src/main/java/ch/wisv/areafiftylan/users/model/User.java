@@ -35,7 +35,7 @@ import java.util.Set;
 
 
 @Entity
-@Table(uniqueConstraints = { @UniqueConstraint(name = "username", columnNames = { "username" }) })
+@Table(uniqueConstraints = { @UniqueConstraint(name = "email", columnNames = { "email" }) })
 @EqualsAndHashCode
 @NoArgsConstructor
 public class User implements Serializable, UserDetails {
@@ -45,10 +45,10 @@ public class User implements Serializable, UserDetails {
 
     @Column(nullable = false)
     @JsonView(View.NoProfile.class)
-    @Email(message = "Username should be a valid Email!")
+    @Email(message = "Email should be valid!")
     @Getter
     @Setter
-    private String username;
+    private String email;
 
     @OneToOne(targetEntity = Profile.class, cascade = CascadeType.ALL)
     @JsonView(View.Public.class)
@@ -84,8 +84,8 @@ public class User implements Serializable, UserDetails {
     @Setter
     private boolean enabled = true;
 
-    public User(String username, String passwordHash) {
-        this.username = username;
+    public User(String email, String passwordHash) {
+        this.email = email;
         this.passwordHash = passwordHash;
         this.profile = new Profile();
         this.roles = new HashSet<>();
@@ -94,6 +94,12 @@ public class User implements Serializable, UserDetails {
 
     public void setPasswordHash(String passwordHash) {
         this.passwordHash = passwordHash;
+    }
+
+    // This method is created to allow logging is using the email field
+    @Override
+    public String getUsername() {
+        return email;
     }
 
     @Override
@@ -117,6 +123,6 @@ public class User implements Serializable, UserDetails {
 
     @JsonView(View.Public.class)
     public int getReference() {
-        return username.hashCode();
+        return email.hashCode();
     }
 }

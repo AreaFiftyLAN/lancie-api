@@ -53,8 +53,8 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public Team create(String username, String teamname) {
-        User captain = userService.getUserByUsername(username);
+    public Team create(String email, String teamname) {
+        User captain = userService.getUserByEmail(email);
         Team team = new Team(teamname, captain);
 
         return teamRepository.saveAndFlush(team);
@@ -87,8 +87,8 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public Collection<Team> getTeamsByUsername(String username) {
-        return teamRepository.findAllByMembersUsernameIgnoreCase(username);
+    public Collection<Team> getTeamsByEmail(String email) {
+        return teamRepository.findAllByMembersUsernameIgnoreCase(email);
     }
 
     @Override
@@ -103,7 +103,7 @@ public class TeamServiceImpl implements TeamService {
         // If the Captain username is set and different from the current captain, change the Captain
         String captainUsername = input.getCaptainUsername();
         if (!Strings.isNullOrEmpty(captainUsername) && !captainUsername.equals(current.getCaptain().getUsername())) {
-            User captain = userService.getUserByUsername(captainUsername);
+            User captain = userService.getUserByEmail(captainUsername);
             current.setCaptain(captain);
         }
 
@@ -122,8 +122,8 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public TeamInviteToken inviteMember(Long teamId, String username) {
-        User user = userService.getUserByUsername(username);
+    public TeamInviteToken inviteMember(Long teamId, String email) {
+        User user = userService.getUserByEmail(email);
         Team team = getTeamById(teamId);
 
         // Check if the member isn't already part of the team
@@ -131,7 +131,7 @@ public class TeamServiceImpl implements TeamService {
             throw new IllegalArgumentException("User is already a member of this team");
         }
 
-        if (isUserAlreadyInvited(username, team)) {
+        if (isUserAlreadyInvited(email, team)) {
             TeamInviteToken inviteToken = new TeamInviteToken(user, team);
             teamInviteTokenRepository.save(inviteToken);
 
@@ -159,8 +159,8 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public List<TeamInviteResponse> findTeamInvitesByUsername(String username) {
-        Collection<TeamInviteToken> inviteTokens = teamInviteTokenRepository.findByUserUsernameIgnoreCase(username);
+    public List<TeamInviteResponse> findTeamInvitesByEmail(String email) {
+        Collection<TeamInviteToken> inviteTokens = teamInviteTokenRepository.findByUserUsernameIgnoreCase(email);
 
         return teamInviteTokensToReponses(inviteTokens);
     }
@@ -192,9 +192,9 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public void addMember(Long teamId, String username) {
+    public void addMember(Long teamId, String email) {
         Team team = teamRepository.getOne(teamId);
-        User user = userService.getUserByUsername(username);
+        User user = userService.getUserByEmail(email);
         if (team.addMember(user)) {
             teamRepository.saveAndFlush(team);
         } else {
@@ -203,9 +203,9 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public boolean removeMember(Long teamId, String username) {
+    public boolean removeMember(Long teamId, String email) {
         Team team = getTeamById(teamId);
-        User user = userService.getUserByUsername(username);
+        User user = userService.getUserByEmail(email);
         if (team.getCaptain().equals(user)) {
             return false;
         }

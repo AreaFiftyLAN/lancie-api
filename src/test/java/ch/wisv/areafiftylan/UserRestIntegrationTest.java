@@ -579,7 +579,7 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
             body("message", equalTo("User disabled"));
         //@formatter:on
 
-        User disabledUser = userRepository.findOneByUsernameIgnoreCase(user.getUsername()).orElse(user);
+        User disabledUser = userRepository.findOneByEmailIgnoreCase(user.getUsername()).orElse(user);
         assertFalse("User is disabled", disabledUser.isAccountNonLocked());
     }
 

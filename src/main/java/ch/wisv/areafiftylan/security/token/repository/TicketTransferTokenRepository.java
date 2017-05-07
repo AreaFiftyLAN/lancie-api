@@ -27,5 +27,5 @@ public interface TicketTransferTokenRepository extends TokenRepository<TicketTra
 
     Collection<TicketTransferToken> findAllByTicketId(Long ticketId);
 
-    Collection<TicketTransferToken> findAllByTicketOwnerUsernameIgnoreCase(String username);
+    Collection<TicketTransferToken> findAllByTicketOwnerEmailIgnoreCase(String email);
 }

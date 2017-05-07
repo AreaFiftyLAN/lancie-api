@@ -20,10 +20,10 @@ package ch.wisv.areafiftylan.exception;
 public class UserNotFoundException extends AreaFiftyLANException {
 
     public UserNotFoundException(Long userId) {
-        super("could not find user '" + userId + "'.");
+        super("Could not find user '" + userId + "'.");
     }
 
-    public UserNotFoundException(String username) {
-        super("could not find user '" + username + "'.");
+    public UserNotFoundException(String email) {
+        super("Could not find user '" + email + "'.");
     }
 }

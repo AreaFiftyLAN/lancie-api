@@ -173,7 +173,7 @@ public class UserRestController {
     @GetMapping("/{userId}/seat")
     public List<Seat> getSeatByUser(@PathVariable Long userId) {
         User user = userService.getUserById(userId);
-        return seatService.getSeatsByUsername(user.getUsername());
+        return seatService.getSeatsByEmail(user.getUsername());
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)

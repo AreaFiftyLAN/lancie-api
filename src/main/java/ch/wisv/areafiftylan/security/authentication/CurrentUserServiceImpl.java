@@ -74,8 +74,8 @@ public class CurrentUserServiceImpl implements CurrentUserService {
         if (principal instanceof UserDetails) {
             User user = (User) principal;
             Team team = teamService.getTeamById(teamId);
-            // Check for each of the teammembers if the username matches the requester
-            return team.getMembers().stream().anyMatch(u -> u.getUsername().equals(user.getUsername())) ||
+            // Check for each of the teammembers if the email matches the requester
+            return team.getMembers().stream().anyMatch(u -> u.getEmail().equals(user.getEmail())) ||
                     user.getAuthorities().contains(Role.ROLE_ADMIN);
         } else {
             return false;
@@ -85,9 +85,9 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     @Override
     public boolean canEditTeam(Object principal, Long teamId) {
         if (principal instanceof UserDetails) {
-            UserDetails user = (UserDetails) principal;
+            User user = (User) principal;
             Team team = teamService.getTeamById(teamId);
-            return team.getCaptain().getUsername().equals(user.getUsername()) ||
+            return team.getCaptain().getEmail().equals(user.getEmail()) ||
                     user.getAuthorities().contains(Role.ROLE_ADMIN);
         } else {
             return false;
@@ -95,21 +95,21 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     }
 
     @Override
-    public boolean canRemoveFromTeam(Object principal, Long teamId, String username) {
+    public boolean canRemoveFromTeam(Object principal, Long teamId, String email) {
         if (principal instanceof UserDetails) {
             UserDetails currentUser = (UserDetails) principal;
             Team team = teamService.getTeamById(teamId);
 
             // The Teamcaptain can't remove himself
-            if (team.getCaptain().getUsername().equals(username)) {
+            if (team.getCaptain().getEmail().equals(email)) {
                 return false;
             }
 
             // You can remove people from a Team if you're Admin, the Team Captain, or if you want to remove yourself
             // from the Team
-            return team.getCaptain().getUsername().equals(currentUser.getUsername()) ||
+            return team.getCaptain().getEmail().equals(currentUser.getUsername()) ||
                     currentUser.getAuthorities().contains(Role.ROLE_ADMIN) ||
-                    currentUser.getUsername().equals(username);
+                    currentUser.getUsername().equals(email);
         } else {
             return false;
         }
@@ -127,7 +127,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
         if (principal instanceof UserDetails) {
             User user = (User) principal;
             // Return true if the order is owned by the user, or the user is an admin
-            return order.getUser().getUsername().equals(user.getUsername()) ||
+            return order.getUser().getEmail().equals(user.getEmail()) ||
                     user.getAuthorities().contains(Role.ROLE_ADMIN);
         } else {
             return false;
@@ -167,15 +167,15 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     public boolean hasAnyTicket(Object principal) {
         if (principal instanceof UserDetails) {
             User user = (User) principal;
-            return hasAnyTicket(user.getUsername()) || user.getAuthorities().contains(Role.ROLE_ADMIN);
+            return hasAnyTicket(user.getEmail()) || user.getAuthorities().contains(Role.ROLE_ADMIN);
         } else {
             return false;
         }
     }
 
     @Override
-    public boolean hasAnyTicket(String username) {
-        return ticketRepository.findAllByOwnerUsernameIgnoreCase(username).stream().anyMatch(Ticket::isValid);
+    public boolean hasAnyTicket(String email) {
+        return ticketRepository.findAllByOwnerEmailIgnoreCase(email).stream().anyMatch(Ticket::isValid);
     }
 
     @Override

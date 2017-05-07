@@ -26,7 +26,7 @@ import java.util.Collection;
 import java.util.List;
 
 public interface TeamService {
-    Team create(String username, String teamname);
+    Team create(String email, String teamname);
 
     Team getTeamById(Long id);
 
@@ -38,23 +38,23 @@ public interface TeamService {
 
     Collection<Team> getAllTeams();
 
-    Collection<Team> getTeamsByUsername(String username);
+    Collection<Team> getTeamsByEmail(String email);
 
     Team update(Long teamId, TeamDTO input);
 
     Team delete(Long teamId);
 
-    TeamInviteToken inviteMember(Long teamId, String username);
+    TeamInviteToken inviteMember(Long teamId, String email);
 
     void revokeInvite(String token);
 
-    List<TeamInviteResponse> findTeamInvitesByUsername(String username);
+    List<TeamInviteResponse> findTeamInvitesByEmail(String email);
 
     List<TeamInviteResponse> findTeamInvitesByTeamId(Long teamId);
 
     void addMemberByInvite(String token);
 
-    void addMember(Long teamId, String username);
+    void addMember(Long teamId, String email);
 
-    boolean removeMember(Long teamId, String username);
+    boolean removeMember(Long teamId, String email);
 }

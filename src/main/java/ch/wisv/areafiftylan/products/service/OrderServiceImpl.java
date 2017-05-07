@@ -86,15 +86,15 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Collection<Order> findOrdersByUsername(String username) {
-        return orderRepository.findAllByUserUsernameIgnoreCase(username);
+    public Collection<Order> findOrdersByEmail(String email) {
+        return orderRepository.findAllByUserEmailIgnoreCase(email);
     }
 
     @Override
-    public List<Order> getOpenOrders(String username) {
-        Collection<Order> ordersByUsername = findOrdersByUsername(username);
+    public List<Order> getOpenOrders(String email) {
+        Collection<Order> ordersByEmail = findOrdersByEmail(email);
 
-        return ordersByUsername.stream().
+        return ordersByEmail.stream().
                 filter(o -> o.getStatus().equals(OrderStatus.ASSIGNED)).
                 collect(Collectors.toList());
     }
@@ -144,12 +144,12 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Order assignOrderToUser(Long orderId, String username) {
+    public Order assignOrderToUser(Long orderId, String email) {
         Order order = getOrderById(orderId);
-        User user = userService.getUserByUsername(username);
+        User user = userService.getUserByEmail(email);
 
         // Expire all other open orders for this user
-        getOpenOrders(username).forEach(this::expireOrder);
+        getOpenOrders(email).forEach(this::expireOrder);
 
         if (order.getStatus() != OrderStatus.ANONYMOUS) {
             throw new ImmutableOrderException(order.getId());
@@ -214,7 +214,7 @@ public class OrderServiceImpl implements OrderService {
 
         if (order.getStatus().equals(OrderStatus.PAID)) {
             for (Ticket ticket : order.getTickets()) {
-                ticketService.assignTicketToUser(ticket.getId(), order.getUser().getUsername());
+                ticketService.assignTicketToUser(ticket.getId(), order.getUser().getEmail());
                 ticketService.validateTicket(ticket.getId());
             }
         }

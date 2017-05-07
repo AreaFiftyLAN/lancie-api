@@ -27,12 +27,12 @@ public class TeamInviteResponse {
     @Getter
     String token;
     @Getter
-    String username;
+    String email;
 
-    public TeamInviteResponse(Long teamId, String teamName, String token, String username) {
+    public TeamInviteResponse(Long teamId, String teamName, String token, String email) {
         this.teamId = teamId;
         this.teamName = teamName;
         this.token = token;
-        this.username = username;
+        this.email = email;
     }
 }

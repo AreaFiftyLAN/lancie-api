@@ -32,5 +32,5 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
     Integer countByType(TicketType type);
 
-    Collection<Ticket> findAllByOwnerUsernameIgnoreCase(String username);
+    Collection<Ticket> findAllByOwnerEmailIgnoreCase(String email);
 }
