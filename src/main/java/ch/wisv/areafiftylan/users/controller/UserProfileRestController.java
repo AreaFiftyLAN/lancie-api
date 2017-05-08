@@ -25,7 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -57,20 +56,6 @@ public class UserProfileRestController {
         User user = userService.addProfile(userId, input);
 
         return createResponseEntity(HttpStatus.OK, "Profile successfully set", user.getProfile());
-    }
-
-    /**
-     * Add a profile to the current user. An empty profile is created when a user is created, so this method fills the
-     * existing fields
-     *
-     * @param input A representation of the profile
-     *
-     * @return The user with the new profile
-     */
-    @PreAuthorize("isAuthenticated()")
-    @RequestMapping(value = "/current/profile", method = RequestMethod.POST)
-    public ResponseEntity<?> addProfile(@Validated @RequestBody ProfileDTO input, Authentication auth) {
-        return this.addProfile(((User) auth.getPrincipal()).getId(), input);
     }
 
     /**

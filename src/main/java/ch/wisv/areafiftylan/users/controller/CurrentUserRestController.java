@@ -28,6 +28,7 @@ import ch.wisv.areafiftylan.security.authentication.PasswordChangeDTO;
 import ch.wisv.areafiftylan.teams.model.Team;
 import ch.wisv.areafiftylan.teams.model.TeamInviteResponse;
 import ch.wisv.areafiftylan.teams.service.TeamService;
+import ch.wisv.areafiftylan.users.model.ProfileDTO;
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.users.service.UserService;
 import ch.wisv.areafiftylan.utils.view.View;
@@ -36,13 +37,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
 import java.util.List;
@@ -51,7 +48,6 @@ import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEnt
 
 @RestController
 @RequestMapping("/users/current")
-@PreAuthorize("isAuthenticated()")
 public class CurrentUserRestController {
 
     private final UserService userService;
@@ -71,105 +67,128 @@ public class CurrentUserRestController {
     }
 
     /**
-     * The GET /users/current/ mapping is located in the UserRestController as all methods in this authentication
-     * require
-     * Authentication
+     * Get the User currently logged in. Because our User model implements the Spring Security UserDetails, this can be
+     * automatically resolved from the current Authentication.getPrincipal(). Returns a not-found entity if
+     * there's no user logged in. Returns the user.
+     *
+     * @param user automatically resolve the current Authentication.getPrincipal() for Spring MVC arguments.
+     *
+     * @return The currently logged in User.
      */
+    @GetMapping
+    public ResponseEntity<?> getCurrentUser(@AuthenticationPrincipal User user) {
+        // To prevent 403 errors on this endpoint, we manually handle unauthenticated users, instead of a
+        // preauthorize tag.
+        if (user == null) {
+            return createResponseEntity(HttpStatus.OK, "Not logged in.");
+        } else {
+            return new ResponseEntity<>(user, HttpStatus.OK);
+        }
+    }
+
+    /**
+     * Add a profile to the current user. An empty profile is created when a user is created, so this method fills the
+     * existing fields.
+     *
+     * @param input A representation of the profile.
+     *
+     * @return The user with the new profile.
+     */
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/profile")
+    public ResponseEntity<?> addProfile(@AuthenticationPrincipal User user, @Validated @RequestBody ProfileDTO input) {
+        user = userService.addProfile(user.getId(), input);
+        return createResponseEntity(HttpStatus.OK, "Profile successfully set", user.getProfile());
+    }
 
     /**
      * This mapping allows the user to change their password while logged in. This is different from the password reset
      * functionality which works with tokens. Users have to provide both their old and new password, and have to be
      * fully authenticated, meaning that they can't be coming from a "Remember me" session.
      *
-     * @param auth              The current user
-     * @param passwordChangeDTO DTO containing oldPassword and newPassword
+     * @param passwordChangeDTO DTO containing oldPassword and newPassword.
      *
-     * @return Statusmessage
+     * @return Statusmessage of the request.
      */
-    @RequestMapping(value = "/password", method = RequestMethod.POST)
-    public ResponseEntity<?> changeCurrentUserPassword(Authentication auth,
-                                                       @RequestBody @Validated PasswordChangeDTO passwordChangeDTO) {
-        User currentUser = (User) auth.getPrincipal();
-
-        userService.changePassword(currentUser.getId(), passwordChangeDTO.getOldPassword(),
-                passwordChangeDTO.getNewPassword());
-
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/password")
+    public ResponseEntity<?> changeCurrentUserPassword(@AuthenticationPrincipal User user, @RequestBody @Validated PasswordChangeDTO passwordChangeDTO) {
+        userService.changePassword(user.getId(), passwordChangeDTO.getOldPassword(), passwordChangeDTO.getNewPassword());
         return createResponseEntity(HttpStatus.OK, "Password successfully changed");
     }
 
     /**
      * Get all the Teams the current user is a member of.
      *
-     * @param auth Current Authentication object, automatically taken from the SecurityContext
-     *
-     * @return A Collection of Teams of which the current User is a member
+     * @return A Collection of Teams of which the current User is a member.
      */
     @JsonView(View.Team.class)
-    @RequestMapping(value = "/teams", method = RequestMethod.GET)
-    public Collection<Team> getCurrentTeams(Authentication auth) {
-        UserDetails currentUser = (UserDetails) auth.getPrincipal();
-        return teamService.getTeamsByUsername(currentUser.getUsername());
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/teams")
+    public Collection<Team> getCurrentTeams(@AuthenticationPrincipal User user) {
+        return teamService.getTeamsByUsername(user.getUsername());
     }
 
-    @RequestMapping(value = "/teams/invites", method = RequestMethod.GET)
-    public List<TeamInviteResponse> getOpenInvites(Authentication auth) {
-        User currentUser = (User) auth.getPrincipal();
-
-        return teamService.findTeamInvitesByUsername(currentUser.getUsername());
+    /**
+     * Get all invites of all Teams the current user is a member of.
+     *
+     * @return A List of TeamInviteResponse's of your teams.
+     */
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/teams/invites")
+    public List<TeamInviteResponse> getOpenInvites(@AuthenticationPrincipal User user) {
+        return teamService.findTeamInvitesByUsername(user.getUsername());
     }
 
     /**
      * Get all Orders that the current User created. This doesn't include expired orders. This will be a Collection with
      * size 0 or 1 of the majority, but it can contain more orders.
      *
-     * @param auth The current User
-     *
      * @return A collection of Orders of the current User.
      */
     @JsonView(View.OrderOverview.class)
-    @RequestMapping(value = "/orders", method = RequestMethod.GET)
-    public Collection<Order> getAllOrders(Authentication auth) {
-        UserDetails currentUser = (UserDetails) auth.getPrincipal();
-        return orderService.findOrdersByUsername(currentUser.getUsername());
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/orders")
+    public Collection<Order> getAllOrders(@AuthenticationPrincipal User user) {
+        return orderService.findOrdersByUsername(user.getUsername());
     }
 
     /**
      * Get the tickets of the currently logged in user. All the tickets owned by this user will be returned.
      *
-     * @param auth The current User, injected by spring
-     *
-     * @return The current owned tickets, if any exist
+     * @return The current owned tickets, if any exist.
      */
-    @RequestMapping(value = "/tickets", method = RequestMethod.GET)
-    public Collection<Ticket> getAllTickets(Authentication auth) {
-        UserDetails currentUser = (UserDetails) auth.getPrincipal();
-        return ticketService.findValidTicketsByOwnerUsername(currentUser.getUsername());
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/tickets")
+    public Collection<Ticket> getAllTickets(@AuthenticationPrincipal User user) {
+        return ticketService.findValidTicketsByOwnerUsername(user.getUsername());
     }
 
     /**
      * Get the current open order include expired orders. A User van only have one open order.
      *
-     * @param auth The current User, injected by Spring
-     *
-     * @return The current open order, if any exist
+     * @return The current open order, if any exist.
      */
-    @RequestMapping(value = "/orders/open", method = RequestMethod.GET)
-    public List<Order> getOpenOrder(Authentication auth) {
-        UserDetails currentUser = (UserDetails) auth.getPrincipal();
-        return orderService.getOpenOrders(currentUser.getUsername());
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/orders/open")
+    public List<Order> getOpenOrder(@AuthenticationPrincipal User user) {
+        return orderService.getOpenOrders(user.getUsername());
     }
 
     /**
-     * Get the seats of the current user
+     * Get the seats of the current user.
      *
-     * @param auth Currently logged in user
-     *
-     * @return Returns a list of reserved seats by the user
+     * @return Returns a list of reserved seats by the user.
      */
-    @RequestMapping(value = "/seat", method = RequestMethod.GET)
-    public List<Seat> getCurrentUserSeat(Authentication auth) {
-        User user = (User) auth.getPrincipal();
-
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/seat")
+    public List<Seat> getCurrentUserSeat(@AuthenticationPrincipal User user) {
         return seatService.getSeatsByUsername(user.getUsername());
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin")
+    public ResponseEntity<?> adminCheck() {
+        return createResponseEntity(HttpStatus.OK, "You are an admin.");
     }
 }
