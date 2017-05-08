@@ -22,28 +22,29 @@ import ch.wisv.areafiftylan.teams.model.Team;
 import ch.wisv.areafiftylan.users.model.User;
 
 import java.util.Collection;
+import java.util.Map;
 
 public interface MailService {
 
-    void sendMail(String recipientEmail, String recipientName, String subject, String message);
+    void sendTemplateMail(String recipientEmail, String templateName, Map<String, String> injections);
 
-    void sendContactMail(String senderEmail, String subject, String message);
+    void sendTemplateMailToCollection(Collection<String> recipientEmails, String templateName, Map<String, String> injections);
 
-    void sendTemplateMailToTeam(Team team, MailDTO mailDTO);
+    void sendCustomMail(String recipientEmail, MailDTO mailDTO);
 
-    void sendTemplateMailToAll(Collection<User> users, MailDTO mailDTO);
+    void sendCustomMailToCollection(Collection<String> recipientEmails, MailDTO mailDTO);
 
-    void sendTemplateMailToUser(User user, MailDTO mailDTO);
+    void sendContactMail(String sender, String subject, String message);
 
     void sendVerificationmail(User user, String url);
 
-    void sendOrderConfirmation(Order order);
+    void sendOrderConfirmationMail(Order order);
 
     void sendPasswordResetMail(User user, String url);
 
-    void sendTicketTransferMail(User sender, User receiver, String url);
+    void sendTicketTransferMail(User receiver, User sender, String url);
 
-    void sendTeamInviteMail(User user, String teamName, User teamCaptain);
+    void sendTeamInviteMail(User user, Team team);
 
     void sendSeatOverrideMail(User user);
 }

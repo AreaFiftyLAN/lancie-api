@@ -28,6 +28,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.stream.Collectors;
+
 import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEntity;
 
 @RestController
@@ -56,9 +58,7 @@ public class MailRestController {
     @RequestMapping(value = "/user/{userId}", method = RequestMethod.POST)
     ResponseEntity<?> sendMailToUser(@PathVariable Long userId, @Validated @RequestBody MailDTO mailDTO) {
         User user = userService.getUserById(userId);
-
-        mailService.sendTemplateMailToUser(user, mailDTO);
-
+        mailService.sendCustomMail(user.getUsername(), mailDTO);
         return createResponseEntity(HttpStatus.OK, "Mail successfully sent");
 
     }
@@ -67,15 +67,14 @@ public class MailRestController {
     @RequestMapping(value = "/team/{teamId}", method = RequestMethod.POST)
     ResponseEntity<?> sendMailToTeam(@PathVariable Long teamId, @Validated @RequestBody MailDTO mailDTO) {
         Team team = teamService.getTeamById(teamId);
-        mailService.sendTemplateMailToTeam(team, mailDTO);
-
+        mailService.sendCustomMailToCollection(team.getMembers().stream().map(User::getUsername).collect(Collectors.toList()), mailDTO);
         return createResponseEntity(HttpStatus.OK, "Mail successfully sent");
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @RequestMapping(value = "/users/all/YESREALLY", method = RequestMethod.POST)
     ResponseEntity<?> sendMailToAll(@Validated @RequestBody MailDTO mailDTO) {
-        mailService.sendTemplateMailToAll(userService.getAllUsers(), mailDTO);
+        mailService.sendCustomMailToCollection(userService.getAllUsers().stream().map(User::getUsername).collect(Collectors.toList()), mailDTO);
         return createResponseEntity(HttpStatus.OK, "Mail successfully sent");
     }
 }

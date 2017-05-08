@@ -17,9 +17,12 @@
 
 package ch.wisv.areafiftylan.utils.mail;
 
+import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.model.order.Order;
 import ch.wisv.areafiftylan.teams.model.Team;
 import ch.wisv.areafiftylan.users.model.User;
+import ch.wisv.areafiftylan.utils.mail.template.MailTemplate;
+import ch.wisv.areafiftylan.utils.mail.template.MailTemplateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
@@ -28,20 +31,20 @@ import org.springframework.mail.MailSendException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-import org.thymeleaf.context.Context;
 import org.thymeleaf.spring4.SpringTemplateEngine;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.util.Collection;
-import java.util.Locale;
+import java.util.HashMap;
+import java.util.Map;
 
 @SuppressWarnings("SpringJavaAutowiringInspection")
 @Service
 public class MailServiceImpl implements MailService {
 
     private final JavaMailSender mailSender;
-
+    private final MailTemplateService templateService;
     private final SpringTemplateEngine templateEngine;
 
     @Value("${a5l.mail.sender}")
@@ -51,26 +54,24 @@ public class MailServiceImpl implements MailService {
     String contact;
 
     @Autowired
-    public MailServiceImpl(JavaMailSender mailSender, SpringTemplateEngine templateEngine) {
+    public MailServiceImpl(JavaMailSender mailSender, MailTemplateService mailTemplateService, SpringTemplateEngine templateEngine) {
         this.mailSender = mailSender;
+        this.templateService = mailTemplateService;
         this.templateEngine = templateEngine;
     }
 
-    private void sendMailWithContent(String recipientEmail, String subject, String content) {
-        // Prepare message using a Spring helper
+    //region Helper methods
+    private void sendMimeMail(String sender, String recipientEmail, String subject, String content) {
         MimeMessage mimeMessage = this.mailSender.createMimeMessage();
         MimeMessageHelper message;
 
         try {
             message = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-            message.setSubject("[Area FiftyLAN] " + subject);
             message.setFrom(sender);
             message.setTo(recipientEmail);
+            message.setSubject(subject);
+            message.setText(content, true);
 
-            // Create the HTML body using Thymeleaf
-            message.setText(content, true); // true = isHtml
-
-            // Send mail
             this.mailSender.send(mimeMessage);
         } catch (MessagingException e) {
             throw new MailPreparationException("Unable to prepare email", e.getCause());
@@ -79,119 +80,122 @@ public class MailServiceImpl implements MailService {
         }
     }
 
-    @Override
-    public void sendMail(String recipientEmail, String recipientName, String subject, String messageString) {
-        String htmlContent = prepareHtmlContent(recipientName, messageString);
-        sendMailWithContent(recipientEmail, subject, htmlContent);
-    }
-
-    @Override
-    public void sendContactMail(String senderEmail, String subject, String messageString) {
-        MimeMessage mimeMessage = this.mailSender.createMimeMessage();
-        MimeMessageHelper message;
-
-        try {
-            message = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-            message.setSubject("[Contact] " + subject);
-            message.setFrom(senderEmail);
-            message.setTo(contact);
-
-            message.setText(messageString);
-
-            this.mailSender.send(mimeMessage);
-        } catch (MessagingException m) {
-            throw new MailSendException("Unable to send email", m.getCause());
+    /**
+     * Replaces substrings in the message and subject of the MailTemplate.
+     * Using a Map<K, V>, replace all K with V.
+     * Regex is allowed in the K values.
+     *
+     * @param mailTemplate The MailTemplate to inject.
+     * @param injections The Strings to inject.
+     * @return The injected MailTemplate.
+     */
+    private MailTemplate injectMailTemplate(MailTemplate mailTemplate, Map<String, String> injections) {
+        String message = mailTemplate.getMessage();
+        String subject = mailTemplate.getSubject();
+        for (Map.Entry<String, String> injection : injections.entrySet()) {
+            message = message.replaceAll(injection.getKey(), injection.getValue());
+            subject = subject.replaceAll(injection.getKey(), injection.getValue());
         }
-    }
-
-    private String prepareHtmlContent(String name, String message) {
-        // Prepare the evaluation context
-        final Context ctx = new Context(new Locale("en"));
-        ctx.setVariable("name", name);
-        ctx.setVariable("message", message);
-        return this.templateEngine.process("mailTemplate", ctx);
+        mailTemplate.setSubject(subject);
+        mailTemplate.setMessage(message);
+        return mailTemplate;
     }
 
     private String formatRecipient(User user) {
-        if (user.getProfile() != null) {
-            return user.getProfile().getFirstName() + " " + user.getProfile().getLastName();
-        } else {
+        if (user.getProfile() == null ||
+            user.getProfile().getFirstName().equals("") ||
+            user.getProfile().getLastName().equals("")) {
             return user.getUsername();
+        } else {
+            return user.getProfile().getFirstName() + " " + user.getProfile().getLastName();
+        }
+    }
+    //endregion Helper methods
+    //region Generic mail methods
+    @Override
+    public void sendTemplateMail(String recipientEmail, String templateName, Map<String, String> injections) {
+        MailTemplate mailTemplate = templateService.getMailTemplateByTemplateName(templateName);
+        mailTemplate = injectMailTemplate(mailTemplate, injections);
+        sendMimeMail(sender, recipientEmail, mailTemplate.getSubject(), mailTemplate.getMessage());
+    }
+
+    @Override
+    public void sendTemplateMailToCollection(Collection<String> recipientEmails, String templateName, Map<String, String> injections) {
+        for (String recipientEmail : recipientEmails) {
+            sendTemplateMail(recipientEmail, templateName, injections);
         }
     }
 
     @Override
-    public void sendTemplateMailToTeam(Team team, MailDTO mailDTO) {
-        for (User user : team.getMembers()) {
-            sendTemplateMailToUser(user, mailDTO);
-        }
+    public void sendCustomMail(String recipient, MailDTO mailDTO) {
+        sendMimeMail(sender, recipient, mailDTO.getSubject(), mailDTO.getMessage());
     }
 
     @Override
-    public void sendTemplateMailToAll(Collection<User> users, MailDTO mailDTO) {
-        for (User user : users) {
-            sendTemplateMailToUser(user, mailDTO);
+    public void sendCustomMailToCollection(Collection<String> recipientEmails, MailDTO mailDTO) {
+        for (String recipientEmail : recipientEmails) {
+            sendCustomMail(recipientEmail, mailDTO);
         }
     }
-
+    //endregion Generic mail methods
+    //region Specific mail methods
     @Override
-    public void sendTemplateMailToUser(User user, MailDTO mailDTO) {
-        sendMail(user.getUsername(), formatRecipient(user), mailDTO.getSubject(), mailDTO.getMessage());
+    public void sendContactMail(String sender, String subject, String message) {
+        sendMimeMail(sender, contact, "[Contact] " + subject, message);
     }
 
     @Override
     public void sendVerificationmail(User user, String url) {
-        String message =
-                "Please click on the following link to complete your registration: <a href=\"" + url + "\">" + url +
-                        "</a><br /><br />If the link does not work, please copy the link and" +
-                        " paste it into your browser.";
-        sendMail(user.getUsername(), formatRecipient(user), "Confirm your registration", message);
+        Map<String, String> injections = new HashMap<>();
+        injections.put("${url}", url);
+        injections.put("${addressee}", formatRecipient(user));
+        sendTemplateMail(user.getUsername(), "verification", injections);
     }
 
     @Override
-    public void sendOrderConfirmation(Order order) {
-        // Prepare the evaluation context
-        final Context ctx = new Context(new Locale("en"));
-        ctx.setVariable("name",
-                order.getUser().getProfile().getFirstName() + " " + order.getUser().getProfile().getLastName());
-        ctx.setVariable("order", order);
-        String content = this.templateEngine.process("orderConfirmation", ctx);
+    public void sendOrderConfirmationMail(Order order) {
+        Map<String, String> injections = new HashMap<>();
+        injections.put("${addressee}", formatRecipient(order.getUser()));
+        String ticketinjection = "";
+        for (Ticket ticket : order.getTickets()) {
+            //TODO
+            ticketinjection = ticketinjection + "<BUNCH OF HTML AROUND A TICKET>" + ticket.getType().getText() + ticket.getEnabledOptions() + "MORE HTML CLOSING THE TICKET";
+        }
 
-        sendMailWithContent(order.getUser().getUsername(), "Order Confirmation", content);
+        sendTemplateMail(order.getUser().getUsername(), "orderConfirmation", injections);
     }
 
     @Override
-    public void sendPasswordResetMail(User user, String url) {
-        String message = "Please click on the following link to reset your password: <a href=\"" + url + "\">" + url +
-                "</a><br /><br />If the link does not work, please copy the link and" + " paste it into your browser.";
-        sendMail(user.getUsername(), formatRecipient(user), "Password reset requested", message);
+    public void sendPasswordResetMail(User recipient, String url) {
+        Map<String, String> injections = new HashMap<>();
+        injections.put("${addressee}", formatRecipient(recipient));
+        injections.put("${url}", url);
+        sendTemplateMail(recipient.getUsername(), "passwordReset", injections);
     }
 
     @Override
-    public void sendTeamInviteMail(User user, String teamName, User teamCaptain) {
-
-        String message =
-                "You've been invited to join \"Team " + teamName + "\" by " + teamCaptain.getProfile().getFirstName() +
-                        " " + teamCaptain.getProfile().getLastName() +
-                        "! Please log in to My Area to accept the invitation.";
-
-        sendMail(user.getUsername(), formatRecipient(user), "You've been invited to \"Team " + teamName + "\"", message);
+    public void sendTeamInviteMail(User recipient, Team team) {
+        Map<String, String> injections = new HashMap<>();
+        injections.put("${addressee}", formatRecipient(recipient));
+        injections.put("${teamname}", team.getTeamName());
+        injections.put("${teamcaptain}", formatRecipient(team.getCaptain()));
+        sendTemplateMail(recipient.getUsername(), "teamInvite", injections);
     }
 
     @Override
-    public void sendSeatOverrideMail(User user) {
-        String subject = "Your seat was reset";
-        String message = "Unfortunately we had to reallocate your reserved seat.\n" +
-                         "Please contact us if you have any questions.\n" +
-                         "You can reserve a new seat through <a href=\"https://areafiftylan.nl/my-area\">My Area</a>.";
-        sendMail(user.getUsername(), formatRecipient(user), subject, message);
+    public void sendSeatOverrideMail(User recipient) {
+        Map<String, String> injections = new HashMap<>();
+        injections.put("${addressee}", formatRecipient(recipient));
+        sendTemplateMail(recipient.getUsername(), "seatOverride", injections);
     }
 
     @Override
-    public void sendTicketTransferMail(User sender, User receiver, String url) {
-        String message = sender.getProfile().firstName +
-                " has sent you a ticket for AreaFiftyLAN! To accept this ticket please click on the following link: " +
-                "<a href=\"" + url + "\">" + url + "</a>";
-        sendMail(receiver.getUsername(), formatRecipient(receiver), "A ticket for AreaFiftyLAN has been sent to you!", message);
+    public void sendTicketTransferMail(User recipient, User sender, String url) {
+        Map<String, String> injections = new HashMap<>();
+        injections.put("${addressee}", formatRecipient(recipient));
+        injections.put("${sender}", formatRecipient(sender));
+        injections.put("${url}", url);
+        sendTemplateMail(recipient.getUsername(), "seatOverride", injections);
     }
+    //endregion Specific mail methods
 }
