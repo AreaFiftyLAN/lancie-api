@@ -60,7 +60,7 @@ public class UserRestController {
      * This method accepts POST requests on /users. It will send the input to the {@link UserService} to create a new
      * user
      *
-     * @param input The user that has to be created. It consists of 3 fields. The username, the email and the plain-text
+     * @param input The user that has to be created. It consists of 2 fields. The the email and the plain-text
      *              password. The password is saved hashed using the BCryptPasswordEncoder
      *
      * @return The generated object, in JSON format.
@@ -133,8 +133,8 @@ public class UserRestController {
         // preauthorize tag.
         if (auth != null) {
             // Get the currently logged in user from the autowired Authentication object.
-            UserDetails currentUser = (UserDetails) auth.getPrincipal();
-            User user = userService.getUserByUsername(currentUser.getUsername());
+            User currentUser = (User) auth.getPrincipal();
+            User user = userService.getUserByEmail(currentUser.getEmail());
             return new ResponseEntity<>(user, HttpStatus.OK);
         } else {
             return createResponseEntity(HttpStatus.OK, "Not logged in");
@@ -173,7 +173,7 @@ public class UserRestController {
     @GetMapping("/{userId}/seat")
     public List<Seat> getSeatByUser(@PathVariable Long userId) {
         User user = userService.getUserById(userId);
-        return seatService.getSeatsByUsername(user.getUsername());
+        return seatService.getSeatsByEmail(user.getEmail());
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)

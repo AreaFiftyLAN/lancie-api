@@ -32,7 +32,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     Collection<Order> findAllByCreationDateTimeBefore(LocalDateTime creationDate);
 
-    Collection<Order> findAllByUserUsernameIgnoreCase(String username);
+    Collection<Order> findAllByUserEmailIgnoreCase(String email);
 
     Optional<Order> findByReference(String reference);
 }

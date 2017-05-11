@@ -99,8 +99,8 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public Collection<Ticket> findValidTicketsByOwnerUsername(String username) {
-        return ticketRepository.findAllByOwnerUsernameIgnoreCase(username).stream().
+    public Collection<Ticket> findValidTicketsByOwnerEmail(String email) {
+        return ticketRepository.findAllByOwnerEmailIgnoreCase(email).stream().
                 filter(Ticket::isValid).
                 collect(Collectors.toList());
     }
@@ -167,8 +167,8 @@ public class TicketServiceImpl implements TicketService {
 
 
     @Override
-    public TicketTransferToken setupForTransfer(Long ticketId, String goalUserName) {
-        User u = userService.getUserByUsername(goalUserName);
+    public TicketTransferToken setupForTransfer(Long ticketId, String receiverEmail) {
+        User u = userService.getUserByEmail(receiverEmail);
         Ticket t = getTicketById(ticketId);
 
         List<TicketTransferToken> ticketTransferTokens = tttRepository.findAllByTicketId(ticketId).stream().
@@ -183,7 +183,7 @@ public class TicketServiceImpl implements TicketService {
             throw new TicketAlreadyLinkedException();
         }
 
-        if (t.getOwner() != null && t.getOwner().getUsername().equals(goalUserName)) {
+        if (t.getOwner() != null && t.getOwner().getEmail().equals(receiverEmail)) {
             throw new TicketTransferTokenException("Cant send a ticket to yourself");
         }
 
@@ -226,8 +226,8 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public Collection<TicketTransferToken> getValidTicketTransferTokensByUser(String username) {
-        return tttRepository.findAllByTicketOwnerUsernameIgnoreCase(username).stream().
+    public Collection<TicketTransferToken> getValidTicketTransferTokensByUserEmail(String email) {
+        return tttRepository.findAllByTicketOwnerEmailIgnoreCase(email).stream().
                 filter(TicketTransferToken::isValid).
                 collect(Collectors.toList());
     }
@@ -247,9 +247,9 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public Ticket assignTicketToUser(Long ticketId, String username) {
+    public Ticket assignTicketToUser(Long ticketId, String email) {
         Ticket ticket = getTicketById(ticketId);
-        User user = userService.getUserByUsername(username);
+        User user = userService.getUserByEmail(email);
         ticket.setOwner(user);
         return ticketRepository.save(ticket);
     }
@@ -304,14 +304,14 @@ public class TicketServiceImpl implements TicketService {
         Collection<Team> captainedTeams = teamService.getTeamByCaptainId(user.getId());
 
         if (captainedTeams.isEmpty()) {
-            return ticketRepository.findAllByOwnerUsernameIgnoreCase(user.getUsername());
+            return ticketRepository.findAllByOwnerEmailIgnoreCase(user.getEmail());
         } else {
             return captainedTeams.stream().
                     // Get all team members, including the owner
                             flatMap(team -> team.getMembers().stream()).
                     // Find all tickets of those members and filter for validity
                             flatMap(
-                            member -> ticketRepository.findAllByOwnerUsernameIgnoreCase(member.getUsername()).stream()).
+                            member -> ticketRepository.findAllByOwnerEmailIgnoreCase(member.getEmail()).stream()).
                             filter(Ticket::isValid).
                             collect(Collectors.toSet());
         }

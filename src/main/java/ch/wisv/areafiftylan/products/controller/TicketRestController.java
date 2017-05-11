@@ -31,7 +31,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -53,9 +52,9 @@ public class TicketRestController {
 
     @PreAuthorize("@currentUserServiceImpl.isTicketOwner(principal, #ticketId)")
     @RequestMapping(value = "/transfer/{ticketId}", method = RequestMethod.POST)
-    public ResponseEntity<?> requestTicketTransfer(@PathVariable Long ticketId, @RequestBody String goalUsername,
+    public ResponseEntity<?> requestTicketTransfer(@PathVariable Long ticketId, @RequestBody String goalEmail,
                                                    Authentication auth) {
-        TicketTransferToken ttt = ticketService.setupForTransfer(ticketId, goalUsername);
+        TicketTransferToken ttt = ticketService.setupForTransfer(ticketId, goalEmail);
 
         return createResponseEntity(HttpStatus.OK, "Ticket successfully set up for transfer.", ttt.getToken());
     }
@@ -79,9 +78,9 @@ public class TicketRestController {
     @PreAuthorize("isAuthenticated()")
     @RequestMapping(value = "/tokens", method = RequestMethod.GET)
     public ResponseEntity<?> getTicketTokensOpenForTransfer(Authentication auth) {
-        UserDetails currentUser = (UserDetails) auth.getPrincipal();
+        User currentUser = (User) auth.getPrincipal();
         Collection<TicketTransferToken> tokens =
-                ticketService.getValidTicketTransferTokensByUser(currentUser.getUsername());
+                ticketService.getValidTicketTransferTokensByUserEmail(currentUser.getEmail());
 
         return createResponseEntity(HttpStatus.OK, "Ticket transfer tokens successfully retrieved.", tokens);
     }

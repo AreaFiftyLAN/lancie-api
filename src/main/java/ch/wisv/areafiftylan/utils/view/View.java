@@ -42,7 +42,7 @@ public class View {
     public interface Participants extends Public {}
 
     /**
-     * The Team view includes username and email, next to the public fields.
+     * The Team view includes email, next to the public fields.
      */
     public interface Team extends Public, NoProfile {}
 

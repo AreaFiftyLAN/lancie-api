@@ -24,7 +24,7 @@ public class UserDTO {
 
     @NotEmpty
     @Getter
-    private String username = "";
+    private String email = "";
 
     @NotEmpty
     @Getter

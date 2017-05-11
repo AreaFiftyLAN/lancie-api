@@ -62,8 +62,8 @@ public class TeamRestController {
      * The method to handle POST requests on the /teams endpoint. This creates a new team. Users can only create new
      * Teams with themselves as Captain. Admins can also create Teams with other Users as Captain.
      *
-     * @param teamDTO Object containing the Team name and Captain username. When coming from a user, username should
-     *                equal their own username.
+     * @param teamDTO Object containing the Team name and Captain email. When coming from a user, email should
+     *                equal their own email.
      * @param auth    Authentication object from Spring Security
      *
      * @return Return status message of the operation
@@ -80,10 +80,10 @@ public class TeamRestController {
         Team team;
         // Users can only create teams with themselves as Captain
         if (auth.getAuthorities().contains(Role.ROLE_ADMIN)) {
-            team = teamService.create(teamDTO.getCaptainUsername(), teamDTO.getTeamName());
+            team = teamService.create(teamDTO.getCaptainEmail(), teamDTO.getTeamName());
         } else {
-            // If the DTO contains another username as the the current user, return an error.
-            if (!auth.getName().equalsIgnoreCase(teamDTO.getCaptainUsername())) {
+            // If the DTO contains another email as the the current user, return an error.
+            if (!auth.getName().equalsIgnoreCase(teamDTO.getCaptainEmail())) {
                 return createResponseEntity(HttpStatus.BAD_REQUEST, "Can not create team with another user as Captain");
             }
             team = teamService.create(auth.getName(), teamDTO.getTeamName());
@@ -169,35 +169,35 @@ public class TeamRestController {
     }
 
     /**
-     * Add members to the Team with the given Id. Expects only a username as Requestbody. People can only directly be
+     * Add members to the Team with the given Id. Expects only an email as Requestbody. People can only directly be
      * added to a team by an Admin. Captains can only invite users.
      *
      * @param teamId   Id of the Team to which the User should be added.
-     * @param username Username of the User to be added to the Team
+     * @param email Email of the User to be added to the Team
      *
      * @return Result message of the request
      */
     @PreAuthorize("hasRole('ADMIN')")
     @RequestMapping(method = RequestMethod.POST, value = "/{teamId}")
-    public ResponseEntity<?> addTeamMember(@PathVariable Long teamId, @RequestBody String username) {
-        teamService.addMember(teamId, username);
-        return createResponseEntity(HttpStatus.OK, "User " + username + " successfully added to Team " + teamId);
+    public ResponseEntity<?> addTeamMember(@PathVariable Long teamId, @RequestBody String email) {
+        teamService.addMember(teamId, email);
+        return createResponseEntity(HttpStatus.OK, "User " + email + " successfully added to Team " + teamId);
     }
 
     /**
-     * Add members to the Team with the given Id. Expects only a username as Requestbody. Can only be done by the
+     * Add members to the Team with the given Id. Expects only an email as Requestbody. Can only be done by the
      * Captain or an Admin
      *
      * @param teamId   Id of the Team to which the User should be added.
-     * @param username Username of the User to be added to the Team
+     * @param email Email of the User to be added to the Team
      *
      * @return Result message of the request
      */
     @PreAuthorize("@currentUserServiceImpl.canEditTeam(principal, #teamId) ")
     @RequestMapping(method = RequestMethod.POST, value = "/{teamId}/invites")
-    public ResponseEntity<?> inviteTeamMember(@PathVariable Long teamId, @RequestBody String username) {
-        teamService.inviteMember(teamId, username);
-        return createResponseEntity(HttpStatus.OK, "User " + username + " successfully invited to Team " + teamId);
+    public ResponseEntity<?> inviteTeamMember(@PathVariable Long teamId, @RequestBody String email) {
+        teamService.inviteMember(teamId, email);
+        return createResponseEntity(HttpStatus.OK, "User " + email + " successfully invited to Team " + teamId);
     }
 
     @PreAuthorize("@currentUserServiceImpl.canEditTeam(principal, #teamId)")
@@ -239,7 +239,7 @@ public class TeamRestController {
      * Captain or an Admin.
      *
      * @param teamId Id of the Team to be changed
-     * @param input  Object containing the team name and Captain username
+     * @param input  Object containing the team name and Captain email
      *
      * @return The updated Team
      */
@@ -270,19 +270,19 @@ public class TeamRestController {
     }
 
     /**
-     * Delete a member from a team. Expects only a username in the RequestBody. Can only be done by the Captain or an
+     * Delete a member from a team. Expects only an email in the RequestBody. Can only be done by the Captain or an
      * Admin
      *
      * @param teamId   Id of the Team to be edited
-     * @param username Username of the member to be deleted
+     * @param email Email of the member to be deleted
      *
      * @return A status message of the operation
      */
-    @PreAuthorize("@currentUserServiceImpl.canRemoveFromTeam(principal, #teamId, #username)")
+    @PreAuthorize("@currentUserServiceImpl.canRemoveFromTeam(principal, #teamId, #email)")
     @RequestMapping(method = RequestMethod.DELETE, value = "/{teamId}/members")
-    public ResponseEntity<?> removeTeamMember(@PathVariable Long teamId, @RequestBody String username) {
-        teamService.removeMember(teamId, username);
-        return createResponseEntity(HttpStatus.OK, "User " + username + " successfully removed from Team " + teamId);
+    public ResponseEntity<?> removeTeamMember(@PathVariable Long teamId, @RequestBody String email) {
+        teamService.removeMember(teamId, email);
+        return createResponseEntity(HttpStatus.OK, "User '" + email + "' successfully removed from Team " + teamId);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

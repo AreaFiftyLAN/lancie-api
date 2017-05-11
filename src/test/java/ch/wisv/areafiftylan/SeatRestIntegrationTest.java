@@ -79,7 +79,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
             get(SEAT_ENDPOINT).
         then().
             statusCode(HttpStatus.SC_OK).
-            body("seatmap.A.ticket.owner", not(contains(hasKey("username")))).
+            body("seatmap.A.ticket.owner", not(contains(hasKey("email")))).
             body("seatmap.A.ticket.owner.profile", contains(hasKey("displayName"))).
             body("seatmap.A", hasSize(5));
         //@formatter:on
@@ -111,7 +111,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
             get(SEAT_ENDPOINT).
         then().
             statusCode(HttpStatus.SC_OK).
-            body("seatmap.A.ticket.owner", not(contains(hasKey("username")))).
+            body("seatmap.A.ticket.owner", not(contains(hasKey("email")))).
             body("seatmap.A.ticket.owner.profile", contains(hasKey("displayName"))).
             body("seatmap.A", hasSize(5));
         //@formatter:on
@@ -131,7 +131,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
             get(SEAT_ENDPOINT).
         then().
             statusCode(HttpStatus.SC_OK).
-            body("seatmap.A.ticket.owner", hasItem(hasKey("username"))).
+            body("seatmap.A.ticket.owner", hasItem(hasKey("email"))).
             body("seatmap.A.ticket.owner.profile", contains(hasKey("displayName"))).
             body("seatmap.A.ticket.owner", hasItem(hasKey("authorities"))).
             body("seatmap.A", hasSize(5));
@@ -151,7 +151,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
             get(SEAT_ENDPOINT + "/A").
         then().
             statusCode(HttpStatus.SC_OK).
-            body("seatmap.A.ticket.owner", not(contains(hasKey("username")))).
+            body("seatmap.A.ticket.owner", not(contains(hasKey("email")))).
             body("seatmap.A.ticket.owner.profile", contains(hasKey("displayName"))).
             body("seatmap.A", hasSize(5));
         //@formatter:on
@@ -171,7 +171,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
             get(SEAT_ENDPOINT + "/A").
         then().
             statusCode(HttpStatus.SC_OK).
-            body("seatmap.A.ticket.owner", not(contains(hasKey("username")))).
+            body("seatmap.A.ticket.owner", not(contains(hasKey("email")))).
             body("seatmap.A.ticket.owner.profile", contains(hasKey("displayName"))).
             body("seatmap.A", hasSize(5));
         //@formatter:on
@@ -191,7 +191,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
             get(SEAT_ENDPOINT + "/A").
         then().
             statusCode(HttpStatus.SC_OK).
-            body("seatmap.A.ticket.owner", hasItem(hasKey("username"))).
+            body("seatmap.A.ticket.owner", hasItem(hasKey("email"))).
             body("seatmap.A.ticket.owner.profile", hasItem(hasKey("displayName"))).
             body("seatmap.A.ticket.owner", hasItem(hasKey("authorities"))).
             body("seatmap.A", hasSize(5));
@@ -211,7 +211,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
             get(SEAT_ENDPOINT + "/A/1").
         then().
             statusCode(HttpStatus.SC_OK).
-            body("ticket.owner", not(hasKey("username"))).
+            body("ticket.owner", not(hasKey("email"))).
             body("ticket.owner.profile", hasKey("displayName")).
             body("ticket.owner", not(hasItem(hasKey("authorities"))));
         //@formatter:on
@@ -231,7 +231,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
             get(SEAT_ENDPOINT + "/A/1").
         then().
             statusCode(HttpStatus.SC_OK).
-            body("ticket.owner", not(hasKey("username"))).
+            body("ticket.owner", not(hasKey("email"))).
             body("ticket.owner.profile", hasKey("displayName")).
             body("ticket.owner", not(hasItem(hasKey("authorities"))));
         //@formatter:on
@@ -250,7 +250,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
             get("/users/current/seat").
         then().
             statusCode(HttpStatus.SC_OK).
-            body("[0].ticket.owner.username", is(user.getUsername())).
+            body("[0].ticket.owner.email", is(user.getEmail())).
             body("[0].ticket.owner.profile", hasKey("displayName")).
             body("[0].ticket.owner.profile", hasKey("firstName"));
         //@formatter:on
@@ -282,7 +282,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
             body("ticket.owner.profile.displayName", hasItems(
                     captain.getProfile().getDisplayName(),
                     user.getProfile().getDisplayName())).
-            body("ticket.owner", not(hasKey("username"))).
+            body("ticket.owner", not(hasKey("email"))).
             body("ticket.owner.profile", not(hasKey("firstName")));
         //@formatter:on
     }

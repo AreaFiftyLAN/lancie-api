@@ -75,7 +75,7 @@ public class JsonLoginFilter extends UsernamePasswordAuthenticationFilter {
 
     @Override
     protected String obtainUsername(HttpServletRequest request) {
-        return userDTO.getUsername();
+        return userDTO.getEmail();
     }
 
     @Override

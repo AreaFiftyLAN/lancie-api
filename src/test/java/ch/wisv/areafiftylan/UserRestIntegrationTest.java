@@ -62,7 +62,7 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         return profileDTO;
     }
 
-    @Test
+   @Test
     public void testGetAllUsersAsAnonymous() {
         //@formatter:off
         when().
@@ -99,7 +99,7 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
             get("/users").
         then().
             statusCode(HttpStatus.SC_OK).
-            body("username", hasItems(user.getUsername(), admin.getUsername())).
+            body("email", hasItems(user.getEmail(), admin.getEmail())).
             body("profile.displayName",
             hasItems(user.getProfile().getDisplayName(), admin.getProfile().getDisplayName()));
         //@formatter:on
@@ -127,7 +127,7 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         when().
             get("/users/current").
         then().statusCode(HttpStatus.SC_OK).
-            body("username", equalTo(user.getUsername())).
+            body("email", equalTo(user.getEmail())).
             body("authorities", hasItem("ROLE_USER"));
         //@formatter:on
     }
@@ -142,7 +142,7 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         when().
             get("/users/current").
         then().statusCode(HttpStatus.SC_OK).
-            body("username", equalTo(admin.getUsername())).
+            body("email", equalTo(admin.getEmail())).
             body("authorities", hasItem("ROLE_ADMIN"));
         //@formatter:on
     }
@@ -183,7 +183,7 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         when().
             get("/users/" + userId).
         then().statusCode(HttpStatus.SC_OK).
-            body("username", equalTo(user.getUsername()));
+            body("email", equalTo(user.getEmail()));
         //@formatter:on
     }
 
@@ -197,7 +197,7 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         when().
             get("/users/" + user.getId()).
         then().statusCode(HttpStatus.SC_OK).
-            body("username", equalTo(user.getUsername()));
+            body("email", equalTo(user.getEmail()));
         //@formatter:on
     }
 
@@ -206,7 +206,7 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
     @Test
     public void testCreateUser() {
         Map<String, String> userDTO = new HashMap<>();
-        userDTO.put("username", "test@mail.com");
+        userDTO.put("email", "test@mail.com");
         userDTO.put("password", cleartextPassword);
 
         //@formatter:off
@@ -217,14 +217,14 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         then().
             statusCode(HttpStatus.SC_CREATED).
             body("message", containsString("User successfully created at")).
-            body("object.username", is(userDTO.get("username")));
+            body("object.email", is(userDTO.get("email")));
         //@formatter:on
     }
 
     @Test
     public void testCreateUserIsDisabled() {
         Map<String, String> userDTO = new HashMap<>();
-        userDTO.put("username", "disabled@mail.com");
+        userDTO.put("email", "disabled@mail.com");
         userDTO.put("password", cleartextPassword);
 
         //@formatter:off
@@ -235,7 +235,7 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         then().
             statusCode(HttpStatus.SC_CREATED).
             body("message", containsString("User successfully created at")).
-            body("object.username", is(userDTO.get("username")));
+            body("object.email", is(userDTO.get("email")));
 
         given().
             body(userDTO).
@@ -249,23 +249,7 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
     }
 
     @Test
-    public void createUserNoEmail() {
-        Map<String, String> userDTO = new HashMap<>();
-        userDTO.put("username", "user");
-        userDTO.put("password", cleartextPassword);
-
-        //@formatter:off
-        given().
-        when().
-            body(userDTO).contentType(ContentType.JSON).
-            post("/users").
-        then().
-            statusCode(HttpStatus.SC_BAD_REQUEST);
-        //@formatter:on
-    }
-
-    @Test
-    public void createUserMissingUsernameField() {
+    public void createUserMissingEmailField() {
         Map<String, String> userDTO = new HashMap<>();
         userDTO.put("password", "password");
 
@@ -280,9 +264,9 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
     }
 
     @Test
-    public void createUserEmptyUsernameField() {
+    public void createUserEmptyEmailField() {
         Map<String, String> userDTO = new HashMap<>();
-        userDTO.put("username", "");
+        userDTO.put("email", "");
         userDTO.put("password", "password");
 
         //@formatter:off
@@ -298,7 +282,7 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
     @Test
     public void createUserMissingPasswordField() {
         Map<String, String> userDTO = new HashMap<>();
-        userDTO.put("username", "testUser");
+        userDTO.put("email", "testUser");
 
         //@formatter:off
         given().
@@ -313,7 +297,7 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
     @Test
     public void createUserEmptyPasswordField() {
         Map<String, String> userDTO = new HashMap<>();
-        userDTO.put("username", "testUser");
+        userDTO.put("email", "testEmail");
         userDTO.put("password", "");
 
         //@formatter:off
@@ -327,10 +311,10 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
     }
 
     @Test
-    public void createUserTakenUsername() {
+    public void createUserTakenEmail() {
         User user = createUser();
         Map<String, String> userDTO = new HashMap<>();
-        userDTO.put("username", user.getUsername());
+        userDTO.put("email", user.getEmail());
         userDTO.put("password", cleartextPassword);
 
         //@formatter:off
@@ -344,10 +328,10 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
     }
 
     @Test
-    public void createUserTakenUsernameDifferentCase() {
+    public void createUserTakenEmailDifferentCase() {
         User user = createUser();
         Map<String, String> userDTO = new HashMap<>();
-        userDTO.put("username", user.getUsername().toUpperCase());
+        userDTO.put("email", user.getEmail().toUpperCase());
         userDTO.put("password", cleartextPassword);
 
         //@formatter:off
@@ -579,7 +563,7 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
             body("message", equalTo("User disabled"));
         //@formatter:on
 
-        User disabledUser = userRepository.findOneByUsernameIgnoreCase(user.getUsername()).orElse(user);
+        User disabledUser = userRepository.findOneByEmailIgnoreCase(user.getEmail()).orElse(user);
         assertFalse("User is disabled", disabledUser.isAccountNonLocked());
     }
 
@@ -681,7 +665,7 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         removeXAuthToken(xAuthTokenHeader);
 
         Map<String, String> userDTO = new HashMap<>();
-        userDTO.put("username", user.getUsername());
+        userDTO.put("email", user.getEmail());
         userDTO.put("password", newPassword);
 
         //@formatter:off
@@ -721,7 +705,7 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         removeXAuthToken(xAuthTokenHeader);
 
         Map<String, String> userDTO = new HashMap<>();
-        userDTO.put("username", user.getUsername());
+        userDTO.put("email", user.getEmail());
         userDTO.put("password", cleartextPassword);
 
         //@formatter:off
@@ -830,11 +814,11 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         User user = createUser();
         //@formatter:off
         given().
-            header(getXAuthTokenHeaderForUser(user.getUsername().toUpperCase())).
+            header(getXAuthTokenHeaderForUser(user.getEmail().toUpperCase())).
         when().
             get("/users/current").
         then().statusCode(HttpStatus.SC_OK).
-            body("username", equalTo(user.getUsername())).
+            body("email", equalTo(user.getEmail())).
             body("authorities", hasItem("ROLE_USER"));
         //@formatter:on
     }

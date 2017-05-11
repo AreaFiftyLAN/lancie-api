@@ -57,8 +57,8 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     }
 
     /**
-     * This method is responsible for the main security configuration. The formlogin() section defines how to login.
-     * POST requests should be made to /login with a username and password field. Errors are redirected to /login?error.
+     * This method is responsible for the main security configuration.
+     * POST requests should be made to /login with an email and password field.
      * The logout section is similar.
      * <p>
      * The last section is about permissions. Anything related to Login is accessible for everyone. Use this for

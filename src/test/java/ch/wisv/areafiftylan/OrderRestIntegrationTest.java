@@ -223,7 +223,7 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
             post(ORDER_ENDPOINT + order.getId()).
         then().
             statusCode(HttpStatus.SC_OK).
-            body("object.user.username", is(user.getUsername())).
+            body("object.user.email", is(user.getEmail())).
             body("object.status", is("ASSIGNED")).
             body("object.tickets", hasSize(2)).
             body("object.tickets.type.name", hasItems(TEST_TICKET, TEST_TICKET)).
@@ -273,7 +273,7 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
             post(ORDER_ENDPOINT + order.getId()).
         then().
             statusCode(HttpStatus.SC_OK).
-            body("object.user.username", is(user.getUsername())).
+            body("object.user.email", is(user.getEmail())).
             body("object.status", is("ASSIGNED")).
             body("object.tickets", hasSize(2)).
             body("object.tickets.type.name", hasItems(TEST_TICKET, TEST_TICKET)).
@@ -370,7 +370,7 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
             get(ORDER_ENDPOINT + order.getId()).
         then().
             statusCode(HttpStatus.SC_OK).
-            body("user.username", is(user.getUsername())).
+            body("user.email", is(user.getEmail())).
             body("status", is("ASSIGNED")).
             body("tickets", hasSize(1)).
             body("tickets.type.name", hasItem(is(TEST_TICKET))).
@@ -409,7 +409,7 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
             get(ORDER_ENDPOINT + order.getId()).
         then().
             statusCode(HttpStatus.SC_OK).
-            body("user.username", is(user.getUsername())).
+            body("user.email", is(user.getEmail())).
             body("status", is("ASSIGNED")).
             body("tickets", hasSize(1)).
             body("tickets.type.name", hasItem(is(TEST_TICKET))).
@@ -445,7 +445,7 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
             statusCode(HttpStatus.SC_OK).
             body("object.id", equalTo(order.getId().intValue())).
             body("object.status", is("ASSIGNED")).
-            body("object.user.username", is(user.getUsername()));
+            body("object.user.email", is(user.getEmail()));
         //@formatter:on
     }
 

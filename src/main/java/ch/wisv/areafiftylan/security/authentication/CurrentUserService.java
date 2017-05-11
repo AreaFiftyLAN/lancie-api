@@ -27,7 +27,7 @@ public interface CurrentUserService {
 
     boolean canEditTeam(Object principal, Long teamId);
 
-    boolean canRemoveFromTeam(Object principal, Long teamId, String username);
+    boolean canRemoveFromTeam(Object principal, Long teamId, String email);
 
     boolean canAccessOrder(Object principal, Long orderId);
 
@@ -41,7 +41,7 @@ public interface CurrentUserService {
 
     boolean hasAnyTicket(Object principal);
 
-    boolean hasAnyTicket(String username);
+    boolean hasAnyTicket(String email);
 
     boolean canRevokeInvite(Object principal, String token);
 

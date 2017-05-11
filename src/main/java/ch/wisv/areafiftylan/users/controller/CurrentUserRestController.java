@@ -37,7 +37,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -107,15 +106,14 @@ public class CurrentUserRestController {
     @JsonView(View.Team.class)
     @RequestMapping(value = "/teams", method = RequestMethod.GET)
     public Collection<Team> getCurrentTeams(Authentication auth) {
-        UserDetails currentUser = (UserDetails) auth.getPrincipal();
-        return teamService.getTeamsByUsername(currentUser.getUsername());
+        User currentUser = (User) auth.getPrincipal();
+        return teamService.getTeamsByMemberEmail(currentUser.getEmail());
     }
 
     @RequestMapping(value = "/teams/invites", method = RequestMethod.GET)
     public List<TeamInviteResponse> getOpenInvites(Authentication auth) {
         User currentUser = (User) auth.getPrincipal();
-
-        return teamService.findTeamInvitesByUsername(currentUser.getUsername());
+        return teamService.findTeamInvitesByEmail(currentUser.getEmail());
     }
 
     /**
@@ -129,8 +127,8 @@ public class CurrentUserRestController {
     @JsonView(View.OrderOverview.class)
     @RequestMapping(value = "/orders", method = RequestMethod.GET)
     public Collection<Order> getAllOrders(Authentication auth) {
-        UserDetails currentUser = (UserDetails) auth.getPrincipal();
-        return orderService.findOrdersByUsername(currentUser.getUsername());
+        User currentUser = (User) auth.getPrincipal();
+        return orderService.findOrdersByEmail(currentUser.getEmail());
     }
 
     /**
@@ -142,8 +140,8 @@ public class CurrentUserRestController {
      */
     @RequestMapping(value = "/tickets", method = RequestMethod.GET)
     public Collection<Ticket> getAllTickets(Authentication auth) {
-        UserDetails currentUser = (UserDetails) auth.getPrincipal();
-        return ticketService.findValidTicketsByOwnerUsername(currentUser.getUsername());
+        User currentUser = (User) auth.getPrincipal();
+        return ticketService.findValidTicketsByOwnerEmail(currentUser.getEmail());
     }
 
     /**
@@ -155,8 +153,8 @@ public class CurrentUserRestController {
      */
     @RequestMapping(value = "/orders/open", method = RequestMethod.GET)
     public List<Order> getOpenOrder(Authentication auth) {
-        UserDetails currentUser = (UserDetails) auth.getPrincipal();
-        return orderService.getOpenOrders(currentUser.getUsername());
+        User currentUser = (User) auth.getPrincipal();
+        return orderService.getOpenOrders(currentUser.getEmail());
     }
 
     /**
@@ -170,6 +168,6 @@ public class CurrentUserRestController {
     public List<Seat> getCurrentUserSeat(Authentication auth) {
         User user = (User) auth.getPrincipal();
 
-        return seatService.getSeatsByUsername(user.getUsername());
+        return seatService.getSeatsByEmail(user.getEmail());
     }
 }

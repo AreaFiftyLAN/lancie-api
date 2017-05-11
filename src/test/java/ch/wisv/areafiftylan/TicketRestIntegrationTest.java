@@ -103,7 +103,7 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
 
         //@formatter:off
         given().
-            body(ticketReceiver.getUsername()).
+            body(ticketReceiver.getEmail()).
         when().
             post(TRANSFER_ENDPOINT + "/" + ticket.getId()).
         then().
@@ -121,7 +121,7 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         String token =
             given().
                 header(getXAuthTokenHeaderForUser(ticketOwner)).
-                body(ticketReceiver.getUsername()).
+                body(ticketReceiver.getEmail()).
             when().
                 post(TRANSFER_ENDPOINT + "/" + ticket.getId()).
             then().
@@ -144,7 +144,7 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         //@formatter:off
         given().
             header(getXAuthTokenHeaderForUser(ticketReceiver)).
-            body(ticketReceiver.getUsername()).
+            body(ticketReceiver.getEmail()).
         when().
             post(TRANSFER_ENDPOINT + "/" + ticket.getId()).
         then().
@@ -160,7 +160,7 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         //@formatter:off
         given().
             header(getXAuthTokenHeaderForUser(ticketOwner)).
-            body(ticketOwner.getUsername()).
+            body(ticketOwner.getEmail()).
         when().
             post(TRANSFER_ENDPOINT + "/" + ticket.getId()).
         then().
@@ -178,7 +178,7 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         //@formatter:off
         given().
             header(getXAuthTokenHeaderForUser(outsider)).
-            body(ticketReceiver.getUsername()).
+            body(ticketReceiver.getEmail()).
         when().
             post(TRANSFER_ENDPOINT + "/" + ticket.getId()).
         then().
@@ -191,7 +191,7 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         User ticketOwner = createUser();
         User ticketReceiver = createUser();
         Ticket ticket = createTicketForUser(ticketOwner);
-        TicketTransferToken ttt = ticketService.setupForTransfer(ticket.getId(), ticketReceiver.getUsername());
+        TicketTransferToken ttt = ticketService.setupForTransfer(ticket.getId(), ticketReceiver.getEmail());
 
         //@formatter:off
         given().
@@ -214,7 +214,7 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         User ticketOwner = createUser();
         User ticketReceiver = createUser();
         Ticket ticket = createTicketForUser(ticketOwner);
-        TicketTransferToken ttt = ticketService.setupForTransfer(ticket.getId(), ticketReceiver.getUsername());
+        TicketTransferToken ttt = ticketService.setupForTransfer(ticket.getId(), ticketReceiver.getEmail());
 
         //@formatter:off
         given().
@@ -238,7 +238,7 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         User ticketOwner = createUser();
         User ticketReceiver = createUser();
         Ticket ticket = createTicketForUser(ticketOwner);
-        TicketTransferToken ttt = ticketService.setupForTransfer(ticket.getId(), ticketReceiver.getUsername());
+        TicketTransferToken ttt = ticketService.setupForTransfer(ticket.getId(), ticketReceiver.getEmail());
 
         //@formatter:off
         given().
@@ -263,7 +263,7 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         User ticketReceiver = createUser();
         Ticket ticket = createTicketForUser(ticketOwner);
 
-        TicketTransferToken ttt = ticketService.setupForTransfer(ticket.getId(), ticketReceiver.getUsername());
+        TicketTransferToken ttt = ticketService.setupForTransfer(ticket.getId(), ticketReceiver.getEmail());
 
         TicketAlreadyLinkedException e = new TicketAlreadyLinkedException();
 
@@ -293,7 +293,7 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         User ticketReceiver = createUser();
         User outsider = createUser();
         Ticket ticket = createTicketForUser(ticketOwner);
-        TicketTransferToken ttt = ticketService.setupForTransfer(ticket.getId(), ticketReceiver.getUsername());
+        TicketTransferToken ttt = ticketService.setupForTransfer(ticket.getId(), ticketReceiver.getEmail());
 
         //@formatter:off
         given().
@@ -317,12 +317,12 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         User ticketOwner = createUser();
         User ticketReceiver = createUser();
         Ticket ticket = createTicketForUser(ticketOwner);
-        ticketService.setupForTransfer(ticket.getId(), ticketReceiver.getUsername());
+        ticketService.setupForTransfer(ticket.getId(), ticketReceiver.getEmail());
 
         //@formatter:off
         given().
             header(getXAuthTokenHeaderForUser(ticketOwner)).
-            body(ticketReceiver.getUsername()).
+            body(ticketReceiver.getEmail()).
         when().
             post(TRANSFER_ENDPOINT + "/" + ticket.getId()).
         then().
@@ -342,7 +342,7 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         //@formatter:off
         given().
             header(getXAuthTokenHeaderForUser(ticketOwner)).
-            body(ticketReceiver.getUsername()).
+            body(ticketReceiver.getEmail()).
         when().
             post(TRANSFER_ENDPOINT + "/" + ticket.getId()).
         then().
@@ -356,7 +356,7 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         User ticketOwner = createUser();
         User ticketReceiver = createUser();
         Ticket ticket = createTicketForUser(ticketOwner);
-        TicketTransferToken ttt = ticketService.setupForTransfer(ticket.getId(), ticketReceiver.getUsername());
+        TicketTransferToken ttt = ticketService.setupForTransfer(ticket.getId(), ticketReceiver.getEmail());
 
         //@formatter:off
         given().
@@ -379,7 +379,7 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         User ticketOwner = createUser();
         User ticketReceiver = createUser();
         Ticket ticket = createTicketForUser(ticketOwner);
-        TicketTransferToken ttt = ticketService.setupForTransfer(ticket.getId(), ticketReceiver.getUsername());
+        TicketTransferToken ttt = ticketService.setupForTransfer(ticket.getId(), ticketReceiver.getEmail());
 
         //@formatter:off
         given().
@@ -403,7 +403,7 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         User ticketOwner = createUser();
         User ticketReceiver = createUser();
         Ticket ticket = createTicketForUser(ticketOwner);
-        TicketTransferToken ttt = ticketService.setupForTransfer(ticket.getId(), ticketReceiver.getUsername());
+        TicketTransferToken ttt = ticketService.setupForTransfer(ticket.getId(), ticketReceiver.getEmail());
 
         //@formatter:off
         given().
@@ -428,7 +428,7 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         User ticketReceiver = createUser();
         User outsider = createUser();
         Ticket ticket = createTicketForUser(ticketOwner);
-        TicketTransferToken ttt = ticketService.setupForTransfer(ticket.getId(), ticketReceiver.getUsername());
+        TicketTransferToken ttt = ticketService.setupForTransfer(ticket.getId(), ticketReceiver.getEmail());
 
         //@formatter:off
         given().
@@ -475,7 +475,7 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         then().
             statusCode(HttpStatus.SC_OK).
             body("$", hasSize(1)).
-            body("owner.username", containsInAnyOrder(user.getUsername()));
+            body("owner.email", containsInAnyOrder(user.getEmail()));
         //@formatter:on
     }
 
@@ -496,7 +496,7 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
             get(TICKETS_ENDPOINT + "/teammembers").
         then().
             statusCode(HttpStatus.SC_OK).
-            body("owner.username", containsInAnyOrder(user.getUsername(), teammate.getUsername()));
+            body("owner.email", containsInAnyOrder(user.getEmail(), teammate.getEmail()));
         //@formatter:on
     }
 
@@ -516,7 +516,7 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
             get(TICKETS_ENDPOINT + "/teammembers").
         then().
             statusCode(HttpStatus.SC_OK).
-            body("owner.username", containsInAnyOrder(teammate.getUsername()));
+            body("owner.email", containsInAnyOrder(teammate.getEmail()));
         //@formatter:on
     }
 
