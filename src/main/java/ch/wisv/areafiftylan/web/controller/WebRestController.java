@@ -25,6 +25,7 @@ import ch.wisv.areafiftylan.web.service.EventServiceImpl;
 import ch.wisv.areafiftylan.web.service.SponsorServiceImpl;
 import ch.wisv.areafiftylan.web.service.TournamentServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -47,12 +48,12 @@ public class WebRestController {
         this.sponsorService = sponsorService;
     }
 
-    @RequestMapping("/tournaments")
+    @GetMapping("/tournaments")
     public Collection<Tournament> getAllTournaments() {
         return tournamentService.getAllTournaments();
     }
 
-    @RequestMapping("/events")
+    @GetMapping("/events")
     public Collection<Event> getAllEvents() {
         return eventService.getAllEvents();
     }
@@ -62,7 +63,7 @@ public class WebRestController {
      *
      * @return A collection with all committee members.
      */
-    @RequestMapping("/committee")
+    @GetMapping("/committee")
     public Collection<CommitteeMember> getCommittee() {
         Collection<CommitteeMember> committeeMembers = new ArrayList<>();
         committeeMembers.add(new CommitteeMember("Sille Kamoen", "Chairman", "people"));
@@ -72,7 +73,7 @@ public class WebRestController {
         return committeeMembers;
     }
 
-    @RequestMapping("/sponsors")
+    @GetMapping("/sponsors")
     public Collection<Sponsor> getSponspors() {
         return sponsorService.getAllSponsors();
     }

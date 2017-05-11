@@ -51,14 +51,14 @@ public class TicketRestController {
     }
 
     @PreAuthorize("@currentUserServiceImpl.isTicketOwner(principal, #ticketId)")
-    @RequestMapping(value = "/transfer/{ticketId}", method = RequestMethod.POST)
+    @PostMapping("/transfer/{ticketId}")
     public ResponseEntity<?> requestTicketTransfer(@PathVariable Long ticketId, @RequestBody String goalEmail) {
         TicketTransferToken ttt = ticketService.setupForTransfer(ticketId, goalEmail);
         return createResponseEntity(HttpStatus.OK, "Ticket successfully set up for transfer.", ttt.getToken());
     }
 
     @PreAuthorize("@currentUserServiceImpl.isTicketReceiver(principal, #token)")
-    @RequestMapping(value = "/transfer", method = RequestMethod.PUT)
+    @PutMapping("/transfer")
     public ResponseEntity<?> transferTicket(@RequestBody String token) {
         ticketService.transferTicket(token);
 
@@ -66,7 +66,7 @@ public class TicketRestController {
     }
 
     @PreAuthorize("@currentUserServiceImpl.isTicketSender(principal, #token)")
-    @RequestMapping(value = "/transfer", method = RequestMethod.DELETE)
+    @DeleteMapping("/transfer")
     public ResponseEntity<?> cancelTicketTransfer(@RequestBody String token) {
         ticketService.cancelTicketTransfer(token);
 
@@ -74,7 +74,7 @@ public class TicketRestController {
     }
 
     @PreAuthorize("isAuthenticated()")
-    @RequestMapping(value = "/tokens", method = RequestMethod.GET)
+    @GetMapping("/tokens")
     public ResponseEntity<?> getTicketTokensOpenForTransfer(@AuthenticationPrincipal User user) {
         Collection<TicketTransferToken> tokens =
                 ticketService.getValidTicketTransferTokensByUserEmail(user.getEmail());
@@ -87,25 +87,25 @@ public class TicketRestController {
      *
      * @return A collection of all TicketTypes and their availability
      */
-    @RequestMapping(value = "/available", method = RequestMethod.GET)
+    @GetMapping("/available")
     public Collection<TicketInformationResponse> getAvailableTickets() {
         return orderService.getAvailableTickets();
     }
 
     @PreAuthorize("isAuthenticated()")
-    @RequestMapping(value = "/teammembers", method = RequestMethod.GET)
+    @GetMapping("/teammembers")
     public Collection<Ticket> getTicketsFromTeamMembers(@AuthenticationPrincipal User user) {
         return ticketService.getOwnedTicketsAndFromTeamMembers(user);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @RequestMapping(method = RequestMethod.GET)
+    @GetMapping
     public Collection<Ticket> getAllTickets() {
         return ticketService.getAllTickets();
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @RequestMapping(value = "/transport", method = RequestMethod.GET)
+    @GetMapping("/transport")
     public Collection<Ticket> getAllTicketsWithTransport() {
         return ticketService.getAllTicketsWithTransport();
     }

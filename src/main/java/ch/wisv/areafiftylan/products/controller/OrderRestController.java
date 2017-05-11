@@ -47,6 +47,7 @@ import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEnt
 
 @RestController
 @Log4j2
+@RequestMapping("/orders")
 public class OrderRestController {
 
     private final OrderService orderService;
@@ -57,7 +58,7 @@ public class OrderRestController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @RequestMapping(value = "/orders", method = RequestMethod.GET)
+    @GetMapping
     @JsonView(View.OrderOverview.class)
     public Collection<Order> getAllOrders() {
         return orderService.getAllOrders();
@@ -73,7 +74,7 @@ public class OrderRestController {
      *
      * @return A message informing about the result of the request
      */
-    @RequestMapping(value = "/orders", method = RequestMethod.POST)
+    @PostMapping
     @JsonView(View.OrderOverview.class)
     public ResponseEntity<?> createOrder(@RequestBody @Validated TicketDTO ticketDTO) {
         HttpHeaders headers = new HttpHeaders();
@@ -95,7 +96,7 @@ public class OrderRestController {
      * @return The requested Order.
      */
     @PreAuthorize("@currentUserServiceImpl.canAccessOrder(principal, #orderId)")
-    @RequestMapping(value = "/orders/{orderId}", method = RequestMethod.GET)
+    @GetMapping("/{orderId}")
     @JsonView(View.OrderOverview.class)
     public Order getOrderById(@PathVariable Long orderId) {
         return orderService.getOrderById(orderId);
@@ -111,7 +112,7 @@ public class OrderRestController {
      * @return Message about the result of the request
      */
     @PreAuthorize("@currentUserServiceImpl.canAccessOrder(principal, #orderId)")
-    @RequestMapping(value = "/orders/{orderId}", method = RequestMethod.POST)
+    @PostMapping("/{orderId}")
     @JsonView(View.OrderOverview.class)
     public ResponseEntity<?> addToOrder(@PathVariable Long orderId, @RequestBody @Validated TicketDTO ticketDTO) {
         Order modifiedOrder = orderService.addTicketToOrder(orderId, ticketDTO.getType(), ticketDTO.getOptions());
@@ -127,7 +128,7 @@ public class OrderRestController {
      * @return Message about the result of the request
      */
     @PreAuthorize("@currentUserServiceImpl.canAccessOrder(principal, #orderId)")
-    @RequestMapping(value = "/orders/{orderId}/{ticketId}", method = RequestMethod.DELETE)
+    @DeleteMapping("/{orderId}/{ticketId}")
     @JsonView(View.OrderOverview.class)
     public ResponseEntity<?> removeFromOrder(@PathVariable Long orderId, @PathVariable Long ticketId) {
         Order modifiedOrder = orderService.removeTicketFromOrder(orderId, ticketId);
@@ -144,7 +145,7 @@ public class OrderRestController {
      * @return The assigned order
      */
     @PreAuthorize("isAuthenticated() and @currentUserServiceImpl.canAccessOrder(principal, #orderId)")
-    @PostMapping(value = "/orders/{orderId}/assign")
+    @PostMapping("/{orderId}/assign")
     @JsonView(View.OrderOverview.class)
     public ResponseEntity<?> assignOrderToUser(@AuthenticationPrincipal User user, @PathVariable Long orderId) {
         Order assignedOrder = orderService.assignOrderToUser(orderId, user.getEmail());
@@ -161,7 +162,7 @@ public class OrderRestController {
      * @return Instructions on how to proceed.
      */
     @PreAuthorize("@currentUserServiceImpl.canAccessOrder(principal, #orderId)")
-    @RequestMapping(value = "/orders/{orderId}/checkout", method = RequestMethod.POST)
+    @PostMapping("/{orderId}/checkout")
     public ResponseEntity<?> payOrder(@PathVariable Long orderId) throws URISyntaxException {
         String paymentUrl = orderService.requestPayment(orderId);
         HttpHeaders headers = new HttpHeaders();
@@ -178,7 +179,7 @@ public class OrderRestController {
      * @return The paymentURL from the paymentprovider
      */
     @PreAuthorize("@currentUserServiceImpl.canAccessOrder(principal, #orderId)")
-    @GetMapping(value = "/orders/{orderId}/url")
+    @GetMapping("/{orderId}/url")
     public ResponseEntity<?> getPaymentURL(@PathVariable Long orderId) throws URISyntaxException {
         String paymentUrl = orderService.getPaymentUrl(orderId);
         HttpHeaders headers = new HttpHeaders();
@@ -196,7 +197,7 @@ public class OrderRestController {
      * @return Status message
      */
     @PreAuthorize("hasRole('ADMIN')")
-    @RequestMapping(value = "/orders/{orderId}/approve", method = RequestMethod.POST)
+    @PostMapping("/{orderId}/approve")
     public ResponseEntity<?> approveOrder(@PathVariable Long orderId) {
         orderService.adminApproveOrder(orderId);
 
@@ -212,7 +213,7 @@ public class OrderRestController {
      *
      * @return Statusmessage
      */
-    @RequestMapping(value = "/orders/status", method = RequestMethod.POST)
+    @PostMapping("/status")
     public ResponseEntity<?> updateOrderStatus(@RequestParam(name = "id") String orderReference) {
         log.log(Level.getLevel("A5L"), "Incoming paymentprovicer webhook for reference: {}", orderReference);
         try {
@@ -223,8 +224,7 @@ public class OrderRestController {
         return createResponseEntity(HttpStatus.OK, "Status is being updated");
     }
 
-    @RequestMapping(value = "/orders/status", method = { RequestMethod.GET,
-            RequestMethod.POST }, params = "testByMollie")
+    @RequestMapping(value = "/status", method = { RequestMethod.GET, RequestMethod.POST }, params = "testByMollie")
     public ResponseEntity<?> handleMollieTestCall() {
         return createResponseEntity(HttpStatus.OK, "Mollie webhook available");
     }
@@ -239,7 +239,7 @@ public class OrderRestController {
      */
     @PreAuthorize("@currentUserServiceImpl.canAccessOrder(principal, #orderId)")
     @JsonView(View.OrderOverview.class)
-    @RequestMapping(value = "/orders/{orderId}/status", method = RequestMethod.GET)
+    @GetMapping("/{orderId}/status")
     public ResponseEntity<?> updateOrderStatusManual(@PathVariable long orderId) {
         Order order = orderService.updateOrderStatusByOrderId(orderId);
         return createResponseEntity(HttpStatus.OK, "Order status updated", order);
