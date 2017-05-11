@@ -32,7 +32,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -64,14 +63,14 @@ public class TeamRestController {
      *
      * @param teamDTO Object containing the Team name and Captain email. When coming from a user, email should
      *                equal their own email.
-     * @param auth    Authentication object from Spring Security
+     * @param user    The logged in user
      *
      * @return Return status message of the operation
      */
     @PreAuthorize("isAuthenticated()")
     @JsonView(View.Public.class)
     @RequestMapping(method = RequestMethod.POST)
-    ResponseEntity<?> add(@Validated @RequestBody TeamDTO teamDTO, Authentication auth) {
+    ResponseEntity<?> add(@AuthenticationPrincipal User user, @Validated @RequestBody TeamDTO teamDTO) {
         if (teamService.teamnameUsed(teamDTO.getTeamName())) {
             return createResponseEntity(HttpStatus.CONFLICT,
                     "Team with name \"" + teamDTO.getTeamName() + "\" already exists.");
@@ -79,14 +78,14 @@ public class TeamRestController {
 
         Team team;
         // Users can only create teams with themselves as Captain
-        if (auth.getAuthorities().contains(Role.ROLE_ADMIN)) {
+        if (user.getAuthorities().contains(Role.ROLE_ADMIN)) {
             team = teamService.create(teamDTO.getCaptainEmail(), teamDTO.getTeamName());
         } else {
             // If the DTO contains another email as the the current user, return an error.
-            if (!auth.getName().equalsIgnoreCase(teamDTO.getCaptainEmail())) {
+            if (!user.getEmail().equalsIgnoreCase(teamDTO.getCaptainEmail())) {
                 return createResponseEntity(HttpStatus.BAD_REQUEST, "Can not create team with another user as Captain");
             }
-            team = teamService.create(auth.getName(), teamDTO.getTeamName());
+            team = teamService.create(user.getEmail(), teamDTO.getTeamName());
         }
 
         HttpHeaders httpHeaders = new HttpHeaders();
