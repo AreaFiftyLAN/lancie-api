@@ -179,7 +179,7 @@ public class OrderRestController {
      * @return The paymentURL from the paymentprovider
      */
     @PreAuthorize("@currentUserServiceImpl.canAccessOrder(principal, #orderId)")
-    @GetMapping(value = "/{orderId}/url")
+    @GetMapping("/{orderId}/url")
     public ResponseEntity<?> getPaymentURL(@PathVariable Long orderId) throws URISyntaxException {
         String paymentUrl = orderService.getPaymentUrl(orderId);
         HttpHeaders headers = new HttpHeaders();
