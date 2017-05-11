@@ -30,7 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -52,10 +52,8 @@ public class TicketRestController {
 
     @PreAuthorize("@currentUserServiceImpl.isTicketOwner(principal, #ticketId)")
     @RequestMapping(value = "/transfer/{ticketId}", method = RequestMethod.POST)
-    public ResponseEntity<?> requestTicketTransfer(@PathVariable Long ticketId, @RequestBody String goalEmail,
-                                                   Authentication auth) {
+    public ResponseEntity<?> requestTicketTransfer(@PathVariable Long ticketId, @RequestBody String goalEmail) {
         TicketTransferToken ttt = ticketService.setupForTransfer(ticketId, goalEmail);
-
         return createResponseEntity(HttpStatus.OK, "Ticket successfully set up for transfer.", ttt.getToken());
     }
 
@@ -77,10 +75,9 @@ public class TicketRestController {
 
     @PreAuthorize("isAuthenticated()")
     @RequestMapping(value = "/tokens", method = RequestMethod.GET)
-    public ResponseEntity<?> getTicketTokensOpenForTransfer(Authentication auth) {
-        User currentUser = (User) auth.getPrincipal();
+    public ResponseEntity<?> getTicketTokensOpenForTransfer(@AuthenticationPrincipal User user) {
         Collection<TicketTransferToken> tokens =
-                ticketService.getValidTicketTransferTokensByUserEmail(currentUser.getEmail());
+                ticketService.getValidTicketTransferTokensByUserEmail(user.getEmail());
 
         return createResponseEntity(HttpStatus.OK, "Ticket transfer tokens successfully retrieved.", tokens);
     }
@@ -97,10 +94,8 @@ public class TicketRestController {
 
     @PreAuthorize("isAuthenticated()")
     @RequestMapping(value = "/teammembers", method = RequestMethod.GET)
-    public Collection<Ticket> getTicketsFromTeamMembers(Authentication auth) {
-        User u = (User) auth.getPrincipal();
-
-        return ticketService.getOwnedTicketsAndFromTeamMembers(u);
+    public Collection<Ticket> getTicketsFromTeamMembers(@AuthenticationPrincipal User user) {
+        return ticketService.getOwnedTicketsAndFromTeamMembers(user);
     }
 
     @PreAuthorize("hasRole('ADMIN')")

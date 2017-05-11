@@ -24,6 +24,7 @@ import ch.wisv.areafiftylan.exception.TicketUnavailableException;
 import ch.wisv.areafiftylan.products.model.TicketDTO;
 import ch.wisv.areafiftylan.products.model.order.Order;
 import ch.wisv.areafiftylan.products.service.OrderService;
+import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.utils.view.View;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.extern.log4j.Log4j2;
@@ -33,7 +34,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -137,7 +138,7 @@ public class OrderRestController {
      * Assign a User to a previously anonymous Order. The currently assigned user is assigned to the order specified in
      * the path. This is required before an order can be paid.
      *
-     * @param auth    The Spring Authentication object
+     * @param user    The logged in user
      * @param orderId Id of the Order to be assigned to the currently logged in user
      *
      * @return The assigned order
@@ -145,8 +146,8 @@ public class OrderRestController {
     @PreAuthorize("isAuthenticated() and @currentUserServiceImpl.canAccessOrder(principal, #orderId)")
     @PostMapping(value = "/orders/{orderId}/assign")
     @JsonView(View.OrderOverview.class)
-    public ResponseEntity<?> assignOrderToUser(Authentication auth, @PathVariable Long orderId) {
-        Order assignedOrder = orderService.assignOrderToUser(orderId, auth.getName());
+    public ResponseEntity<?> assignOrderToUser(@AuthenticationPrincipal User user, @PathVariable Long orderId) {
+        Order assignedOrder = orderService.assignOrderToUser(orderId, user.getEmail());
         return createResponseEntity(HttpStatus.OK, "Order successfully attached to User", assignedOrder);
     }
 
