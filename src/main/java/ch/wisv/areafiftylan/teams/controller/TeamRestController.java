@@ -161,7 +161,7 @@ public class TeamRestController {
      * @return A list of the members of the Team with the given Id
      */
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/{teamId}/members", params = "admin")
+    @GetMapping(value = "/{teamId}/members", params = "admin")
     public Set<User> getTeamMembersByIdAdmin(@PathVariable Long teamId) {
         Team team = teamService.getTeamById(teamId);
         return team.getMembers();
