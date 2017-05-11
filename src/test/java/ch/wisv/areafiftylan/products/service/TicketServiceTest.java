@@ -543,20 +543,20 @@ public class TicketServiceTest extends ServiceTest {
         ttt1.use();
         testEntityManager.persist(ttt1);
 
-        Collection<TicketTransferToken> tttc = ticketService.getValidTicketTransferTokensByUser(owner.getEmail());
+        Collection<TicketTransferToken> tttc = ticketService.getValidTicketTransferTokensByUserEmail(owner.getEmail());
 
         assertEquals(tttc, Collections.singletonList(ttt2));
     }
 
     @Test
     public void getValidTicketTransferTokensByUserNotFound() {
-        Collection<TicketTransferToken> tttc = ticketService.getValidTicketTransferTokensByUser("doesnt_exist");
+        Collection<TicketTransferToken> tttc = ticketService.getValidTicketTransferTokensByUserEmail("doesnt_exist");
         assertTrue(tttc.isEmpty());
     }
 
     @Test
     public void getValidTicketTransferTokensByUserNull() {
-        Collection<TicketTransferToken> tttc = ticketService.getValidTicketTransferTokensByUser(null);
+        Collection<TicketTransferToken> tttc = ticketService.getValidTicketTransferTokensByUserEmail(null);
         assertTrue(tttc.isEmpty());
     }
 
