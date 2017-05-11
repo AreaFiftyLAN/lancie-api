@@ -31,7 +31,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -81,7 +80,7 @@ public class TicketRestController {
     public ResponseEntity<?> getTicketTokensOpenForTransfer(Authentication auth) {
         User currentUser = (User) auth.getPrincipal();
         Collection<TicketTransferToken> tokens =
-                ticketService.getValidTicketTransferTokensByUser(currentUser.getEmail());
+                ticketService.getValidTicketTransferTokensByUserEmail(currentUser.getEmail());
 
         return createResponseEntity(HttpStatus.OK, "Ticket transfer tokens successfully retrieved.", tokens);
     }

@@ -107,7 +107,7 @@ public class CurrentUserRestController {
     @RequestMapping(value = "/teams", method = RequestMethod.GET)
     public Collection<Team> getCurrentTeams(Authentication auth) {
         User currentUser = (User) auth.getPrincipal();
-        return teamService.getTeamsByEmail(currentUser.getEmail());
+        return teamService.getTeamsByMemberEmail(currentUser.getEmail());
     }
 
     @RequestMapping(value = "/teams/invites", method = RequestMethod.GET)

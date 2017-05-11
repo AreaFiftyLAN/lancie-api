@@ -65,10 +65,10 @@ public interface TicketService {
     /**
      * Sets up the ticket for transfer
      *
-     * @param ticketId     The ID of the ticket to be transferred
-     * @param goalEmail    The name of the user which should receive the ticket
+     * @param ticketId      The ID of the ticket to be transferred
+     * @param receiverEmail    The name of the user which should receive the ticket
      */
-    TicketTransferToken setupForTransfer(Long ticketId, String goalEmail);
+    TicketTransferToken setupForTransfer(Long ticketId, String receiverEmail);
 
     /**
      * Transfer the ticket to another user
@@ -94,7 +94,7 @@ public interface TicketService {
      */
     Collection<Ticket> getOwnedTicketsAndFromTeamMembers(User user);
 
-    Collection<TicketTransferToken> getValidTicketTransferTokensByUser(String email);
+    Collection<TicketTransferToken> getValidTicketTransferTokensByUserEmail(String email);
 
     Collection<Ticket> getAllTicketsWithTransport();
 

@@ -87,7 +87,7 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public Collection<Team> getTeamsByEmail(String email) {
+    public Collection<Team> getTeamsByMemberEmail(String email) {
         return teamRepository.findAllByMembersEmailIgnoreCase(email);
     }
 

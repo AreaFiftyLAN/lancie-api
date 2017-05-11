@@ -38,7 +38,7 @@ public interface TeamService {
 
     Collection<Team> getAllTeams();
 
-    Collection<Team> getTeamsByEmail(String email);
+    Collection<Team> getTeamsByMemberEmail(String email);
 
     Team update(Long teamId, TeamDTO input);
 

@@ -167,8 +167,8 @@ public class TicketServiceImpl implements TicketService {
 
 
     @Override
-    public TicketTransferToken setupForTransfer(Long ticketId, String goalEmail) {
-        User u = userService.getUserByEmail(goalEmail);
+    public TicketTransferToken setupForTransfer(Long ticketId, String receiverEmail) {
+        User u = userService.getUserByEmail(receiverEmail);
         Ticket t = getTicketById(ticketId);
 
         List<TicketTransferToken> ticketTransferTokens = tttRepository.findAllByTicketId(ticketId).stream().
@@ -183,7 +183,7 @@ public class TicketServiceImpl implements TicketService {
             throw new TicketAlreadyLinkedException();
         }
 
-        if (t.getOwner() != null && t.getOwner().getEmail().equals(goalEmail)) {
+        if (t.getOwner() != null && t.getOwner().getEmail().equals(receiverEmail)) {
             throw new TicketTransferTokenException("Cant send a ticket to yourself");
         }
 
@@ -226,7 +226,7 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public Collection<TicketTransferToken> getValidTicketTransferTokensByUser(String email) {
+    public Collection<TicketTransferToken> getValidTicketTransferTokensByUserEmail(String email) {
         return tttRepository.findAllByTicketOwnerEmailIgnoreCase(email).stream().
                 filter(TicketTransferToken::isValid).
                 collect(Collectors.toList());
