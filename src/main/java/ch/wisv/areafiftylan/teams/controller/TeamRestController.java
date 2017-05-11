@@ -69,7 +69,7 @@ public class TeamRestController {
      */
     @PreAuthorize("isAuthenticated()")
     @JsonView(View.Public.class)
-    @RequestMapping(method = RequestMethod.POST)
+    @PostMapping
     ResponseEntity<?> add(@AuthenticationPrincipal User user, @Validated @RequestBody TeamDTO teamDTO) {
         if (teamService.teamnameUsed(teamDTO.getTeamName())) {
             return createResponseEntity(HttpStatus.CONFLICT,
@@ -103,7 +103,7 @@ public class TeamRestController {
      * @return A collection of all registered Users.
      */
     @PreAuthorize("hasRole('ADMIN')")
-    @RequestMapping(method = RequestMethod.GET)
+    @GetMapping
     public Collection<Team> readTeams() {
         return teamService.getAllTeams();
     }
@@ -117,7 +117,7 @@ public class TeamRestController {
      */
     @PreAuthorize("@currentUserServiceImpl.canAccessTeam(principal, #teamId)")
     @JsonView(View.Team.class)
-    @RequestMapping(method = RequestMethod.GET, value = "/{teamId}")
+    @GetMapping("/{teamId}")
     public Team getTeamById(@PathVariable Long teamId) {
         return this.teamService.getTeamById(teamId);
     }
@@ -145,7 +145,7 @@ public class TeamRestController {
      */
     @PreAuthorize("@currentUserServiceImpl.canAccessTeam(principal, #teamId)")
     @JsonView(View.Team.class)
-    @RequestMapping(method = RequestMethod.GET, value = "/{teamId}/members")
+    @GetMapping("/{teamId}/members")
     public Set<User> getTeamMembersById(@PathVariable Long teamId) {
         Team team = teamService.getTeamById(teamId);
         return team.getMembers();
@@ -161,7 +161,7 @@ public class TeamRestController {
      * @return A list of the members of the Team with the given Id
      */
     @PreAuthorize("hasRole('ADMIN')")
-    @RequestMapping(method = RequestMethod.GET, value = "/{teamId}/members", params = "admin")
+    @GetMapping("/{teamId}/members", params = "admin")
     public Set<User> getTeamMembersByIdAdmin(@PathVariable Long teamId) {
         Team team = teamService.getTeamById(teamId);
         return team.getMembers();
@@ -177,7 +177,7 @@ public class TeamRestController {
      * @return Result message of the request
      */
     @PreAuthorize("hasRole('ADMIN')")
-    @RequestMapping(method = RequestMethod.POST, value = "/{teamId}")
+    @PostMapping("/{teamId}")
     public ResponseEntity<?> addTeamMember(@PathVariable Long teamId, @RequestBody String email) {
         teamService.addMember(teamId, email);
         return createResponseEntity(HttpStatus.OK, "User " + email + " successfully added to Team " + teamId);
@@ -193,14 +193,14 @@ public class TeamRestController {
      * @return Result message of the request
      */
     @PreAuthorize("@currentUserServiceImpl.canEditTeam(principal, #teamId) ")
-    @RequestMapping(method = RequestMethod.POST, value = "/{teamId}/invites")
+    @PostMapping("/{teamId}/invites")
     public ResponseEntity<?> inviteTeamMember(@PathVariable Long teamId, @RequestBody String email) {
         teamService.inviteMember(teamId, email);
         return createResponseEntity(HttpStatus.OK, "User " + email + " successfully invited to Team " + teamId);
     }
 
     @PreAuthorize("@currentUserServiceImpl.canEditTeam(principal, #teamId)")
-    @RequestMapping(method = RequestMethod.GET, value = "/{teamId}/invites")
+    @GetMapping("/{teamId}/invites")
     public List<TeamInviteResponse> getTeamInvitesByTeam(@PathVariable Long teamId) {
         return teamService.findTeamInvitesByTeamId(teamId);
     }
@@ -213,7 +213,7 @@ public class TeamRestController {
      * @return Statusmessage
      */
     @PreAuthorize("@currentUserServiceImpl.canAcceptInvite(principal, #token)")
-    @RequestMapping(method = RequestMethod.POST, value = "/invites")
+    @PostMapping("/invites")
     public ResponseEntity<?> acceptTeamInvite(@RequestBody String token) {
         teamService.addMemberByInvite(token);
         return createResponseEntity(HttpStatus.OK, "Invite successfully accepted");
@@ -227,7 +227,7 @@ public class TeamRestController {
      * @return Statusmessage
      */
     @PreAuthorize("@currentUserServiceImpl.canRevokeInvite(principal, #token)")
-    @RequestMapping(method = RequestMethod.DELETE, value = "/invites")
+    @DeleteMapping("/invites")
     public ResponseEntity<?> revokeTeamInvite(@RequestBody String token) {
         teamService.revokeInvite(token);
         return createResponseEntity(HttpStatus.OK, "Invite successfully declined");
@@ -244,7 +244,7 @@ public class TeamRestController {
      */
     @PreAuthorize("@currentUserServiceImpl.canEditTeam(principal, #teamId)")
     @JsonView(View.Team.class)
-    @RequestMapping(method = RequestMethod.PUT, value = "/{teamId}")
+    @PutMapping("/{teamId}")
     public Team update(@PathVariable Long teamId, @Validated @RequestBody TeamDTO input) {
         return this.teamService.update(teamId, input);
     }
@@ -278,7 +278,7 @@ public class TeamRestController {
      * @return A status message of the operation
      */
     @PreAuthorize("@currentUserServiceImpl.canRemoveFromTeam(principal, #teamId, #email)")
-    @RequestMapping(method = RequestMethod.DELETE, value = "/{teamId}/members")
+    @DeleteMapping("/{teamId}/members")
     public ResponseEntity<?> removeTeamMember(@PathVariable Long teamId, @RequestBody String email) {
         teamService.removeMember(teamId, email);
         return createResponseEntity(HttpStatus.OK, "User '" + email + "' successfully removed from Team " + teamId);

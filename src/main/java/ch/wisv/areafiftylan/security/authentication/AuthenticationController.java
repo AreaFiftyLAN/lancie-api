@@ -72,19 +72,19 @@ public class AuthenticationController {
         this.passwordResetTokenRepository = passwordResetTokenRepository;
     }
 
-    @RequestMapping(value = "/token", method = RequestMethod.GET)
+    @GetMapping("/token")
     public ResponseEntity<?> checkSession() {
         return createResponseEntity(HttpStatus.OK, "Here's your token!");
     }
 
     @PreAuthorize("isAuthenticated()")
-    @RequestMapping(value = "/token/verify", method = RequestMethod.GET)
+    @GetMapping("/token/verify")
     public ResponseEntity<?> verifyToken() {
         return createResponseEntity(HttpStatus.OK, "Token is valid!");
     }
 
     @PreAuthorize("isAuthenticated()")
-    @RequestMapping(value = "/logout", method = RequestMethod.POST)
+    @PostMapping("/logout")
     public ResponseEntity<?> removeSession(@RequestHeader("X-Auth-Token") String xAuth) {
         authenticationService.removeAuthToken(xAuth);
 
@@ -100,7 +100,7 @@ public class AuthenticationController {
      *
      * @return A status message telling whether the action was successful
      */
-    @RequestMapping(value = "/requestResetPassword", method = RequestMethod.POST)
+    @PostMapping("/requestResetPassword")
     @ResponseBody
     public ResponseEntity<?> requestResetPassword(HttpServletRequest request, @RequestBody Map<String, String> body) {
         String email = body.get("email");
@@ -126,7 +126,7 @@ public class AuthenticationController {
      *
      * @return A status message telling whether the action was successful
      */
-    @RequestMapping(value = "/resetPassword", method = RequestMethod.POST)
+    @PostMapping("/resetPassword")
     @ResponseBody
     public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> body,
                                            @RequestHeader("X-Auth-Token") String xAuth) throws InvalidTokenException {
@@ -170,7 +170,7 @@ public class AuthenticationController {
      *
      * @throws TokenNotFoundException if the token can't be found
      */
-    @RequestMapping(value = "/confirmRegistration", method = RequestMethod.GET)
+    @GetMapping("/confirmRegistration")
     public ResponseEntity<?> confirmRegistration(@RequestParam("token") String token,
                                                  @RequestParam("orderId") Optional<Long> orderId)
             throws TokenNotFoundException, InvalidTokenException {

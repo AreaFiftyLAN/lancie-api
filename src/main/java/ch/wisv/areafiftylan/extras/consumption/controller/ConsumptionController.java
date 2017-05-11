@@ -33,7 +33,7 @@ import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEnt
 
 @RestController
 @PreAuthorize("hasRole('ADMIN')")
-@RequestMapping(value = "/consumptions")
+@RequestMapping("/consumptions")
 public class ConsumptionController {
     private final ConsumptionService consumptionService;
 
@@ -42,12 +42,12 @@ public class ConsumptionController {
         this.consumptionService = consumptionService;
     }
 
-    @RequestMapping(method = RequestMethod.GET)
+    @GetMapping
     public Collection<Consumption> getAllPossibleConsumptions() {
         return consumptionService.getPossibleConsumptions();
     }
 
-    @RequestMapping(method = RequestMethod.POST)
+    @PostMapping
     public ResponseEntity<?> addAvailableConsumption(@RequestBody String consumptionName) {
         consumptionService.addPossibleConsumption(consumptionName);
 
@@ -55,7 +55,7 @@ public class ConsumptionController {
                 "Successfully added " + consumptionName + " as a supported consumption.");
     }
 
-    @RequestMapping(method = RequestMethod.DELETE)
+    @DeleteMapping
     public ResponseEntity<?> removeAvailableConsumption(@RequestBody Long consumptionId) {
         Consumption c = consumptionService.removePossibleConsumption(consumptionId);
 
@@ -63,18 +63,18 @@ public class ConsumptionController {
                 "Successfully removed " + c.getName() + " as a supported consumption.");
     }
 
-    @RequestMapping(value = "/{ticketId}", method = RequestMethod.GET)
+    @GetMapping("/{ticketId}")
     public Collection<Consumption> consumptionsMade(@PathVariable Long ticketId) {
         return consumptionService.getByTicketIdIfValid(ticketId).getConsumptionsMade();
     }
 
-    @RequestMapping(value = "/{ticketId}/consume", method = RequestMethod.POST)
+    @PostMapping("/{ticketId}/consume")
     public ResponseEntity<?> consume(@PathVariable Long ticketId, @RequestBody Long consumptionId) {
         consumptionService.consume(ticketId, consumptionId);
         return createResponseEntity(HttpStatus.OK, "Successfully consumed consumption");
     }
 
-    @RequestMapping(value = "/{ticketId}/reset", method = RequestMethod.POST)
+    @PostMapping("/{ticketId}/reset")
     public ResponseEntity<?> reset(@PathVariable Long ticketId, @RequestBody Long consumptionId) {
         consumptionService.reset(ticketId, consumptionId);
         return createResponseEntity(HttpStatus.OK, "Successfully reset consumption");
