@@ -450,6 +450,25 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
     }
 
     @Test
+    public void reserveTakenSeatAsAdmin() {
+        User user1 = createUser();
+        Ticket ticket1 = createTicketForUser(user1);
+        setTicketOnA1(ticket1);
+
+        User user2 = createAdmin();
+        Ticket ticket2 = createTicketForUser(user2);
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user2)).
+        when().
+            post(SEAT_ENDPOINT + "/A/1/" + ticket2.getId()).
+        then().
+            statusCode(HttpStatus.SC_OK);
+        //@formatter:on
+    }
+
+    @Test
     public void reserveSeatWithInvalidTicket() {
         User user = createUser();
         Ticket ticket = createTicketForUser(user);
