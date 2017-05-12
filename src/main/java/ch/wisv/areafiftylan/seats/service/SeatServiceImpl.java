@@ -88,9 +88,9 @@ public class SeatServiceImpl implements SeatService {
     }
 
     @Override
-    public void reserveSeatForAdmin(String seatGroup, int seatNumber) {
+    public void reserveSeatForAdmin(String seatGroup, int seatNumber, Long ticketId) {
         Seat seat = getSeatBySeatGroupAndSeatNumber(seatGroup, seatNumber);
-        reserveSeat(seat, null);
+        reserveSeat(seat, ticketId);
     }
 
     /**
