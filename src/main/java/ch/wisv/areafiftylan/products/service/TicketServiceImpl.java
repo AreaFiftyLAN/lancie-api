@@ -239,7 +239,7 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public List<Ticket> getAllTicketsWithTransport() {
-        TicketOption pickupServiceOption = getTicketOptionByName("pickupService");
+        TicketOption pickupServiceOption = getTicketOptionByName("Pickup service");
 
         return ticketRepository.findAll().stream().
                 filter(ticket -> ticket.getEnabledOptions().contains(pickupServiceOption)).
