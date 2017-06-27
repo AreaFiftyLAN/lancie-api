@@ -82,7 +82,7 @@ public class User implements Serializable, UserDetails {
     public String getUsername() {
         return email;
     }
-  
+
     @Override
     public Set<? extends GrantedAuthority> getAuthorities() {
         return roles;

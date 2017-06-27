@@ -41,7 +41,6 @@ public class Order {
 
     @OneToMany(cascade = CascadeType.MERGE, targetEntity = Ticket.class, fetch = FetchType.EAGER)
     @JsonView(View.OrderOverview.class)
-    @Setter
     private Set<Ticket> tickets;
 
     @JsonView(View.OrderOverview.class)
