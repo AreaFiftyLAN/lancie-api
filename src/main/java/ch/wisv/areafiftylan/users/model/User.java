@@ -77,13 +77,6 @@ public class User implements Serializable, UserDetails {
     @JsonIgnore
     private boolean enabled = true;
 
-    public User(String email, String passwordHash) {
-        this.email = email;
-        this.passwordHash = passwordHash;
-        this.profile = new Profile();
-        this.roles = new HashSet<>();
-    }
-
     // This method is created to allow logging is using the email field
     @Override
     public String getUsername() {

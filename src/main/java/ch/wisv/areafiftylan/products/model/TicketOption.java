@@ -39,7 +39,7 @@ public class TicketOption {
 
     @JsonView(View.OrderOverview.class)
     private float price;
-    
+
     public TicketOption(String name, float price) {
         this.name = name;
         this.price = price;
