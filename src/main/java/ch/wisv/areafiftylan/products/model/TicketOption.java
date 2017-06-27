@@ -27,7 +27,6 @@ import javax.persistence.Id;
 
 @Entity
 @Data
-@RequiredArgsConstructor
 @NoArgsConstructor
 public class TicketOption {
 
@@ -35,12 +34,14 @@ public class TicketOption {
     @GeneratedValue
     private Long id;
 
-    @NonNull
     @JsonView(View.OrderOverview.class)
     private String name;
 
-    @NonNull
     @JsonView(View.OrderOverview.class)
     private float price;
-
+    
+    public TicketOption(String name, float price) {
+        this.name = name;
+        this.price = price;
+    }
 }
