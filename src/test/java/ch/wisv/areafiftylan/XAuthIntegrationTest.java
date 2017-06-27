@@ -98,6 +98,7 @@ public abstract class XAuthIntegrationTest {
     protected User createUser(int age, boolean admin) {
         long count = userRepository.count();
         User user = new User(count + "@mail.com", new BCryptPasswordEncoder().encode(cleartextPassword));
+        user.addRole(Role.ROLE_USER);
         if (admin) {
             user.addRole(Role.ROLE_ADMIN);
         }
