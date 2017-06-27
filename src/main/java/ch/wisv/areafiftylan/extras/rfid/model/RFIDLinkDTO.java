@@ -22,14 +22,13 @@ import lombok.Setter;
 
 import javax.validation.constraints.NotNull;
 
+@Getter
+@Setter
 public class RFIDLinkDTO {
+
     @NotNull
-    @Getter
-    @Setter
     private String rfid;
 
     @NotNull
-    @Getter
-    @Setter
     private Long ticketId;
 }

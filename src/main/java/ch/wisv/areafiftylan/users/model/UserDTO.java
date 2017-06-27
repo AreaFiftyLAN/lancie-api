@@ -20,16 +20,14 @@ package ch.wisv.areafiftylan.users.model;
 import lombok.Getter;
 import org.hibernate.validator.constraints.NotEmpty;
 
+@Getter
 public class UserDTO {
 
     @NotEmpty
-    @Getter
     private String username = "";
 
     @NotEmpty
-    @Getter
     private String password = "";
 
-    @Getter
     private Long orderId;
 }

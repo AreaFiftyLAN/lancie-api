@@ -31,46 +31,41 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-
+@Getter
 public class Order {
 
     @Id
     @GeneratedValue
     @JsonView(View.OrderOverview.class)
-    @Getter
     private Long id;
 
     @OneToMany(cascade = CascadeType.MERGE, targetEntity = Ticket.class, fetch = FetchType.EAGER)
     @JsonView(View.OrderOverview.class)
-    @Getter
+    @Setter
     private Set<Ticket> tickets;
 
     @JsonView(View.OrderOverview.class)
-    @Getter
     @Setter
     private OrderStatus status;
 
     @JsonView(View.OrderOverview.class)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
-    @Getter
     private LocalDateTime creationDateTime;
 
     /**
      * This String can be used to store an external reference. Payment providers often have their own id.
      */
     @JsonView(View.OrderOverview.class)
-    @Getter
     @Setter
     private String reference;
 
     @ManyToOne(cascade = CascadeType.MERGE)
     @JsonView(View.OrderOverview.class)
-    @Getter
     private User user = null;
 
     public Order() {
-        status = OrderStatus.ANONYMOUS;
-        creationDateTime = LocalDateTime.now();
+        this.status = OrderStatus.ANONYMOUS;
+        this.creationDateTime = LocalDateTime.now();
         this.tickets = new HashSet<>();
     }
 

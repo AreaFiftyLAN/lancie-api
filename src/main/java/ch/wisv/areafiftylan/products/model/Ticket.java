@@ -29,34 +29,30 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
+@Getter
 @NoArgsConstructor
 public class Ticket {
 
     @Id
     @GeneratedValue
     @JsonView(View.OrderOverview.class)
-    @Getter
     private Long id;
 
     @ManyToOne(cascade = CascadeType.MERGE)
     @JsonView(View.Public.class)
-    @Getter
     @Setter
     private User owner;
 
     @JsonView(View.OrderOverview.class)
     @ManyToOne(cascade = CascadeType.MERGE)
-    @Getter
     private TicketType type;
 
 
     @JsonView(View.OrderOverview.class)
-    @Getter
     @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     private Set<TicketOption> enabledOptions;
 
     @JsonView(View.OrderOverview.class)
-    @Getter
     @Setter
     private boolean valid;
 
