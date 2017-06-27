@@ -17,8 +17,8 @@
 
 package ch.wisv.areafiftylan.exception;
 
-public class PaymentServiceConnectionException extends RuntimeException {
-    public PaymentServiceConnectionException(String s) {
-        super(s);
+public class PaymentServiceConnectionException extends AreaFiftyLANException {
+    public PaymentServiceConnectionException(String message) {
+        super(message);
     }
 }

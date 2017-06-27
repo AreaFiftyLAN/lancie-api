@@ -25,7 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -52,7 +52,7 @@ public class UserProfileRestController {
      * @return The user with the new profile
      */
     @PreAuthorize("@currentUserServiceImpl.canAccessUser(principal, #userId)")
-    @RequestMapping(value = "/{userId}/profile", method = RequestMethod.POST)
+    @PostMapping("/{userId}/profile")
     public ResponseEntity<?> addProfile(@PathVariable Long userId, @Validated @RequestBody ProfileDTO input) {
         User user = userService.addProfile(userId, input);
 
@@ -68,9 +68,9 @@ public class UserProfileRestController {
      * @return The user with the new profile
      */
     @PreAuthorize("isAuthenticated()")
-    @RequestMapping(value = "/current/profile", method = RequestMethod.POST)
-    public ResponseEntity<?> addProfile(@Validated @RequestBody ProfileDTO input, Authentication auth) {
-        return this.addProfile(((User) auth.getPrincipal()).getId(), input);
+    @PostMapping("/current/profile")
+    public ResponseEntity<?> addProfile(@AuthenticationPrincipal User user, @Validated @RequestBody ProfileDTO input) {
+        return this.addProfile(user.getId(), input);
     }
 
     /**
@@ -82,7 +82,7 @@ public class UserProfileRestController {
      * @return The user with the changed profile
      */
     @PreAuthorize("@currentUserServiceImpl.canAccessUser(principal, #userId)")
-    @RequestMapping(value = "/{userId}/profile", method = RequestMethod.PUT)
+    @PutMapping("/{userId}/profile")
     public ResponseEntity<?> changeProfile(@PathVariable Long userId, @Validated @RequestBody ProfileDTO input) {
         User user = userService.changeProfile(userId, input);
 
@@ -97,7 +97,7 @@ public class UserProfileRestController {
      * @return Empty body with StatusCode OK.
      */
     @PreAuthorize("hasRole('ADMIN')")
-    @RequestMapping(value = "/{userId}/profile", method = RequestMethod.DELETE)
+    @DeleteMapping("/{userId}/profile")
     public ResponseEntity<?> resetProfile(@PathVariable Long userId) {
         Profile profile = userService.resetProfile(userId);
         return createResponseEntity(HttpStatus.OK, "Profile successfully reset", profile);

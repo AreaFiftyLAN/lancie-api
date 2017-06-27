@@ -29,8 +29,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -60,12 +59,12 @@ public class UserRestController {
      * This method accepts POST requests on /users. It will send the input to the {@link UserService} to create a new
      * user
      *
-     * @param input The user that has to be created. It consists of 3 fields. The username, the email and the plain-text
+     * @param input The user that has to be created. It consists of 2 fields. The the email and the plain-text
      *              password. The password is saved hashed using the BCryptPasswordEncoder
      *
      * @return The generated object, in JSON format.
      */
-    @RequestMapping(method = RequestMethod.POST)
+    @PostMapping
     public ResponseEntity<?> add(HttpServletRequest request, @Validated @RequestBody UserDTO input) {
         User save = userService.create(input, request);
 
@@ -88,7 +87,7 @@ public class UserRestController {
      * @return The User object.
      */
     @PreAuthorize("@currentUserServiceImpl.canAccessUser(principal, #userId)")
-    @RequestMapping(value = "/{userId}", method = RequestMethod.PUT)
+    @PutMapping("/{userId}")
     public ResponseEntity<?> replaceUser(@PathVariable Long userId, @Validated @RequestBody UserDTO input) {
         User user = userService.replace(userId, input);
         return createResponseEntity(HttpStatus.OK, "User successfully replaced", user);
@@ -102,7 +101,7 @@ public class UserRestController {
      * @return The user with the given userId
      */
     @PreAuthorize("@currentUserServiceImpl.canAccessUser(principal, #userId)")
-    @RequestMapping(value = "/{userId}", method = RequestMethod.GET)
+    @GetMapping("/{userId}")
     public User getUserById(@PathVariable Long userId) {
         return this.userService.getUserById(userId);
     }
@@ -113,7 +112,7 @@ public class UserRestController {
      * @return all users
      */
     @PreAuthorize("hasRole('ADMIN')")
-    @RequestMapping(method = RequestMethod.GET)
+    @GetMapping
     public Collection<User> readUsers() {
         return userService.getAllUsers();
     }
@@ -123,18 +122,13 @@ public class UserRestController {
      * directly derived from the Authentication object which is automatically added. Returns a not-found entity if
      * there's no user logged in. Returns the user
      *
-     * @param auth Current Authentication object, automatically taken from the SecurityContext
-     *
+     * @param user the current user
      * @return The currently logged in User.
      */
-    @RequestMapping(value = "/current", method = RequestMethod.GET)
-    public ResponseEntity<?> getCurrentUser(Authentication auth) {
-        // To prevent 403 errors on this endpoint, we manually handle unauthenticated users, instead of a
-        // preauthorize tag.
-        if (auth != null) {
-            // Get the currently logged in user from the autowired Authentication object.
-            UserDetails currentUser = (UserDetails) auth.getPrincipal();
-            User user = userService.getUserByUsername(currentUser.getUsername());
+    @GetMapping("/current")
+    public ResponseEntity<?> getCurrentUser(@AuthenticationPrincipal User user) {
+        // To prevent 403 errors on this endpoint, we manually handle unauthenticated users, instead of @PreAuthorize.
+        if (user != null) {
             return new ResponseEntity<>(user, HttpStatus.OK);
         } else {
             return createResponseEntity(HttpStatus.OK, "Not logged in");
@@ -149,7 +143,7 @@ public class UserRestController {
      * @return A status message.
      */
     @PreAuthorize("hasRole('ADMIN')")
-    @RequestMapping(value = "/{userId}", method = RequestMethod.DELETE)
+    @DeleteMapping("/{userId}")
     public ResponseEntity<?> disableUser(@PathVariable Long userId) {
         userService.lock(userId);
         return createResponseEntity(HttpStatus.OK, "User disabled");
@@ -173,25 +167,12 @@ public class UserRestController {
     @GetMapping("/{userId}/seat")
     public List<Seat> getSeatByUser(@PathVariable Long userId) {
         User user = userService.getUserById(userId);
-        return seatService.getSeatsByUsername(user.getUsername());
-    }
-
-    /**
-     * Checks for the availability of a username. Returns false when another user is already registered with this
-     * username.
-     *
-     * @param username The username to be checked.
-     *
-     * @return Whether this username has already been registered.
-     */
-    @RequestMapping(value = "/checkUsername", method = RequestMethod.GET)
-    public Boolean checkUsernameExists(@RequestParam String username) {
-        return userService.checkUsernameAvailable(username);
+        return seatService.getSeatsByEmail(user.getEmail());
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<?> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
-        return createResponseEntity(HttpStatus.CONFLICT, "Username or Email already taken!");
+        return createResponseEntity(HttpStatus.CONFLICT, "Email is already in use");
     }
 
     @ExceptionHandler(ConstraintViolationException.class)

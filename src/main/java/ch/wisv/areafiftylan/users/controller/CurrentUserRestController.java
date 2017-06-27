@@ -36,12 +36,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collection;
@@ -81,18 +81,16 @@ public class CurrentUserRestController {
      * functionality which works with tokens. Users have to provide both their old and new password, and have to be
      * fully authenticated, meaning that they can't be coming from a "Remember me" session.
      *
-     * @param auth              The current user
+     * @param user the current user
      * @param passwordChangeDTO DTO containing oldPassword and newPassword
      *
      * @return Statusmessage
      */
-    @RequestMapping(value = "/password", method = RequestMethod.POST)
-    public ResponseEntity<?> changeCurrentUserPassword(Authentication auth,
+    @PostMapping("/password")
+    public ResponseEntity<?> changeCurrentUserPassword(@AuthenticationPrincipal User user,
                                                        @RequestBody @Validated PasswordChangeDTO passwordChangeDTO) {
-        User currentUser = (User) auth.getPrincipal();
-
-        userService.changePassword(currentUser.getId(), passwordChangeDTO.getOldPassword(),
-                passwordChangeDTO.getNewPassword());
+        userService.changePassword(user.getId(),
+                passwordChangeDTO.getOldPassword(), passwordChangeDTO.getNewPassword());
 
         return createResponseEntity(HttpStatus.OK, "Password successfully changed");
     }
@@ -100,76 +98,63 @@ public class CurrentUserRestController {
     /**
      * Get all the Teams the current user is a member of.
      *
-     * @param auth Current Authentication object, automatically taken from the SecurityContext
-     *
+     * @param user Current logged in user.
      * @return A Collection of Teams of which the current User is a member
      */
     @JsonView(View.Team.class)
-    @RequestMapping(value = "/teams", method = RequestMethod.GET)
-    public Collection<Team> getCurrentTeams(Authentication auth) {
-        UserDetails currentUser = (UserDetails) auth.getPrincipal();
-        return teamService.getTeamsByUsername(currentUser.getUsername());
+    @GetMapping("/teams")
+    public Collection<Team> getCurrentTeams(@AuthenticationPrincipal User user) {
+        return teamService.getTeamsByMemberEmail(user.getEmail());
     }
 
-    @RequestMapping(value = "/teams/invites", method = RequestMethod.GET)
-    public List<TeamInviteResponse> getOpenInvites(Authentication auth) {
-        User currentUser = (User) auth.getPrincipal();
-
-        return teamService.findTeamInvitesByUsername(currentUser.getUsername());
+    @GetMapping("/teams/invites")
+    public List<TeamInviteResponse> getOpenInvites(@AuthenticationPrincipal User user) {
+        return teamService.findTeamInvitesByEmail(user.getEmail());
     }
 
     /**
      * Get all Orders that the current User created. This doesn't include expired orders. This will be a Collection with
      * size 0 or 1 of the majority, but it can contain more orders.
      *
-     * @param auth The current User
-     *
+     * @param user Current logged in user.
      * @return A collection of Orders of the current User.
      */
     @JsonView(View.OrderOverview.class)
-    @RequestMapping(value = "/orders", method = RequestMethod.GET)
-    public Collection<Order> getAllOrders(Authentication auth) {
-        UserDetails currentUser = (UserDetails) auth.getPrincipal();
-        return orderService.findOrdersByUsername(currentUser.getUsername());
+    @GetMapping("/orders")
+    public Collection<Order> getAllOrders(@AuthenticationPrincipal User user) {
+        return orderService.findOrdersByEmail(user.getEmail());
     }
 
     /**
      * Get the tickets of the currently logged in user. All the tickets owned by this user will be returned.
      *
-     * @param auth The current User, injected by spring
-     *
+     * @param user Current logged in user.
      * @return The current owned tickets, if any exist
      */
-    @RequestMapping(value = "/tickets", method = RequestMethod.GET)
-    public Collection<Ticket> getAllTickets(Authentication auth) {
-        UserDetails currentUser = (UserDetails) auth.getPrincipal();
-        return ticketService.findValidTicketsByOwnerUsername(currentUser.getUsername());
+    @GetMapping("/tickets")
+    public Collection<Ticket> getAllTickets(@AuthenticationPrincipal User user) {
+        return ticketService.findValidTicketsByOwnerEmail(user.getEmail());
     }
 
     /**
      * Get the current open order include expired orders. A User van only have one open order.
      *
-     * @param auth The current User, injected by Spring
-     *
+     * @param user Current logged in user.
      * @return The current open order, if any exist
      */
-    @RequestMapping(value = "/orders/open", method = RequestMethod.GET)
-    public List<Order> getOpenOrder(Authentication auth) {
-        UserDetails currentUser = (UserDetails) auth.getPrincipal();
-        return orderService.getOpenOrders(currentUser.getUsername());
+    @GetMapping("/orders/open")
+    public List<Order> getOpenOrder(@AuthenticationPrincipal User user) {
+        return orderService.getOpenOrders(user.getEmail());
     }
 
     /**
      * Get the seats of the current user
      *
-     * @param auth Currently logged in user
-     *
+     * @param user Current logged in user.
      * @return Returns a list of reserved seats by the user
      */
-    @RequestMapping(value = "/seat", method = RequestMethod.GET)
-    public List<Seat> getCurrentUserSeat(Authentication auth) {
-        User user = (User) auth.getPrincipal();
-
-        return seatService.getSeatsByUsername(user.getUsername());
+    @GetMapping("/seat")
+    public List<Seat> getCurrentUserSeat(@AuthenticationPrincipal User user) {
+        return seatService.getSeatsByEmail(user.getEmail());
     }
 }

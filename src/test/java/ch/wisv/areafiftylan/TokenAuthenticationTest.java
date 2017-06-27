@@ -53,7 +53,7 @@ public class TokenAuthenticationTest extends XAuthIntegrationTest {
     public void testRequestToken() {
         User user = createUser();
         Map<String, String> userDTO = new HashMap<>();
-        userDTO.put("username", user.getUsername());
+        userDTO.put("email", user.getEmail());
         userDTO.put("password", cleartextPassword);
 
         //@formatter:off
@@ -64,7 +64,7 @@ public class TokenAuthenticationTest extends XAuthIntegrationTest {
             post("/login");
 
         Optional<AuthenticationToken> authenticationToken =
-                authenticationTokenRepository.findByUserUsername(user.getUsername());
+                authenticationTokenRepository.findByUserEmail(user.getEmail());
 
         Assert.assertTrue(authenticationToken.isPresent());
 
@@ -79,7 +79,7 @@ public class TokenAuthenticationTest extends XAuthIntegrationTest {
     public void testRequestTokenRenew() {
         User user = createUser();
         Map<String, String> userDTO = new HashMap<>();
-        userDTO.put("username", user.getUsername());
+        userDTO.put("email", user.getEmail());
         userDTO.put("password", cleartextPassword);
 
         //@formatter:off
@@ -92,7 +92,7 @@ public class TokenAuthenticationTest extends XAuthIntegrationTest {
         //@formatter:on
 
         AuthenticationToken authenticationToken1 =
-                authenticationTokenRepository.findByUserUsername(user.getUsername()).orElse(null);
+                authenticationTokenRepository.findByUserEmail(user.getEmail()).orElse(null);
 
         //@formatter:off
         given().
@@ -104,7 +104,7 @@ public class TokenAuthenticationTest extends XAuthIntegrationTest {
         //@formatter:on
 
         AuthenticationToken authenticationToken2 =
-                authenticationTokenRepository.findByUserUsername(user.getUsername()).orElse(null);
+                authenticationTokenRepository.findByUserEmail(user.getEmail()).orElse(null);
 
         Assert.assertFalse(authenticationToken1.equals(authenticationToken2));
     }
@@ -161,7 +161,7 @@ public class TokenAuthenticationTest extends XAuthIntegrationTest {
             get("/users/current").
         then().
             statusCode(HttpStatus.SC_OK).
-            body("username", equalTo(user.getUsername()));
+            body("email", equalTo(user.getEmail()));
         //@formatter:on
     }
 

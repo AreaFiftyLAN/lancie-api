@@ -14,11 +14,9 @@ The API is a Spring based application to suit the needs of a LAN-party.
 3.  Enable annotation processing, this can be enabled in `Settings > Build, Execution, Deployment > Compiler > Annotation Processors`. Here you have to check the checkmark that says `Enable Annotation Processors`
 4.  Copy `config/application.properties.sample` to `config/application.properties`. The sample properties assume a working PostgreSQL installation running in the background.
 
-  You should change:
+  You should fill in:
   - `spring.datasource.[…]` (`url`, `username`, `password`) to your database url and credentials
-  - `flyway.enabled` to `false`
   - `a5l.molliekey` and `a5l.googleMapsAPIkey` to their respective keys if you have those
-  - all occurrences of `areafiftylan.nl` to `localhost:5100`
  
   You should comment:
   - `spring.jpa.properties.hibernate.hbm2ddl.auto`

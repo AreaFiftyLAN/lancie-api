@@ -34,7 +34,7 @@ public interface TicketService {
 
     Integer getNumberSoldOfType(TicketType type);
 
-    Collection<Ticket> findValidTicketsByOwnerUsername(String username);
+    Collection<Ticket> findValidTicketsByOwnerEmail(String email);
 
     Collection<Ticket> getAllTickets();
 
@@ -65,10 +65,10 @@ public interface TicketService {
     /**
      * Sets up the ticket for transfer
      *
-     * @param ticketId     The ID of the ticket to be transferred
-     * @param goalUserName The name of the user which should receive the ticket
+     * @param ticketId      The ID of the ticket to be transferred
+     * @param receiverEmail    The name of the user which should receive the ticket
      */
-    TicketTransferToken setupForTransfer(Long ticketId, String goalUserName);
+    TicketTransferToken setupForTransfer(Long ticketId, String receiverEmail);
 
     /**
      * Transfer the ticket to another user
@@ -94,11 +94,11 @@ public interface TicketService {
      */
     Collection<Ticket> getOwnedTicketsAndFromTeamMembers(User user);
 
-    Collection<TicketTransferToken> getValidTicketTransferTokensByUser(String username);
+    Collection<TicketTransferToken> getValidTicketTransferTokensByUserEmail(String email);
 
     Collection<Ticket> getAllTicketsWithTransport();
 
-    Ticket assignTicketToUser(Long TicketId, String username);
+    Ticket assignTicketToUser(Long TicketId, String email);
 
     TicketType addTicketType(TicketType type);
 

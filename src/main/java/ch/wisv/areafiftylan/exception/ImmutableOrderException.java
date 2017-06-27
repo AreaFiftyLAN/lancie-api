@@ -17,8 +17,7 @@
 
 package ch.wisv.areafiftylan.exception;
 
-public class ImmutableOrderException extends RuntimeException {
-
+public class ImmutableOrderException extends AreaFiftyLANException {
     public ImmutableOrderException(Long orderId) {
         super("Operation on Order " + orderId + " not permitted");
     }

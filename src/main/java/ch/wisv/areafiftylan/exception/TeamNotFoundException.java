@@ -17,7 +17,7 @@
 
 package ch.wisv.areafiftylan.exception;
 
-public class TeamNotFoundException extends RuntimeException {
+public class TeamNotFoundException extends AreaFiftyLANException {
 
     public TeamNotFoundException(String teamname) {
         super("could not find team '" + teamname + "'.");

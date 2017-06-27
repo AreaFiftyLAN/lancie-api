@@ -24,5 +24,5 @@ import java.util.Optional;
 
 @Repository
 public interface AuthenticationTokenRepository extends TokenRepository<AuthenticationToken> {
-    Optional<AuthenticationToken> findByUserUsername(String username);
+    Optional<AuthenticationToken> findByUserEmail(String email);
 }

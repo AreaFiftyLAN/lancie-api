@@ -17,8 +17,7 @@
 
 package ch.wisv.areafiftylan.exception;
 
-public class TokenNotFoundException extends RuntimeException {
-
+public class TokenNotFoundException extends AreaFiftyLANException {
     public TokenNotFoundException(String token) {
         super("Could not find token " + token);
     }

@@ -49,7 +49,7 @@ public class ExpiredOrder {
         this.createdAt = order.getCreationDateTime().toString();
         this.expiredAt = LocalDateTime.now().toString();
         if (order.getUser() != null) {
-            this.createdBy = order.getUser().getUsername();
+            this.createdBy = order.getUser().getEmail();
         } else {
             this.createdBy = "Anonymous";
         }

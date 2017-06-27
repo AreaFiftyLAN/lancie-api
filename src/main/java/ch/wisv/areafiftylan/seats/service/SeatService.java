@@ -25,7 +25,7 @@ import java.util.List;
 
 public interface SeatService {
 
-    List<Seat> getSeatsByUsername(String username);
+    List<Seat> getSeatsByEmail(String email);
 
     SeatmapResponse getAllSeats();
 
@@ -33,7 +33,7 @@ public interface SeatService {
 
     boolean reserveSeatForTicket(String groupname, int seatnumber, Long ticketId);
 
-    void reserveSeatForAdmin(String groupname, int seatnumber);
+    void reserveSeatForAdmin(String groupname, int seatnumber, Long ticketId);
 
     Seat getSeatBySeatGroupAndSeatNumber(String groupName, int seatNumber);
 

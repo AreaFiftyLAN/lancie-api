@@ -26,7 +26,7 @@ import java.util.Optional;
 
 @Repository
 public interface SeatRepository extends JpaRepository<Seat, Long> {
-    List<Seat> findByTicketOwnerUsernameIgnoreCase(String username);
+    List<Seat> findByTicketOwnerEmailIgnoreCase(String email);
 
     List<Seat> findBySeatGroup(String seatGroup);
 

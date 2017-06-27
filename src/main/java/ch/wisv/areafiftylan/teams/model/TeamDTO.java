@@ -31,5 +31,5 @@ public class TeamDTO {
     @NotEmpty
     @Getter
     @Setter
-    private String captainUsername = "";
+    private String captainEmail = "";
 }

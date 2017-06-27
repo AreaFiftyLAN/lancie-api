@@ -52,7 +52,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
 
     private Map<String, String> getTeamDTO(User captain) {
         Map<String, String> team = new HashMap<>();
-        team.put("captainUsername", captain.getUsername());
+        team.put("captainEmail", captain.getEmail());
         team.put("teamName", "Team + " + captain.getId());
         return team;
 
@@ -89,7 +89,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
     public void testCreateTeamAsCaptainDifferentCase() {
         User captain = createUser();
         Map<String, String> teamDTO = getTeamDTO(captain);
-        teamDTO.put("captainUsername", captain.getUsername().toUpperCase());
+        teamDTO.put("captainEmail", captain.getEmail().toUpperCase());
 
         //@formatter:off
         Integer teamId =
@@ -142,7 +142,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
 
         User captain = createUser();
         Map<String, String> teamDTO = getTeamDTO(captain);
-        teamDTO.remove("captainUsername");
+        teamDTO.remove("captainEmail");
 
 
         //@formatter:off
@@ -157,7 +157,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
     }
 
     @Test
-    public void testCreateTeamWithDifferentCaptainUsername() {
+    public void testCreateTeamWithDifferentCaptainEmail() {
         User user = createUser();
         User captain = createUser();
 
@@ -350,14 +350,14 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(admin)).
         when().
-            body(member.getUsername()).
+            body(member.getEmail()).
             post(TEAM_ENDPOINT + team.getId() + "/invites").
         then().
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
 
         Collection<TeamInviteToken> tokens =
-                teamInviteTokenRepository.findByUserUsernameIgnoreCase(member.getUsername());
+                teamInviteTokenRepository.findByUserEmailIgnoreCase(member.getEmail());
         Assert.assertFalse(tokens.isEmpty());
     }
 
@@ -374,7 +374,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
         given().
             header(header).
         when().
-            body(member.getUsername()).
+            body(member.getEmail()).
             post(TEAM_ENDPOINT + team.getId()).
         then().
             statusCode(HttpStatus.SC_OK);
@@ -403,14 +403,14 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(captain)).
         when().
-            body(member.getUsername()).
+            body(member.getEmail()).
             post(TEAM_ENDPOINT + team.getId() + "/invites").
         then().
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
 
         Collection<TeamInviteToken> tokens =
-                teamInviteTokenRepository.findByUserUsernameIgnoreCase(member.getUsername());
+                teamInviteTokenRepository.findByUserEmailIgnoreCase(member.getEmail());
         Assert.assertFalse(tokens.isEmpty());
     }
 
@@ -426,7 +426,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
         given().
             header(header).
         when().
-            body(user.getUsername()).
+            body(user.getEmail()).
             post(TEAM_ENDPOINT + team.getId() + "/invites").
         then().
             statusCode(HttpStatus.SC_OK);
@@ -434,13 +434,13 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
         given().
             header(header).
         when().
-            body(user.getUsername()).
+            body(user.getEmail()).
             post(TEAM_ENDPOINT + team.getId() + "/invites").
         then().
             statusCode(HttpStatus.SC_CONFLICT);
         //@formatter:on
 
-        Collection<TeamInviteToken> tokens = teamInviteTokenRepository.findByUserUsernameIgnoreCase(user.getUsername());
+        Collection<TeamInviteToken> tokens = teamInviteTokenRepository.findByUserEmailIgnoreCase(user.getEmail());
         Assert.assertEquals(1, tokens.size());
     }
 
@@ -456,7 +456,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(member)).
         when().
-            body(member2.getUsername()).
+            body(member2.getEmail()).
             post(TEAM_ENDPOINT + team.getId()).
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
@@ -475,7 +475,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(member)).
         when().
-            body(member2.getUsername()).
+            body(member2.getEmail()).
             post(TEAM_ENDPOINT + team.getId() + "/invites").
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
@@ -493,7 +493,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(user)).
         when().
-            body(member.getUsername()).
+            body(member.getEmail()).
             post(TEAM_ENDPOINT + team.getId()).
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
@@ -511,7 +511,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(user)).
         when().
-            body(member.getUsername()).
+            body(member.getEmail()).
             post(TEAM_ENDPOINT + team.getId() + "/invites").
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
@@ -527,7 +527,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(captain)).
         when().
-            body(captain.getUsername()).
+            body(captain.getEmail()).
             post(TEAM_ENDPOINT + team.getId()).
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
@@ -543,7 +543,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(captain)).
         when().
-            body(captain.getUsername()).
+            body(captain.getEmail()).
             post(TEAM_ENDPOINT + team.getId() + "/invites").
         then().
             statusCode(HttpStatus.SC_CONFLICT);
@@ -561,7 +561,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(captain)).
         when().
-            body(member.getUsername()).
+            body(member.getEmail()).
             post(TEAM_ENDPOINT + team.getId() + "/invites").
         then().
             statusCode(HttpStatus.SC_CONFLICT);
@@ -578,11 +578,11 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(captain)).
         when().
-            body(member.getUsername()).
+            body(member.getEmail()).
             post(TEAM_ENDPOINT + team.getId() + "/invites").
         then().
             statusCode(HttpStatus.SC_OK).
-            body("message", equalTo("User " + member.getUsername() + " successfully invited to Team " + team.getId()));
+            body("message", equalTo("User " + member.getEmail() + " successfully invited to Team " + team.getId()));
         //@formatter:on
     }
 
@@ -598,7 +598,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(admin)).
         when().
-            body(member.getUsername()).
+            body(member.getEmail()).
             post(TEAM_ENDPOINT + team.getId()).
         then().
             statusCode(HttpStatus.SC_CONFLICT);
@@ -623,7 +623,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
         then().
             statusCode(HttpStatus.SC_OK).
             body("teamName", hasItem(equalTo(team.getTeamName()))).
-            body("username", hasItem(equalTo(user.getUsername()))).
+            body("email", hasItem(equalTo(user.getEmail()))).
             body("$", hasSize(1));
         //@formatter:on
     }
@@ -643,7 +643,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
         then().
             statusCode(HttpStatus.SC_OK).
             body("teamName", hasItem(equalTo(team.getTeamName()))).
-            body("username", hasItem(equalTo(user.getUsername()))).
+            body("email", hasItem(equalTo(user.getEmail()))).
             body("$", hasSize(1));
         //@formatter:on
     }
@@ -683,7 +683,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
         then().
             statusCode(HttpStatus.SC_OK).
             body("teamName", hasItem(equalTo(team.getTeamName()))).
-            body("username", hasItem(equalTo(user.getUsername()))).
+            body("email", hasItem(equalTo(user.getEmail()))).
             body("$", hasSize(1));
         //@formatter:on
     }
@@ -721,8 +721,8 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
 
-        Collection<Team> allByMembersUsername = teamRepository.findAllByMembersUsernameIgnoreCase(user.getUsername());
-        Assert.assertFalse(allByMembersUsername.isEmpty());
+        Collection<Team> allByMembersEmail = teamRepository.findAllByMembersEmailIgnoreCase(user.getEmail());
+        Assert.assertFalse(allByMembersEmail.isEmpty());
     }
 
     @Test
@@ -744,7 +744,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
         //@formatter:on
 
 
-        Collection<TeamInviteToken> tokens = teamInviteTokenRepository.findByUserUsernameIgnoreCase(user.getUsername());
+        Collection<TeamInviteToken> tokens = teamInviteTokenRepository.findByUserEmailIgnoreCase(user.getEmail());
         tokens.removeIf(t -> !t.isValid());
 
         Assert.assertTrue(tokens.isEmpty());
@@ -764,7 +764,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(captain)).
         when().
-            body(member.getUsername()).
+            body(member.getEmail()).
             delete(TEAM_ENDPOINT + team.getId() + "/members").
         then().
             statusCode(HttpStatus.SC_OK);
@@ -780,7 +780,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(captain)).
         when().
-            body(captain.getUsername()).
+            body(captain.getEmail()).
             delete(TEAM_ENDPOINT + team.getId() + "/members").
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
@@ -799,7 +799,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(admin)).
         when().
-            body(member.getUsername()).
+            body(member.getEmail()).
             delete(TEAM_ENDPOINT + team.getId() + "/members").
         then().
             statusCode(HttpStatus.SC_OK);
@@ -817,7 +817,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(member)).
         when().
-            body(member.getUsername()).
+            body(member.getEmail()).
             delete(TEAM_ENDPOINT + team.getId() + "/members").
         then().
             statusCode(HttpStatus.SC_OK);
@@ -836,7 +836,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(user)).
         when().
-            body(member.getUsername()).
+            body(member.getEmail()).
             delete(TEAM_ENDPOINT + team.getId() + "/members").
         then().
                 statusCode(HttpStatus.SC_FORBIDDEN);

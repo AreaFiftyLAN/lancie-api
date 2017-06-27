@@ -116,7 +116,7 @@ public class MailServiceImpl implements MailService {
         if (user.getProfile() != null) {
             return user.getProfile().getFirstName() + " " + user.getProfile().getLastName();
         } else {
-            return user.getUsername();
+            return user.getEmail();
         }
     }
 
@@ -136,7 +136,7 @@ public class MailServiceImpl implements MailService {
 
     @Override
     public void sendTemplateMailToUser(User user, MailDTO mailDTO) {
-        sendMail(user.getUsername(), formatRecipient(user), mailDTO.getSubject(), mailDTO.getMessage());
+        sendMail(user.getEmail(), formatRecipient(user), mailDTO.getSubject(), mailDTO.getMessage());
     }
 
     @Override
@@ -145,7 +145,7 @@ public class MailServiceImpl implements MailService {
                 "Please click on the following link to complete your registration: <a href=\"" + url + "\">" + url +
                         "</a><br /><br />If the link does not work, please copy the link and" +
                         " paste it into your browser.";
-        sendMail(user.getUsername(), formatRecipient(user), "Confirm your registration", message);
+        sendMail(user.getEmail(), formatRecipient(user), "Confirm your registration", message);
     }
 
     @Override
@@ -157,14 +157,14 @@ public class MailServiceImpl implements MailService {
         ctx.setVariable("order", order);
         String content = this.templateEngine.process("orderConfirmation", ctx);
 
-        sendMailWithContent(order.getUser().getUsername(), "Order Confirmation", content);
+        sendMailWithContent(order.getUser().getEmail(), "Order Confirmation", content);
     }
 
     @Override
     public void sendPasswordResetMail(User user, String url) {
         String message = "Please click on the following link to reset your password: <a href=\"" + url + "\">" + url +
                 "</a><br /><br />If the link does not work, please copy the link and" + " paste it into your browser.";
-        sendMail(user.getUsername(), formatRecipient(user), "Password reset requested", message);
+        sendMail(user.getEmail(), formatRecipient(user), "Password reset requested", message);
     }
 
     @Override
@@ -175,7 +175,7 @@ public class MailServiceImpl implements MailService {
                         " " + teamCaptain.getProfile().getLastName() +
                         "! Please log in to My Area to accept the invitation.";
 
-        sendMail(user.getUsername(), formatRecipient(user), "You've been invited to \"Team " + teamName + "\"", message);
+        sendMail(user.getEmail(), formatRecipient(user), "You've been invited to \"Team " + teamName + "\"", message);
     }
 
     @Override
@@ -184,7 +184,7 @@ public class MailServiceImpl implements MailService {
         String message = "Unfortunately we had to reallocate your reserved seat.\n" +
                          "Please contact us if you have any questions.\n" +
                          "You can reserve a new seat through <a href=\"https://areafiftylan.nl/my-area\">My Area</a>.";
-        sendMail(user.getUsername(), formatRecipient(user), subject, message);
+        sendMail(user.getEmail(), formatRecipient(user), subject, message);
     }
 
     @Override
@@ -192,6 +192,6 @@ public class MailServiceImpl implements MailService {
         String message = sender.getProfile().getFirstName() +
                 " has sent you a ticket for AreaFiftyLAN! To accept this ticket please click on the following link: " +
                 "<a href=\"" + url + "\">" + url + "</a>";
-        sendMail(receiver.getUsername(), formatRecipient(receiver), "A ticket for AreaFiftyLAN has been sent to you!", message);
+        sendMail(receiver.getEmail(), formatRecipient(receiver), "A ticket for AreaFiftyLAN has been sent to you!", message);
     }
 }

@@ -103,7 +103,7 @@ public class TicketServiceTest extends ServiceTest {
     }
 
     @Test
-    public void findValidTicketsByOwnerUsername() {
+    public void findValidTicketsByOwnerEmail() {
         User user = persistUser();
 
         Ticket ticket = persistTicketForUser(user);
@@ -111,10 +111,10 @@ public class TicketServiceTest extends ServiceTest {
         ticket2.setValid(false);
         testEntityManager.persist(ticket2);
 
-        Collection<Ticket> validTicketsByOwnerUsername =
-                ticketService.findValidTicketsByOwnerUsername(user.getUsername());
+        Collection<Ticket> validTicketsByOwnerEmail =
+                ticketService.findValidTicketsByOwnerEmail(user.getEmail());
 
-        assertThat(validTicketsByOwnerUsername).containsExactly(ticket);
+        assertThat(validTicketsByOwnerEmail).containsExactly(ticket);
     }
 
     @Test
@@ -313,11 +313,11 @@ public class TicketServiceTest extends ServiceTest {
     @Test
     public void setupForTransfer() {
         User goalUser = persistUser();
-        String goalUsername = goalUser.getUsername();
+        String goalEmail = goalUser.getEmail();
         Ticket ticket = persistTicket();
         Long ticketId = ticket.getId();
 
-        TicketTransferToken ttt = ticketService.setupForTransfer(ticketId, goalUsername);
+        TicketTransferToken ttt = ticketService.setupForTransfer(ticketId, goalEmail);
 
         assertEquals(ticket, ttt.getTicket());
         assertEquals(goalUser, ttt.getUser());
@@ -327,34 +327,34 @@ public class TicketServiceTest extends ServiceTest {
     @Test
     public void setupForTransferDuplicate() {
         User goalUser = persistUser();
-        String goalUsername = goalUser.getUsername();
+        String goalEmail = goalUser.getEmail();
         Ticket ticket = persistTicket();
         Long ticketId = ticket.getId();
 
         thrown.expect(TicketTransferTokenException.class);
         thrown.expectMessage(" is already set up for transfer!");
 
-        ticketService.setupForTransfer(ticketId, goalUsername);
-        ticketService.setupForTransfer(ticketId, goalUsername);
+        ticketService.setupForTransfer(ticketId, goalEmail);
+        ticketService.setupForTransfer(ticketId, goalEmail);
     }
 
     @Test
     public void setupForTransferSelf() {
         User goalUser = persistUser();
-        String goalUsername = goalUser.getUsername();
+        String goalEmail = goalUser.getEmail();
         Ticket ticket = persistTicketForUser(goalUser);
         Long ticketId = ticket.getId();
 
         thrown.expect(TicketTransferTokenException.class);
         thrown.expectMessage("yourself");
 
-        ticketService.setupForTransfer(ticketId, goalUsername);
+        ticketService.setupForTransfer(ticketId, goalEmail);
     }
 
     @Test
     public void setupForTransferAlreadyLinked() {
         User goalUser = persistUser();
-        String goalUsername = goalUser.getUsername();
+        String goalEmail = goalUser.getEmail();
         Ticket ticket = persistTicket();
         Long ticketId = ticket.getId();
         testEntityManager.persist(new RFIDLink("1234567890", ticket));
@@ -362,16 +362,16 @@ public class TicketServiceTest extends ServiceTest {
         thrown.expect(TicketAlreadyLinkedException.class);
         thrown.expectMessage("Ticket has already been linked to a RFID");
 
-        ticketService.setupForTransfer(ticketId, goalUsername);
+        ticketService.setupForTransfer(ticketId, goalEmail);
     }
 
     @Test
     public void transferTicket() {
         User goalUser = persistUser();
-        String goalUsername = goalUser.getUsername();
+        String goalEmail = goalUser.getEmail();
         Ticket ticket = persistTicket();
         Long ticketId = ticket.getId();
-        TicketTransferToken ttt = ticketService.setupForTransfer(ticketId, goalUsername);
+        TicketTransferToken ttt = ticketService.setupForTransfer(ticketId, goalEmail);
         String token = ttt.getToken();
 
         ticketService.transferTicket(token);
@@ -399,10 +399,10 @@ public class TicketServiceTest extends ServiceTest {
     @Test
     public void transferTicketTokenInvalid() {
         User goalUser = persistUser();
-        String goalUsername = goalUser.getUsername();
+        String goalEmail = goalUser.getEmail();
         Ticket ticket = persistTicket();
         Long ticketId = ticket.getId();
-        TicketTransferToken ttt = ticketService.setupForTransfer(ticketId, goalUsername);
+        TicketTransferToken ttt = ticketService.setupForTransfer(ticketId, goalEmail);
         String token = ttt.getToken();
 
         ttt.use();
@@ -416,10 +416,10 @@ public class TicketServiceTest extends ServiceTest {
     @Test
     public void transferTicketAlreadyLinked() {
         User goalUser = persistUser();
-        String goalUsername = goalUser.getUsername();
+        String goalEmail = goalUser.getEmail();
         Ticket ticket = persistTicket();
         Long ticketId = ticket.getId();
-        TicketTransferToken ttt = ticketService.setupForTransfer(ticketId, goalUsername);
+        TicketTransferToken ttt = ticketService.setupForTransfer(ticketId, goalEmail);
         String token = ttt.getToken();
 
         // Creating the RFIDLink needs to happen after setupForTransfer.
@@ -434,10 +434,10 @@ public class TicketServiceTest extends ServiceTest {
     @Test
     public void cancelTicketTransfer() {
         User goalUser = persistUser();
-        String goalUsername = goalUser.getUsername();
+        String goalEmail = goalUser.getEmail();
         Ticket ticket = persistTicket();
         Long ticketId = ticket.getId();
-        TicketTransferToken ttt = ticketService.setupForTransfer(ticketId, goalUsername);
+        TicketTransferToken ttt = ticketService.setupForTransfer(ticketId, goalEmail);
         String token = ttt.getToken();
 
         ticketService.cancelTicketTransfer(token);
@@ -466,10 +466,10 @@ public class TicketServiceTest extends ServiceTest {
     @Test
     public void cancelTicketTransferTokenInvalid() {
         User goalUser = persistUser();
-        String goalUsername = goalUser.getUsername();
+        String goalEmail = goalUser.getEmail();
         Ticket ticket = persistTicket();
         Long ticketId = ticket.getId();
-        TicketTransferToken ttt = ticketService.setupForTransfer(ticketId, goalUsername);
+        TicketTransferToken ttt = ticketService.setupForTransfer(ticketId, goalEmail);
         String token = ttt.getToken();
 
         ttt.use();
@@ -537,26 +537,26 @@ public class TicketServiceTest extends ServiceTest {
         Ticket ticket1 = persistTicketForUser(owner);
         Ticket ticket2 = persistTicketForUser(owner);
         Ticket ticket3 = persistTicketForUser(goalUser);
-        TicketTransferToken ttt1 = ticketService.setupForTransfer(ticket1.getId(), goalUser.getUsername());
-        TicketTransferToken ttt2 = ticketService.setupForTransfer(ticket2.getId(), goalUser.getUsername());
-        ticketService.setupForTransfer(ticket3.getId(), owner.getUsername());
+        TicketTransferToken ttt1 = ticketService.setupForTransfer(ticket1.getId(), goalUser.getEmail());
+        TicketTransferToken ttt2 = ticketService.setupForTransfer(ticket2.getId(), goalUser.getEmail());
+        ticketService.setupForTransfer(ticket3.getId(), owner.getEmail());
         ttt1.use();
         testEntityManager.persist(ttt1);
 
-        Collection<TicketTransferToken> tttc = ticketService.getValidTicketTransferTokensByUser(owner.getUsername());
+        Collection<TicketTransferToken> tttc = ticketService.getValidTicketTransferTokensByUserEmail(owner.getEmail());
 
         assertEquals(tttc, Collections.singletonList(ttt2));
     }
 
     @Test
     public void getValidTicketTransferTokensByUserNotFound() {
-        Collection<TicketTransferToken> tttc = ticketService.getValidTicketTransferTokensByUser("doesnt_exist");
+        Collection<TicketTransferToken> tttc = ticketService.getValidTicketTransferTokensByUserEmail("doesnt_exist");
         assertTrue(tttc.isEmpty());
     }
 
     @Test
     public void getValidTicketTransferTokensByUserNull() {
-        Collection<TicketTransferToken> tttc = ticketService.getValidTicketTransferTokensByUser(null);
+        Collection<TicketTransferToken> tttc = ticketService.getValidTicketTransferTokensByUserEmail(null);
         assertTrue(tttc.isEmpty());
     }
 
@@ -590,7 +590,7 @@ public class TicketServiceTest extends ServiceTest {
     public void assignTicketToUserAnonymous() {
         User user = persistUser();
         Ticket ticket = persistTicket();
-        Ticket result = ticketService.assignTicketToUser(ticket.getId(), user.getUsername());
+        Ticket result = ticketService.assignTicketToUser(ticket.getId(), user.getEmail());
         assertEquals(user, result.getOwner());
     }
 
@@ -600,7 +600,7 @@ public class TicketServiceTest extends ServiceTest {
         User owner = persistUser();
         Ticket ticket = persistTicketForUser(owner);
         assertEquals(owner, ticket.getOwner());
-        Ticket result = ticketService.assignTicketToUser(ticket.getId(), user.getUsername());
+        Ticket result = ticketService.assignTicketToUser(ticket.getId(), user.getEmail());
         assertEquals(user, result.getOwner());
     }
 

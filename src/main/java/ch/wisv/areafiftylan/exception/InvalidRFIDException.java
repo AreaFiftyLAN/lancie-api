@@ -17,7 +17,7 @@
 
 package ch.wisv.areafiftylan.exception;
 
-public class InvalidRFIDException extends RuntimeException {
+public class InvalidRFIDException extends AreaFiftyLANException {
     public InvalidRFIDException(String invalidRFID) {
         super(invalidRFID + " is an invald RFID.");
     }

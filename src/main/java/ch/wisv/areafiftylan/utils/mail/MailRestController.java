@@ -45,7 +45,7 @@ public class MailRestController {
     private final UserService userService;
     private final TeamService teamService;
 
-    @RequestMapping(value = "/contact", method = RequestMethod.POST)
+    @PostMapping("/contact")
     ResponseEntity<?> sendContactForm(@Validated @RequestBody ContactMailDTO mailDTO) {
         mailService.sendContactMail(mailDTO.getSender(), mailDTO.getSubject(), mailDTO.getMessage());
 
@@ -53,7 +53,7 @@ public class MailRestController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @RequestMapping(value = "/user/{userId}", method = RequestMethod.POST)
+    @PostMapping("/user/{userId}")
     ResponseEntity<?> sendMailToUser(@PathVariable Long userId, @Validated @RequestBody MailDTO mailDTO) {
         User user = userService.getUserById(userId);
 
@@ -64,7 +64,7 @@ public class MailRestController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @RequestMapping(value = "/team/{teamId}", method = RequestMethod.POST)
+    @PostMapping("/team/{teamId}")
     ResponseEntity<?> sendMailToTeam(@PathVariable Long teamId, @Validated @RequestBody MailDTO mailDTO) {
         Team team = teamService.getTeamById(teamId);
         mailService.sendTemplateMailToTeam(team, mailDTO);
@@ -73,7 +73,7 @@ public class MailRestController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @RequestMapping(value = "/users/all/YESREALLY", method = RequestMethod.POST)
+    @PostMapping("/users/all/YESREALLY")
     ResponseEntity<?> sendMailToAll(@Validated @RequestBody MailDTO mailDTO) {
         mailService.sendTemplateMailToAll(userService.getAllUsers(), mailDTO);
         return createResponseEntity(HttpStatus.OK, "Mail successfully sent");

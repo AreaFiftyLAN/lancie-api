@@ -19,7 +19,7 @@ package ch.wisv.areafiftylan.exception;
 
 import ch.wisv.areafiftylan.products.model.TicketOption;
 
-public class TicketOptionNotSupportedException extends RuntimeException {
+public class TicketOptionNotSupportedException extends AreaFiftyLANException {
     public TicketOptionNotSupportedException(TicketOption ticketOption) {
         super("Ticket option " + ticketOption.getName() + " is not available for this ticket");
     }

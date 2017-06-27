@@ -2,7 +2,7 @@ import org.springframework.boot.gradle.run.BootRunTask
 
 buildscript {
     ext {
-        springBootVersion = '1.5.1.RELEASE'
+        springBootVersion = '1.5.4.RELEASE'
     }
     repositories {
         mavenCentral()
@@ -16,11 +16,18 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
+apply plugin: 'jacoco'
 
 jar {
     baseName = 'lancie-api'
     version = '2017.1.6'
+    archiveName = "${baseName}.${extension}"
 }
+
+springBoot {
+    executable = true
+}
+
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
@@ -33,8 +40,6 @@ repositories {
 
 
 configurations {
-    // We're using Jetty instead
-    compile.exclude module: "spring-boot-starter-tomcat"
     // We're using HikariCP instead
     compile.exclude module: "tomcat-jdbc"
     // We're using Log4j2 instead
@@ -46,24 +51,24 @@ dependencies {
     // https://docs.spring.io/spring-boot/docs/current/reference/html/appendix-dependency-versions.html
     compile("org.springframework.boot:spring-boot-starter-data-jpa")
     compile("org.springframework.boot:spring-boot-starter-security")
-    compile("org.springframework.boot:spring-boot-starter-jetty")
     compile("org.springframework.boot:spring-boot-starter-mail")
     compile("org.springframework.boot:spring-boot-starter-thymeleaf")
     compile("org.springframework.boot:spring-boot-devtools")
     compile("org.springframework.boot:spring-boot-starter-log4j2")
+    compile("org.springframework.boot:spring-boot-starter-actuator")
     compile("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     compile("com.zaxxer:HikariCP")
-    compile("org.flywaydb:flyway-core:4.0.3")
+    compile("org.flywaydb:flyway-core:4.1.2")
 
-    compile("org.projectlombok:lombok:1.16.12")
-    compile("com.google.guava:guava:19.0")
-    compile("nl.stil4m:mollie-api:2.6.0")
+    compile("org.projectlombok:lombok:1.16.16")
+    compile("com.google.guava:guava:22.0")
+    compile("nl.stil4m:mollie-api:2.6.2")
 
     runtime("org.hsqldb:hsqldb")
     runtime("org.postgresql:postgresql")
 
     testCompile("org.springframework.boot:spring-boot-starter-test")
-    testCompile("io.rest-assured:rest-assured:3.0.2")
+    testCompile("io.rest-assured:rest-assured:3.0.3")
 }
 
 eclipse {
@@ -74,7 +79,7 @@ eclipse {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '3.2.1'
+    gradleVersion = '3.5'
 }
 
 task bootRunDev(type: BootRunTask) {
@@ -85,3 +90,12 @@ task bootRunDev(type: BootRunTask) {
         systemProperty 'spring.profiles.active', 'dev'
     }
 }
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        html.enabled false
+    }
+}
+
+check.dependsOn jacocoTestReport

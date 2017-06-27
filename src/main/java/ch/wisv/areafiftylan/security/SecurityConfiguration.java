@@ -20,7 +20,7 @@ package ch.wisv.areafiftylan.security;
 import ch.wisv.areafiftylan.security.authentication.AuthenticationService;
 import ch.wisv.areafiftylan.security.token.repository.AuthenticationTokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
+import org.springframework.boot.actuate.autoconfigure.ManagementServerProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -34,7 +34,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-@Order(SecurityProperties.ACCESS_OVERRIDE_ORDER)
+@Order(ManagementServerProperties.ACCESS_OVERRIDE_ORDER)
 class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private final UserDetailsService userDetailsService;
@@ -57,8 +57,8 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     }
 
     /**
-     * This method is responsible for the main security configuration. The formlogin() section defines how to login.
-     * POST requests should be made to /login with a username and password field. Errors are redirected to /login?error.
+     * This method is responsible for the main security configuration.
+     * POST requests should be made to /login with an email and password field.
      * The logout section is similar.
      * <p>
      * The last section is about permissions. Anything related to Login is accessible for everyone. Use this for
@@ -67,7 +67,6 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
      * By default, all requests to the API should come from authenticated sources. (USER or ADMIN)
      *
      * @param http default parameter
-     *
      * @throws Exception
      */
     @Override

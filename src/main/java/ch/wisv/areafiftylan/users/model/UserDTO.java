@@ -24,7 +24,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 public class UserDTO {
 
     @NotEmpty
-    private String username = "";
+    private String email = "";
 
     @NotEmpty
     private String password = "";

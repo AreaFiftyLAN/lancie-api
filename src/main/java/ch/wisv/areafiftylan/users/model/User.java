@@ -38,14 +38,14 @@ import java.util.Set;
 @Data
 @RequiredArgsConstructor
 @NoArgsConstructor
-@Table(uniqueConstraints = { @UniqueConstraint(name = "username", columnNames = { "username" }) })
+@Table(uniqueConstraints = { @UniqueConstraint(name = "email", columnNames = { "email" }) })
 public class User implements Serializable, UserDetails {
 
     @NonNull
     @Column(nullable = false)
     @JsonView(View.NoProfile.class)
-    @Email(message = "Username should be a valid Email!")
-    private String username;
+    @Email(message = "Email should be valid!")
+    private String email;
 
     @NonNull
     @Column(nullable = false)
@@ -77,6 +77,19 @@ public class User implements Serializable, UserDetails {
     @JsonIgnore
     private boolean enabled = true;
 
+    public User(String email, String passwordHash) {
+        this.email = email;
+        this.passwordHash = passwordHash;
+        this.profile = new Profile();
+        this.roles = new HashSet<>();
+    }
+
+    // This method is created to allow logging is using the email field
+    @Override
+    public String getUsername() {
+        return email;
+    }
+  
     @Override
     public Set<? extends GrantedAuthority> getAuthorities() {
         return roles;
@@ -98,6 +111,6 @@ public class User implements Serializable, UserDetails {
 
     @JsonView(View.Public.class)
     public int getReference() {
-        return username.hashCode();
+        return email.hashCode();
     }
 }

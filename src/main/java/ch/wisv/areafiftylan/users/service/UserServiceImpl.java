@@ -78,14 +78,14 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public User getUserByUsername(String username) {
-        return userRepository.findOneByUsernameIgnoreCase(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User '" + username + "' not found"));
+    public User getUserByEmail(String email) {
+        return userRepository.findOneByEmailIgnoreCase(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User '" + email + "' not found"));
     }
 
     @Override
     public Collection<User> getAllUsers() {
-        return userRepository.findAll(new Sort("username"));
+        return userRepository.findAll(new Sort("email"));
     }
 
     @Override
@@ -94,7 +94,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
         // Hash the plain password coming from the DTO
         String passwordHash = getPasswordHash(userDTO.getPassword());
-        User user = new User(userDTO.getUsername(), passwordHash);
+        User user = new User(userDTO.getEmail(), passwordHash);
         // Add default roles to User
         for (Role defaultRole : defaultRoles) {
             user.addRole(defaultRole);
@@ -111,9 +111,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     private void handleDuplicateUserFields(UserDTO userDTO) throws DataIntegrityViolationException {
-        // Check if the username already exists
-        userRepository.findOneByUsernameIgnoreCase(userDTO.getUsername()).ifPresent(u -> {
-            throw new DataIntegrityViolationException("username already in use");
+        // Check if the email is already in use
+        userRepository.findOneByEmailIgnoreCase(userDTO.getEmail()).ifPresent(u -> {
+            throw new DataIntegrityViolationException("Email already in use");
         });
     }
 
@@ -134,7 +134,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public User replace(Long userId, UserDTO userDTO) {
         User user = userRepository.getOne(userId);
 
-        user.setUsername(userDTO.getUsername());
+        user.setEmail(userDTO.getEmail());
         user.setPasswordHash(getPasswordHash(userDTO.getPassword()));
         user.resetProfile();
 
@@ -150,8 +150,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public User edit(Long userId, UserDTO userDTO) {
         User user = userRepository.findOne(userId);
-        if (!Strings.isNullOrEmpty(userDTO.getUsername())) {
-            user.setUsername(userDTO.getUsername());
+        if (!Strings.isNullOrEmpty(userDTO.getEmail())) {
+            user.setEmail(userDTO.getEmail());
         }
         if (!Strings.isNullOrEmpty(userDTO.getPassword())) {
             user.setPasswordHash(getPasswordHash(userDTO.getPassword()));
@@ -228,6 +228,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public void resetPassword(Long userId, String password) {
         User user = userRepository.findOne(userId);
+        if (Strings.isNullOrEmpty(password)) {
+            throw new IllegalArgumentException("Password can't be empty");
+        }
         // The token is being checked in the authentication, so just set the password here
         user.setPasswordHash(new BCryptPasswordEncoder().encode(password));
         userRepository.saveAndFlush(user);
@@ -246,8 +249,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public Boolean checkUsernameAvailable(String username) {
-        return !userRepository.findOneByUsernameIgnoreCase(username).isPresent();
+    public Boolean checkEmailAvailable(String email) {
+        return !userRepository.findOneByEmailIgnoreCase(email).isPresent();
 
     }
 
@@ -269,8 +272,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findOneByUsernameIgnoreCase(username)
-                .orElseThrow(() -> new UsernameNotFoundException(username));
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        return userRepository.findOneByEmailIgnoreCase(email)
+                .orElseThrow(() -> new UsernameNotFoundException(email));
     }
 }

@@ -25,7 +25,7 @@ import java.util.Collection;
 @Repository
 public interface TeamInviteTokenRepository extends TokenRepository<TeamInviteToken> {
 
-    Collection<TeamInviteToken> findByUserUsernameIgnoreCase(String username);
+    Collection<TeamInviteToken> findByUserEmailIgnoreCase(String email);
 
     Collection<TeamInviteToken> findByTeamId(Long teamId);
 
