@@ -20,8 +20,10 @@ package ch.wisv.areafiftylan.users.model;
 import ch.wisv.areafiftylan.utils.view.View;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
-import com.google.common.collect.Sets;
-import lombok.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.hibernate.validator.constraints.Email;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -61,7 +63,7 @@ public class User implements Serializable, UserDetails {
     @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
     @CollectionTable(name = "user_role")
-    private Set<Role> roles = new HashSet<>(Sets.newHashSet(Role.ROLE_USER));
+    final private Set<Role> roles = new HashSet<>();
 
     @JsonIgnore
     private final boolean accountNonExpired = true;

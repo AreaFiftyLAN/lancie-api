@@ -23,10 +23,12 @@ import ch.wisv.areafiftylan.security.token.repository.PasswordResetTokenReposito
 import ch.wisv.areafiftylan.security.token.repository.VerificationTokenRepository;
 import ch.wisv.areafiftylan.users.model.Profile;
 import ch.wisv.areafiftylan.users.model.ProfileDTO;
+import ch.wisv.areafiftylan.users.model.Role;
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.users.model.UserDTO;
 import ch.wisv.areafiftylan.utils.mail.MailService;
 import com.google.common.base.Strings;
+import com.google.common.collect.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -41,6 +43,8 @@ import org.springframework.stereotype.Service;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 public class UserServiceImpl implements UserService, UserDetailsService {
@@ -49,6 +53,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     private final VerificationTokenRepository verificationTokenRepository;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final MailService mailService;
+
+    private static final Set<Role> defaultRoles = new HashSet<>(Sets.newHashSet(Role.ROLE_USER));
 
     @Value("${a5l.mail.confirmUrl}")
     String requestUrl;
@@ -89,6 +95,10 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         // Hash the plain password coming from the DTO
         String passwordHash = getPasswordHash(userDTO.getPassword());
         User user = new User(userDTO.getUsername(), passwordHash);
+        // Add default roles to User
+        for (Role defaultRole : defaultRoles) {
+            user.addRole(defaultRole);
+        }
         // All users that register through the service have to be verified
         user.setEnabled(false);
 
