@@ -22,7 +22,6 @@ import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -31,7 +30,6 @@ import java.util.Set;
 
 @Entity
 @Data
-@RequiredArgsConstructor
 @NoArgsConstructor
 public class TicketType {
     //    EARLY_FULL("Early Bird", 37.50F, 50, LocalDateTime.of(2016, 6, 3, 0, 0), true),
@@ -52,28 +50,34 @@ public class TicketType {
     @JsonView(View.OrderOverview.class)
     private String text;
 
-    @NonNull
     private float price;
 
     /**
      * The maximum amount of tickets of this type that can be sold.
      * Will be 0 if no maximum amount is set.
      */
-    @NonNull
     private int numberAvailable;
 
     /**
      * A time after which no more tickets of this type can be sold.
      * Will be null if no deadline is set.
      */
-    @NonNull
     private LocalDateTime deadline;
 
-    @NonNull
     private boolean buyable;
     
     @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
-    Set<TicketOption> possibleOptions = new HashSet<>();
+    private Set<TicketOption> possibleOptions;
+
+    public TicketType(String name, String text, float price, int numberAvailable, LocalDateTime deadline, boolean buyable) {
+        this.name = name;
+        this.text = text;
+        this.price = price;
+        this.numberAvailable = numberAvailable;
+        this.deadline = deadline;
+        this.buyable = buyable;
+        this.possibleOptions = new HashSet<>();
+    }
 
     public void addPossibleOption(TicketOption option) {
         this.possibleOptions.add(option);

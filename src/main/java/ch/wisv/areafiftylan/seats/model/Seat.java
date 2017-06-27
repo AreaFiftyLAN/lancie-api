@@ -25,16 +25,18 @@ import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 
 import javax.persistence.*;
 
 @Entity
 @Data
 @NoArgsConstructor
-@RequiredArgsConstructor
 @Table(uniqueConstraints = { @UniqueConstraint(name = "seatConstraint", columnNames = { "seatGroup", "seatNumber" }) })
 public class Seat {
+
+    @Id
+    @GeneratedValue
+    private Long Id;
 
     @JsonView(View.Public.class)
     private boolean taken = false;
@@ -43,17 +45,17 @@ public class Seat {
     @JsonView(View.Public.class)
     private Ticket ticket;
 
-    @Id
-    @GeneratedValue
-    private Long Id;
-
     @NonNull
     @JsonView(View.Public.class)
     public String seatGroup;
 
-    @NonNull
     @JsonView(View.Public.class)
     public int seatNumber;
+
+    public Seat(String seatGroup, int seatNumber) {
+        this.seatGroup = seatGroup;
+        this.seatNumber = seatNumber;
+    }
 
     @JsonIgnore
     public User getUser() {
