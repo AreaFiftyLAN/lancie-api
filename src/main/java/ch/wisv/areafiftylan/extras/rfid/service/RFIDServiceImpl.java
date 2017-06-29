@@ -31,6 +31,8 @@ import java.util.Collection;
 @Service
 public class RFIDServiceImpl implements RFIDService {
 
+    public static final int RFID_CHAR_COUNT = 10;
+
     private final RFIDLinkRepository rfidLinkRepository;
     private final TicketService ticketService;
 
@@ -105,10 +107,6 @@ public class RFIDServiceImpl implements RFIDService {
     }
 
     private RFIDLink getLinkByRFID(String rfid) {
-        if (RFIDLink.isInvalidRFID(rfid)) {
-            throw new InvalidRFIDException(rfid);
-        }
-
         return rfidLinkRepository.findByRfid(rfid).orElseThrow(RFIDNotFoundException::new);
     }
 

@@ -30,6 +30,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.Collection;
 
 import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEntity;
@@ -62,7 +63,7 @@ public class RFIDController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addRFIDLink(@RequestBody RFIDLinkDTO rfidLinkDTO) {
+    public ResponseEntity<?> addRFIDLink(@RequestBody @Valid RFIDLinkDTO rfidLinkDTO) {
         rfidService.addRFIDLink(rfidLinkDTO.getRfid(), rfidLinkDTO.getTicketId());
 
         return createResponseEntity(HttpStatus.OK, "Succesfully linked RFID with Ticket");
