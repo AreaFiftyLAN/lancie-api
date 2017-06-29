@@ -17,61 +17,41 @@
 
 package ch.wisv.areafiftylan.users.model;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 
+@Data
 public class ProfileDTO {
 
     @NotNull
-    @Getter
-    @Setter
     private Gender gender;
 
     @NotNull
-    @Getter
-    @Setter
     private LocalDate birthday;
 
     @NotEmpty
-    @Getter
-    @Setter
     private String address = "";
 
     @NotEmpty
-    @Getter
-    @Setter
     private String zipcode = "";
 
     @NotEmpty
-    @Getter
-    @Setter
     private String city = "";
 
     @NotEmpty
-    @Getter
-    @Setter
     private String phoneNumber = "";
 
-    @Getter
-    @Setter
     private String notes = "";
 
     @NotEmpty
-    @Getter
-    @Setter
     private String firstName = "";
 
     @NotEmpty
-    @Getter
-    @Setter
     private String lastName = "";
 
     @NotEmpty
-    @Getter
-    @Setter
     private String displayName = "";
 }

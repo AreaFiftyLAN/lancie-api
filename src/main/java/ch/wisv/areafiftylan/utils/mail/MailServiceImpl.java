@@ -189,7 +189,7 @@ public class MailServiceImpl implements MailService {
 
     @Override
     public void sendTicketTransferMail(User sender, User receiver, String url) {
-        String message = sender.getProfile().firstName +
+        String message = sender.getProfile().getFirstName() +
                 " has sent you a ticket for AreaFiftyLAN! To accept this ticket please click on the following link: " +
                 "<a href=\"" + url + "\">" + url + "</a>";
         sendMail(receiver.getEmail(), formatRecipient(receiver), "A ticket for AreaFiftyLAN has been sent to you!", message);

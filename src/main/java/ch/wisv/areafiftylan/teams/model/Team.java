@@ -20,12 +20,16 @@ package ch.wisv.areafiftylan.teams.model;
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.utils.view.View;
 import com.fasterxml.jackson.annotation.JsonView;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
+@Data
+@NoArgsConstructor
 @Table(uniqueConstraints = { @UniqueConstraint(name = "teamName", columnNames = { "teamName" }) })
 public class Team {
 
@@ -57,44 +61,12 @@ public class Team {
         size = 1;
     }
 
-    public Team() {
-        //jpa only
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getTeamName() {
-        return teamName;
-    }
-
-    public void setTeamName(String teamName) {
-        this.teamName = teamName;
-    }
-
-    public Set<User> getMembers() {
-        return members;
-    }
-
     public boolean addMember(User member) {
         return this.members.add(member);
     }
 
     public boolean removeMember(User member) {
         return this.members.remove(member);
-    }
-
-    public User getCaptain() {
-        return captain;
-    }
-
-    public void setCaptain(User captain) {
-        this.captain = captain;
     }
 
     public int getSize() {

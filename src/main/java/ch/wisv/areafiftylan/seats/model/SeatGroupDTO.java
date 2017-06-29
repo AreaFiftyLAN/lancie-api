@@ -23,16 +23,14 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
 
+@Getter
+@Setter
 public class SeatGroupDTO {
 
     @NotEmpty
-    @Getter
-    @Setter
     String seatGroupName = "";
 
     @NotNull
-    @Getter
-    @Setter
     Integer numberOfSeats;
 
 

@@ -23,14 +23,13 @@ import lombok.Setter;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
+@Getter
+@Setter
 public class TicketDTO {
+    
     @NotNull
-    @Getter
-    @Setter
     String type;
 
     @NotNull
-    @Getter
-    @Setter
     List<String> options;
 }

@@ -17,6 +17,7 @@
 
 package ch.wisv.areafiftylan.products.model.order;
 
+import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.Entity;
@@ -29,6 +30,7 @@ import java.time.LocalDateTime;
  */
 @Entity
 @NoArgsConstructor
+@AllArgsConstructor
 public class ExpiredOrder {
     @Id
     private Long id;
@@ -41,15 +43,6 @@ public class ExpiredOrder {
 
     private String createdBy;
 
-    public ExpiredOrder(Long id, int numberOfTickets, String createdAt, String expiredAt, String createdBy) {
-        this.id = id;
-        this.numberOfTickets = numberOfTickets;
-        this.createdAt = createdAt;
-        this.expiredAt = expiredAt;
-        this.createdBy = createdBy;
-
-    }
-
     public ExpiredOrder(Order order) {
         this.id = order.getId();
         this.numberOfTickets = order.getTickets().size();
@@ -60,6 +53,5 @@ public class ExpiredOrder {
         } else {
             this.createdBy = "Anonymous";
         }
-
     }
 }

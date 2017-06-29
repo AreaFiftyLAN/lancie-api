@@ -20,10 +20,10 @@ package ch.wisv.areafiftylan.users.model;
 import ch.wisv.areafiftylan.utils.view.View;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.hibernate.validator.constraints.Email;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -35,66 +35,47 @@ import java.util.Set;
 
 
 @Entity
-@Table(uniqueConstraints = { @UniqueConstraint(name = "email", columnNames = { "email" }) })
-@EqualsAndHashCode
+@Data
+@RequiredArgsConstructor
 @NoArgsConstructor
+@Table(uniqueConstraints = { @UniqueConstraint(name = "email", columnNames = { "email" }) })
 public class User implements Serializable, UserDetails {
 
-    @Column(nullable = false)
-    private String passwordHash;
-
+    @NonNull
     @Column(nullable = false)
     @JsonView(View.NoProfile.class)
     @Email(message = "Email should be valid!")
-    @Getter
-    @Setter
     private String email;
+
+    @NonNull
+    @Column(nullable = false)
+    private String passwordHash;
 
     @OneToOne(targetEntity = Profile.class, cascade = CascadeType.ALL)
     @JsonView(View.Public.class)
-    @Getter
-    private Profile profile;
+    private Profile profile = new Profile();
 
     @GeneratedValue
     @Id
-    @Getter
     private Long id;
 
     @JsonIgnore
     @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
     @CollectionTable(name = "user_role")
-    private Set<Role> roles;
+    final private Set<Role> roles = new HashSet<>();
 
     @JsonIgnore
-    @Getter
     private final boolean accountNonExpired = true;
 
     @JsonIgnore
-    @Getter
-    @Setter
     private boolean accountNonLocked = true;
 
     @JsonIgnore
-    @Getter
     private final boolean credentialsNonExpired = true;
 
     @JsonIgnore
-    @Getter
-    @Setter
     private boolean enabled = true;
-
-    public User(String email, String passwordHash) {
-        this.email = email;
-        this.passwordHash = passwordHash;
-        this.profile = new Profile();
-        this.roles = new HashSet<>();
-        roles.add(Role.ROLE_USER);
-    }
-
-    public void setPasswordHash(String passwordHash) {
-        this.passwordHash = passwordHash;
-    }
 
     // This method is created to allow logging is using the email field
     @Override

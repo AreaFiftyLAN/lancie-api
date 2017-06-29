@@ -22,26 +22,21 @@ import lombok.Getter;
 import java.util.HashMap;
 import java.util.Map;
 
+@Getter
 public class TicketInformationResponse {
-    @Getter
+
     private String ticketType;
 
-    @Getter
     private int limit;
 
-    @Getter
     private int numberSold;
 
-    @Getter
     private double price;
 
-    @Getter
     private String text;
 
-    @Getter
     private Map<String, Float> possibleOptions;
 
-    @Getter
     private String deadline;
 
     public TicketInformationResponse(TicketType type, int numberSold) {

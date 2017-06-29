@@ -19,39 +19,29 @@ package ch.wisv.areafiftylan.products.model;
 
 import ch.wisv.areafiftylan.utils.view.View;
 import com.fasterxml.jackson.annotation.JsonView;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
 @Entity
+@Data
 @NoArgsConstructor
-@EqualsAndHashCode
 public class TicketOption {
 
     @Id
     @GeneratedValue
-    @Getter
     private Long id;
 
-    @Getter
-    @Setter
-    @JsonView(View.OrderOverview.class)
-    private float price;
-
-    @Getter
-    @Setter
     @JsonView(View.OrderOverview.class)
     private String name;
 
+    @JsonView(View.OrderOverview.class)
+    private float price;
 
     public TicketOption(String name, float price) {
         this.name = name;
         this.price = price;
     }
-
 }

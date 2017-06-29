@@ -22,47 +22,39 @@ import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.utils.view.View;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 import javax.persistence.*;
 
 @Entity
+@Data
+@NoArgsConstructor
 @Table(uniqueConstraints = { @UniqueConstraint(name = "seatConstraint", columnNames = { "seatGroup", "seatNumber" }) })
 public class Seat {
-
-    @Getter
-    @Setter
-    @JsonView(View.Public.class)
-    public boolean taken;
-
-    @Getter
-    @OneToOne(cascade = CascadeType.MERGE)
-    @JsonView(View.Public.class)
-    public Ticket ticket;
 
     @Id
     @GeneratedValue
     private Long Id;
 
-    @Getter
-    @Setter
+    @JsonView(View.Public.class)
+    private boolean taken = false;
+
+    @OneToOne(cascade = CascadeType.MERGE)
+    @JsonView(View.Public.class)
+    private Ticket ticket;
+
+    @NonNull
     @JsonView(View.Public.class)
     public String seatGroup;
 
-    @Getter
-    @Setter
     @JsonView(View.Public.class)
     public int seatNumber;
 
     public Seat(String seatGroup, int seatNumber) {
         this.seatGroup = seatGroup;
         this.seatNumber = seatNumber;
-        this.taken = false;
-    }
-
-    public Seat() {
-        //JPA ONLY
     }
 
     @JsonIgnore
@@ -72,7 +64,6 @@ public class Seat {
 
     public void setTicket(Ticket ticket) {
         this.ticket = ticket;
-
         this.taken = this.ticket != null;
     }
 }

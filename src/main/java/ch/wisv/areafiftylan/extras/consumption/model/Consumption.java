@@ -17,28 +17,25 @@
 
 package ch.wisv.areafiftylan.extras.consumption.model;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
 @Entity
+@Data
+@RequiredArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode
 public class Consumption {
 
     @GeneratedValue
     @Id
-    @Getter
     Long id;
 
-    @Getter
+    @NonNull
     String name;
-
-    public Consumption(String name) {
-        this.name = name;
-    }
 }
