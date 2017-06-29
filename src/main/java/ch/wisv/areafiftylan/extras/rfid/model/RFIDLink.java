@@ -22,7 +22,6 @@ import ch.wisv.areafiftylan.products.model.Ticket;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
 
@@ -36,7 +35,6 @@ public class RFIDLink {
     private Long id;
 
     @NonNull
-    @Length(min = RFID_CHAR_COUNT, max = RFID_CHAR_COUNT)
     private String rfid;
 
     @NonNull
