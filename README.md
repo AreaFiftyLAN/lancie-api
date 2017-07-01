@@ -17,13 +17,6 @@ The API is a Spring based application to suit the needs of a LAN-party.
   You should fill in:
   - `spring.datasource.[…]` (`url`, `username`, `password`) to your database url and credentials
   - `a5l.molliekey` and `a5l.googleMapsAPIkey` to their respective keys if you have those
- 
-  You should comment:
-  - `spring.jpa.properties.hibernate.hbm2ddl.auto`
-  - `logging.config`
-  
-  You should uncomment:
-  - `spring.jpa.hibernate.ddl-auto`
 
 5.  Right click the `Application` class (`src -> main -> java -> ch.wisv.areafiftylan`) and choose `Run`. Terminate the process (you don't have to wait for it to finish starting). Now go to the Run/Debug Configuration window `Run -> Edit Configurations` choose the `Spring Boot` configuration called `Application`. Enable the dev profile for this configuration by entering `dev` in the `Active Profiles` box.
 
@@ -39,7 +32,7 @@ To generate a runnable JAR file, make sure that you have followed all the instru
 ## Contributing
 If you want to contribute, awesome! First, pick an issue and self-assign it. Make your changes in a new branch, with the following naming convention:
 
-* Fixing a bug? > "**fix-**description\_of\_bug"
-* Implementing a new feature? > "**feature-**description\_of\_feature"
+* Fixing a bug? > "**fix**-description\_of\_bug"
+* Implementing a new feature? > "**feature**-description\_of\_feature"
 
 Once you're satisfied with your changes, create a pull request and give it the label "Ready for merge". You can assign someone in specific or wait for someone to pick it up. Make sure to include tests and documentation. If Travis isn't happy, we're not happy.
