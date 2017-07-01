@@ -24,7 +24,7 @@ import javax.persistence.Entity;
 
 @Entity
 @NoArgsConstructor
-public class PasswordResetToken extends Token {
+public class PasswordResetToken extends UserToken {
 
     public PasswordResetToken(User user) {
         super(user);

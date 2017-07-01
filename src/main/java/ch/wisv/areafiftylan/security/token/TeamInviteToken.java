@@ -29,7 +29,7 @@ import javax.persistence.OneToOne;
 
 @Entity
 @NoArgsConstructor
-public class TeamInviteToken extends Token {
+public class TeamInviteToken extends UserToken {
 
     @Getter
     @OneToOne(targetEntity = Team.class, fetch = FetchType.EAGER)

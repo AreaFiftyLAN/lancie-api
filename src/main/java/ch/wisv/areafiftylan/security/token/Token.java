@@ -17,7 +17,6 @@
 
 package ch.wisv.areafiftylan.security.token;
 
-import ch.wisv.areafiftylan.users.model.User;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -27,21 +26,16 @@ import java.util.UUID;
 
 @Entity
 @Data
-@NoArgsConstructor
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Token {
-    //Zero means not expirable
-    private static final int EXPIRATION = 60 * 24;
+    //Zero means not expirable, expiration in minutes
+    public static final int DEFAULTEXPIRATION = 60 * 24;
 
     @Id
     @GeneratedValue
     private Long id;
 
     private String token;
-
-    @OneToOne(targetEntity = User.class, fetch = FetchType.EAGER)
-    @JoinColumn(nullable = false)
-    private User user;
 
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
     private boolean expirable = true;
@@ -54,13 +48,12 @@ public abstract class Token {
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private boolean revoked = false;
 
-    Token(User user) {
-        this(user, EXPIRATION);
+    Token() {
+        this(DEFAULTEXPIRATION);
     }
 
-    Token(User user, int expiration) {
+    Token(int expiration) {
         this.token = UUID.randomUUID().toString();
-        this.user = user;
         this.expirable = expiration != 0;
         this.expiryDate = calculateExpiryDate(expiration);
     }
@@ -86,5 +79,16 @@ public abstract class Token {
     private boolean isExpired() {
         return this.isExpirable() && LocalDateTime.now().compareTo(expiryDate) > 0;
 
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        Token token1 = (Token) o;
+
+        return token.equals(token1.token);
     }
 }

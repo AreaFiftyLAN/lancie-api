@@ -24,7 +24,7 @@ import javax.persistence.Entity;
 
 @Entity
 @NoArgsConstructor
-public class AuthenticationToken extends Token {
+public class AuthenticationToken extends UserToken {
 
     // Default 5 days validity
     private static final int EXPIRATION = 60 * 24 * 5;

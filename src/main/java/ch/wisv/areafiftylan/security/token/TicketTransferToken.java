@@ -29,7 +29,7 @@ import javax.persistence.OneToOne;
 
 @Entity
 @NoArgsConstructor
-public class TicketTransferToken extends Token {
+public class TicketTransferToken extends UserToken {
 
     private static final int EXPIRATION = 0;
 

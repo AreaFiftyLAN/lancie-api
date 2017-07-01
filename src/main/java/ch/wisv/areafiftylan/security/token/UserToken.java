@@ -18,16 +18,29 @@
 package ch.wisv.areafiftylan.security.token;
 
 import ch.wisv.areafiftylan.users.model.User;
+import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
+import javax.persistence.*;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @NoArgsConstructor
-public class VerificationToken extends UserToken {
-    private static final int EXPIRATION = 3 * 60 * 24; //Three days
+@Inheritance(strategy = InheritanceType.JOINED)
+public abstract class UserToken extends Token{
+    @OneToOne(targetEntity = User.class, fetch = FetchType.EAGER)
+    @JoinColumn(nullable = false)
+    @Getter
+    private User user;
 
-    public VerificationToken(User user) {
-        super(user, EXPIRATION);
+    UserToken(User user) {
+        this(user, Token.DEFAULTEXPIRATION);
+    }
+
+    UserToken(User user, int expiration) {
+        super(expiration);
+        this.user = user;
     }
 }
