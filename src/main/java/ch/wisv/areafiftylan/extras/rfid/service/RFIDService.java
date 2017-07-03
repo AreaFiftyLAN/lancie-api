@@ -29,13 +29,11 @@ public interface RFIDService {
 
     User getUserByRFID(String rfid);
 
-    boolean isRFIDUsed(String rfid);
-
-    boolean isTicketLinked(Long ticketId);
-
     void addRFIDLink(String rfid, Long ticketId);
 
     RFIDLink removeRFIDLink(String rfid);
 
     RFIDLink removeRFIDLink(Long ticketId);
+
+    boolean isTicketLinked(Long ticketId);
 }
