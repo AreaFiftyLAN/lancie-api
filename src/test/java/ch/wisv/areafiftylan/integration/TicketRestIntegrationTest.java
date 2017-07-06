@@ -16,7 +16,7 @@
  */
 
 
-package ch.wisv.areafiftylan;
+package ch.wisv.areafiftylan.integration;
 
 import ch.wisv.areafiftylan.exception.TicketAlreadyLinkedException;
 import ch.wisv.areafiftylan.extras.rfid.model.RFIDLink;

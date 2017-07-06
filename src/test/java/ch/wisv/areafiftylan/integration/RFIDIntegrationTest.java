@@ -16,7 +16,7 @@
  */
 
 
-package ch.wisv.areafiftylan;
+package ch.wisv.areafiftylan.integration;
 
 import ch.wisv.areafiftylan.exception.RFIDNotFoundException;
 import ch.wisv.areafiftylan.extras.rfid.model.RFIDLink;

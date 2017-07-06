@@ -16,7 +16,7 @@
  */
 
 
-package ch.wisv.areafiftylan;
+package ch.wisv.areafiftylan.integration;
 
 import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.service.repository.TicketRepository;

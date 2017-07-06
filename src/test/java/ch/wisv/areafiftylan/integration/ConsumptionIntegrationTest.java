@@ -16,7 +16,7 @@
  */
 
 
-package ch.wisv.areafiftylan;
+package ch.wisv.areafiftylan.integration;
 
 import ch.wisv.areafiftylan.extras.consumption.model.Consumption;
 import ch.wisv.areafiftylan.extras.consumption.model.ConsumptionMapsRepository;

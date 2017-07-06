@@ -16,7 +16,7 @@
  */
 
 
-package ch.wisv.areafiftylan;
+package ch.wisv.areafiftylan.integration;
 
 import ch.wisv.areafiftylan.security.token.TeamInviteToken;
 import ch.wisv.areafiftylan.security.token.repository.TeamInviteTokenRepository;
