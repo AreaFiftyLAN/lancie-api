@@ -15,8 +15,9 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.wisv.areafiftylan.extras.rfid.model;
+package ch.wisv.areafiftylan.extras.rfid.service;
 
+import ch.wisv.areafiftylan.extras.rfid.model.RFIDLink;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
