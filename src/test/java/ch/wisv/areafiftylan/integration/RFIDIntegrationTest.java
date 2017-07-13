@@ -48,22 +48,19 @@ public class RFIDIntegrationTest extends XAuthIntegrationTest {
     private TicketRepository ticketRepository;
 
     private RFIDLink createRfidLink(Ticket ticket) {
-        long rfid = 1_000_000_000L + rfidLinkRepository.count();
-        String rfidString = String.valueOf(rfid);
-        RFIDLink link = new RFIDLink(rfidString, ticket);
+        String rfid = String.format("%010d", rfidLinkRepository.count());
+        RFIDLink link = new RFIDLink(rfid, ticket);
         return rfidLinkRepository.saveAndFlush(link);
     }
 
     private RFIDLink createUnusedRfidLink(Ticket ticket) {
-        long rfid = 2_000_000_000L + rfidLinkRepository.count();
-        String rfidString = String.valueOf(rfid);
-        return new RFIDLink(rfidString, ticket);
+        String rfid = String.format("%710d", rfidLinkRepository.count()); //pad with 7's
+        return new RFIDLink(rfid, ticket);
     }
 
     private RFIDLink createInvalidRfidLink(Ticket ticket) {
-        long rfid = rfidLinkRepository.count();
-        String rfidString = String.valueOf(rfid);
-        return new RFIDLink(rfidString, ticket);
+        String rfid = String.valueOf(rfidLinkRepository.count());
+        return new RFIDLink(rfid, ticket);
     }
 
     private RFIDLinkDTO createRFIDLinkDTO(Ticket ticket) {

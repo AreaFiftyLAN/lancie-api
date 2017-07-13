@@ -57,7 +57,7 @@ public class RFIDServiceImpl implements RFIDService {
     }
 
     @Override
-    public void addRFIDLink(String rfid, Long ticketId) {
+    public RFIDLink addRFIDLink(String rfid, Long ticketId) {
         if (!isValidRfid(rfid)) {
             throw new InvalidRFIDException(rfid);
         }
@@ -73,7 +73,7 @@ public class RFIDServiceImpl implements RFIDService {
 
         Ticket ticket = ticketService.getTicketById(ticketId);
         RFIDLink newLink = new RFIDLink(rfid, ticket);
-        rfidLinkRepository.saveAndFlush(newLink);
+        return rfidLinkRepository.saveAndFlush(newLink);
     }
 
     @Override
