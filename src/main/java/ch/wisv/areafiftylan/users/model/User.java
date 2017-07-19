@@ -20,7 +20,9 @@ package ch.wisv.areafiftylan.users.model;
 import ch.wisv.areafiftylan.utils.view.View;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -48,6 +50,7 @@ public class User implements Serializable, UserDetails {
     private String email;
 
     @NonNull
+    @Getter(AccessLevel.NONE)
     @Column(nullable = false)
     private String passwordHash;
 

@@ -125,9 +125,24 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
             header(getXAuthTokenHeaderForUser(user)).
         when().
             get("/users/current").
-        then().statusCode(HttpStatus.SC_OK).
+        then().
+            statusCode(HttpStatus.SC_OK).
             body("email", equalTo(user.getEmail())).
-            body("authorities", hasItem("ROLE_USER"));
+            body("authorities", hasItem("ROLE_USER")).
+            body("authorities", not(hasItem("ROLE_ADMIN")));
+        //@formatter:on
+    }
+
+    @Test
+    public void testGetCurrentUserHasNoPasswordHash() {
+        User user = createUser();
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+        when().
+            get("/users/current").
+        then().
+            body("passwordHash", isEmptyOrNullString());
         //@formatter:on
     }
 
