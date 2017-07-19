@@ -58,11 +58,6 @@ public class RFIDIntegrationTest extends XAuthIntegrationTest {
         return new RFIDLink(rfid, ticket);
     }
 
-    private RFIDLink createInvalidRfidLink(Ticket ticket) {
-        String rfid = String.valueOf(rfidLinkRepository.count());
-        return new RFIDLink(rfid, ticket);
-    }
-
     private RFIDLinkDTO createRFIDLinkDTO(Ticket ticket) {
         long rfid = 1_000_000_000L + rfidLinkRepository.count();
         RFIDLinkDTO dto = new RFIDLinkDTO();
