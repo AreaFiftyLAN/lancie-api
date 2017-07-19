@@ -23,19 +23,18 @@ import ch.wisv.areafiftylan.users.model.User;
 import java.util.Collection;
 
 public interface RFIDService {
+
     Collection<RFIDLink> getAllRFIDLinks();
 
     Long getTicketIdByRFID(String rfid);
 
     User getUserByRFID(String rfid);
 
-    boolean isRFIDUsed(String rfid);
-
-    boolean isTicketLinked(Long ticketId);
-
-    void addRFIDLink(String rfid, Long ticketId);
+    RFIDLink addRFIDLink(String rfid, Long ticketId);
 
     RFIDLink removeRFIDLink(String rfid);
 
     RFIDLink removeRFIDLink(Long ticketId);
+
+    boolean isTicketLinked(Long ticketId);
 }

@@ -16,11 +16,12 @@
  */
 
 
-package ch.wisv.areafiftylan;
+package ch.wisv.areafiftylan.integration;
 
 import ch.wisv.areafiftylan.exception.RFIDNotFoundException;
 import ch.wisv.areafiftylan.extras.rfid.model.RFIDLink;
-import ch.wisv.areafiftylan.extras.rfid.model.RFIDLinkRepository;
+import ch.wisv.areafiftylan.extras.rfid.model.RFIDLinkDTO;
+import ch.wisv.areafiftylan.extras.rfid.service.RFIDLinkRepository;
 import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.users.model.User;
@@ -30,7 +31,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.HashMap;
 import java.util.Optional;
 
 import static io.restassured.RestAssured.given;
@@ -38,8 +38,8 @@ import static io.restassured.RestAssured.when;
 import static org.hamcrest.Matchers.*;
 
 public class RFIDIntegrationTest extends XAuthIntegrationTest {
-    private final String RFID_ENDPOINT = "/rfid";
-    private final String RFID_TICKET_ENDPOINT = RFID_ENDPOINT + "/tickets";
+    private final String RFID_ENDPOINT = "/rfid/";
+    private final String INVALID_RFID = "123";
 
     @Autowired
     private RFIDLinkRepository rfidLinkRepository;
@@ -48,14 +48,34 @@ public class RFIDIntegrationTest extends XAuthIntegrationTest {
     private TicketRepository ticketRepository;
 
     private RFIDLink createRfidLink(Ticket ticket) {
-        long rfid = (long) Math.floor(Math.random() * 9_000_000_000L) + 1_000_000_000L;
-        RFIDLink l = new RFIDLink(String.valueOf(rfid), ticket);
-        l = rfidLinkRepository.saveAndFlush(l);
-        return l;
+        String rfid = String.format("%010d", rfidLinkRepository.count());
+        RFIDLink link = new RFIDLink(rfid, ticket);
+        return rfidLinkRepository.saveAndFlush(link);
+    }
+
+    private RFIDLink createUnusedRfidLink(Ticket ticket) {
+        String rfid = String.format("%710d", rfidLinkRepository.count()); //pad with 7's
+        return new RFIDLink(rfid, ticket);
+    }
+
+    private RFIDLinkDTO createRFIDLinkDTO(Ticket ticket) {
+        long rfid = 1_000_000_000L + rfidLinkRepository.count();
+        RFIDLinkDTO dto = new RFIDLinkDTO();
+        dto.setRfid(String.valueOf(rfid));
+        dto.setTicketId(ticket.getId());
+        return dto;
+    }
+
+    private RFIDLinkDTO createInvalidRFIDLinkDTO(Ticket ticket) {
+        long rfid = rfidLinkRepository.count();
+        RFIDLinkDTO dto = new RFIDLinkDTO();
+        dto.setRfid(String.valueOf(rfid));
+        dto.setTicketId(ticket.getId());
+        return dto;
     }
 
     @Test
-    public void testGetRFIDLinks_Anon() {
+    public void testGetRFIDLinksAsAnon() {
         //@formatter:off
         when()
             .get(RFID_ENDPOINT)
@@ -80,11 +100,11 @@ public class RFIDIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void testGetRFIDLinksNoneAsAdmin() {
-        User user = createAdmin();
+        User admin = createAdmin();
 
         //@formatter:off
         given().
-            header(getXAuthTokenHeaderForUser(user)).
+            header(getXAuthTokenHeaderForUser(admin)).
         when()
             .get(RFID_ENDPOINT).
         then()
@@ -136,15 +156,15 @@ public class RFIDIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void testGetTicketIdByRFIDAsAdmin() {
-        User user = createAdmin();
-        Ticket ticket = createTicketForUser(user);
+        User admin = createAdmin();
+        Ticket ticket = createTicketForUser(admin);
         RFIDLink link = createRfidLink(ticket);
 
         //@formatter:off
         given().
-            header(getXAuthTokenHeaderForUser(user)).
+            header(getXAuthTokenHeaderForUser(admin)).
         when()
-            .get(RFID_ENDPOINT + "/" + link.getRfid() + "/ticketId").
+            .get(RFID_ENDPOINT + link.getRfid() + "/ticketId").
         then()
             .statusCode(HttpStatus.SC_OK)
             .body(equalTo(ticket.getId().toString()));
@@ -153,30 +173,29 @@ public class RFIDIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void testGetTicketIdInvalidRFIDAsAdmin() {
-        User user = createAdmin();
+        User admin = createAdmin();
 
         //@formatter:off
         given().
-            header(getXAuthTokenHeaderForUser(user)).
+            header(getXAuthTokenHeaderForUser(admin)).
         when()
-            .get(RFID_ENDPOINT + "/123" + "/ticketId").
+            .get(RFID_ENDPOINT + INVALID_RFID + "/ticketId").
         then()
-            .statusCode(HttpStatus.SC_BAD_REQUEST);
+            .statusCode(HttpStatus.SC_NOT_FOUND);
         //@formatter:on
     }
 
     @Test
     public void testGetTicketIdUnusedRFIDAsAdmin() {
-        User user = createAdmin();
-        Ticket ticket = createTicketForUser(user);
-        RFIDLink link = createRfidLink(ticket);
-        String unused = String.valueOf(Long.valueOf(link.getRfid()) + 1);
+        User admin = createAdmin();
+        Ticket ticket = createTicketForUser(admin);
+        RFIDLink link = createUnusedRfidLink(ticket);
 
         //@formatter:off
         given().
-            header(getXAuthTokenHeaderForUser(user)).
+            header(getXAuthTokenHeaderForUser(admin)).
         when()
-            .get(RFID_ENDPOINT + "/" + unused + "/ticketId").
+            .get(RFID_ENDPOINT + link.getId() + "/ticketId").
         then()
             .statusCode(HttpStatus.SC_NOT_FOUND);
         //@formatter:on
@@ -184,82 +203,80 @@ public class RFIDIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void testGetUserByRFID(){
-        User user = createAdmin();
-        Ticket ticket = createTicketForUser(user);
+        User admin = createAdmin();
+        Ticket ticket = createTicketForUser(admin);
         RFIDLink link = createRfidLink(ticket);
 
         //@formatter:off
         given().
-            header(getXAuthTokenHeaderForUser(user)).
+            header(getXAuthTokenHeaderForUser(admin)).
         when()
-            .get(RFID_ENDPOINT + "/" + link.getRfid() + "/user").
+            .get(RFID_ENDPOINT + link.getRfid() + "/user").
         then()
             .statusCode(HttpStatus.SC_OK)
-            .body("email", equalTo(user.getEmail()))
-            .body("profile.displayName", equalTo(user.getProfile().getDisplayName()))
-            .body("id", equalTo(user.getId().intValue()));
+            .body("email", equalTo(admin.getEmail()))
+            .body("profile.displayName", equalTo(admin.getProfile().getDisplayName()))
+            .body("id", equalTo(admin.getId().intValue()));
         //@formatter:on
     }
 
     @Test
     public void testGetUserByInvalidRFID(){
-        User user = createAdmin();
-        Ticket ticket = createTicketForUser(user);
+        User admin = createAdmin();
+        Ticket ticket = createTicketForUser(admin);
         RFIDLink link = createRfidLink(ticket);
 
         //@formatter:off
         given().
-            header(getXAuthTokenHeaderForUser(user)).
+            header(getXAuthTokenHeaderForUser(admin)).
         when()
-            .get(RFID_ENDPOINT + "/" + "123" + "/user").
+            .get(RFID_ENDPOINT + INVALID_RFID + "/user").
         then()
-            .statusCode(HttpStatus.SC_BAD_REQUEST);
+            .statusCode(HttpStatus.SC_NOT_FOUND);
         //@formatter:on
     }
 
     @Test
     public void testAddRFIDLinkAsAdmin() {
-        User user = createAdmin();
-        Ticket ticket = createTicketForUser(user);
-        HashMap<String, String> rfidLinkDTO = makeRFIDLinkDTO(ticket);
+        User admin = createAdmin();
+        Ticket ticket = createTicketForUser(admin);
+        RFIDLinkDTO dto = createRFIDLinkDTO(ticket);
 
         //@formatter:off
         given().
-            header(getXAuthTokenHeaderForUser(user)).
+            header(getXAuthTokenHeaderForUser(admin)).
         when()
-            .body(rfidLinkDTO)
+            .body(dto)
             .contentType(ContentType.JSON)
             .post(RFID_ENDPOINT).
         then()
             .statusCode(HttpStatus.SC_OK);
         //@formatter:on
 
-        Optional<RFIDLink> queryResult = rfidLinkRepository.findByRfid(rfidLinkDTO.get("rfid"));
+        Optional<RFIDLink> queryResult = rfidLinkRepository.findByRfid(dto.getRfid());
         Assert.assertEquals(queryResult.orElseThrow(RFIDNotFoundException::new).
                 getTicket().getId(), ticket.getId());
     }
 
     @Test
     public void testAddRFIDLinkInvalidRFIDAsAdmin() {
-        User user = createAdmin();
-        Ticket ticket = createTicketForUser(user);
-        String invalid = "1234";
+        User admin = createAdmin();
+        Ticket ticket = createTicketForUser(admin);
 
-        HashMap<String, String> rfidLinkDTO = makeRFIDLinkDTO(ticket);
-        rfidLinkDTO.put("rfid", invalid);
+        RFIDLinkDTO dto = createInvalidRFIDLinkDTO(ticket);
 
         //@formatter:off
         given().
-            header(getXAuthTokenHeaderForUser(user)).
-        when()
-            .body(rfidLinkDTO)
-            .contentType(ContentType.JSON)
-            .post(RFID_ENDPOINT).
-        then()
-            .statusCode(HttpStatus.SC_BAD_REQUEST);
+            header(getXAuthTokenHeaderForUser(admin)).
+            body(dto).
+            contentType(ContentType.JSON).
+        when().
+            post(RFID_ENDPOINT).
+        then().
+            statusCode(HttpStatus.SC_BAD_REQUEST);
         //@formatter:on
 
-        Assert.assertFalse(rfidLinkRepository.findByRfid(invalid).isPresent());
+        Assert.assertFalse(rfidLinkRepository.findByRfid(dto.getRfid()).isPresent());
     }
 
     @Test
@@ -269,18 +286,18 @@ public class RFIDIntegrationTest extends XAuthIntegrationTest {
         Ticket ticket1 = createTicketForUser(admin);
         Ticket ticket2 = createTicketForUser(user);
         RFIDLink rfidLink = createRfidLink(ticket1);
-        HashMap<String, String> rfidLinkDTO = makeRFIDLinkDTO(ticket2);
-        rfidLinkDTO.put("rfid", rfidLink.getRfid());
+        RFIDLinkDTO dto = createRFIDLinkDTO(ticket2);
+        dto.setRfid(rfidLink.getRfid());
 
         //@formatter:off
         given().
             header(getXAuthTokenHeaderForUser(admin)).
-        when()
-            .body(rfidLinkDTO)
-            .contentType(ContentType.JSON)
-            .post(RFID_ENDPOINT).
-        then()
-            .statusCode(HttpStatus.SC_CONFLICT);
+            body(dto).
+            contentType(ContentType.JSON).
+        when().
+            post(RFID_ENDPOINT).
+        then().
+            statusCode(HttpStatus.SC_CONFLICT);
         //@formatter:on
 
         Optional<RFIDLink> queryResult = rfidLinkRepository.findByRfid(rfidLink.getRfid());
@@ -290,23 +307,23 @@ public class RFIDIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void testAddRFIDLinkTicketTakenAsAdmin() {
-        User user = createAdmin();
-        Ticket ticket = createTicketForUser(user);
+        User admin = createAdmin();
+        Ticket ticket = createTicketForUser(admin);
         createRfidLink(ticket);
-        HashMap<String, String> rfidLinkDTO = makeRFIDLinkDTO(ticket);
+        RFIDLinkDTO dto = createRFIDLinkDTO(ticket);
 
         //@formatter:off
         given().
-            header(getXAuthTokenHeaderForUser(user)).
+            header(getXAuthTokenHeaderForUser(admin)).
         when()
-            .body(rfidLinkDTO)
+            .body(dto)
             .contentType(ContentType.JSON)
             .post(RFID_ENDPOINT).
         then()
             .statusCode(HttpStatus.SC_CONFLICT);
         //@formatter:on
 
-        Assert.assertFalse(rfidLinkRepository.findByRfid(rfidLinkDTO.get("rfid")).isPresent());
+        Assert.assertFalse(rfidLinkRepository.findByRfid(dto.getRfid()).isPresent());
     }
 
     @Test
@@ -321,7 +338,7 @@ public class RFIDIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(admin)).
         when()
-            .body(makeRFIDLinkDTO(ticket))
+            .body(createRFIDLinkDTO(ticket))
             .contentType(ContentType.JSON)
             .post(RFID_ENDPOINT)
         .then()
@@ -331,37 +348,37 @@ public class RFIDIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void testAddRFIDLinkTicketDoesntExistAsAdmin() {
-        User user = createAdmin();
-        Ticket ticket = createTicketForUser(user);
+        User admin = createAdmin();
+        Ticket ticket = createTicketForUser(admin);
 
-        HashMap<String, String> rfidLinkDTO = makeRFIDLinkDTO(ticket);
-        rfidLinkDTO.put("ticketId", user.getId().toString());
+        RFIDLinkDTO dto = createRFIDLinkDTO(ticket);
+        dto.setTicketId(admin.getId());
 
         //@formatter:off
         given().
-            header(getXAuthTokenHeaderForUser(user)).
+            header(getXAuthTokenHeaderForUser(admin)).
         when()
-            .body(rfidLinkDTO)
+            .body(dto)
             .contentType(ContentType.JSON)
             .post(RFID_ENDPOINT)
         .then()
             .statusCode(HttpStatus.SC_NOT_FOUND);
         //@formatter:on
 
-        Assert.assertFalse(rfidLinkRepository.findByRfid(rfidLinkDTO.get("rfid")).isPresent());
+        Assert.assertFalse(rfidLinkRepository.findByRfid(dto.getRfid()).isPresent());
     }
 
     @Test
     public void testRemoveRFIDLinkByRFIDAsAdmin() {
-        User user = createAdmin();
-        Ticket ticket = createTicketForUser(user);
+        User admin = createAdmin();
+        Ticket ticket = createTicketForUser(admin);
         RFIDLink link = createRfidLink(ticket);
 
         //@formatter:off
         given().
-            header(getXAuthTokenHeaderForUser(user)).
+            header(getXAuthTokenHeaderForUser(admin)).
         when()
-            .delete(RFID_ENDPOINT + "/" + link.getRfid()).
+            .delete(RFID_ENDPOINT + link.getRfid()).
         then()
             .statusCode(HttpStatus.SC_OK)
             .body("ticket.id", equalTo(ticket.getId().intValue()));
@@ -372,15 +389,15 @@ public class RFIDIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void testRemoveRFIDLinkByTicketIdAsAdmin() {
-        User user = createAdmin();
-        Ticket ticket = createTicketForUser(user);
+        User admin = createAdmin();
+        Ticket ticket = createTicketForUser(admin);
         RFIDLink rfidLink = createRfidLink(ticket);
 
         //@formatter:off
         given().
-            header(getXAuthTokenHeaderForUser(user)).
+            header(getXAuthTokenHeaderForUser(admin)).
         when()
-            .delete(RFID_TICKET_ENDPOINT + "/" + ticket.getId()).
+            .delete((RFID_ENDPOINT + "tickets/") + ticket.getId()).
         then()
             .statusCode(HttpStatus.SC_OK)
             .body("ticket.id", equalTo(ticket.getId().intValue()));
@@ -391,16 +408,16 @@ public class RFIDIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void testRemoveRFIDLinkLinkNotFoundAsAdmin() {
-        User user = createAdmin();
-        Ticket ticket = createTicketForUser(user);
+        User admin = createAdmin();
+        Ticket ticket = createTicketForUser(admin);
         RFIDLink link = createRfidLink(ticket);
         String unused = String.valueOf(Long.valueOf(link.getRfid()) + 1);
 
         //@formatter:off
         given().
-            header(getXAuthTokenHeaderForUser(user)).
+            header(getXAuthTokenHeaderForUser(admin)).
         when()
-            .delete(RFID_ENDPOINT + "/" + unused).
+            .delete(RFID_ENDPOINT + unused).
         then()
             .statusCode(HttpStatus.SC_NOT_FOUND);
         //@formatter:on
@@ -410,25 +427,15 @@ public class RFIDIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void testRemoveRFIDLinkInvalidRFIDAsAdmin() {
-        User user = createAdmin();
+        User admin = createAdmin();
 
         //@formatter:off
         given().
-            header(getXAuthTokenHeaderForUser(user)).
+            header(getXAuthTokenHeaderForUser(admin)).
         when()
-            .delete(RFID_ENDPOINT + "/" + "123").
+            .delete(RFID_ENDPOINT + INVALID_RFID).
         then()
-            .statusCode(HttpStatus.SC_BAD_REQUEST);
+            .statusCode(HttpStatus.SC_NOT_FOUND);
         //@formatter:on
-    }
-
-    private HashMap<String, String> makeRFIDLinkDTO(Ticket ticket) {
-        long rfid = (long) Math.floor(Math.random() * 9_000_000_000L) + 1_000_000_000L;
-
-        HashMap<String, String> rfidLinkDTO = new HashMap<>();
-        rfidLinkDTO.put("rfid", String.valueOf(rfid));
-        rfidLinkDTO.put("ticketId", ticket.getId().toString());
-
-        return rfidLinkDTO;
     }
 }

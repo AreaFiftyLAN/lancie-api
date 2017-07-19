@@ -20,7 +20,8 @@ package ch.wisv.areafiftylan.products.model;
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.utils.view.View;
 import com.fasterxml.jackson.annotation.JsonView;
-import lombok.Getter;
+import lombok.AccessLevel;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
@@ -29,31 +30,32 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Getter
+@Data
 @NoArgsConstructor
 public class Ticket {
 
     @Id
     @GeneratedValue
+    @Setter(AccessLevel.NONE)
     @JsonView(View.OrderOverview.class)
     private Long id;
 
     @ManyToOne(cascade = CascadeType.MERGE)
     @JsonView(View.Public.class)
-    @Setter
     private User owner;
 
     @JsonView(View.OrderOverview.class)
     @ManyToOne(cascade = CascadeType.MERGE)
+    @Setter(AccessLevel.NONE)
     private TicketType type;
 
 
     @JsonView(View.OrderOverview.class)
     @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    @Setter(AccessLevel.NONE)
     private Set<TicketOption> enabledOptions;
 
     @JsonView(View.OrderOverview.class)
-    @Setter
     private boolean valid;
 
     public Ticket(User owner, TicketType type) {

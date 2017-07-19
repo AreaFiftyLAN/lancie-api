@@ -17,17 +17,18 @@
 
 package ch.wisv.areafiftylan.extras.rfid.model;
 
-import ch.wisv.areafiftylan.exception.InvalidRFIDException;
 import ch.wisv.areafiftylan.products.model.Ticket;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 import javax.persistence.*;
 
 @Entity
 @Data
 @NoArgsConstructor
+@RequiredArgsConstructor
 public class RFIDLink {
 
     @Id
@@ -40,21 +41,4 @@ public class RFIDLink {
     @NonNull
     @OneToOne(cascade = CascadeType.MERGE)
     private Ticket ticket;
-
-
-    public RFIDLink(String rfid, Ticket ticket) {
-        if (isInvalidRFID(rfid)) {
-            throw new InvalidRFIDException(rfid);
-        }
-
-        this.rfid = rfid;
-        this.ticket = ticket;
-    }
-
-    //Static Content
-    private static final int RFID_CHAR_COUNT = 10;
-
-    public static boolean isInvalidRFID(String rfid) {
-        return rfid.length() != RFID_CHAR_COUNT;
-    }
 }

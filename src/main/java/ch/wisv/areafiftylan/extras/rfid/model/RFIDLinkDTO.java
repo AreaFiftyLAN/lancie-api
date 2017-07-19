@@ -19,14 +19,18 @@ package ch.wisv.areafiftylan.extras.rfid.model;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotNull;
+
+import static ch.wisv.areafiftylan.extras.rfid.service.RFIDServiceImpl.RFID_CHAR_COUNT;
 
 @Getter
 @Setter
 public class RFIDLinkDTO {
 
     @NotNull
+    @Length(min = RFID_CHAR_COUNT, max = RFID_CHAR_COUNT)
     private String rfid;
 
     @NotNull

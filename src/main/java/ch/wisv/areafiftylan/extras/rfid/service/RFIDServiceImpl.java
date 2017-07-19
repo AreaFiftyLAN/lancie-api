@@ -19,7 +19,6 @@ package ch.wisv.areafiftylan.extras.rfid.service;
 
 import ch.wisv.areafiftylan.exception.*;
 import ch.wisv.areafiftylan.extras.rfid.model.RFIDLink;
-import ch.wisv.areafiftylan.extras.rfid.model.RFIDLinkRepository;
 import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.service.TicketService;
 import ch.wisv.areafiftylan.users.model.User;
@@ -30,6 +29,8 @@ import java.util.Collection;
 
 @Service
 public class RFIDServiceImpl implements RFIDService {
+
+    public static final int RFID_CHAR_COUNT = 10;
 
     private final RFIDLinkRepository rfidLinkRepository;
     private final TicketService ticketService;
@@ -56,8 +57,37 @@ public class RFIDServiceImpl implements RFIDService {
     }
 
     @Override
-    public boolean isRFIDUsed(String rfid) {
-        return rfidLinkRepository.findByRfid(rfid).isPresent();
+    public RFIDLink addRFIDLink(String rfid, Long ticketId) {
+        if (!isValidRfid(rfid)) {
+            throw new InvalidRFIDException(rfid);
+        }
+        if (isUsedRfid(rfid)) {
+            throw new RFIDTakenException(rfid);
+        }
+        if (!isValidTicket(ticketId)) {
+            throw new InvalidTicketException("Can't link ticket to RFID; ticket is invalid.");
+        }
+        if (isTicketLinked(ticketId)) {
+            throw new TicketAlreadyLinkedException();
+        }
+
+        Ticket ticket = ticketService.getTicketById(ticketId);
+        RFIDLink newLink = new RFIDLink(rfid, ticket);
+        return rfidLinkRepository.saveAndFlush(newLink);
+    }
+
+    @Override
+    public RFIDLink removeRFIDLink(String rfid) {
+        RFIDLink link = getLinkByRFID(rfid);
+        rfidLinkRepository.delete(link);
+        return link;
+    }
+
+    @Override
+    public RFIDLink removeRFIDLink(Long ticketId) {
+        RFIDLink link = getLinkByTicketId(ticketId);
+        rfidLinkRepository.delete(link);
+        return link;
     }
 
     @Override
@@ -65,50 +95,19 @@ public class RFIDServiceImpl implements RFIDService {
         return rfidLinkRepository.findByTicketId(ticketId).isPresent();
     }
 
-    @Override
-    public void addRFIDLink(String rfid, Long ticketId) {
-        if (isRFIDUsed(rfid)) {
-            throw new RFIDTakenException(rfid);
-        }
-
-        if (isTicketLinked(ticketId)) {
-            throw new TicketAlreadyLinkedException();
-        }
-
-        if (!ticketService.getTicketById(ticketId).isValid()) {
-            throw new InvalidTicketException("Can't link ticket to RFID; ticket is invalid.");
-        }
-
-        Ticket t = ticketService.getTicketById(ticketId);
-
-        RFIDLink newLink = new RFIDLink(rfid, t);
-
-        rfidLinkRepository.saveAndFlush(newLink);
+    private boolean isValidRfid(String rfid) {
+        return rfid.length() == RFID_CHAR_COUNT;
     }
 
-    @Override
-    public RFIDLink removeRFIDLink(String rfid) {
-        RFIDLink link = getLinkByRFID(rfid);
-
-        rfidLinkRepository.delete(link);
-
-        return link;
+    private boolean isUsedRfid(String rfid) {
+        return rfidLinkRepository.findByRfid(rfid).isPresent();
     }
 
-    @Override
-    public RFIDLink removeRFIDLink(Long ticketId) {
-        RFIDLink link = getLinkByTicketId(ticketId);
-
-        rfidLinkRepository.delete(link);
-
-        return link;
+    private boolean isValidTicket(Long ticketId) {
+        return ticketService.getTicketById(ticketId).isValid();
     }
 
     private RFIDLink getLinkByRFID(String rfid) {
-        if (RFIDLink.isInvalidRFID(rfid)) {
-            throw new InvalidRFIDException(rfid);
-        }
-
         return rfidLinkRepository.findByRfid(rfid).orElseThrow(RFIDNotFoundException::new);
     }
 

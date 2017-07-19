@@ -1,7 +1,10 @@
-package ch.wisv.areafiftylan.products.service;
+package ch.wisv.areafiftylan.unit;
 
 import ch.wisv.areafiftylan.ApplicationTest;
 import ch.wisv.areafiftylan.products.model.Ticket;
+import ch.wisv.areafiftylan.products.service.OrderService;
+import ch.wisv.areafiftylan.products.service.PaymentService;
+import ch.wisv.areafiftylan.products.service.TicketService;
 import ch.wisv.areafiftylan.products.service.repository.OrderRepository;
 import ch.wisv.areafiftylan.products.service.repository.TicketOptionRepository;
 import ch.wisv.areafiftylan.products.service.repository.TicketRepository;

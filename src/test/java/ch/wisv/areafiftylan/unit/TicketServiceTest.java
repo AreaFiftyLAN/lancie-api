@@ -1,4 +1,4 @@
-package ch.wisv.areafiftylan.products.service;
+package ch.wisv.areafiftylan.unit;
 
 import ch.wisv.areafiftylan.exception.*;
 import ch.wisv.areafiftylan.extras.rfid.model.RFIDLink;
