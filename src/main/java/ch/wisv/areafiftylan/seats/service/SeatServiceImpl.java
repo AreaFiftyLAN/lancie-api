@@ -58,6 +58,17 @@ public class SeatServiceImpl implements SeatService {
     }
 
     @Override
+    public List<Seat> getSeatsByTeamName(String teamName) {
+        Team team = teamService.getTeamByTeamname(teamName);
+
+        return team.getMembers().stream().
+                map(User::getEmail).
+                map(seatRepository::findByTicketOwnerEmailIgnoreCase).
+                flatMap(Collection::stream).
+                collect(Collectors.toList());
+    }
+
+    @Override
     public SeatmapResponse getAllSeats() {
         List<Seat> all = seatRepository.findAll();
 
@@ -77,49 +88,30 @@ public class SeatServiceImpl implements SeatService {
     }
 
     @Override
-    public boolean reserveSeatForTicket(String seatGroup, int seatNumber, Long ticketId) {
-        Seat seat = getSeatBySeatGroupAndSeatNumber(seatGroup, seatNumber);
-        if (seat.isTaken()) {
-            return false;
-        } else {
-            reserveSeat(seat, ticketId);
-            return true;
-        }
-    }
-
-    @Override
-    public void reserveSeatForAdmin(String seatGroup, int seatNumber, Long ticketId) {
-        Seat seat = getSeatBySeatGroupAndSeatNumber(seatGroup, seatNumber);
-        reserveSeat(seat, ticketId);
-    }
-
-    /**
-     * Reserves a Seat, and sets the Ticket to ticketId's Ticket.
-     * Also frees any previous Seat belonging to the Ticket.
-     * This method ignores any current user assigned to the seat, that logic must be done before calling this class.
-     * If any user was assigned this seat before, send an email to let them know their seat was overridden.
-     * This method is synchronized to prevent the extremely unlikely event of simultaneous requests.
-     *
-     * @param seat The Seat to reserve.
-     * @param ticketId The Id of the Ticket to be set to the Seat.
-     */
     @Synchronized
-    private void reserveSeat(Seat seat, Long ticketId) {
+    public boolean reserveSeat(String groupName, int seatNumber, Long ticketId, boolean isAdmin) {
+        Seat seat = getSeatBySeatGroupAndSeatNumber(groupName, seatNumber);
+        Ticket ticket = null;
+
+        if (!isAdmin && (seat.isTaken() || ticketId == null)) {
+            return false;
+        }
+
+        if (seat.getTicket() != null && seat.getTicket().getOwner() != null) {
+            mailService.sendSeatOverrideMail(seat.getTicket().getOwner());
+        }
         if (ticketId != null) {
             seatRepository.findByTicketId(ticketId).ifPresent(previousSeat -> previousSeat.setTicket(null));
-            Ticket ticket = ticketService.getTicketById(ticketId);
+            ticket = ticketService.getTicketById(ticketId);
             if (!ticket.isValid()) {
                 throw new InvalidTicketException("Unable to reserve seat for an invalid Ticket");
             }
-            if (seat.getTicket() != null && seat.getTicket().getOwner() != null) {
-                mailService.sendSeatOverrideMail(seat.getTicket().getOwner());
-            }
-            seat.setTicket(ticket);
-        } else {
-            seat.setTicket(null);
         }
+
+        seat.setTicket(ticket);
         seat.setTaken(true);
         seatRepository.saveAndFlush(seat);
+        return true;
     }
 
     @Override
@@ -136,17 +128,6 @@ public class SeatServiceImpl implements SeatService {
             seatList.add(new Seat(seatGroupDTO.getSeatGroupName(), i));
         }
         seatRepository.save(seatList);
-    }
-
-    @Override
-    public List<Seat> getSeatsByTeamName(String teamName) {
-        Team team = teamService.getTeamByTeamname(teamName);
-
-        return team.getMembers().stream().
-                map(User::getEmail).
-                map(seatRepository::findByTicketOwnerEmailIgnoreCase).
-                flatMap(Collection::stream).
-                collect(Collectors.toList());
     }
 
     @Override

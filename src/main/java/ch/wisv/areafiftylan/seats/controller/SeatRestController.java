@@ -114,15 +114,10 @@ public class SeatRestController {
     @PostMapping("/{group}/{number}/{ticketId}")
     ResponseEntity<?> reserveSingleSeat(@PathVariable String group, @PathVariable Integer number,
                                         @PathVariable Long ticketId, @AuthenticationPrincipal User user) {
-        if (user.getAuthorities().contains(Role.ROLE_ADMIN)) {
-            seatService.reserveSeatForAdmin(group, number, ticketId);
+        if (seatService.reserveSeat(group, number, ticketId, user.getAuthorities().contains(Role.ROLE_ADMIN))) {
             return createResponseEntity(HttpStatus.OK, "Seat successfully reserved");
         } else {
-            if (seatService.reserveSeatForTicket(group, number, ticketId)) {
-                return createResponseEntity(HttpStatus.OK, "Seat successfully reserved");
-            } else {
-                return createResponseEntity(HttpStatus.CONFLICT, "Seat is already taken");
-            }
+            return createResponseEntity(HttpStatus.CONFLICT, "Seat is already taken");
         }
     }
 
@@ -137,7 +132,7 @@ public class SeatRestController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{group}/{number}")
     ResponseEntity<?> reserveSingleSeat(@PathVariable String group, @PathVariable Integer number) {
-        seatService.reserveSeatForAdmin(group, number, null);
+        seatService.reserveSeat(group, number, null, true);
         return createResponseEntity(HttpStatus.OK, "Seat successfully reserved");
     }
 

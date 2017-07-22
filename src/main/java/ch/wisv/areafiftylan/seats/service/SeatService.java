@@ -27,19 +27,17 @@ public interface SeatService {
 
     List<Seat> getSeatsByEmail(String email);
 
+    List<Seat> getSeatsByTeamName(String teamName);
+
     SeatmapResponse getAllSeats();
 
     SeatmapResponse getSeatGroupByName(String groupname);
 
-    boolean reserveSeatForTicket(String groupname, int seatnumber, Long ticketId);
-
-    void reserveSeatForAdmin(String groupname, int seatnumber, Long ticketId);
+    boolean reserveSeat(String groupName, int seatNumber, Long ticketId, boolean isAdmin);
 
     Seat getSeatBySeatGroupAndSeatNumber(String groupName, int seatNumber);
 
     void addSeats(SeatGroupDTO seatGroupDTO);
-
-    List<Seat> getSeatsByTeamName(String teamName);
 
     void clearSeat(String groupName, int seatNumber);
 }
