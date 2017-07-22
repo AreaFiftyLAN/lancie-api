@@ -78,22 +78,22 @@ public class SeatServiceImpl implements SeatService {
     }
 
     @Override
-    public SeatmapResponse getSeatGroupByName(String groupname) {
-        List<Seat> seatGroup = seatRepository.findBySeatGroup(groupname);
+    public SeatmapResponse getSeatGroupByName(String groupName) {
+        List<Seat> seatGroup = seatRepository.findBySeatGroup(groupName);
 
         Map<String, List<Seat>> seatMapResponse = new HashMap<>();
-        seatMapResponse.put(groupname, seatGroup);
+        seatMapResponse.put(groupName, seatGroup);
 
         return new SeatmapResponse(seatMapResponse);
     }
 
     @Override
     @Synchronized
-    public boolean reserveSeat(String groupName, int seatNumber, Long ticketId, boolean isAdmin) {
+    public boolean reserveSeat(String groupName, int seatNumber, Long ticketId, boolean allowSeatOverride) {
         Seat seat = getSeatBySeatGroupAndSeatNumber(groupName, seatNumber);
         Ticket ticket = null;
 
-        if (!isAdmin && (seat.isTaken() || ticketId == null)) {
+        if (!allowSeatOverride && (seat.isTaken() || ticketId == null)) {
             return false;
         }
 

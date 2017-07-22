@@ -31,9 +31,9 @@ public interface SeatService {
 
     SeatmapResponse getAllSeats();
 
-    SeatmapResponse getSeatGroupByName(String groupname);
+    SeatmapResponse getSeatGroupByName(String groupName);
 
-    boolean reserveSeat(String groupName, int seatNumber, Long ticketId, boolean isAdmin);
+    boolean reserveSeat(String groupName, int seatNumber, Long ticketId, boolean allowSeatOverride);
 
     Seat getSeatBySeatGroupAndSeatNumber(String groupName, int seatNumber);
 
