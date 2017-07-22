@@ -55,12 +55,11 @@ public class ConsumptionController {
                 "Successfully added " + consumptionName + " as a supported consumption.");
     }
 
-    @DeleteMapping
-    public ResponseEntity<?> removeAvailableConsumption(@RequestBody Long consumptionId) {
-        Consumption c = consumptionService.removePossibleConsumption(consumptionId);
-
+    @DeleteMapping("/{consumptionId}")
+    public ResponseEntity<?> removeAvailableConsumption(@PathVariable Long consumptionId) {
+        consumptionService.removePossibleConsumption(consumptionId);
         return createResponseEntity(HttpStatus.OK,
-                "Successfully removed " + c.getName() + " as a supported consumption.");
+                "Successfully removed the supported consumption with id: " + consumptionId);
     }
 
     @GetMapping("/{ticketId}")

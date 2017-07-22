@@ -53,14 +53,8 @@ public class ConsumptionServiceImpl implements ConsumptionService {
         if (!ticketService.getTicketById(ticketId).isValid()) {
             throw new InvalidTicketException("Ticket is invalid; It can not be used for consumptions.");
         }
-
         Optional<ConsumptionMap> mapOptional = consumptionMapsRepository.findByTicketId(ticketId);
-
-        if (mapOptional.isPresent()) {
-            return mapOptional.get();
-        } else {
-            return initializeConsumptionMap(ticketId);
-        }
+        return mapOptional.orElseGet(() -> initializeConsumptionMap(ticketId));
     }
 
     @Override
@@ -102,13 +96,9 @@ public class ConsumptionServiceImpl implements ConsumptionService {
     }
 
     @Override
-    public Consumption removePossibleConsumption(Long consumptionId) {
-        Consumption consumption = getByConsumptionId(consumptionId);
-
-        resetConsumptionEverywhere(consumption);
-
-        possibleConsumptionsRepository.delete(consumption);
-        return consumption;
+    public void removePossibleConsumption(Long consumptionId) {
+        resetConsumptionEverywhere(consumptionId);
+        possibleConsumptionsRepository.delete(consumptionId);
     }
 
     @Override
@@ -121,10 +111,13 @@ public class ConsumptionServiceImpl implements ConsumptionService {
         return possibleConsumptionsRepository.saveAndFlush(consumption);
     }
 
-    private void resetConsumptionEverywhere(Consumption consumption) {
-        Collection<Ticket> allValidTickets =
-                ticketService.getAllTickets().stream().filter(Ticket::isValid).collect(Collectors.toList());
+    private void resetConsumptionEverywhere(Long consumptionId) {
+        Collection<Long> allValidTicketIds = ticketService.getAllTickets().
+                stream().
+                filter(Ticket::isValid).
+                map(Ticket::getId).
+                collect(Collectors.toList());
 
-        allValidTickets.forEach(t -> reset(t.getId(), consumption.getId()));
+        allValidTicketIds.forEach(id -> reset(id, consumptionId));
     }
 }
