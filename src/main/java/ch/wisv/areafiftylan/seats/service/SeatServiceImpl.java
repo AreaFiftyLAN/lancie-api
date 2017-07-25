@@ -93,11 +93,11 @@ public class SeatServiceImpl implements SeatService {
         Seat seat = getSeatBySeatGroupAndSeatNumber(groupName, seatNumber);
         Ticket ticket = null;
 
-        if (!allowSeatOverride && (seat.isTaken() || ticketId == null)) {
+        if (!allowSeatOverride && (seat.isTaken() || seat.isLocked() || ticketId == null)) {
             return false;
         }
 
-        if (seat.getTicket() != null && seat.getTicket().getOwner() != null) {
+        if (seat.isTaken() && seat.getTicket().getOwner() != null) {
             mailService.sendSeatOverrideMail(seat.getTicket().getOwner());
         }
         if (ticketId != null) {
@@ -107,9 +107,7 @@ public class SeatServiceImpl implements SeatService {
                 throw new InvalidTicketException("Unable to reserve seat for an invalid Ticket");
             }
         }
-
         seat.setTicket(ticket);
-        seat.setTaken(true);
         seatRepository.saveAndFlush(seat);
         return true;
     }
@@ -135,5 +133,26 @@ public class SeatServiceImpl implements SeatService {
         Seat seat = getSeatBySeatGroupAndSeatNumber(groupName, seatNumber);
         seat.setTicket(null);
         seatRepository.save(seat);
+    }
+
+    @Override
+    public void setSeatLocked(String groupName, int seatNumber, boolean locked) {
+        Seat seat = getSeatBySeatGroupAndSeatNumber(groupName, seatNumber);
+        seat.setLocked(locked);
+        seatRepository.save(seat);
+    }
+
+    @Override
+    public void setSeatGroupLocked(String groupName, boolean locked) {
+        List<Seat> seatGroup = seatRepository.findBySeatGroup(groupName);
+        seatGroup.forEach(seat -> seat.setLocked(locked));
+        seatRepository.save(seatGroup);
+    }
+
+    @Override
+    public void setAllSeatsLock(boolean locked) {
+        List<Seat> seats = seatRepository.findAll();
+        seats.forEach(seat -> seat.setLocked(locked));
+        seatRepository.save(seats);
     }
 }

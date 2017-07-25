@@ -39,7 +39,7 @@ public class Seat {
     private Long Id;
 
     @JsonView(View.Public.class)
-    private boolean taken = false;
+    private boolean locked = true;
 
     @OneToOne(cascade = CascadeType.MERGE)
     @JsonView(View.Public.class)
@@ -62,8 +62,7 @@ public class Seat {
         return ticket.getOwner();
     }
 
-    public void setTicket(Ticket ticket) {
-        this.ticket = ticket;
-        this.taken = this.ticket != null;
+    public boolean isTaken() {
+        return ticket != null;
     }
 }
