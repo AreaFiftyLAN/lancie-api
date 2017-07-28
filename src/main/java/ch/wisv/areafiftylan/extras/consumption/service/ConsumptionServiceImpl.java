@@ -96,6 +96,11 @@ public class ConsumptionServiceImpl implements ConsumptionService {
     }
 
     @Override
+    public Collection<ConsumptionMap> getConsumptionMaps() {
+        return consumptionMapsRepository.findAll();
+    }
+
+    @Override
     public void removePossibleConsumption(Long consumptionId) {
         resetConsumptionEverywhere(consumptionId);
         possibleConsumptionsRepository.delete(consumptionId);

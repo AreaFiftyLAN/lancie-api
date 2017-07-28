@@ -20,6 +20,7 @@ package ch.wisv.areafiftylan.extras.consumption.controller;
 import ch.wisv.areafiftylan.exception.AlreadyConsumedException;
 import ch.wisv.areafiftylan.exception.ConsumptionNotFoundException;
 import ch.wisv.areafiftylan.extras.consumption.model.Consumption;
+import ch.wisv.areafiftylan.extras.consumption.model.ConsumptionMap;
 import ch.wisv.areafiftylan.extras.consumption.service.ConsumptionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -45,6 +46,11 @@ public class ConsumptionController {
     @GetMapping
     public Collection<Consumption> getAllPossibleConsumptions() {
         return consumptionService.getPossibleConsumptions();
+    }
+
+    @GetMapping("/consumptionMaps")
+    public Collection<ConsumptionMap> getAllConsumptionMaps() {
+        return consumptionService.getConsumptionMaps();
     }
 
     @PostMapping
