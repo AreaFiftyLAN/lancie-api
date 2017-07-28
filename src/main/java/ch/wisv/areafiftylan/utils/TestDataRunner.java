@@ -159,6 +159,7 @@ public class TestDataRunner implements CommandLineRunner {
             seatGroup.setSeatGroupName(String.valueOf(s));
             seatService.addSeats(seatGroup);
         }
+        seatService.setAllSeatsLock(false);
         seatService.reserveSeat("A", 2, ticket.getId(), false);
     }
 }
