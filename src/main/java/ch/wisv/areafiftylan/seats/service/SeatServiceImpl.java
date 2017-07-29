@@ -52,6 +52,13 @@ public class SeatServiceImpl implements SeatService {
     }
 
     @Override
+    public SeatmapResponse getAllSeats() {
+        return new SeatmapResponse(seatRepository.findAll().
+                stream().
+                collect(Collectors.groupingBy(Seat::getSeatGroup)));
+    }
+
+    @Override
     public List<Seat> getSeatsByEmail(String email) {
         return seatRepository.findByTicketOwnerEmailIgnoreCase(email);
 
@@ -69,15 +76,6 @@ public class SeatServiceImpl implements SeatService {
     }
 
     @Override
-    public SeatmapResponse getAllSeats() {
-        List<Seat> all = seatRepository.findAll();
-
-        Map<String, List<Seat>> seatMapGroups = all.stream().collect(Collectors.groupingBy(Seat::getSeatGroup));
-
-        return new SeatmapResponse(seatMapGroups);
-    }
-
-    @Override
     public SeatmapResponse getSeatGroupByName(String groupName) {
         List<Seat> seatGroup = seatRepository.findBySeatGroup(groupName);
 
@@ -85,6 +83,12 @@ public class SeatServiceImpl implements SeatService {
         seatMapResponse.put(groupName, seatGroup);
 
         return new SeatmapResponse(seatMapResponse);
+    }
+
+    @Override
+    public Seat getSeatBySeatGroupAndSeatNumber(String groupName, int seatNumber) {
+        return seatRepository.findBySeatGroupAndSeatNumber(groupName, seatNumber)
+                .orElseThrow(SeatNotFoundException::new);
     }
 
     @Override
@@ -113,9 +117,8 @@ public class SeatServiceImpl implements SeatService {
     }
 
     @Override
-    public Seat getSeatBySeatGroupAndSeatNumber(String groupName, int seatNumber) {
-        return seatRepository.findBySeatGroupAndSeatNumber(groupName, seatNumber)
-                .orElseThrow(SeatNotFoundException::new);
+    public void clearSeat(String groupName, int seatNumber) {
+        reserveSeat(groupName, seatNumber, null, true);
     }
 
     @Override
@@ -126,13 +129,6 @@ public class SeatServiceImpl implements SeatService {
             seatList.add(new Seat(seatGroupDTO.getSeatGroupName(), i));
         }
         seatRepository.save(seatList);
-    }
-
-    @Override
-    public void clearSeat(String groupName, int seatNumber) {
-        Seat seat = getSeatBySeatGroupAndSeatNumber(groupName, seatNumber);
-        seat.setTicket(null);
-        seatRepository.save(seat);
     }
 
     @Override

@@ -127,7 +127,7 @@ public class SeatRestController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{group}/{number}")
     ResponseEntity<?> reserveSingleSeat(@PathVariable String group, @PathVariable Integer number) {
-        seatService.reserveSeat(group, number, null, true);
+        seatService.clearSeat(group, number);
         return createResponseEntity(HttpStatus.OK, "Seat successfully reserved");
     }
 
@@ -142,7 +142,6 @@ public class SeatRestController {
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{group}/{number}")
     ResponseEntity<?> clearSeat(@PathVariable String group, @PathVariable int number) {
-
         seatService.clearSeat(group, number);
         return createResponseEntity(HttpStatus.OK, "Seat successfully cleared");
     }
