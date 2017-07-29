@@ -54,7 +54,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
     private TicketRepository ticketRepository;
 
     @Autowired
-    SeatService seatService;
+    private SeatService seatService;
 
     private void setTicketOnA1(Ticket ticket) {
         Seat seat = seatRepository.findAll().get(0);
@@ -67,6 +67,10 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
     public void cleanupSeatTest() {
         seatService.clearSeat("A", 1);
         seatService.clearSeat("A", 2);
+        seatService.clearSeat("A", 3);
+        seatService.clearSeat("A", 4);
+        seatService.clearSeat("A", 5);
+        seatService.setAllSeatsLock(false);
     }
 
     @Test
