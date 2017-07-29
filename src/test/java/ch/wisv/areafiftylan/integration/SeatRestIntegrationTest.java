@@ -32,18 +32,21 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 
 public class SeatRestIntegrationTest extends XAuthIntegrationTest {
     
     private final String SEAT_ENDPOINT = "/seats";
+    private final String LOCK_ENDPOINT = SEAT_ENDPOINT + "/lock/";
 
     @Autowired
     private SeatRepository seatRepository;
@@ -595,4 +598,128 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         Seat seat = seatService.getSeatBySeatGroupAndSeatNumber("A", 1);
         Assert.assertNull(seat.getTicket());
     }
+
+    //region Locks
+    @Test
+    public void setAllSeatsLockFalse() {
+        User admin = createAdmin();
+
+        //formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(admin)).
+            body(false).
+            contentType(ContentType.JSON).
+        when().
+            post(LOCK_ENDPOINT).
+        then().
+            statusCode(HttpStatus.SC_OK);
+        //formatter:on
+
+        assertTrue(seatService.getAllSeats().getSeatmap().values()
+                .stream()
+                .flatMap(Collection::stream)
+                .noneMatch(Seat::isLocked));
+    }
+
+    @Test
+    public void setAllSeatsLockTrue() {
+        User admin = createAdmin();
+
+        //formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(admin)).
+            body(true).
+            contentType(ContentType.JSON).
+        when().
+            post(LOCK_ENDPOINT).
+        then().
+            statusCode(HttpStatus.SC_OK);
+        //formatter:on
+
+        assertTrue(seatService.getAllSeats().getSeatmap().values()
+                .stream()
+                .flatMap(Collection::stream)
+                .allMatch(Seat::isLocked));
+    }
+
+    @Test
+    public void setSeatGroupLockTestFalse() {
+        User admin = createAdmin();
+        String group = "A";
+
+        //formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(admin)).
+            body(false).
+            contentType(ContentType.JSON).
+        when().
+            post(LOCK_ENDPOINT + group).
+        then().
+            statusCode(HttpStatus.SC_OK);
+        //formatter:on
+
+        assertTrue(seatService.getAllSeats().getSeatmap().get(group)
+                .stream()
+                .noneMatch(Seat::isLocked));
+    }
+
+    @Test
+    public void setSeatGroupLockTestTrue() {
+        User admin = createAdmin();
+        String group = "A";
+
+        //formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(admin)).
+            body(true).
+            contentType(ContentType.JSON).
+        when().
+            post(LOCK_ENDPOINT + group).
+        then().
+            statusCode(HttpStatus.SC_OK);
+        //formatter:on
+
+        assertTrue(seatService.getAllSeats().getSeatmap().get(group)
+                .stream()
+                .allMatch(Seat::isLocked));
+    }
+
+    @Test
+    public void setSeatLockTestFalse() {
+        User admin = createAdmin();
+        String group = "A";
+
+        //formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(admin)).
+            body(false).
+            contentType(ContentType.JSON).
+        when().
+            post(LOCK_ENDPOINT + group + "/3").
+        then().
+            statusCode(HttpStatus.SC_OK);
+        //formatter:on
+
+        assertFalse(seatService.getAllSeats().getSeatmap().get(group).get(2).isLocked());
+    }
+
+    @Test
+    public void setSeatLockTestTrue() {
+        User admin = createAdmin();
+        String group = "A";
+
+        //formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(admin)).
+            body(true).
+            contentType(ContentType.JSON).
+        when().
+            post(LOCK_ENDPOINT + group + "/3").
+        then().
+            statusCode(HttpStatus.SC_OK);
+        //formatter:on
+
+        assertTrue(seatService.getAllSeats().getSeatmap().get(group).get(2).isLocked());
+    }
+    //endregion Locks
 }
