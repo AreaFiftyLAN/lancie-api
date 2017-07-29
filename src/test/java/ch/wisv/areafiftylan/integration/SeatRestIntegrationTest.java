@@ -73,6 +73,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         seatService.setAllSeatsLock(false);
     }
 
+    //region Get Seat
     @Test
     public void getAllSeatAsUser() {
         User user = createUser();
@@ -245,6 +246,26 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
     }
 
     @Test
+    public void getSeatAdminViewAsAdmin() {
+        User admin = createAdmin();
+        Ticket ticket = createTicketForUser(admin);
+        setTicketOnA1(ticket);
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(admin)).
+            param("admin", true).
+        when().
+            get(SEAT_ENDPOINT + "/A/1").
+        then().
+            statusCode(HttpStatus.SC_OK).
+            body("ticket.owner", hasKey("email")).
+            body("ticket.owner.profile", hasKey("displayName")).
+            body("ticket.owner", hasKey("authorities"));
+        //@formatter:on
+    }
+
+    @Test
     public void getCurrentSeatAsUser() {
         User user = createUser();
         Ticket ticket = createTicketForUser(user);
@@ -293,9 +314,8 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
             body("ticket.owner.profile", not(hasKey("firstName")));
         //@formatter:on
     }
-    //endregion
-
-    //region Test Add Seat
+    //endregion Get Seat
+    //region Add Seat
     @Test
     public void addSeatGroupAsAnon() {
         Map<String, String> seatGroupDTO = new HashMap<>();
@@ -354,8 +374,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         assertTrue(seatGroup.size() == 5);
     }
     //endregion
-
-    //region Test Reserve Seat
+    //region Reserve Seat
     @Test
     public void reserveSeatAsAnon() {
         User user = createUser();
@@ -553,7 +572,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         //@formatter:on
     }
     //endregion
-
+    //region Clear seat
     @Test
     public void clearSeatAsAnon() {
         Ticket ticket = createTicketForUser(createUser());
@@ -589,10 +608,11 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         User user = createUser();
         Ticket ticket = createTicketForUser(user);
         setTicketOnA1(ticket);
+        User admin = createAdmin();
 
         //@formatter:off
         given().
-            header(getXAuthTokenHeaderForUser(createAdmin())).
+            header(getXAuthTokenHeaderForUser(admin)).
         when().
             delete(SEAT_ENDPOINT + "/A/1").
         then().
@@ -603,7 +623,57 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         Assert.assertNull(seat.getTicket());
     }
 
-    //region Locks
+    @Test
+    public void reserveSeatAsAnonWithoutTicket() {
+        Ticket ticket = createTicketForUser(createUser());
+        setTicketOnA1(ticket);
+
+        //@formatter:off
+        given().
+        when().
+            post(SEAT_ENDPOINT + "/A/1").
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
+    }
+
+    @Test
+    public void reserveSeatAsUserWithoutTicket() {
+        User user = createUser();
+        Ticket ticket = createTicketForUser(user);
+        setTicketOnA1(ticket);
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+        when().
+            post(SEAT_ENDPOINT + "/A/1").
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
+    }
+
+    @Test
+    public void reserveSeatAsAdminWithoutTicket() {
+        User user = createUser();
+        Ticket ticket = createTicketForUser(user);
+        setTicketOnA1(ticket);
+        User admin = createAdmin();
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(admin)).
+        when().
+            post(SEAT_ENDPOINT + "/A/1").
+        then().
+            statusCode(HttpStatus.SC_OK);
+        //@formatter:on
+
+        Seat seat = seatService.getSeatBySeatGroupAndSeatNumber("A", 1);
+        Assert.assertNull(seat.getTicket());
+    }
+    //endregion Clear seat
+    //region Lock Seat
     @Test
     public void setAllSeatsLockFalse() {
         User admin = createAdmin();
@@ -725,5 +795,5 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
 
         assertTrue(seatService.getAllSeats().getSeatmap().get(group).get(2).isLocked());
     }
-    //endregion Locks
+    //endregion Lock Seat
 }
