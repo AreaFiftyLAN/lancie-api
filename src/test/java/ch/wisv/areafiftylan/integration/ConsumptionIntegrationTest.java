@@ -165,9 +165,8 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
         given().
             header(getXAuthTokenHeaderForUser(user)).
         when().
-            body(consumption.getId()).
             contentType(ContentType.JSON).
-            delete(CONSUMPTION_ENDPOINT).
+            delete(CONSUMPTION_ENDPOINT + "/" + consumption.getId()).
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
@@ -181,13 +180,12 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
         //@formatter:off
         given().
             header(getXAuthTokenHeaderForUser(user)).
-            body(consumption.getId()).
             contentType(ContentType.JSON).
         when().
-            delete(CONSUMPTION_ENDPOINT).
+            delete(CONSUMPTION_ENDPOINT + "/" + consumption.getId()).
         then().
             statusCode(HttpStatus.SC_OK).
-            body("message", equalTo("Successfully removed " + CONSUMPTION + " as a supported consumption."));
+            body("message", equalTo("Successfully removed the supported consumption with id: " + consumption.getId()));
         //@formatter:on
     }
 
@@ -198,10 +196,9 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
         //@formatter:off
         given().
             header(getXAuthTokenHeaderForUser(user)).
-            body(9999F).
             contentType(ContentType.JSON).
         when().
-            delete(CONSUMPTION_ENDPOINT).
+            delete(CONSUMPTION_ENDPOINT + "/" + 9999F).
         then().
             statusCode(HttpStatus.SC_NOT_FOUND).
             body("message", equalTo("Can't find a consumption with id: 9999"));

@@ -20,6 +20,7 @@ package ch.wisv.areafiftylan.extras.consumption.controller;
 import ch.wisv.areafiftylan.exception.AlreadyConsumedException;
 import ch.wisv.areafiftylan.exception.ConsumptionNotFoundException;
 import ch.wisv.areafiftylan.extras.consumption.model.Consumption;
+import ch.wisv.areafiftylan.extras.consumption.model.ConsumptionMap;
 import ch.wisv.areafiftylan.extras.consumption.service.ConsumptionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -47,6 +48,11 @@ public class ConsumptionController {
         return consumptionService.getPossibleConsumptions();
     }
 
+    @GetMapping("/consumptionMaps")
+    public Collection<ConsumptionMap> getAllConsumptionMaps() {
+        return consumptionService.getConsumptionMaps();
+    }
+
     @PostMapping
     public ResponseEntity<?> addAvailableConsumption(@RequestBody String consumptionName) {
         consumptionService.addPossibleConsumption(consumptionName);
@@ -55,12 +61,11 @@ public class ConsumptionController {
                 "Successfully added " + consumptionName + " as a supported consumption.");
     }
 
-    @DeleteMapping
-    public ResponseEntity<?> removeAvailableConsumption(@RequestBody Long consumptionId) {
-        Consumption c = consumptionService.removePossibleConsumption(consumptionId);
-
+    @DeleteMapping("/{consumptionId}")
+    public ResponseEntity<?> removeAvailableConsumption(@PathVariable Long consumptionId) {
+        consumptionService.removePossibleConsumption(consumptionId);
         return createResponseEntity(HttpStatus.OK,
-                "Successfully removed " + c.getName() + " as a supported consumption.");
+                "Successfully removed the supported consumption with id: " + consumptionId);
     }
 
     @GetMapping("/{ticketId}")

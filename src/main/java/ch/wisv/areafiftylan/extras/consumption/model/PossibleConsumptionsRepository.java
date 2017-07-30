@@ -23,7 +23,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface PossibleConsumptionsRepository extends JpaRepository<Consumption, String> {
+public interface PossibleConsumptionsRepository extends JpaRepository<Consumption, Long> {
     Optional<Consumption> findByName(String name);
 
     Optional<Consumption> findById(Long consumptionId);

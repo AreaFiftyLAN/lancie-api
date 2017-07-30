@@ -35,7 +35,9 @@ public interface ConsumptionService {
 
     Collection<Consumption> getPossibleConsumptions();
 
-    Consumption removePossibleConsumption(Long consumptionId);
+    Collection<ConsumptionMap> getConsumptionMaps();
+
+    void removePossibleConsumption(Long consumptionId);
 
     Consumption addPossibleConsumption(String consumptionName);
 }
