@@ -109,7 +109,9 @@ public class ApplicationTest {
             ticketTypeRepository.save(ticketType);
 
             for (int i = 1; i <= 5; i++) {
-                seatRepository.save(new Seat("A", i));
+                Seat seat = new Seat("A", i);
+                seat.setLocked(false);
+                seatRepository.save(seat);
             }
         }
     }

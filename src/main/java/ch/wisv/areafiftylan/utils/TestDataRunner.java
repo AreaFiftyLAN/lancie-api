@@ -135,8 +135,6 @@ public class TestDataRunner implements CommandLineRunner {
         rfidLinkRepository.saveAndFlush(rfidLink2);
         RFIDLink rfidLink3 = new RFIDLink("0000000003", ticket3);
         rfidLinkRepository.saveAndFlush(rfidLink3);
-        RFIDLink rfidLink4 = new RFIDLink("0000000004", null);
-        rfidLinkRepository.saveAndFlush(rfidLink4);
 
         Consumption consumption1 = new Consumption("Bier");
         consumption1 = consumptionsRepository.saveAndFlush(consumption1);
@@ -159,6 +157,7 @@ public class TestDataRunner implements CommandLineRunner {
             seatGroup.setSeatGroupName(String.valueOf(s));
             seatService.addSeats(seatGroup);
         }
-        seatService.reserveSeatForTicket("A", 2, ticket.getId());
+        seatService.setAllSeatsLock(false);
+        seatService.reserveSeat("A", 2, ticket.getId(), false);
     }
 }

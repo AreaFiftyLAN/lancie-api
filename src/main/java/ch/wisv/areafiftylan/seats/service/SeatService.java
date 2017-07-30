@@ -25,21 +25,25 @@ import java.util.List;
 
 public interface SeatService {
 
-    List<Seat> getSeatsByEmail(String email);
-
     SeatmapResponse getAllSeats();
 
-    SeatmapResponse getSeatGroupByName(String groupname);
-
-    boolean reserveSeatForTicket(String groupname, int seatnumber, Long ticketId);
-
-    void reserveSeatForAdmin(String groupname, int seatnumber, Long ticketId);
-
-    Seat getSeatBySeatGroupAndSeatNumber(String groupName, int seatNumber);
-
-    void addSeats(SeatGroupDTO seatGroupDTO);
+    List<Seat> getSeatsByEmail(String email);
 
     List<Seat> getSeatsByTeamName(String teamName);
 
+    SeatmapResponse getSeatGroupByName(String groupName);
+
+    Seat getSeatBySeatGroupAndSeatNumber(String groupName, int seatNumber);
+
+    boolean reserveSeat(String groupName, int seatNumber, Long ticketId, boolean allowSeatOverride);
+
     void clearSeat(String groupName, int seatNumber);
+
+    void addSeats(SeatGroupDTO seatGroupDTO);
+
+    void setSeatLocked(String groupName, int seatNumber, boolean locked);
+
+    void setSeatGroupLocked(String groupName, boolean locked);
+
+    void setAllSeatsLock(boolean locked);
 }

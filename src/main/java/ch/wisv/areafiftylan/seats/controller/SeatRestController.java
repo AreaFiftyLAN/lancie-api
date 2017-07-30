@@ -21,9 +21,7 @@ import ch.wisv.areafiftylan.seats.model.SeatGroupDTO;
 import ch.wisv.areafiftylan.seats.service.SeatService;
 import ch.wisv.areafiftylan.users.model.Role;
 import ch.wisv.areafiftylan.users.model.User;
-import ch.wisv.areafiftylan.users.service.UserService;
 import ch.wisv.areafiftylan.utils.view.View;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJacksonValue;
@@ -39,12 +37,9 @@ import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEnt
 public class SeatRestController {
 
     private final SeatService seatService;
-    private final UserService userService;
 
-    @Autowired
-    public SeatRestController(SeatService seatService, UserService userService) {
+    public SeatRestController(SeatService seatService) {
         this.seatService = seatService;
-        this.userService = userService;
     }
 
     /**
@@ -114,15 +109,10 @@ public class SeatRestController {
     @PostMapping("/{group}/{number}/{ticketId}")
     ResponseEntity<?> reserveSingleSeat(@PathVariable String group, @PathVariable Integer number,
                                         @PathVariable Long ticketId, @AuthenticationPrincipal User user) {
-        if (user.getAuthorities().contains(Role.ROLE_ADMIN)) {
-            seatService.reserveSeatForAdmin(group, number, ticketId);
+        if (seatService.reserveSeat(group, number, ticketId, user.getAuthorities().contains(Role.ROLE_ADMIN))) {
             return createResponseEntity(HttpStatus.OK, "Seat successfully reserved");
         } else {
-            if (seatService.reserveSeatForTicket(group, number, ticketId)) {
-                return createResponseEntity(HttpStatus.OK, "Seat successfully reserved");
-            } else {
-                return createResponseEntity(HttpStatus.CONFLICT, "Seat is already taken");
-            }
+            return createResponseEntity(HttpStatus.CONFLICT, "Seat is already taken");
         }
     }
 
@@ -137,7 +127,7 @@ public class SeatRestController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{group}/{number}")
     ResponseEntity<?> reserveSingleSeat(@PathVariable String group, @PathVariable Integer number) {
-        seatService.reserveSeatForAdmin(group, number, null);
+        seatService.clearSeat(group, number);
         return createResponseEntity(HttpStatus.OK, "Seat successfully reserved");
     }
 
@@ -152,7 +142,6 @@ public class SeatRestController {
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{group}/{number}")
     ResponseEntity<?> clearSeat(@PathVariable String group, @PathVariable int number) {
-
         seatService.clearSeat(group, number);
         return createResponseEntity(HttpStatus.OK, "Seat successfully cleared");
     }
@@ -172,4 +161,26 @@ public class SeatRestController {
         return createResponseEntity(HttpStatus.OK,
                 seatGroupDTO.getNumberOfSeats() + " added in group " + seatGroupDTO.getSeatGroupName());
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/lock")
+    ResponseEntity<?> setAllSeatsLock(@RequestBody Boolean lock) {
+        seatService.setAllSeatsLock(lock);
+        return createResponseEntity(HttpStatus.OK, lock ? "All seats successfully locked." : "All seats successfully unlocked.");
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/lock/{group}")
+    ResponseEntity<?> setSeatGroupLock(@PathVariable String group, @RequestBody Boolean lock) {
+        seatService.setSeatGroupLocked(group, lock);
+        return createResponseEntity(HttpStatus.OK, lock ? "SeatGroup successfully locked." : "SeatGroup successfully unlocked.");
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/lock/{group}/{number}")
+    ResponseEntity<?> setSeatLock(@PathVariable String group, @PathVariable int number, @RequestBody Boolean lock) {
+        seatService.setSeatLocked(group, number, lock);
+        return createResponseEntity(HttpStatus.OK, lock ? "Seat successfully locked." : "Seat successfully unlocked.");
+    }
+
 }

@@ -52,90 +52,16 @@ public class SeatServiceImpl implements SeatService {
     }
 
     @Override
+    public SeatmapResponse getAllSeats() {
+        return new SeatmapResponse(seatRepository.findAll().
+                stream().
+                collect(Collectors.groupingBy(Seat::getSeatGroup)));
+    }
+
+    @Override
     public List<Seat> getSeatsByEmail(String email) {
         return seatRepository.findByTicketOwnerEmailIgnoreCase(email);
 
-    }
-
-    @Override
-    public SeatmapResponse getAllSeats() {
-        List<Seat> all = seatRepository.findAll();
-
-        Map<String, List<Seat>> seatMapGroups = all.stream().collect(Collectors.groupingBy(Seat::getSeatGroup));
-
-        return new SeatmapResponse(seatMapGroups);
-    }
-
-    @Override
-    public SeatmapResponse getSeatGroupByName(String groupname) {
-        List<Seat> seatGroup = seatRepository.findBySeatGroup(groupname);
-
-        Map<String, List<Seat>> seatMapResponse = new HashMap<>();
-        seatMapResponse.put(groupname, seatGroup);
-
-        return new SeatmapResponse(seatMapResponse);
-    }
-
-    @Override
-    public boolean reserveSeatForTicket(String seatGroup, int seatNumber, Long ticketId) {
-        Seat seat = getSeatBySeatGroupAndSeatNumber(seatGroup, seatNumber);
-        if (seat.isTaken()) {
-            return false;
-        } else {
-            reserveSeat(seat, ticketId);
-            return true;
-        }
-    }
-
-    @Override
-    public void reserveSeatForAdmin(String seatGroup, int seatNumber, Long ticketId) {
-        Seat seat = getSeatBySeatGroupAndSeatNumber(seatGroup, seatNumber);
-        reserveSeat(seat, ticketId);
-    }
-
-    /**
-     * Reserves a Seat, and sets the Ticket to ticketId's Ticket.
-     * Also frees any previous Seat belonging to the Ticket.
-     * This method ignores any current user assigned to the seat, that logic must be done before calling this class.
-     * If any user was assigned this seat before, send an email to let them know their seat was overridden.
-     * This method is synchronized to prevent the extremely unlikely event of simultaneous requests.
-     *
-     * @param seat The Seat to reserve.
-     * @param ticketId The Id of the Ticket to be set to the Seat.
-     */
-    @Synchronized
-    private void reserveSeat(Seat seat, Long ticketId) {
-        if (ticketId != null) {
-            seatRepository.findByTicketId(ticketId).ifPresent(previousSeat -> previousSeat.setTicket(null));
-            Ticket ticket = ticketService.getTicketById(ticketId);
-            if (!ticket.isValid()) {
-                throw new InvalidTicketException("Unable to reserve seat for an invalid Ticket");
-            }
-            if (seat.getTicket() != null && seat.getTicket().getOwner() != null) {
-                mailService.sendSeatOverrideMail(seat.getTicket().getOwner());
-            }
-            seat.setTicket(ticket);
-        } else {
-            seat.setTicket(null);
-        }
-        seat.setTaken(true);
-        seatRepository.saveAndFlush(seat);
-    }
-
-    @Override
-    public Seat getSeatBySeatGroupAndSeatNumber(String groupName, int seatNumber) {
-        return seatRepository.findBySeatGroupAndSeatNumber(groupName, seatNumber)
-                .orElseThrow(SeatNotFoundException::new);
-    }
-
-    @Override
-    public void addSeats(SeatGroupDTO seatGroupDTO) {
-        List<Seat> seatList = new ArrayList<>(seatGroupDTO.getNumberOfSeats());
-
-        for (int i = 1; i <= seatGroupDTO.getNumberOfSeats(); i++) {
-            seatList.add(new Seat(seatGroupDTO.getSeatGroupName(), i));
-        }
-        seatRepository.save(seatList);
     }
 
     @Override
@@ -150,9 +76,79 @@ public class SeatServiceImpl implements SeatService {
     }
 
     @Override
-    public void clearSeat(String groupName, int seatNumber) {
+    public SeatmapResponse getSeatGroupByName(String groupName) {
+        List<Seat> seatGroup = seatRepository.findBySeatGroup(groupName);
+
+        Map<String, List<Seat>> seatMapResponse = new HashMap<>();
+        seatMapResponse.put(groupName, seatGroup);
+
+        return new SeatmapResponse(seatMapResponse);
+    }
+
+    @Override
+    public Seat getSeatBySeatGroupAndSeatNumber(String groupName, int seatNumber) {
+        return seatRepository.findBySeatGroupAndSeatNumber(groupName, seatNumber)
+                .orElseThrow(SeatNotFoundException::new);
+    }
+
+    @Override
+    @Synchronized
+    public boolean reserveSeat(String groupName, int seatNumber, Long ticketId, boolean allowSeatOverride) {
         Seat seat = getSeatBySeatGroupAndSeatNumber(groupName, seatNumber);
-        seat.setTicket(null);
+        Ticket ticket = null;
+
+        if (!allowSeatOverride && (seat.isTaken() || seat.isLocked() || ticketId == null)) {
+            return false;
+        }
+
+        if (seat.isTaken() && seat.getTicket().getOwner() != null) {
+            mailService.sendSeatOverrideMail(seat.getTicket().getOwner());
+        }
+        if (ticketId != null) {
+            seatRepository.findByTicketId(ticketId).ifPresent(previousSeat -> previousSeat.setTicket(null));
+            ticket = ticketService.getTicketById(ticketId);
+            if (!ticket.isValid()) {
+                throw new InvalidTicketException("Unable to reserve seat for an invalid Ticket");
+            }
+        }
+        seat.setTicket(ticket);
+        seatRepository.saveAndFlush(seat);
+        return true;
+    }
+
+    @Override
+    public void clearSeat(String groupName, int seatNumber) {
+        reserveSeat(groupName, seatNumber, null, true);
+    }
+
+    @Override
+    public void addSeats(SeatGroupDTO seatGroupDTO) {
+        List<Seat> seatList = new ArrayList<>(seatGroupDTO.getNumberOfSeats());
+
+        for (int i = 1; i <= seatGroupDTO.getNumberOfSeats(); i++) {
+            seatList.add(new Seat(seatGroupDTO.getSeatGroupName(), i));
+        }
+        seatRepository.save(seatList);
+    }
+
+    @Override
+    public void setSeatLocked(String groupName, int seatNumber, boolean locked) {
+        Seat seat = getSeatBySeatGroupAndSeatNumber(groupName, seatNumber);
+        seat.setLocked(locked);
         seatRepository.save(seat);
+    }
+
+    @Override
+    public void setSeatGroupLocked(String groupName, boolean locked) {
+        List<Seat> seatGroup = seatRepository.findBySeatGroup(groupName);
+        seatGroup.forEach(seat -> seat.setLocked(locked));
+        seatRepository.save(seatGroup);
+    }
+
+    @Override
+    public void setAllSeatsLock(boolean locked) {
+        List<Seat> seats = seatRepository.findAll();
+        seats.forEach(seat -> seat.setLocked(locked));
+        seatRepository.save(seats);
     }
 }
