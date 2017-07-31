@@ -25,10 +25,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.access.expression.SecurityExpressionHandler;
-import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
-import org.springframework.security.access.vote.RoleHierarchyVoter;
-import org.springframework.security.access.vote.RoleVoter;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -116,11 +113,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
         roleHierarchy.setHierarchy(HIERARCHY);
         return roleHierarchy;
-    }
-
-    @Bean
-    protected RoleVoter roleVoter(RoleHierarchy roleHierarchy) {
-        return new RoleHierarchyVoter(roleHierarchy);
     }
 
     private SecurityExpressionHandler<FilterInvocation> webExpressionHandler() {
