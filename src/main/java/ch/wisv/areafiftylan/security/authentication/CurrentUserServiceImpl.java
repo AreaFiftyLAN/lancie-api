@@ -23,6 +23,7 @@ import ch.wisv.areafiftylan.products.model.order.Order;
 import ch.wisv.areafiftylan.products.service.OrderService;
 import ch.wisv.areafiftylan.products.service.TicketService;
 import ch.wisv.areafiftylan.products.service.repository.TicketRepository;
+import ch.wisv.areafiftylan.security.SecurityConfiguration;
 import ch.wisv.areafiftylan.security.token.TeamInviteToken;
 import ch.wisv.areafiftylan.security.token.TicketTransferToken;
 import ch.wisv.areafiftylan.security.token.repository.TeamInviteTokenRepository;
@@ -32,6 +33,7 @@ import ch.wisv.areafiftylan.teams.service.TeamService;
 import ch.wisv.areafiftylan.users.model.Role;
 import ch.wisv.areafiftylan.users.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -46,6 +48,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     private final TicketService ticketService;
     private final TeamInviteTokenRepository teamInviteTokenRepository;
     private final TicketTransferTokenRepository tttRepository;
+    private final RoleHierarchyImpl roleHierarchy;
 
     @Autowired
     public CurrentUserServiceImpl(TeamService teamService, OrderService orderService, TicketRepository ticketRepository,
@@ -57,6 +60,24 @@ public class CurrentUserServiceImpl implements CurrentUserService {
         this.ticketService = ticketService;
         this.teamInviteTokenRepository = teamInviteTokenRepository;
         this.tttRepository = tttRepository;
+        this.roleHierarchy = new RoleHierarchyImpl();
+        roleHierarchy.setHierarchy(SecurityConfiguration.HIERARCHY);
+    }
+
+    private boolean hasRole(User user, Role role) {
+        return roleHierarchy.getReachableGrantedAuthorities(user.getAuthorities()).contains(role);
+    }
+
+    private boolean isAdmin(User user) {
+        return hasRole(user, Role.ROLE_ADMIN);
+    }
+
+    private boolean isOperator(User user) {
+        return hasRole(user, Role.ROLE_OPERATOR);
+    }
+
+    private boolean isCommittee(User user) {
+        return hasRole(user, Role.ROLE_COMMITTEE);
     }
 
     @Override
