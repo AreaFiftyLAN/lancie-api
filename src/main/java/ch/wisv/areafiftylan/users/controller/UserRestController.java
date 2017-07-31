@@ -34,7 +34,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolationException;
 import java.util.Collection;
 import java.util.List;
@@ -65,8 +64,8 @@ public class UserRestController {
      * @return The generated object, in JSON format.
      */
     @PostMapping
-    public ResponseEntity<?> add(HttpServletRequest request, @Validated @RequestBody UserDTO input) {
-        User save = userService.create(input, request);
+    public ResponseEntity<?> add(@Validated @RequestBody UserDTO input) {
+        User save = userService.create(input);
 
         // Create headers to set the location of the created User object.
         HttpHeaders httpHeaders = new HttpHeaders();
