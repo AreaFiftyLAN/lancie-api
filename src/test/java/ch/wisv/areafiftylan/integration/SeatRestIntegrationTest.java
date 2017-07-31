@@ -21,6 +21,7 @@ package ch.wisv.areafiftylan.integration;
 import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.seats.model.Seat;
+import ch.wisv.areafiftylan.seats.model.SeatGroupDTO;
 import ch.wisv.areafiftylan.seats.service.SeatRepository;
 import ch.wisv.areafiftylan.seats.service.SeatService;
 import ch.wisv.areafiftylan.teams.model.Team;
@@ -33,9 +34,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
@@ -47,6 +46,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
     
     private final String SEAT_ENDPOINT = "/seats";
     private final String LOCK_ENDPOINT = SEAT_ENDPOINT + "/lock/";
+    private final String TEMP_SEATGROUP = "tempSeatGroup";
 
     @Autowired
     private SeatRepository seatRepository;
@@ -71,6 +71,10 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         seatService.clearSeat("A", 4);
         seatService.clearSeat("A", 5);
         seatService.setAllSeatsLock(false);
+        SeatGroupDTO seatGroupDTO = new SeatGroupDTO();
+        seatGroupDTO.setSeatGroupName(TEMP_SEATGROUP);
+        seatGroupDTO.setNumberOfSeats(999);
+        seatService.removeSeats(seatGroupDTO);
     }
 
     //region Get Seat
@@ -315,12 +319,12 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         //@formatter:on
     }
     //endregion Get Seat
-    //region Add Seat
+    //region Add/Remove SeatGroups
     @Test
     public void addSeatGroupAsAnon() {
-        Map<String, String> seatGroupDTO = new HashMap<>();
-        seatGroupDTO.put("seatGroupName", "testGroup");
-        seatGroupDTO.put("numberOfSeats", "5");
+        SeatGroupDTO seatGroupDTO = new SeatGroupDTO();
+        seatGroupDTO.setSeatGroupName(TEMP_SEATGROUP);
+        seatGroupDTO.setNumberOfSeats(5);
 
         //@formatter:off
         given().
@@ -331,14 +335,17 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
+
+        List<Seat> seatGroup = seatRepository.findBySeatGroup(TEMP_SEATGROUP);
+        assertTrue(seatGroup.isEmpty());
     }
 
     @Test
     public void addSeatGroupAsUser() {
         User user = createUser();
-        Map<String, String> seatGroupDTO = new HashMap<>();
-        seatGroupDTO.put("seatGroupName", "testGroup");
-        seatGroupDTO.put("numberOfSeats", "5");
+        SeatGroupDTO seatGroupDTO = new SeatGroupDTO();
+        seatGroupDTO.setSeatGroupName(TEMP_SEATGROUP);
+        seatGroupDTO.setNumberOfSeats(5);
 
         //@formatter:off
         given().
@@ -350,14 +357,17 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
+
+        List<Seat> seatGroup = seatRepository.findBySeatGroup(TEMP_SEATGROUP);
+        assertTrue(seatGroup.isEmpty());
     }
 
     @Test
     public void addSeatGroupAsAdmin() {
         User admin = createAdmin();
-        Map<String, String> seatGroupDTO = new HashMap<>();
-        seatGroupDTO.put("seatGroupName", "testGroup");
-        seatGroupDTO.put("numberOfSeats", "5");
+        SeatGroupDTO seatGroupDTO = new SeatGroupDTO();
+        seatGroupDTO.setSeatGroupName(TEMP_SEATGROUP);
+        seatGroupDTO.setNumberOfSeats(5);
 
         //@formatter:off
         given().
@@ -370,10 +380,102 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
 
-        List<Seat> seatGroup = seatRepository.findBySeatGroup(seatGroupDTO.get("seatGroupName"));
+        List<Seat> seatGroup = seatRepository.findBySeatGroup(TEMP_SEATGROUP);
         assertTrue(seatGroup.size() == 5);
     }
-    //endregion
+
+    @Test
+    public void removeSeatGroupAsAnon() {
+        SeatGroupDTO seatGroupDTO = new SeatGroupDTO();
+        seatGroupDTO.setSeatGroupName(TEMP_SEATGROUP);
+        seatGroupDTO.setNumberOfSeats(5);
+        seatService.addSeats(seatGroupDTO);
+
+
+        //@formatter:off
+        given().
+            body(seatGroupDTO).
+            contentType(ContentType.JSON).
+        when().
+            delete(SEAT_ENDPOINT).
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
+
+        List<Seat> seatGroup = seatRepository.findBySeatGroup(TEMP_SEATGROUP);
+        assertTrue(seatGroup.size() == 5);
+    }
+
+    @Test
+    public void removeSeatGroupAsUser() {
+        User user = createUser();
+        SeatGroupDTO seatGroupDTO = new SeatGroupDTO();
+        seatGroupDTO.setSeatGroupName(TEMP_SEATGROUP);
+        seatGroupDTO.setNumberOfSeats(5);
+        seatService.addSeats(seatGroupDTO);
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+            body(seatGroupDTO).
+            contentType(ContentType.JSON).
+        when().
+            delete(SEAT_ENDPOINT).
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
+
+        List<Seat> seatGroup = seatRepository.findBySeatGroup(TEMP_SEATGROUP);
+        assertTrue(seatGroup.size() == 5);
+    }
+
+    @Test
+    public void removeSeatGroupAsAdminPartially() {
+        User admin = createAdmin();
+        SeatGroupDTO seatGroupDTO = new SeatGroupDTO();
+        seatGroupDTO.setSeatGroupName(TEMP_SEATGROUP);
+        seatGroupDTO.setNumberOfSeats(5);
+        seatService.addSeats(seatGroupDTO);
+        seatGroupDTO.setNumberOfSeats(3);
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(admin)).
+        when().
+            body(seatGroupDTO).
+            contentType(ContentType.JSON).
+            delete(SEAT_ENDPOINT).
+        then().
+            statusCode(HttpStatus.SC_OK);
+        //@formatter:on
+
+        List<Seat> seatGroup = seatRepository.findBySeatGroup(TEMP_SEATGROUP);
+        System.out.println(seatGroup.size());
+        assertTrue(seatGroup.size() == 2);
+    }
+
+    @Test
+    public void removeSeatGroupAsAdminFully() {
+        User admin = createAdmin();
+        SeatGroupDTO seatGroupDTO = new SeatGroupDTO();
+        seatGroupDTO.setSeatGroupName("testGroup");
+        seatGroupDTO.setNumberOfSeats(5);
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(admin)).
+        when().
+            body(seatGroupDTO).
+            contentType(ContentType.JSON).
+            delete(SEAT_ENDPOINT).
+        then().
+            statusCode(HttpStatus.SC_OK);
+        //@formatter:on
+
+        List<Seat> seatGroup = seatRepository.findBySeatGroup(TEMP_SEATGROUP);
+        assertTrue(seatGroup.isEmpty());
+    }
+    //endregion Add/Remove SeatGroups
     //region Reserve Seat
     @Test
     public void reserveSeatAsAnon() {
@@ -571,8 +673,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
     }
-    //endregion
-    //region Clear seat
+
     @Test
     public void clearSeatAsAnon() {
         Ticket ticket = createTicketForUser(createUser());
@@ -672,7 +773,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         Seat seat = seatService.getSeatBySeatGroupAndSeatNumber("A", 1);
         Assert.assertNull(seat.getTicket());
     }
-    //endregion Clear seat
+    //endregion Reserve seat
     //region Lock Seat
     @Test
     public void setAllSeatsLockFalse() {
