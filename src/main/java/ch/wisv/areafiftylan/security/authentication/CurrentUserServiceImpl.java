@@ -84,7 +84,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     public boolean canAccessUser(Object principal, Long userId) {
         if (principal instanceof UserDetails) {
             User user = (User) principal;
-            return user.getId().equals(userId) || user.getAuthorities().contains(Role.ROLE_ADMIN);
+            return user.getId().equals(userId) || isAdmin(user);
         } else {
             return false;
         }
@@ -96,8 +96,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
             User user = (User) principal;
             Team team = teamService.getTeamById(teamId);
             // Check for each of the teammembers if the email matches the requester
-            return team.getMembers().stream().anyMatch(u -> u.getEmail().equals(user.getEmail())) ||
-                    user.getAuthorities().contains(Role.ROLE_ADMIN);
+            return team.getMembers().stream().anyMatch(u -> u.getEmail().equals(user.getEmail())) || isAdmin(user);
         } else {
             return false;
         }
@@ -108,8 +107,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
         if (principal instanceof UserDetails) {
             User user = (User) principal;
             Team team = teamService.getTeamById(teamId);
-            return team.getCaptain().getEmail().equals(user.getEmail()) ||
-                    user.getAuthorities().contains(Role.ROLE_ADMIN);
+            return team.getCaptain().getEmail().equals(user.getEmail()) || isAdmin(user);
         } else {
             return false;
         }
@@ -129,7 +127,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
             // You can remove people from a Team if you're Admin, the Team Captain, or if you want to remove yourself
             // from the Team
             return team.getCaptain().getEmail().equals(currentUser.getEmail()) ||
-                    currentUser.getAuthorities().contains(Role.ROLE_ADMIN) ||
+                    isAdmin(currentUser) ||
                     currentUser.getEmail().equals(email);
         } else {
             return false;
@@ -149,7 +147,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
             User user = (User) principal;
             // Return true if the order is owned by the user, or the user is an admin
             return order.getUser().getEmail().equals(user.getEmail()) ||
-                    user.getAuthorities().contains(Role.ROLE_ADMIN);
+                    isAdmin(user);
         } else {
             return false;
         }
@@ -171,7 +169,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
             User user = (User) principal;
 
             Ticket ticket = ticketRepository.findOne(ticketId);
-            if (ticket.getOwner().equals(user) || user.getAuthorities().contains(Role.ROLE_ADMIN)) {
+            if (ticket.getOwner().equals(user) || isAdmin(user)) {
                 return true;
             }
 
@@ -188,7 +186,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     public boolean hasAnyTicket(Object principal) {
         if (principal instanceof UserDetails) {
             User user = (User) principal;
-            return hasAnyTicket(user.getEmail()) || user.getAuthorities().contains(Role.ROLE_ADMIN);
+            return hasAnyTicket(user.getEmail()) || isAdmin(user));
         } else {
             return false;
         }
@@ -208,7 +206,8 @@ public class CurrentUserServiceImpl implements CurrentUserService {
                     teamInviteTokenRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
 
             // Tokens can be revoked by the target user, an Admin or the Captain
-            return teamInviteToken.getUser().equals(user) || user.getAuthorities().contains(Role.ROLE_ADMIN) ||
+            return  teamInviteToken.getUser().equals(user) ||
+                    isAdmin(user) ||
                     teamInviteToken.getTeam().getCaptain().equals(user);
         } else {
             return false;
