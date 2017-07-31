@@ -162,6 +162,20 @@ public class SeatRestController {
                 seatGroupDTO.getNumberOfSeats() + " added in group " + seatGroupDTO.getSeatGroupName());
     }
 
+    /**
+     * Remove Seats from a SeatGroup, or remove the SeatGroup altogether.
+     * @param seatGroupDTO DTO with the name of the group, and the amount of seats to remove from that group.
+     *                     Removing all seats from a group removes that group.
+     * @return Status message indicating the result
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping
+    ResponseEntity<?> removeSeatGroup(@RequestBody @Validated SeatGroupDTO seatGroupDTO) {
+        seatService.removeSeats(seatGroupDTO);
+        return createResponseEntity(HttpStatus.OK,
+                seatGroupDTO.getNumberOfSeats() + " removed in group " + seatGroupDTO.getSeatGroupName());
+    }
+
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/lock")
     ResponseEntity<?> setAllSeatsLock(@RequestBody Boolean lock) {

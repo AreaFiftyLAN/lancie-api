@@ -132,6 +132,21 @@ public class SeatServiceImpl implements SeatService {
     }
 
     @Override
+    public void removeSeats(SeatGroupDTO seatGroupDTO) {
+        String seatGroupName = seatGroupDTO.getSeatGroupName();
+        int seatsInSeatGroup = getSeatGroupByName(seatGroupName).getSeatmap().get(seatGroupName).size();
+        int seatsToRemove = seatGroupDTO.getNumberOfSeats();
+        int lowestSeatToRemove = Math.max(1, seatsInSeatGroup - seatsToRemove + 1);
+
+        // We want to start removing seats with the highest numbers first
+        for (int i = seatsInSeatGroup; i >= lowestSeatToRemove; i--) {
+            clearSeat(seatGroupName, i);
+            Seat seat = getSeatBySeatGroupAndSeatNumber(seatGroupName, i);
+            seatRepository.delete(seat);
+        }
+    }
+
+    @Override
     public void setSeatLocked(String groupName, int seatNumber, boolean locked) {
         Seat seat = getSeatBySeatGroupAndSeatNumber(groupName, seatNumber);
         seat.setLocked(locked);
