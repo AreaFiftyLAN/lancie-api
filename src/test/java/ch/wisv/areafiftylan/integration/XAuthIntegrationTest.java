@@ -89,20 +89,25 @@ public abstract class XAuthIntegrationTest {
     }
 
     protected User createUser() {
-        return createUser(19, false);
+        return createUser(19, Role.ROLE_USER);
+    }
+
+    protected User createOperator() {
+        return createUser(19, Role.ROLE_OPERATOR);
+    }
+
+    protected User createCommitteeMember() {
+        return createUser(19, Role.ROLE_COMMITTEE);
     }
 
     protected User createAdmin() {
-        return createUser(19, true);
+        return createUser(19, Role.ROLE_ADMIN);
     }
 
-    protected User createUser(int age, boolean admin) {
+    protected User createUser(int age, Role role) {
         long count = userRepository.count();
         User user = new User(count + "@mail.com", new BCryptPasswordEncoder().encode(cleartextPassword));
-        user.addRole(Role.ROLE_USER);
-        if (admin) {
-            user.addRole(Role.ROLE_ADMIN);
-        }
+        user.addRole(role);
         user.getProfile()
                 .setAllFields("User", String.valueOf(count), "DisplayName" + count, LocalDate.now().minusYears(age),
                         Gender.MALE, "Mekelweg" + count, "2826CD", "Delft", "0906-0666", null);

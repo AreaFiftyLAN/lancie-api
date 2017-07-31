@@ -18,6 +18,7 @@
 package ch.wisv.areafiftylan.integration;
 
 import ch.wisv.areafiftylan.security.token.repository.VerificationTokenRepository;
+import ch.wisv.areafiftylan.users.model.Role;
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.utils.TaskScheduler;
 import io.restassured.http.ContentType;
@@ -624,7 +625,7 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
     @Test
     public void testAlcoholCheckAsAdminUnderage() {
         User admin = createAdmin();
-        User user = createUser(17, false);
+        User user = createUser(17, Role.ROLE_USER);
 
         //@formatter:off
         given().
@@ -640,7 +641,7 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
     @Test
     public void testAlcoholCheckAsAdminOverage() {
         User admin = createAdmin();
-        User user = createUser(19, false);
+        User user = createUser(19, Role.ROLE_USER);
 
         //@formatter:off
         given().
