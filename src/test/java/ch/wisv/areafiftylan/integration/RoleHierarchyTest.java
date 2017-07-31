@@ -9,15 +9,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ch.wisv.areafiftylan.security.SecurityConfiguration.HIERARCHY;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class RoleHierarchyTest extends XAuthIntegrationTest {
-
-    private static final String HIERARCHY =
-            "ROLE_ADMIN > ROLE_COMMITTEE and " +
-            "ROLE_COMMITTEE > ROLE_OPERATOR and " +
-            "ROLE_OPERATOR > ROLE_USER";
 
     @Test
     public void SecurityRoleUserTest() {

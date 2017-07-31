@@ -43,9 +43,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 @Order(ManagementServerProperties.ACCESS_OVERRIDE_ORDER)
-class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-    private static final String hierarchy = "ROLE_ADMIN > ROLE_COMMITTEE and " +
+    public static final String HIERARCHY = "ROLE_ADMIN > ROLE_COMMITTEE and " +
                                             "ROLE_COMMITTEE > ROLE_OPERATOR and " +
                                             "ROLE_OPERATOR > ROLE_USER";
 
@@ -114,7 +114,7 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Bean
     public RoleHierarchyImpl roleHierarchy() {
         RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
-        roleHierarchy.setHierarchy(hierarchy);
+        roleHierarchy.setHierarchy(HIERARCHY);
         return roleHierarchy;
     }
 
