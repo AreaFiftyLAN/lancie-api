@@ -90,7 +90,7 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
-        http.authorizeRequests().expressionHandler(webExpressionHandler());
+        http.authorizeRequests().expressionHandler(webExpressionHandler()).anyRequest().permitAll();
 
         // We use custom Authentication Tokens, making csrf redundant
         http.csrf().disable();
