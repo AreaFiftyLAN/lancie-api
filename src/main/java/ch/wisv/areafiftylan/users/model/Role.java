@@ -20,7 +20,7 @@ package ch.wisv.areafiftylan.users.model;
 import org.springframework.security.core.GrantedAuthority;
 
 public enum Role implements GrantedAuthority {
-    ROLE_USER, ROLE_COMMITTEE, ROLE_ADMIN;
+    ROLE_USER, ROLE_OPERATOR,ROLE_COMMITTEE, ROLE_ADMIN;
 
     @Override
     public String getAuthority() {

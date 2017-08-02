@@ -21,8 +21,11 @@ import ch.wisv.areafiftylan.security.authentication.AuthenticationService;
 import ch.wisv.areafiftylan.security.token.repository.AuthenticationTokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.autoconfigure.ManagementServerProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.access.expression.SecurityExpressionHandler;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -30,12 +33,18 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.FilterInvocation;
+import org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 @Order(ManagementServerProperties.ACCESS_OVERRIDE_ORDER)
-class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+
+    public static final String HIERARCHY = "ROLE_ADMIN > ROLE_COMMITTEE and " +
+                                            "ROLE_COMMITTEE > ROLE_OPERATOR and " +
+                                            "ROLE_OPERATOR > ROLE_USER";
 
     private final UserDetailsService userDetailsService;
 
@@ -78,6 +87,8 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
+        http.authorizeRequests().expressionHandler(webExpressionHandler()).anyRequest().permitAll();
+
         // We use custom Authentication Tokens, making csrf redundant
         http.csrf().disable();
 
@@ -95,6 +106,19 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetailsService).passwordEncoder(new BCryptPasswordEncoder());
+    }
+
+    @Bean
+    public RoleHierarchyImpl roleHierarchy() {
+        RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
+        roleHierarchy.setHierarchy(HIERARCHY);
+        return roleHierarchy;
+    }
+
+    private SecurityExpressionHandler<FilterInvocation> webExpressionHandler() {
+        DefaultWebSecurityExpressionHandler handler = new DefaultWebSecurityExpressionHandler();
+        handler.setRoleHierarchy(roleHierarchy());
+        return handler;
     }
 }
 
