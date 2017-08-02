@@ -37,7 +37,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 import java.util.Optional;
 
@@ -95,21 +94,20 @@ public class AuthenticationController {
      * This method requests a passwordResetToken and sends it to the user. With this token, the user can reset his
      * password.
      *
-     * @param request The HttpServletRequest of the call
      * @param body    The body, should only contain an email parameter TODO: This can be done more elegantly
      *
      * @return A status message telling whether the action was successful
      */
     @PostMapping("/requestResetPassword")
     @ResponseBody
-    public ResponseEntity<?> requestResetPassword(HttpServletRequest request, @RequestBody Map<String, String> body) {
+    public ResponseEntity<?> requestResetPassword(@RequestBody Map<String, String> body) {
         String email = body.get("email");
 
         log.log(Level.getLevel("A5L"), "Requesting password reset on email {}.", email);
 
         try {
             User user = userService.getUserByEmail(email);
-            userService.requestResetPassword(user, request);
+            userService.requestResetPassword(user);
             log.log(Level.getLevel("A5L"), "Successfully requested password reset on email {}.", email);
         } catch (UsernameNotFoundException e) {
             log.warn("Password for {} can't be reset, User doesn't exist");

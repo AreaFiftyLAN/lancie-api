@@ -40,7 +40,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashSet;
@@ -89,7 +88,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public User create(UserDTO userDTO, HttpServletRequest request) throws DataIntegrityViolationException {
+    public User create(UserDTO userDTO) throws DataIntegrityViolationException {
         handleDuplicateUserFields(userDTO);
 
         // Hash the plain password coming from the DTO
@@ -105,7 +104,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         // Save the user so the verificationToken can be stored.
         user = userRepository.saveAndFlush(user);
 
-        generateAndSendToken(request, user, userDTO.getOrderId());
+        generateAndSendToken(user, userDTO.getOrderId());
 
         return user;
     }
@@ -117,7 +116,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         });
     }
 
-    private void generateAndSendToken(HttpServletRequest request, User user, Long orderId) {
+    private void generateAndSendToken(User user, Long orderId) {
         // Create a new Verificationcode with this UUID, and link it to the user
         VerificationToken verificationToken = new VerificationToken(user);
         verificationTokenRepository.saveAndFlush(verificationToken);
@@ -216,7 +215,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public void requestResetPassword(User user, HttpServletRequest request) {
+    public void requestResetPassword(User user) {
         // Use the generated ID to create a passwordToken and link it to the user
         PasswordResetToken passwordResetToken = new PasswordResetToken(user);
         passwordResetTokenRepository.saveAndFlush(passwordResetToken);

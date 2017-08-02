@@ -24,7 +24,6 @@ import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.users.model.UserDTO;
 import org.springframework.dao.DataIntegrityViolationException;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
 
 public interface UserService {
@@ -34,7 +33,7 @@ public interface UserService {
 
     Collection<User> getAllUsers();
 
-    User create(UserDTO userDTO, HttpServletRequest request) throws DataIntegrityViolationException;
+    User create(UserDTO userDTO) throws DataIntegrityViolationException;
 
     User replace(Long userId, UserDTO userDTO);
 
@@ -54,7 +53,7 @@ public interface UserService {
 
     void verify(Long userId);
 
-    void requestResetPassword(User user, HttpServletRequest request);
+    void requestResetPassword(User user);
 
     void resetPassword(Long userId, String password);
 
