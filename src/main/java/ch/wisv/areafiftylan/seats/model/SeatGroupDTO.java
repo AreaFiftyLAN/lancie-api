@@ -21,7 +21,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.validator.constraints.NotEmpty;
 
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Min;
 
 @Getter
 @Setter
@@ -30,8 +30,6 @@ public class SeatGroupDTO {
     @NotEmpty
     String seatGroupName = "";
 
-    @NotNull
+    @Min(value = 1, message = "Number of seats must be positive")
     Integer numberOfSeats;
-
-
 }

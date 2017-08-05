@@ -44,7 +44,8 @@ public class SeatServiceImpl implements SeatService {
     private final MailService mailService;
 
     @Autowired
-    public SeatServiceImpl(SeatRepository seatRepository, TeamService teamService, TicketService ticketService, MailService mailService) {
+    public SeatServiceImpl(SeatRepository seatRepository, TeamService teamService, TicketService ticketService,
+                           MailService mailService) {
         this.seatRepository = seatRepository;
         this.teamService = teamService;
         this.ticketService = ticketService;
@@ -78,6 +79,9 @@ public class SeatServiceImpl implements SeatService {
     @Override
     public SeatmapResponse getSeatGroupByName(String groupName) {
         List<Seat> seatGroup = seatRepository.findBySeatGroup(groupName);
+        if (seatGroup.size() == 0) {
+            throw new SeatNotFoundException("SeatGroup " + groupName + " not found!");
+        }
 
         Map<String, List<Seat>> seatMapResponse = new HashMap<>();
         seatMapResponse.put(groupName, seatGroup);
@@ -129,6 +133,24 @@ public class SeatServiceImpl implements SeatService {
             seatList.add(new Seat(seatGroupDTO.getSeatGroupName(), i));
         }
         seatRepository.save(seatList);
+    }
+
+    @Override
+    public void removeSeats(SeatGroupDTO seatGroupDTO) {
+        String seatGroupName = seatGroupDTO.getSeatGroupName();
+        int seatsInSeatGroup = getSeatGroupByName(seatGroupName).getSeatmap().get(seatGroupName).size();
+        int seatsToRemove = seatGroupDTO.getNumberOfSeats();
+        if (seatsToRemove < 0) {
+            throw new IllegalArgumentException("Number of seats needs to be higher than 1");
+        }
+        int lowestSeatToRemove = Math.max(1, seatsInSeatGroup - seatsToRemove + 1);
+
+        // We want to start removing seats with the highest numbers first
+        for (int i = seatsInSeatGroup; i >= lowestSeatToRemove; i--) {
+            clearSeat(seatGroupName, i);
+            Seat seat = getSeatBySeatGroupAndSeatNumber(seatGroupName, i);
+            seatRepository.delete(seat);
+        }
     }
 
     @Override

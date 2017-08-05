@@ -41,6 +41,8 @@ public interface SeatService {
 
     void addSeats(SeatGroupDTO seatGroupDTO);
 
+    void removeSeats(SeatGroupDTO seatGroupDTO);
+
     void setSeatLocked(String groupName, int seatNumber, boolean locked);
 
     void setSeatGroupLocked(String groupName, boolean locked);
