@@ -18,6 +18,7 @@
 
 package ch.wisv.areafiftylan.integration;
 
+import ch.wisv.areafiftylan.exception.SeatNotFoundException;
 import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.seats.model.Seat;
@@ -43,7 +44,7 @@ import static org.junit.Assert.assertTrue;
 
 
 public class SeatRestIntegrationTest extends XAuthIntegrationTest {
-    
+
     private final String SEAT_ENDPOINT = "/seats";
     private final String LOCK_ENDPOINT = SEAT_ENDPOINT + "/lock/";
     private final String TEMP_SEATGROUP = "tempSeatGroup";
@@ -74,7 +75,11 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         SeatGroupDTO seatGroupDTO = new SeatGroupDTO();
         seatGroupDTO.setSeatGroupName(TEMP_SEATGROUP);
         seatGroupDTO.setNumberOfSeats(999);
-        seatService.removeSeats(seatGroupDTO);
+        try {
+            seatService.removeSeats(seatGroupDTO);
+        } catch (SeatNotFoundException e) {
+            // Ignore
+        }
     }
 
     //region Get Seat
@@ -458,8 +463,9 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
     public void removeSeatGroupAsAdminFully() {
         User admin = createAdmin();
         SeatGroupDTO seatGroupDTO = new SeatGroupDTO();
-        seatGroupDTO.setSeatGroupName("testGroup");
+        seatGroupDTO.setSeatGroupName(TEMP_SEATGROUP);
         seatGroupDTO.setNumberOfSeats(5);
+        seatService.addSeats(seatGroupDTO);
 
         //@formatter:off
         given().
