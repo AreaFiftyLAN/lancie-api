@@ -22,22 +22,28 @@ import ch.wisv.areafiftylan.exception.TicketAlreadyLinkedException;
 import ch.wisv.areafiftylan.extras.rfid.model.RFIDLink;
 import ch.wisv.areafiftylan.extras.rfid.service.RFIDLinkRepository;
 import ch.wisv.areafiftylan.products.model.Ticket;
+import ch.wisv.areafiftylan.products.model.TicketOption;
+import ch.wisv.areafiftylan.products.model.TicketType;
 import ch.wisv.areafiftylan.products.service.TicketService;
 import ch.wisv.areafiftylan.products.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.security.token.TicketTransferToken;
 import ch.wisv.areafiftylan.security.token.repository.TicketTransferTokenRepository;
 import ch.wisv.areafiftylan.teams.model.Team;
-import ch.wisv.areafiftylan.teams.service.TeamRepository;
 import ch.wisv.areafiftylan.users.model.User;
+import io.restassured.http.ContentType;
 import org.apache.http.HttpStatus;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.stream.Collectors;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
 
 
@@ -50,8 +56,6 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
     private TicketRepository ticketRepository;
     @Autowired
     private TicketTransferTokenRepository tttRepository;
-    @Autowired
-    private TeamRepository teamRepository;
     @Autowired
     private RFIDLinkRepository rfidLinkRepository;
     @Autowired
@@ -92,6 +96,127 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
             get(TICKETS_ENDPOINT).
         then().
             statusCode(HttpStatus.SC_OK);
+        //@formatter:on
+    }
+
+    @Test
+    public void testGetAvailableTickets() {
+        Collection<TicketType> ticketTypes = ticketService.getAllTicketTypes();
+
+        //@formatter:off
+        given().
+        when().
+            get(TICKETS_ENDPOINT + "/available").
+        then().
+            statusCode(HttpStatus.SC_OK).
+            body("ticketType", is(ticketTypes.stream()
+                    .map(TicketType::getName)
+                    .collect(Collectors.toList()))).
+            body("price", is(ticketTypes.stream()
+                    .map(TicketType::getPrice)
+                    .collect(Collectors.toList())));
+        //@formatter:on
+    }
+
+    @Test
+    public void testGetTicketTypesAsAnon() {
+        //@formatter:off
+        given().
+        when().
+            get(TICKETS_ENDPOINT + "/types").
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
+    }
+
+    @Test
+    public void testGetTicketTypesAsAdmin() {
+        User admin = createAdmin();
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(admin)).
+        when().
+            get(TICKETS_ENDPOINT + "/types").
+        then().
+            statusCode(HttpStatus.SC_OK).
+            body("name", hasSize(ticketService.getAllTicketTypes().size()));
+        //@formatter:on
+    }
+
+    @Test
+    public void testAddTicketType() {
+        User admin = createAdmin();
+        TicketType type =
+                new TicketType("testAddType", "Type for adding test", 10, 0, LocalDateTime.now().plusDays(1), false);
+
+        //@formatter:off
+            given().
+                header(getXAuthTokenHeaderForUser(admin)).
+            when().
+                contentType(ContentType.JSON).
+                body(type).
+                post(TICKETS_ENDPOINT + "/types").
+            then().
+                statusCode(HttpStatus.SC_CREATED);
+        //@formatter:on
+    }
+
+    @Test
+    public void testRemoveTicketType() {
+        User admin = createAdmin();
+        TicketType type =
+                new TicketType("testRemoveType", "Type for remove test", 10, 0, LocalDateTime.now().plusDays(1), false);
+        type = ticketService.addTicketType(type);
+        //@formatter:off
+            given().
+                header(getXAuthTokenHeaderForUser(admin)).
+            when().
+                delete(TICKETS_ENDPOINT + "/types/" + type.getId()).
+            then().
+                statusCode(HttpStatus.SC_OK);
+        //@formatter:on
+
+        assertThat(ticketService.getAllTicketTypes()).doesNotContain(type);
+    }
+
+    @Test
+    public void testEditTicketType() {
+        User admin = createAdmin();
+        TicketType type =
+                new TicketType("testEditType", "Type for edit test", 10, 0, LocalDateTime.now().plusDays(1), false);
+        type = ticketService.addTicketType(type);
+
+        type.setPrice(15F);
+        //@formatter:off
+            given().
+                header(getXAuthTokenHeaderForUser(admin)).
+            when().
+                contentType(ContentType.JSON).
+                body(type).
+                put(TICKETS_ENDPOINT + "/types/" + type.getId()).
+            then().
+                statusCode(HttpStatus.SC_OK).
+                body("object.price", is(15F));
+        //@formatter:on
+
+        assertThat(ticketService.getAllTicketTypes()).contains(type);
+    }
+
+    @Test
+    public void testAddTicketOption() {
+        TicketOption option = new TicketOption("addTest", 10);
+
+        User admin = createAdmin();
+        //@formatter:off
+            given().
+                header(getXAuthTokenHeaderForUser(admin)).
+            when().
+                contentType(ContentType.JSON).
+                body(option).
+                post(TICKETS_ENDPOINT + "/options").
+            then().
+                statusCode(HttpStatus.SC_CREATED);
         //@formatter:on
     }
 
@@ -183,6 +308,46 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
             post(TRANSFER_ENDPOINT + "/" + ticket.getId()).
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
+    }
+
+    @Test
+    public void testGetValidTokens() {
+        User ticketOwner = createUser();
+        User ticketReceiver = createUser();
+        Ticket ticket = createTicketForUser(ticketOwner);
+
+        TicketTransferToken transferToken = ticketService.setupForTransfer(ticket.getId(), ticketReceiver.getEmail());
+
+        //@formatter:off
+            given().
+                header(getXAuthTokenHeaderForUser(ticketOwner)).
+            when().
+                get(TICKETS_ENDPOINT + "/tokens").
+            then().
+                statusCode(HttpStatus.SC_OK).
+                body("object.token", contains(transferToken.getToken()));
+        //@formatter:on
+    }
+
+    @Test
+    public void testGetValidTokensMultipleTickets() {
+        User ticketOwner = createUser();
+        User ticketReceiver = createUser();
+        Ticket ticket = createTicketForUser(ticketOwner);
+        Ticket ticket2 = createTicketForUser(ticketOwner);
+
+        TicketTransferToken transferToken = ticketService.setupForTransfer(ticket.getId(), ticketReceiver.getEmail());
+        TicketTransferToken transferToken2 = ticketService.setupForTransfer(ticket2.getId(), ticketReceiver.getEmail());
+
+        //@formatter:off
+            given().
+                header(getXAuthTokenHeaderForUser(ticketOwner)).
+            when().
+                get(TICKETS_ENDPOINT + "/tokens").
+            then().
+                statusCode(HttpStatus.SC_OK).
+                body("object.token", contains(transferToken.getToken(), transferToken2.getToken()));
         //@formatter:on
     }
 
