@@ -101,7 +101,9 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void testGetAvailableTickets() {
-        Collection<TicketType> ticketTypes = ticketService.getAllTicketTypes();
+        Collection<TicketType> ticketTypes = ticketService.getAllTicketTypes().stream()
+                .filter(TicketType::isBuyable)
+                .collect(Collectors.toList());
 
         //@formatter:off
         given().
