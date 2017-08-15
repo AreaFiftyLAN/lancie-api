@@ -17,10 +17,7 @@
 
 package ch.wisv.areafiftylan.unit;
 
-import ch.wisv.areafiftylan.exception.ImmutableOrderException;
-import ch.wisv.areafiftylan.exception.OrderNotFoundException;
-import ch.wisv.areafiftylan.exception.TicketNotFoundException;
-import ch.wisv.areafiftylan.exception.UnassignedOrderException;
+import ch.wisv.areafiftylan.exception.*;
 import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.model.order.Order;
 import ch.wisv.areafiftylan.products.model.order.OrderStatus;
@@ -71,6 +68,13 @@ public class OrderServiceTest extends ServiceTest {
         thrown.expectMessage("Order with id: ");
 
         orderService.getOrderById(null);
+    }
+
+    @Test
+    public void getOrderByEmptyReference() {
+        thrown.expect(IllegalArgumentException.class);
+
+        orderService.getOrderByReference("");
     }
 
     @Test
@@ -508,6 +512,19 @@ public class OrderServiceTest extends ServiceTest {
     }
 
     @Test
+    public void removeTicketFromOrderStatusPending() {
+        thrown.expect(ImmutableOrderException.class);
+
+        Order order = new Order();
+        Ticket ticket = persistTicket();
+        order.addTicket(testEntityManager.persist(ticket));
+        order.setStatus(OrderStatus.PENDING);
+        testEntityManager.persistAndGetId(order, Long.class);
+
+        orderService.removeTicketFromOrder(order.getId(), ticket.getId());
+    }
+
+    @Test
     public void requestPayment() {
         User user = persistUser();
         Order order = new Order(user);
@@ -565,6 +582,31 @@ public class OrderServiceTest extends ServiceTest {
         } finally {
             reset(paymentService);
         }
+    }
+
+    @Test
+    public void updateOrdersStatusById() {
+        Order order = new Order();
+        order.setUser(persistUser());
+        order.setReference("updateOrderStatusById");
+        order = testEntityManager.persist(order);
+        given(paymentService.updateStatus(Mockito.anyString())).willReturn(order);
+
+        orderService.updateOrderStatusByOrderId(order.getId());
+
+        verify(paymentService, times(1)).updateStatus(Mockito.anyString());
+
+        reset(paymentService);
+    }
+
+    @Test
+    public void updateOrdersStatusByIdEmptyReference() {
+        thrown.expect(PaymentException.class);
+        Order order = new Order();
+        order.setUser(persistUser());
+        order.setReference("");
+        order = testEntityManager.persist(order);
+        orderService.updateOrderStatusByOrderId(order.getId());
     }
 
     @Test
