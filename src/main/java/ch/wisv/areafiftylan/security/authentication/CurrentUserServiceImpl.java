@@ -181,7 +181,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     public boolean hasAnyTicket(Object principal) {
         if (principal instanceof UserDetails) {
             User user = (User) principal;
-            return hasAnyTicket(user.getEmail()) || isAdmin(user));
+            return hasAnyTicket(user.getEmail()) || isAdmin(user);
         }
         return false;
     }
