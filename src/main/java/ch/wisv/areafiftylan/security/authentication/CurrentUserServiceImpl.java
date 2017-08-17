@@ -165,14 +165,15 @@ public class CurrentUserServiceImpl implements CurrentUserService {
         if (principal instanceof UserDetails) {
             User user = (User) principal;
 
-            if (ticketRepository.findOne(ticketId).getOwner().equals(user) || isAdmin(user)) {
+            User owner = ticketRepository.findOne(ticketId).getOwner();
+            if (owner.equals(user) || isAdmin(user)) {
                 return true;
             }
 
             Collection<Team> userTeams = teamService.getTeamByCaptainId(user.getId());
 
             // For each set of members in a team, check if the owner of the ticket is one of them.
-            return userTeams.stream().map(Team::getMembers).anyMatch(members -> members.contains(ticketRepository.findOne(ticketId).getOwner()));
+            return userTeams.stream().map(Team::getMembers).anyMatch(members -> members.contains(owner));
         }
         return false;
     }
