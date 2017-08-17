@@ -1,0 +1,20 @@
+flyway.enabled: true
+spring.jpa.hibernate.ddl-auto: validate
+spring.jpa.properties.hibernate.hbm2ddl.auto: none
+logging.config: classpath:log4j2-prod.xml
+
+## AREA FIFTYLAN SETTINGS
+a5l:
+  paymentReturnUrl: https://areafiftylan.nl/order-check
+  user:
+    resetUrl: https://areafiftylan.nl/password-reset
+    acceptTransferUrl: https://areafiftylan.nl/transfer-accept
+
+  mail:
+    sender: LANcie <lancie@ch.tudelft.nl>
+    contact: LANcie <lancie@ch.tudelft.nl>
+    confirmUrl: https://areafiftylan.nl/register-confirm
+
+  orderLimit: 5
+  ticketLimit: 200
+  orderKeepAlive: 15
