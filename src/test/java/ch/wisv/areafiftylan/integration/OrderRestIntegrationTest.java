@@ -283,6 +283,44 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
     }
 
     @Test
+    public void testRemoveTicketFromAssignedOrderAsUser() {
+        User user = createUser();
+        Order order = addOrderForUser(user);
+
+        Ticket ticket = order.getTickets().iterator().next();
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+        when().
+            delete(ORDER_ENDPOINT + order.getId() + "/" + ticket.getId()).
+        then().
+            statusCode(HttpStatus.SC_OK).
+            body("object.user.email", is(user.getEmail())).
+            body("object.status", is("ASSIGNED")).
+            body("object.tickets", hasSize(0));
+        //@formatter:on
+    }
+
+    @Test
+    public void testRemoveUnrelatedTicketFromAssignedOrderAsUser() {
+        User user = createUser();
+        Order order = addOrderForUser(user);
+
+        Ticket ticket = ticketRepository.save(new Ticket(
+                ticketTypeRepository.findByName(TEST_TICKET).orElseThrow(IllegalArgumentException::new)));
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+        when().
+            delete(ORDER_ENDPOINT + order.getId() + "/" + ticket.getId()).
+        then().
+            statusCode(HttpStatus.SC_NOT_MODIFIED);
+        //@formatter:on
+    }
+
+    @Test
     public void testGetAnonOrderAsAnon() {
         Order order = insertAnonOrder();
 
