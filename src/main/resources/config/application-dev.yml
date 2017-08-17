@@ -1,0 +1,19 @@
+flyway.enabled: false
+spring.jpa.hibernate.ddl-auto: create
+logging.config: classpath:log4j2.xml
+
+## AREA FIFTYLAN SETTINGS
+a5l:
+  paymentReturnUrl: https://localhost:5100/order-check
+  user:
+    resetUrl: https://localhost:5100/password-reset
+    acceptTransferUrl: https://localhost:5100/transfer-accept
+
+  mail:
+    sender: LANcie <lancie@ch.tudelft.nl>
+    contact: LANcie <lancie@ch.tudelft.nl>
+    confirmUrl: https://localhost:5100/register-confirm
+
+  orderLimit: 5
+  ticketLimit: 200
+  orderKeepAlive: 15
