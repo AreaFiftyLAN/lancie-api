@@ -18,7 +18,6 @@
 package ch.wisv.areafiftylan.security.authentication;
 
 import ch.wisv.areafiftylan.exception.TokenNotFoundException;
-import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.model.order.Order;
 import ch.wisv.areafiftylan.products.service.OrderService;
 import ch.wisv.areafiftylan.products.service.TicketService;
@@ -176,20 +175,6 @@ public class CurrentUserServiceImpl implements CurrentUserService {
             return userTeams.stream().map(Team::getMembers).anyMatch(members -> members.contains(owner));
         }
         return false;
-    }
-
-    @Override
-    public boolean hasAnyTicket(Object principal) {
-        if (principal instanceof UserDetails) {
-            User user = (User) principal;
-            return hasAnyTicket(user.getEmail()) || isAdmin(user);
-        }
-        return false;
-    }
-
-    @Override
-    public boolean hasAnyTicket(String email) {
-        return ticketRepository.findAllByOwnerEmailIgnoreCase(email).stream().anyMatch(Ticket::isValid);
     }
 
     @Override
