@@ -18,11 +18,11 @@
 package ch.wisv.areafiftylan.security.authentication;
 
 import ch.wisv.areafiftylan.exception.TokenNotFoundException;
-import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.model.order.Order;
 import ch.wisv.areafiftylan.products.service.OrderService;
 import ch.wisv.areafiftylan.products.service.TicketService;
 import ch.wisv.areafiftylan.products.service.repository.TicketRepository;
+import ch.wisv.areafiftylan.security.SecurityConfiguration;
 import ch.wisv.areafiftylan.security.token.TeamInviteToken;
 import ch.wisv.areafiftylan.security.token.TicketTransferToken;
 import ch.wisv.areafiftylan.security.token.repository.TeamInviteTokenRepository;
@@ -32,6 +32,7 @@ import ch.wisv.areafiftylan.teams.service.TeamService;
 import ch.wisv.areafiftylan.users.model.Role;
 import ch.wisv.areafiftylan.users.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -46,6 +47,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     private final TicketService ticketService;
     private final TeamInviteTokenRepository teamInviteTokenRepository;
     private final TicketTransferTokenRepository tttRepository;
+    private final RoleHierarchyImpl roleHierarchy;
 
     @Autowired
     public CurrentUserServiceImpl(TeamService teamService, OrderService orderService, TicketRepository ticketRepository,
@@ -57,16 +59,37 @@ public class CurrentUserServiceImpl implements CurrentUserService {
         this.ticketService = ticketService;
         this.teamInviteTokenRepository = teamInviteTokenRepository;
         this.tttRepository = tttRepository;
+        this.roleHierarchy = new RoleHierarchyImpl();
+        roleHierarchy.setHierarchy(SecurityConfiguration.HIERARCHY);
+    }
+
+    private boolean hasRole(User user, Role role) {
+        return roleHierarchy.getReachableGrantedAuthorities(user.getAuthorities()).contains(role);
+    }
+
+    private boolean isAdmin(User user) {
+        return hasRole(user, Role.ROLE_ADMIN);
+    }
+
+    private boolean isOperator(User user) {
+        return hasRole(user, Role.ROLE_OPERATOR);
+    }
+
+    private boolean isCommittee(User user) {
+        return hasRole(user, Role.ROLE_COMMITTEE);
+    }
+
+    private boolean isTeamCaptain(Team team, User user) {
+        return team.getCaptain().getEmail().equals(user.getEmail());
     }
 
     @Override
     public boolean canAccessUser(Object principal, Long userId) {
         if (principal instanceof UserDetails) {
             User user = (User) principal;
-            return user.getId().equals(userId) || user.getAuthorities().contains(Role.ROLE_ADMIN);
-        } else {
-            return false;
+            return user.getId().equals(userId) || isAdmin(user);
         }
+        return false;
     }
 
     @Override
@@ -75,11 +98,9 @@ public class CurrentUserServiceImpl implements CurrentUserService {
             User user = (User) principal;
             Team team = teamService.getTeamById(teamId);
             // Check for each of the teammembers if the email matches the requester
-            return team.getMembers().stream().anyMatch(u -> u.getEmail().equals(user.getEmail())) ||
-                    user.getAuthorities().contains(Role.ROLE_ADMIN);
-        } else {
-            return false;
+            return team.getMembers().stream().anyMatch(u -> u.getEmail().equals(user.getEmail())) || isAdmin(user);
         }
+        return false;
     }
 
     @Override
@@ -87,32 +108,28 @@ public class CurrentUserServiceImpl implements CurrentUserService {
         if (principal instanceof UserDetails) {
             User user = (User) principal;
             Team team = teamService.getTeamById(teamId);
-            return team.getCaptain().getEmail().equals(user.getEmail()) ||
-                    user.getAuthorities().contains(Role.ROLE_ADMIN);
-        } else {
-            return false;
+            return isTeamCaptain(team, user) || isAdmin(user);
         }
+        return false;
     }
 
     @Override
     public boolean canRemoveFromTeam(Object principal, Long teamId, String email) {
         if (principal instanceof UserDetails) {
-            User currentUser = (User) principal;
+            User user = (User) principal;
             Team team = teamService.getTeamById(teamId);
 
-            // The Teamcaptain can't remove himself
+            // You can't remove a Team Captain
             if (team.getCaptain().getEmail().equals(email)) {
                 return false;
             }
 
             // You can remove people from a Team if you're Admin, the Team Captain, or if you want to remove yourself
-            // from the Team
-            return team.getCaptain().getEmail().equals(currentUser.getEmail()) ||
-                    currentUser.getAuthorities().contains(Role.ROLE_ADMIN) ||
-                    currentUser.getEmail().equals(email);
-        } else {
-            return false;
+            return  isTeamCaptain(team, user) ||
+                    isAdmin(user) ||
+                    user.getEmail().equals(email);
         }
+        return false;
     }
 
     @Override
@@ -128,10 +145,9 @@ public class CurrentUserServiceImpl implements CurrentUserService {
             User user = (User) principal;
             // Return true if the order is owned by the user, or the user is an admin
             return order.getUser().getEmail().equals(user.getEmail()) ||
-                    user.getAuthorities().contains(Role.ROLE_ADMIN);
-        } else {
-            return false;
+                    isAdmin(user);
         }
+        return false;
     }
 
     @Override
@@ -139,9 +155,8 @@ public class CurrentUserServiceImpl implements CurrentUserService {
         if (principal instanceof UserDetails) {
             User user = (User) principal;
             return ticketService.getTicketById(ticketId).getOwner().equals(user);
-        } else {
-            return false;
         }
+        return false;
     }
 
     @Override
@@ -149,33 +164,17 @@ public class CurrentUserServiceImpl implements CurrentUserService {
         if (principal instanceof UserDetails) {
             User user = (User) principal;
 
-            Ticket ticket = ticketRepository.findOne(ticketId);
-            if (ticket.getOwner().equals(user) || user.getAuthorities().contains(Role.ROLE_ADMIN)) {
+            User owner = ticketRepository.findOne(ticketId).getOwner();
+            if (owner.equals(user) || isAdmin(user)) {
                 return true;
             }
 
             Collection<Team> userTeams = teamService.getTeamByCaptainId(user.getId());
 
             // For each set of members in a team, check if the owner of the ticket is one of them.
-            return userTeams.stream().map(Team::getMembers).anyMatch(members -> members.contains(ticket.getOwner()));
-        } else {
-            return false;
+            return userTeams.stream().map(Team::getMembers).anyMatch(members -> members.contains(owner));
         }
-    }
-
-    @Override
-    public boolean hasAnyTicket(Object principal) {
-        if (principal instanceof UserDetails) {
-            User user = (User) principal;
-            return hasAnyTicket(user.getEmail()) || user.getAuthorities().contains(Role.ROLE_ADMIN);
-        } else {
-            return false;
-        }
-    }
-
-    @Override
-    public boolean hasAnyTicket(String email) {
-        return ticketRepository.findAllByOwnerEmailIgnoreCase(email).stream().anyMatch(Ticket::isValid);
+        return false;
     }
 
     @Override
@@ -187,11 +186,11 @@ public class CurrentUserServiceImpl implements CurrentUserService {
                     teamInviteTokenRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
 
             // Tokens can be revoked by the target user, an Admin or the Captain
-            return teamInviteToken.getUser().equals(user) || user.getAuthorities().contains(Role.ROLE_ADMIN) ||
+            return  teamInviteToken.getUser().equals(user) ||
+                    isAdmin(user) ||
                     teamInviteToken.getTeam().getCaptain().equals(user);
-        } else {
-            return false;
         }
+        return false;
     }
 
     @Override
@@ -204,9 +203,8 @@ public class CurrentUserServiceImpl implements CurrentUserService {
 
             // Tokens can only be accepted by the target user
             return teamInviteToken.getUser().equals(user);
-        } else {
-            return false;
         }
+        return false;
 
     }
 
@@ -217,9 +215,8 @@ public class CurrentUserServiceImpl implements CurrentUserService {
         if (principal instanceof UserDetails) {
             User user = (User) principal;
             return ttt.getTicket().getOwner().equals(user);
-        } else {
-            return false;
         }
+        return false;
     }
 
     @Override
@@ -229,8 +226,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
         if (principal instanceof UserDetails) {
             User user = (User) principal;
             return ttt.getUser().equals(user);
-        } else {
-            return false;
         }
+        return false;
     }
 }

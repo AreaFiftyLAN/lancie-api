@@ -39,10 +39,6 @@ public interface CurrentUserService {
 
     boolean canReserveSeat(Object principal, Long ticketId);
 
-    boolean hasAnyTicket(Object principal);
-
-    boolean hasAnyTicket(String email);
-
     boolean canRevokeInvite(Object principal, String token);
 
     boolean canAcceptInvite(Object principal, String token);
