@@ -14,7 +14,7 @@ import java.util.Collection;
 import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEntity;
 
 @RestController
-@RequestMapping("/web/sponsors")
+@RequestMapping("/web/sponsor")
 public class SponsorController {
 
     private SponsorService sponsorService;
@@ -40,8 +40,9 @@ public class SponsorController {
      * @return A collection with all sponsors.
      */
     @GetMapping
-    public Collection<Sponsor> getAllSponsors() {
-        return sponsorService.getAllSponsors();
+    public ResponseEntity<?> getAllSponsors() {
+        Collection<Sponsor> sponsors = sponsorService.getAllSponsors();
+        return createResponseEntity(HttpStatus.OK, "Sponsors retrieved.", sponsors);
     }
 
     /**
@@ -50,8 +51,9 @@ public class SponsorController {
      * @return A collection with all sponsors of that type.
      */
     @GetMapping("/{type}")
-    public Collection<Sponsor> getAllSponsorsOfType(@PathVariable SponsorType type) {
-        return sponsorService.getAllSponsorsOfType(type);
+    public ResponseEntity<?> getAllSponsorsOfType(@PathVariable SponsorType type) {
+        Collection<Sponsor> sponsorsOfType = sponsorService.getAllSponsorsOfType(type);
+        return createResponseEntity(HttpStatus.OK, "Sponsors of type " + type + " retrieved.", sponsorsOfType);
     }
 
     /**
@@ -60,7 +62,7 @@ public class SponsorController {
      * @return The status of your request.
      */
     @PreAuthorize("hasRole('COMMITTEE')")
-    @DeleteMapping("/sponsorId")
+    @DeleteMapping("/{sponsorId}")
     public ResponseEntity<?> deleteSponsor(@PathVariable Long sponsorId) {
         sponsorService.deleteSponsor(sponsorId);
         return createResponseEntity(HttpStatus.NO_CONTENT, "Sponsor successfully deleted.");

@@ -16,16 +16,10 @@ import static org.hamcrest.Matchers.hasSize;
 
 public class WebCommitteeIntegrationTest extends XAuthIntegrationTest {
 
-    private final String COMMITTEE_ENDPOINT = "/web/committee/";
-
     @Autowired
-    protected CommitteeRepository committeeRepository;
+    private CommitteeRepository committeeRepository;
 
-//    private CommitteeMember committeeMember1 = new CommitteeMember(1L, "Lotte Bryan", "Chairman", "group");
-//    private CommitteeMember committeeMember2 = new CommitteeMember(2L, "Sterre Noorthoek", "Secretary", "male");
-
-
-    //region Committee
+    private final String COMMITTEE_ENDPOINT = "/web/committee/";
 
     private CommitteeMember addCommitteeMember() {
         CommitteeMember committeeMember = new CommitteeMember(1L, "Lotte Bryan", "Chairman", "group");
@@ -141,6 +135,39 @@ public class WebCommitteeIntegrationTest extends XAuthIntegrationTest {
     @Test
     public void testDeleteCommitteeMemberAsUser() {
         User user = createUser();
+        CommitteeMember member = addCommitteeMember();
+
+        //@formatter:off
+        given().
+			header(getXAuthTokenHeaderForUser(user)).
+        when().
+            delete(COMMITTEE_ENDPOINT + member.getId()).
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN).
+            body("message", equalTo("Access denied"));
+        //@formatter:on
+    }
+
+    @Test
+    public void testDeleteCommitteeMemberAsAdmin() {
+        User admin = createAdmin();
+        CommitteeMember member = addCommitteeMember();
+
+        //@formatter:off
+        given().
+			header(getXAuthTokenHeaderForUser(admin)).
+        when().
+            delete(COMMITTEE_ENDPOINT + member.getId()).
+        then().
+            statusCode(HttpStatus.SC_OK).
+            body("message", equalTo("Successfully removed committee member."));
+        //@formatter:on
+
+    }
+
+    @Test
+    public void testDeleteCommitteeAsUser() {
+        User user = createUser();
 
         //@formatter:off
         given().
@@ -167,7 +194,4 @@ public class WebCommitteeIntegrationTest extends XAuthIntegrationTest {
             body("message", equalTo("Successfully removed committee."));
         //@formatter:on
     }
-
-    //endregion
-
 }
