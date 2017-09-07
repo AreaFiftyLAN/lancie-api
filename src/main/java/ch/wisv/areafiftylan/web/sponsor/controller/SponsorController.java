@@ -29,7 +29,7 @@ public class SponsorController {
      * @return The status of your request.
      */
     @PreAuthorize("hasRole('COMMITTEE')")
-    @PutMapping
+    @PostMapping
     public ResponseEntity<?> createSponsor(@RequestBody @Validated Sponsor sponsor) {
         sponsor = sponsorService.createSponsor(sponsor);
         return createResponseEntity(HttpStatus.CREATED, "Sponsor successfully added.", sponsor);
