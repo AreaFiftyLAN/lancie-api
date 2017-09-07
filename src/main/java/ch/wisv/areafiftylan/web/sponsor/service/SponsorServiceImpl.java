@@ -33,12 +33,6 @@ public class SponsorServiceImpl implements SponsorService {
     }
 
     @Override
-    public Sponsor updateSponsor(Long sponsorId, Sponsor sponsor) {
-        sponsor.setId(sponsorId);
-        return sponsorRepository.saveAndFlush(sponsor);
-    }
-
-    @Override
     public void deleteSponsor(Long sponsorId) {
         sponsorRepository.delete(sponsorId);
     }

@@ -3,7 +3,6 @@ package ch.wisv.areafiftylan.web.sponsor.controller;
 import ch.wisv.areafiftylan.web.sponsor.model.Sponsor;
 import ch.wisv.areafiftylan.web.sponsor.model.SponsorType;
 import ch.wisv.areafiftylan.web.sponsor.service.SponsorService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,7 +19,6 @@ public class SponsorController {
 
     private SponsorService sponsorService;
 
-    @Autowired
     public SponsorController(SponsorService sponsorService) {
         this.sponsorService = sponsorService;
     }
@@ -30,7 +28,7 @@ public class SponsorController {
      * @param sponsor The new sponsor.
      * @return The status of your request.
      */
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('COMMITTEE')")
     @PutMapping
     public ResponseEntity<?> createSponsor(@RequestBody @Validated Sponsor sponsor) {
         sponsor = sponsorService.createSponsor(sponsor);
@@ -57,24 +55,11 @@ public class SponsorController {
     }
 
     /**
-     * Updates the sponsor at the ID with the values in the body.
-     * @param sponsorId the ID of the sponsor.
-     * @param sponsor The new values.
-     * @return The status of your request.
-     */
-    @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/{sponsorId]")
-    public ResponseEntity<?> updateSponsor(@PathVariable Long sponsorId, @RequestBody @Validated Sponsor sponsor) {
-        sponsor = sponsorService.updateSponsor(sponsorId, sponsor);
-        return createResponseEntity(HttpStatus.ACCEPTED, "Sponsor successfully updated.", sponsor);
-    }
-
-    /**
      * Deletes a single sponsor.
      * @param sponsorId the ID of the sponsor to be deleted.
      * @return The status of your request.
      */
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('COMMITTEE')")
     @DeleteMapping("/sponsorId")
     public ResponseEntity<?> deleteSponsor(@PathVariable Long sponsorId) {
         sponsorService.deleteSponsor(sponsorId);
@@ -85,7 +70,7 @@ public class SponsorController {
      * Deletes all sponsors. This is useful after a LAN, when no longer having any sponsors.
      * @return The status of your request.
      */
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('COMMITTEE')")
     @DeleteMapping
     public ResponseEntity<?> deleteAllSponsors() {
         sponsorService.deleteAllSponsors();

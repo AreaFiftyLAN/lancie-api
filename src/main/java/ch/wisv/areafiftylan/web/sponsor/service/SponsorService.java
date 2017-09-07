@@ -13,8 +13,6 @@ public interface SponsorService {
 
     Collection<Sponsor> getAllSponsorsOfType(SponsorType type);
 
-    Sponsor updateSponsor(Long sponsorId, Sponsor sponsor);
-
     void deleteSponsor(Long sponsorId);
 
     void deleteAllSponsors();

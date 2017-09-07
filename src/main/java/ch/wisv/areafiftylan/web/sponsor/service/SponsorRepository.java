@@ -11,5 +11,4 @@ import java.util.Collection;
 public interface SponsorRepository extends JpaRepository<Sponsor, Long> {
 
     Collection<Sponsor> findByType(SponsorType type);
-
 }
