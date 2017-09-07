@@ -25,14 +25,14 @@ public class CommitteeController {
     @GetMapping
     ResponseEntity<?> getCommitteeMembers() {
         List<CommitteeMember> members = committeeService.getCommitteeMembers();
-        return createResponseEntity(HttpStatus.OK, "Successfully added committee member.", members);
+        return createResponseEntity(HttpStatus.OK, "Successfully retrieved committee.", members);
     }
 
     @PostMapping
     @PreAuthorize("hasRole('COMMITTEE')")
-    ResponseEntity<?> addCommitteeMember(CommitteeMember committeeMember) {
+    ResponseEntity<?> addCommitteeMember(@RequestBody CommitteeMember committeeMember) {
         committeeMember = committeeService.addCommitteeMember(committeeMember);
-        return createResponseEntity(HttpStatus.OK, "Successfully added committee member.", committeeMember);
+        return createResponseEntity(HttpStatus.CREATED, "Successfully added committee member.", committeeMember);
     }
 
     @DeleteMapping("/{memberId}")
