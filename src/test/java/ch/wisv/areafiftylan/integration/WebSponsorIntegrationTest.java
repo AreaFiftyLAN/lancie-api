@@ -22,7 +22,11 @@ public class WebSponsorIntegrationTest extends XAuthIntegrationTest {
     private final String TYPE = "PREMIUM";
 
     private Sponsor createSponsor() {
-        Sponsor sponsor = new Sponsor("Red Bull", "redbulllogo.png", "www.redbull.com", SponsorType.PREMIUM);
+        Sponsor sponsor = new Sponsor();
+        sponsor.setName("Red Bull");
+        sponsor.setImageName("redbulllogo.png");
+        sponsor.setWebsite("www.redbull.com");
+        sponsor.setType(SponsorType.PREMIUM);
         return sponsorRepository.save(sponsor);
     }
 
@@ -34,7 +38,7 @@ public class WebSponsorIntegrationTest extends XAuthIntegrationTest {
     @Test
     public void testCreateSponsorAsUser() {
         User user = createUser();
-        Sponsor sponsor = new Sponsor("Red Bull", "redbulllogo.png", "www.redbull.com", SponsorType.PREMIUM);
+        Sponsor sponsor = createSponsor();
 
         //@formatter:off
         given().
@@ -51,7 +55,7 @@ public class WebSponsorIntegrationTest extends XAuthIntegrationTest {
     @Test
     public void testCreateSponsorAsCommitteeMember() {
         User committeeMember = createCommitteeMember();
-        Sponsor sponsor = new Sponsor("Red Bull", "redbulllogo.png", "www.redbull.com", SponsorType.PREMIUM);
+        Sponsor sponsor = createSponsor();
 
         //@formatter:off
         given().
