@@ -65,7 +65,7 @@ public class SponsorController {
     @DeleteMapping("/{sponsorId}")
     public ResponseEntity<?> deleteSponsor(@PathVariable Long sponsorId) {
         sponsorService.deleteSponsor(sponsorId);
-        return createResponseEntity(HttpStatus.NO_CONTENT, "Sponsor successfully deleted.");
+        return createResponseEntity(HttpStatus.OK, "Sponsor successfully deleted.");
     }
 
     /**
@@ -76,6 +76,6 @@ public class SponsorController {
     @DeleteMapping
     public ResponseEntity<?> deleteAllSponsors() {
         sponsorService.deleteAllSponsors();
-        return createResponseEntity(HttpStatus.NO_CONTENT, "Successfully deleted all sponsors.");
+        return createResponseEntity(HttpStatus.OK, "Successfully deleted all sponsors.");
     }
 }

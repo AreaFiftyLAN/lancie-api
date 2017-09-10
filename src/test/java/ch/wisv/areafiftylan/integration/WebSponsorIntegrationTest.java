@@ -158,7 +158,8 @@ public class WebSponsorIntegrationTest extends XAuthIntegrationTest {
         when().
             delete(SPONSOR_ENDPOINT + sponsor.getId()).
         then().
-            statusCode(HttpStatus.SC_NO_CONTENT);
+            statusCode(HttpStatus.SC_OK).
+            body("message", is("Sponsor successfully deleted."));
         //@formatter:on
     }
 
@@ -188,7 +189,8 @@ public class WebSponsorIntegrationTest extends XAuthIntegrationTest {
         when().
             delete(SPONSOR_ENDPOINT).
         then().
-            statusCode(HttpStatus.SC_NO_CONTENT);
+            statusCode(HttpStatus.SC_OK).
+            body("message", is("Successfully deleted all sponsors."));
         //@formatter:on
     }
 }
