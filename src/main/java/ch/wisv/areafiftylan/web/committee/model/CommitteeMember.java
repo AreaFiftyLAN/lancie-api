@@ -6,7 +6,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
 @Entity
@@ -16,9 +15,6 @@ import javax.persistence.Id;
 public class CommitteeMember {
 
     @Id
-    @GeneratedValue
-    private Long id;
-
     @NonNull
     private Long position;
 

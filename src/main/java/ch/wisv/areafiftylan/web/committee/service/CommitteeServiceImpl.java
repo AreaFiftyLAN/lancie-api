@@ -1,23 +1,21 @@
 package ch.wisv.areafiftylan.web.committee.service;
 
 import ch.wisv.areafiftylan.web.committee.model.CommitteeMember;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.Collection;
 
 @Service
 public class CommitteeServiceImpl implements CommitteeService {
 
     private final CommitteeRepository committeeRepository;
 
-    @Autowired
     public CommitteeServiceImpl(CommitteeRepository committeeRepository) {
         this.committeeRepository = committeeRepository;
     }
 
     @Override
-    public List<CommitteeMember> getCommitteeMembers() {
+    public Collection<CommitteeMember> getCommitteeMembers() {
         return committeeRepository.findAll();
     }
 

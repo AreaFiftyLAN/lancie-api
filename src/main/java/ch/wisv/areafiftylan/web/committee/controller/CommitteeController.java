@@ -8,7 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.Collection;
 
 import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEntity;
 
@@ -24,7 +24,7 @@ public class CommitteeController {
 
     @GetMapping
     ResponseEntity<?> getCommitteeMembers() {
-        List<CommitteeMember> members = committeeService.getCommitteeMembers();
+        Collection<CommitteeMember> members = committeeService.getCommitteeMembers();
         return createResponseEntity(HttpStatus.OK, "Successfully retrieved committee.", members);
     }
 

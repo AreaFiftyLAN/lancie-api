@@ -22,7 +22,7 @@ public class WebCommitteeIntegrationTest extends XAuthIntegrationTest {
     private final String COMMITTEE_ENDPOINT = "/web/committee/";
 
     private CommitteeMember addCommitteeMember() {
-        CommitteeMember committeeMember = new CommitteeMember(1L, "Lotte Bryan", "Chairman", "group");
+        CommitteeMember committeeMember = new CommitteeMember(committeeRepository.count() + 1, "Lotte Bryan", "Chairman", "group");
         return committeeRepository.save(committeeMember);
     }
 
@@ -141,7 +141,7 @@ public class WebCommitteeIntegrationTest extends XAuthIntegrationTest {
         given().
 			header(getXAuthTokenHeaderForUser(user)).
         when().
-            delete(COMMITTEE_ENDPOINT + member.getId()).
+            delete(COMMITTEE_ENDPOINT + member.getPosition()).
         then().
             statusCode(HttpStatus.SC_FORBIDDEN).
             body("message", equalTo("Access denied"));
@@ -157,7 +157,7 @@ public class WebCommitteeIntegrationTest extends XAuthIntegrationTest {
         given().
 			header(getXAuthTokenHeaderForUser(admin)).
         when().
-            delete(COMMITTEE_ENDPOINT + member.getId()).
+            delete(COMMITTEE_ENDPOINT + member.getPosition()).
         then().
             statusCode(HttpStatus.SC_OK).
             body("message", equalTo("Successfully removed committee member."));
