@@ -22,7 +22,11 @@ public class WebCommitteeIntegrationTest extends XAuthIntegrationTest {
     private final String COMMITTEE_ENDPOINT = "/web/committee/";
 
     private CommitteeMember addCommitteeMember() {
-        CommitteeMember committeeMember = new CommitteeMember(committeeRepository.count() + 1, "Lotte Bryan", "Chairman", "group");
+        CommitteeMember committeeMember = new CommitteeMember();
+        committeeMember.setPosition(committeeRepository.count() + 1);
+        committeeMember.setName("Lotte Bryan");
+        committeeMember.setFunction("Chairman");
+        committeeMember.setIcon("group");
         return committeeRepository.save(committeeMember);
     }
 
