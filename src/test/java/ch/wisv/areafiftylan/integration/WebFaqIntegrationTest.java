@@ -164,6 +164,23 @@ public class WebFaqIntegrationTest  extends XAuthIntegrationTest{
         when().
             delete(FAQ_ENDPOINT).
         then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
+    }
+
+    @Test
+    public void testDeleteFaqAsAdmin() {
+        User admin = createAdmin();
+        FaqPair faqPair = createPair();
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(admin)).
+            body(faqPair).
+            contentType(ContentType.JSON).
+        when().
+            delete(FAQ_ENDPOINT).
+        then().
             statusCode(HttpStatus.SC_OK).
             body("message", is("Faq deleted."));
         //@formatter:on
