@@ -166,7 +166,6 @@ public class WebSponsorIntegrationTest extends XAuthIntegrationTest {
     @Test
     public void testDeleteAllSponsorsAsUser() {
         User user = createUser();
-        Sponsor sponsor = createSponsor();
 
         //@formatter:off
         given().
@@ -181,7 +180,6 @@ public class WebSponsorIntegrationTest extends XAuthIntegrationTest {
     @Test
     public void testDeleteAllSponsorsAsCommitteeMember() {
         User admin = createAdmin();
-        Sponsor sponsor = createSponsor();
 
         //@formatter:off
         given().
