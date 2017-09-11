@@ -43,7 +43,7 @@ public class FaqController {
     }
 
     @DeleteMapping
-    @PreAuthorize("hasRole('COMMITTEE')")
+    @PreAuthorize("hasRole('ADMIN')")
     ResponseEntity<?> deleteFaq() {
         faqService.deleteFaq();
         return createResponseEntity(HttpStatus.OK, "Faq deleted.");

@@ -22,8 +22,8 @@ public class WebFaqIntegrationTest  extends XAuthIntegrationTest{
 
     private FaqPair createPair() {
         FaqPair faqPair = new FaqPair();
-        faqPair.setQuestion("question");
-        faqPair.setAnswer("answer");
+        faqPair.setQuestion("What do you get if you multiply six by nine?");
+        faqPair.setAnswer("42");
         return faqRepository.save(faqPair);
     }
 
