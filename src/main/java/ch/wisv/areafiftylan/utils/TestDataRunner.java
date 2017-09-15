@@ -215,13 +215,13 @@ public class TestDataRunner implements CommandLineRunner {
         seatService.reserveSeat("B", 1, ticketNormal.getId(), false);
         //endregion Seat
         //region Web Data
-        committeeMember(1L, "Chairman", "Lotte Bryan", "group");
-        committeeMember(2L, "Secretary", "Sterre Noorthoek", "male");
-        committeeMember(3L, "Treasurer", "Francis Behnen", "money");
-        committeeMember(4L, "Commissioner of Promo", "Hilco van der Wilk", "bullhorn");
-        committeeMember(5L, "Commissioner of Logistics", "Millen van Osch", "truck");
-        committeeMember(6L, "Commissioner of Systems", "Matthijs Kok", "cogs");
-        committeeMember(7L, "Qualitate Qua", "Beer van der Drift", "heart");
+        committeeMember(1L, "Chairman", "Mark Rutte", "group");
+        committeeMember(2L, "Secretary", "Lodewijk Asscher", "male");
+        committeeMember(3L, "Treasurer", "Jeroen Dijsselbloem", "money");
+        committeeMember(4L, "Commissioner of Promo", "Frans Timmermans", "bullhorn");
+        committeeMember(5L, "Commissioner of Logistics", "Melanie Schultz", "truck");
+        committeeMember(6L, "Commissioner of Systems", "Klaas Dijkhoff", "cogs");
+        committeeMember(7L, "Qualitate Qua", "Ivo Opstelten", "heart");
 
         faqpair("What the fox say?", "Ring-ding-ding-ding-dingeringeding!");
         faqpair("What do you get if you multiply six by nine?", "42");
