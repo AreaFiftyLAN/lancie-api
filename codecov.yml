@@ -1,0 +1,2 @@
+ignore:
+  - "src/main/java/ch/wisv/areafiftylan/utils/TestDataRunner.java"
