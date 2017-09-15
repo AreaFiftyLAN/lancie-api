@@ -30,7 +30,6 @@ import ch.wisv.areafiftylan.users.service.UserService;
 import ch.wisv.areafiftylan.utils.mail.MailService;
 import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;

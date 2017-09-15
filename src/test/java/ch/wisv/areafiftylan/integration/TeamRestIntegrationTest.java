@@ -30,7 +30,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.validation.constraints.AssertTrue;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
