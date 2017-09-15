@@ -206,14 +206,16 @@ public class TeamServiceImpl implements TeamService {
     public boolean removeMember(Long teamId, String email) {
         Team team = getTeamById(teamId);
         User user = userService.getUserByEmail(email);
+
         if (team.getCaptain().equals(user)) {
-            return false;
-        }
-        boolean success = team.removeMember(user);
-        if (success) {
+            if (team.getSize() > 1) {
+                return false;
+            }
+            delete(team.getId());
+        } else {
+            team.removeMember(user);
             teamRepository.saveAndFlush(team);
         }
-        return success;
-
+        return true;
     }
 }
