@@ -18,7 +18,6 @@
 package ch.wisv.areafiftylan.utils;
 
 import ch.wisv.areafiftylan.extras.consumption.model.Consumption;
-import ch.wisv.areafiftylan.extras.consumption.model.ConsumptionMapsRepository;
 import ch.wisv.areafiftylan.extras.consumption.model.PossibleConsumptionsRepository;
 import ch.wisv.areafiftylan.extras.consumption.service.ConsumptionService;
 import ch.wisv.areafiftylan.extras.rfid.model.RFIDLink;
@@ -37,6 +36,16 @@ import ch.wisv.areafiftylan.users.model.Gender;
 import ch.wisv.areafiftylan.users.model.Role;
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.users.service.UserRepository;
+import ch.wisv.areafiftylan.web.committee.model.CommitteeMember;
+import ch.wisv.areafiftylan.web.committee.service.CommitteeRepository;
+import ch.wisv.areafiftylan.web.faq.model.FaqPair;
+import ch.wisv.areafiftylan.web.faq.service.FaqRepository;
+import ch.wisv.areafiftylan.web.sponsor.model.Sponsor;
+import ch.wisv.areafiftylan.web.sponsor.model.SponsorType;
+import ch.wisv.areafiftylan.web.sponsor.service.SponsorRepository;
+import ch.wisv.areafiftylan.web.tournament.model.Tournament;
+import ch.wisv.areafiftylan.web.tournament.model.TournamentType;
+import ch.wisv.areafiftylan.web.tournament.service.TournamentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
@@ -45,6 +54,9 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 @Component
 @Profile("dev")
@@ -57,15 +69,21 @@ public class TestDataRunner implements CommandLineRunner {
     private final TicketTypeRepository ticketTypeRepository;
     private final RFIDLinkRepository rfidLinkRepository;
     private final PossibleConsumptionsRepository consumptionsRepository;
-    private final ConsumptionMapsRepository consumptionMapsRepository;
     private final ConsumptionService consumptionService;
+
+    private final CommitteeRepository committeeRepository;
+    private final FaqRepository faqRepository;
+    private final SponsorRepository sponsorRepository;
+    private final TournamentRepository tournamentRepository;
 
     @Autowired
     public TestDataRunner(UserRepository accountRepository, TicketRepository ticketRepository,
                           TeamRepository teamRepository, SeatService seatService,
                           TicketOptionRepository ticketOptionRepository, TicketTypeRepository ticketTypeRepository,
                           RFIDLinkRepository rfidLinkRepository, PossibleConsumptionsRepository consumptionsRepository,
-                          ConsumptionMapsRepository consumptionMapsRepository, ConsumptionService consumptionService) {
+                          ConsumptionService consumptionService, CommitteeRepository committeeRepository,
+                          FaqRepository faqRepository, SponsorRepository sponsorRepository,
+                          TournamentRepository tournamentRepository) {
         this.accountRepository = accountRepository;
         this.ticketRepository = ticketRepository;
         this.seatService = seatService;
@@ -74,8 +92,11 @@ public class TestDataRunner implements CommandLineRunner {
         this.ticketTypeRepository = ticketTypeRepository;
         this.rfidLinkRepository = rfidLinkRepository;
         this.consumptionsRepository = consumptionsRepository;
-        this.consumptionMapsRepository = consumptionMapsRepository;
         this.consumptionService = consumptionService;
+        this.committeeRepository = committeeRepository;
+        this.faqRepository = faqRepository;
+        this.sponsorRepository = sponsorRepository;
+        this.tournamentRepository = tournamentRepository;
     }
 
     @Override
@@ -159,5 +180,79 @@ public class TestDataRunner implements CommandLineRunner {
         }
         seatService.setAllSeatsLock(false);
         seatService.reserveSeat("A", 2, ticket.getId(), false);
+
+        // Web data
+        committeeMember(1L, "Chairman", "Lotte Bryan", "group");
+        committeeMember(2L, "Secretary", "Sterre Noorthoek", "male");
+        committeeMember(3L, "Treasurer", "Francis Behnen", "money");
+        committeeMember(4L, "Commissioner of Promo", "Hilco van der Wilk", "bullhorn");
+        committeeMember(5L, "Commissioner of Logistics", "Millen van Osch", "truck");
+        committeeMember(6L, "Commissioner of Systems", "Matthijs Kok", "cogs");
+        committeeMember(7L, "Qualitate Qua", "Beer van der Drift", "heart");
+
+        faqpair("What the fox say?", "Ring-ding-ding-ding-dingeringeding!");
+        faqpair("What do you get if you multiply six by nine?", "42");
+        faqpair("What is your favorite colour?", "Blue.");
+        faqpair("What is the capital of Assyria?", "Well I don't know!");
+        faqpair("What is your favorite colour?", "Blue! no, Yellow!");
+        faqpair("What is the airspeed velocity of an unladen swallow?", "What do you mean? African or European swallow?");
+
+        sponsor("Christiaan Huygens", SponsorType.PRESENTER, "https://ch.tudelft.nl", "images-optimized/lancie/logo_CH.png");
+        sponsor("TU Delft", SponsorType.PRESENTER, "https://www.tudelft.nl", "images-optimized/logos/logo_SC.png");
+        Sponsor sogeti = sponsor("Sogeti", SponsorType.PREMIUM, "https://www.sogeti.nl/", "images-optimized/logos/sogeti.png");
+        sponsor("Nutanix", SponsorType.PREMIUM, "https://www.nutanix.com", "images-optimized/logos/nutanix.png");
+        sponsor("OGD", SponsorType.PREMIUM, "https://ogd.nl/", "images-optimized/logos/ogd.png");
+        Sponsor coolerMaster = sponsor("CoolerMaster", SponsorType.NORMAL, "http://www.coolermaster.com/", "images-optimized/logos/Cooler_Master_Logo.png");
+        sponsor("Spam", SponsorType.NORMAL, "http://www.spam-energydrink.com/", "images-optimized/logos/spam-logo.jpg");
+        sponsor("Jigsaw", SponsorType.NORMAL, "http://www.jigsaw.nl/", "images-optimized/logos/jigsaw_cleaner_logo.png");
+        sponsor("TransIP", SponsorType.NORMAL, "https://www.transip.nl/", "images-optimized/logos/transip_logo.png");
+
+        tournament(TournamentType.OFFICIAL, "RL", "images-optimized/activities/rl.jpg", "3 V 3", "Rocket League",
+                "Rocket League is a fun game.", Arrays.asList("Huis", "Koelkast", "Broodrooster"), sogeti);
+        tournament(TournamentType.OFFICIAL, "HS", "images-optimized/activities/hs.jpg", "1 V 1", "Hearthstone",
+                "Hearthstone is not a fun game.", Arrays.asList("Keyboard", "Muis", "50 Packs"), coolerMaster);
+        tournament(TournamentType.UNOFFICIAL, "Achtung", "images-optimized/unofficial/achtung.jpg", "1 V 1",
+                "Achtung Die Kurve", "Achtung!", Arrays.asList("Kratje Hertog Jan", "Kratje Heineken", "Kratje Amstel"), null);
+        tournament(TournamentType.UNOFFICIAL, "JD", "images-optimized/unofficial/justdance.jpg", "2 V 2", "Just Dance",
+                "Just Dance is about dancing.", Collections.singletonList("Nothing."), sogeti);
+    }
+
+    private CommitteeMember committeeMember(Long position, String function, String name, String icon) {
+        CommitteeMember committeeMember = new CommitteeMember();
+        committeeMember.setPosition(position);
+        committeeMember.setFunction(function);
+        committeeMember.setName(name);
+        committeeMember.setIcon(icon);
+        return committeeRepository.save(committeeMember);
+    }
+
+    private FaqPair faqpair(String question, String answer) {
+        FaqPair faqPair = new FaqPair();
+        faqPair.setQuestion(question);
+        faqPair.setAnswer(answer);
+        return faqRepository.save(faqPair);
+    }
+
+    private Sponsor sponsor(String name, SponsorType type, String website, String imageName) {
+        Sponsor sponsor = new Sponsor();
+        sponsor.setName(name);
+        sponsor.setType(type);
+        sponsor.setWebsite(website);
+        sponsor.setImageName(imageName);
+        return sponsorRepository.save(sponsor);
+    }
+
+    private Tournament tournament(TournamentType type, String buttonTitle, String buttonImagePath, String format,
+                                  String headerTitle, String description, List<String> prizes, Sponsor sponsor) {
+        Tournament tournament = new Tournament();
+        tournament.setType(type);
+        tournament.setButtonTitle(buttonTitle);
+        tournament.setButtonImagePath(buttonImagePath);
+        tournament.setFormat(format);
+        tournament.setHeaderTitle(headerTitle);
+        tournament.setDescription(description);
+        tournament.setPrizes(prizes);
+        tournament.setSponsor(sponsor);
+        return tournamentRepository.save(tournament);
     }
 }
