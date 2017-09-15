@@ -119,11 +119,6 @@ public class CurrentUserServiceImpl implements CurrentUserService {
             User user = (User) principal;
             Team team = teamService.getTeamById(teamId);
 
-            // You can't remove a Team Captain
-            if (team.getCaptain().getEmail().equals(email)) {
-                return false;
-            }
-
             // You can remove people from a Team if you're Admin, the Team Captain, or if you want to remove yourself
             return  isTeamCaptain(team, user) ||
                     isAdmin(user) ||

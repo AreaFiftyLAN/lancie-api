@@ -250,27 +250,8 @@ public class TeamRestController {
     }
 
     /**
-     * Delete the Team with the given Id. Can only be done by an admin,
-     * or the captain of the team when it has no other members.
-     *
-     * @param teamId Id of the Team to be deleted.
-     * @return A status message of the operation
-     */
-    @PreAuthorize("@currentUserServiceImpl.canEditTeam(principal, #teamId)")
-    @JsonView(View.Public.class)
-    @DeleteMapping("/{teamId}")
-    public ResponseEntity<?> deleteTeam(@PathVariable Long teamId, @AuthenticationPrincipal User user) {
-        if (teamService.getTeamById(teamId).getMembers().size() == 1 || user.getAuthorities().contains(Role.ROLE_ADMIN)) {
-            Team deletedTeam = teamService.delete(teamId);
-            return createResponseEntity(HttpStatus.OK, "Deleted team with ID: " + teamId, deletedTeam);
-        } else {
-            return createResponseEntity(HttpStatus.FORBIDDEN, "Team with ID: " + teamId + " has other users.");
-        }
-    }
-
-    /**
-     * Delete a member from a team. Expects only an email in the RequestBody. Can only be done by the Captain or an
-     * Admin
+     * Delete a member from a team. Expects only an email in the RequestBody. The team will be deleted when the capain
+     * is the last member.
      *
      * @param teamId   Id of the Team to be edited
      * @param email Email of the member to be deleted
@@ -280,8 +261,11 @@ public class TeamRestController {
     @PreAuthorize("@currentUserServiceImpl.canRemoveFromTeam(principal, #teamId, #email)")
     @DeleteMapping("/{teamId}/members")
     public ResponseEntity<?> removeTeamMember(@PathVariable Long teamId, @RequestBody String email) {
-        teamService.removeMember(teamId, email);
-        return createResponseEntity(HttpStatus.OK, "User '" + email + "' successfully removed from Team " + teamId);
+        if (teamService.removeMember(teamId, email)) {
+            return createResponseEntity(HttpStatus.OK, "User '" + email + "' successfully removed from Team " + teamId);
+        } else {
+            return createResponseEntity(HttpStatus.FORBIDDEN, "Cannot remove captain from team with other members.");
+        }
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

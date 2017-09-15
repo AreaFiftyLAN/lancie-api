@@ -30,6 +30,7 @@ import ch.wisv.areafiftylan.users.service.UserService;
 import ch.wisv.areafiftylan.utils.mail.MailService;
 import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -206,14 +207,16 @@ public class TeamServiceImpl implements TeamService {
     public boolean removeMember(Long teamId, String email) {
         Team team = getTeamById(teamId);
         User user = userService.getUserByEmail(email);
+
         if (team.getCaptain().equals(user)) {
-            return false;
-        }
-        boolean success = team.removeMember(user);
-        if (success) {
+            if (team.getSize() > 1) {
+                return false;
+            }
+            delete(team.getId());
+        } else {
+            team.removeMember(user);
             teamRepository.saveAndFlush(team);
         }
-        return success;
-
+        return true;
     }
 }
