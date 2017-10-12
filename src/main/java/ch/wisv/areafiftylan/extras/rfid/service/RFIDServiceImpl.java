@@ -95,6 +95,17 @@ public class RFIDServiceImpl implements RFIDService {
         return rfidLinkRepository.findByTicketId(ticketId).isPresent();
     }
 
+    @Override
+    public boolean userHasLinkedTicket (String userEmail) {
+        Collection<Ticket> allUsersTickets = ticketService.findValidTicketsByOwnerEmail(userEmail);
+        for (Ticket ticket : allUsersTickets) {
+            if (isTicketLinked(ticket.getId())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private boolean isValidRfid(String rfid) {
         return rfid.length() == RFID_CHAR_COUNT;
     }

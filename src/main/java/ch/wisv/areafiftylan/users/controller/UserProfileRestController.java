@@ -17,11 +17,12 @@
 
 package ch.wisv.areafiftylan.users.controller;
 
+import ch.wisv.areafiftylan.exception.TicketAlreadyLinkedException;
+import ch.wisv.areafiftylan.extras.rfid.service.RFIDService;
 import ch.wisv.areafiftylan.users.model.Profile;
 import ch.wisv.areafiftylan.users.model.ProfileDTO;
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.users.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -36,10 +37,11 @@ import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEnt
 public class UserProfileRestController {
 
     private final UserService userService;
+    private final RFIDService rfidService;
 
-    @Autowired
-    UserProfileRestController(UserService userService) {
+    UserProfileRestController(UserService userService, RFIDService rfidService) {
         this.userService = userService;
+        this.rfidService = rfidService;
     }
 
     /**
@@ -69,7 +71,8 @@ public class UserProfileRestController {
      */
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/current/profile")
-    public ResponseEntity<?> addProfile(@AuthenticationPrincipal User user, @Validated @RequestBody ProfileDTO input) {
+    public ResponseEntity<?> addProfile(@AuthenticationPrincipal User user, @Validated @RequestBody ProfileDTO input) throws TicketAlreadyLinkedException {
+        authenticationEditBirthday(input, user);
         return this.addProfile(user.getId(), input);
     }
 
@@ -83,9 +86,9 @@ public class UserProfileRestController {
      */
     @PreAuthorize("@currentUserServiceImpl.canAccessUser(principal, #userId)")
     @PutMapping("/{userId}/profile")
-    public ResponseEntity<?> changeProfile(@PathVariable Long userId, @Validated @RequestBody ProfileDTO input) {
+    public ResponseEntity<?> changeProfile(@PathVariable Long userId, @Validated @RequestBody ProfileDTO input) throws TicketAlreadyLinkedException {
+        authenticationEditBirthday(input, userService.getUserById(userId));
         User user = userService.changeProfile(userId, input);
-
         return createResponseEntity(HttpStatus.OK, "Profile successfully updated", user.getProfile());
     }
 
@@ -101,5 +104,13 @@ public class UserProfileRestController {
     public ResponseEntity<?> resetProfile(@PathVariable Long userId) {
         Profile profile = userService.resetProfile(userId);
         return createResponseEntity(HttpStatus.OK, "Profile successfully reset", profile);
+    }
+
+    private void authenticationEditBirthday (ProfileDTO profileDTO, User currentUser) throws TicketAlreadyLinkedException {
+        if (profileDTO.getBirthday() != currentUser.getProfile().getBirthday()) {
+            if(rfidService.userHasLinkedTicket(currentUser.getEmail())) {
+                throw new TicketAlreadyLinkedException();
+            }
+        }
     }
 }
