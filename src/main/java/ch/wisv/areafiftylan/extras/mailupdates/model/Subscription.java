@@ -25,10 +25,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.validator.constraints.Email;
 
 /**
  * Used to gather emails from the frontend, to allow interested users
- * to receive emails about the vent.
+ * to receive emails about the event.
  *
  * @author Jurriaan Den Toonder Created on 23-10-17
  */
@@ -43,6 +44,7 @@ public class Subscription {
   Long id;
 
   @NonNull
+  @Email(message = "Email should be valid!")
   String email;
 
 }

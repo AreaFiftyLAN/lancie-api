@@ -17,25 +17,16 @@
 
 package ch.wisv.areafiftylan.extras.mailupdates.controller;
 
+import ch.wisv.areafiftylan.exception.SubscriptionNotFoundException;
+import ch.wisv.areafiftylan.extras.mailupdates.model.Subscription;
+import ch.wisv.areafiftylan.extras.mailupdates.service.SubscriptionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
-
-import javax.websocket.server.PathParam;
-
-import ch.wisv.areafiftylan.exception.SubscriptionNotFoundException;
-import ch.wisv.areafiftylan.extras.mailupdates.model.Subscription;
-import ch.wisv.areafiftylan.extras.mailupdates.service.SubscriptionService;
 
 import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEntity;
 
@@ -60,7 +51,7 @@ public class SubscriptionController {
 
   @GetMapping("/{id}")
   @PreAuthorize("hasRole('COMMITTEE')")
-  public Subscription getSubscriptionById(@PathParam("id") Long id) {
+  public Subscription getSubscriptionById(@PathVariable Long id) {
     return subscriptionService.getSubscriptionById(id);
   }
 
@@ -72,7 +63,7 @@ public class SubscriptionController {
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<?> removeSubscription(@PathParam("id") Long id) {
+  public ResponseEntity<?> removeSubscription(@PathVariable Long id) {
     subscriptionService.removeSubscription(id);
     return createResponseEntity(HttpStatus.OK,
         "Successfully removed the subscription with id: " + id);

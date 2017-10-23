@@ -17,15 +17,13 @@
 
 package ch.wisv.areafiftylan.extras.mailupdates.service;
 
+import ch.wisv.areafiftylan.exception.SubscriptionNotFoundException;
+import ch.wisv.areafiftylan.extras.mailupdates.model.Subscription;
+import ch.wisv.areafiftylan.extras.mailupdates.model.SubscriptionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
-import java.util.Optional;
-
-import ch.wisv.areafiftylan.exception.SubscriptionNotFoundException;
-import ch.wisv.areafiftylan.extras.mailupdates.model.Subscription;
-import ch.wisv.areafiftylan.extras.mailupdates.model.SubscriptionRepository;
 
 /**
  * @author Jurriaan Den Toonder Created on 23-10-17
@@ -61,21 +59,13 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
   @Override
   public Subscription getSubscriptionByEmail(String email) {
-    Optional<Subscription> subscription = subscriptionRepository.findByEmail(email);
-    if (!subscription.isPresent()) {
-      throw new SubscriptionNotFoundException("Could not find subscription with email " + email);
-    } else {
-      return subscription.get();
-    }
+    return subscriptionRepository.findByEmail(email)
+            .orElseThrow(() -> new SubscriptionNotFoundException("Could not find subscription with email " + email));
   }
 
   @Override
   public Subscription getSubscriptionById(Long id) {
-    Optional<Subscription> subscription = subscriptionRepository.findById(id);
-    if (!subscription.isPresent()) {
-      throw new SubscriptionNotFoundException("Could not find subscription with id " + id);
-    } else {
-      return subscription.get();
-    }
+    return subscriptionRepository.findById(id)
+            .orElseThrow(() -> new SubscriptionNotFoundException("Could not find subscription with id " + id));
   }
 }
