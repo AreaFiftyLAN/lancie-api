@@ -25,13 +25,9 @@ import ch.wisv.areafiftylan.extras.mailupdates.model.Subscription;
  * @author Jurriaan Den Toonder Created on 23-10-17
  */
 public interface SubscriptionService {
-  Subscription getSubscriptionByEmail(String email);
-
-  Subscription getSubscriptionById(Long id);
-
   Subscription addSubscription(String email);
 
-  void removeSubscription(Long id);
+  void removeSubscription(String email);
 
   Collection<Subscription> getSubscriptions();
 }

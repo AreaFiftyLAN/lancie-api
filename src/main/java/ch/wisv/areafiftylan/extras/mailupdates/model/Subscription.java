@@ -17,15 +17,16 @@
 
 package ch.wisv.areafiftylan.extras.mailupdates.model;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.validator.constraints.Email;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 
 /**
  * Used to gather emails from the frontend, to allow interested users
@@ -45,6 +46,7 @@ public class Subscription {
 
   @NonNull
   @Email(message = "Email should be valid!")
+  @Column(unique = true)
   String email;
 
 }

@@ -49,12 +49,6 @@ public class SubscriptionController {
     return subscriptionService.getSubscriptions();
   }
 
-  @GetMapping("/{id}")
-  @PreAuthorize("hasRole('COMMITTEE')")
-  public Subscription getSubscriptionById(@PathVariable Long id) {
-    return subscriptionService.getSubscriptionById(id);
-  }
-
   @PostMapping
   public ResponseEntity<?> addSubscription(@RequestBody String email) {
     subscriptionService.addSubscription(email);
@@ -62,11 +56,11 @@ public class SubscriptionController {
         "Successfully added " + email + " to the subscriptions list.");
   }
 
-  @DeleteMapping("/{id}")
-  public ResponseEntity<?> removeSubscription(@PathVariable Long id) {
-    subscriptionService.removeSubscription(id);
+  @DeleteMapping
+  public ResponseEntity<?> removeSubscription(@RequestBody String email) {
+    subscriptionService.removeSubscription(email);
     return createResponseEntity(HttpStatus.OK,
-        "Successfully removed the subscription with id: " + id);
+        "Successfully removed the subscription with email: " + email);
   }
 
   @ExceptionHandler(SubscriptionNotFoundException.class)

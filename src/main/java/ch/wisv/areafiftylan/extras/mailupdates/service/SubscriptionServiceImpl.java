@@ -39,33 +39,20 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
   @Override
   public Subscription addSubscription(String email) {
-    try {
-      return getSubscriptionByEmail(email);
-    } catch (SubscriptionNotFoundException ignored) {}
-
     Subscription newSubscription = new Subscription(email);
     return subscriptionRepository.saveAndFlush(newSubscription);
   }
 
   @Override
-  public void removeSubscription(Long id) {
-    subscriptionRepository.delete(id);
+  public void removeSubscription(String email) {
+    Subscription subscription = subscriptionRepository
+            .findByEmail(email)
+            .orElseThrow(() -> new SubscriptionNotFoundException("Could not find subscription with email " + email));
+    subscriptionRepository.delete(subscription.getId());
   }
 
   @Override
   public Collection<Subscription> getSubscriptions() {
     return subscriptionRepository.findAll();
-  }
-
-  @Override
-  public Subscription getSubscriptionByEmail(String email) {
-    return subscriptionRepository.findByEmail(email)
-            .orElseThrow(() -> new SubscriptionNotFoundException("Could not find subscription with email " + email));
-  }
-
-  @Override
-  public Subscription getSubscriptionById(Long id) {
-    return subscriptionRepository.findById(id)
-            .orElseThrow(() -> new SubscriptionNotFoundException("Could not find subscription with id " + id));
   }
 }
