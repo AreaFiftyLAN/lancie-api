@@ -86,7 +86,7 @@ public class SubscriptionController {
 
   @ExceptionHandler(DataIntegrityViolationException.class)
   public ResponseEntity<?> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
-    return createResponseEntity(HttpStatus.BAD_REQUEST, "You have already subscribed with that email address!");
+    return createResponseEntity(HttpStatus.CONFLICT, "You have already subscribed with that email address!");
   }
 
 }
