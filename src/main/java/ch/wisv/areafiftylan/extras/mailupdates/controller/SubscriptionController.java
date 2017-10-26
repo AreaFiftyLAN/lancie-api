@@ -26,7 +26,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 import java.util.Collection;
+import java.util.Set;
 
 import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEntity;
 
@@ -66,6 +69,13 @@ public class SubscriptionController {
   @ExceptionHandler(SubscriptionNotFoundException.class)
   public ResponseEntity<?> handleSubscriptionNotFoundException(SubscriptionNotFoundException ex) {
     return createResponseEntity(HttpStatus.NOT_FOUND, ex.getMessage());
+  }
+
+  @ExceptionHandler(ConstraintViolationException.class)
+  public ResponseEntity<?> handleConstraintViolationException(ConstraintViolationException ex) {
+    Set<ConstraintViolation<?>> violations = ex.getConstraintViolations();
+    ConstraintViolation<?> violation = violations.iterator().next();
+    return createResponseEntity(HttpStatus.BAD_REQUEST, violation.getMessage());
   }
 
 }
