@@ -19,6 +19,7 @@ package ch.wisv.areafiftylan.extras.mailupdates.controller;
 
 import ch.wisv.areafiftylan.exception.SubscriptionNotFoundException;
 import ch.wisv.areafiftylan.extras.mailupdates.model.Subscription;
+import ch.wisv.areafiftylan.extras.mailupdates.model.SubscriptionDTO;
 import ch.wisv.areafiftylan.extras.mailupdates.service.SubscriptionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -53,14 +54,16 @@ public class SubscriptionController {
   }
 
   @PostMapping
-  public ResponseEntity<?> addSubscription(@RequestBody String email) {
+  public ResponseEntity<?> addSubscription(@RequestBody SubscriptionDTO subscriptionDTO) {
+    String email = subscriptionDTO.getEmail();
     subscriptionService.addSubscription(email);
     return createResponseEntity(HttpStatus.OK,
         "Successfully added " + email + " to the subscriptions list.");
   }
 
   @DeleteMapping
-  public ResponseEntity<?> removeSubscription(@RequestBody String email) {
+  public ResponseEntity<?> removeSubscription(@RequestBody SubscriptionDTO subscriptionDTO) {
+    String email = subscriptionDTO.getEmail();
     subscriptionService.removeSubscription(email);
     return createResponseEntity(HttpStatus.OK,
         "Successfully removed the subscription with email: " + email);
