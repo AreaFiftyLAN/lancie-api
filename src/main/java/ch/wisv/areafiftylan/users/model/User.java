@@ -80,8 +80,9 @@ public class User implements Serializable, UserDetails {
     @JsonIgnore
     private boolean enabled = true;
 
-    // This method is created to allow logging is using the email field
+    // This method is created to allow logging in using the email field
     @Override
+    @JsonIgnore
     public String getUsername() {
         return email;
     }
