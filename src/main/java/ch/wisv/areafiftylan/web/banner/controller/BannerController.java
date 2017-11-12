@@ -30,8 +30,9 @@ public class BannerController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
-    public Collection<Banner> getBanners() {
-        return bannerService.getAllBanners();
+    public ResponseEntity<?> getBanners() {
+        Collection<Banner> banners = bannerService.getAllBanners();
+        return new ResponseEntity<>(banners, HttpStatus.OK);
     }
 
     /**
