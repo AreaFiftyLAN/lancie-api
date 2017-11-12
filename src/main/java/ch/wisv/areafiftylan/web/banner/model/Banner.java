@@ -7,7 +7,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import java.time.LocalDate;
+import java.sql.Date;
 
 @Entity
 @Data
@@ -21,9 +21,7 @@ public class Banner {
     @Column(columnDefinition = "TEXT")
     private String text;
 
-    @Column(columnDefinition = "DATE")
-    private LocalDate startDate;
+    private Date startDate;
 
-    @Column(columnDefinition = "DATE")
-    private LocalDate endDate;
+    private Date endDate;
 }

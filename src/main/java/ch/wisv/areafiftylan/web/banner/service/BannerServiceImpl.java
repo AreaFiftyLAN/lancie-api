@@ -5,6 +5,7 @@ import ch.wisv.areafiftylan.exception.ConflictingDateRangeException;
 import ch.wisv.areafiftylan.web.banner.model.Banner;
 import org.springframework.stereotype.Service;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.util.Collection;
 
@@ -24,7 +25,7 @@ public class BannerServiceImpl implements BannerService {
 
     @Override
     public Banner getCurrentbanner() {
-        LocalDate now = LocalDate.now();
+        Date now = Date.valueOf(LocalDate.now());
         return bannerRepository.findByStartDateGreaterThanEqualAndEndDateLessThan(now, now)
                 .orElseThrow(BannerNotFoundException::new);
     }
@@ -57,7 +58,7 @@ public class BannerServiceImpl implements BannerService {
         bannerRepository.deleteAll();
     }
 
-    private boolean hasConflictingDates(LocalDate startDate, LocalDate endDate) {
+    private boolean hasConflictingDates(Date startDate, Date endDate) {
         // ... WHERE new_end >= existing_start AND new_start < existing_end ;
         return bannerRepository.findByStartDateGreaterThanEqualAndEndDateLessThan(endDate, startDate).isPresent();
     }
