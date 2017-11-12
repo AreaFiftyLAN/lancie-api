@@ -70,7 +70,7 @@ public class BannerController {
      * @return the updated banner
      */
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/{bannerId}")
+    @PostMapping("/{bannerId}")
     public Banner updateBanner(@PathVariable Long bannerId, @RequestBody Banner banner) {
         return bannerService.update(bannerId, banner);
     }
