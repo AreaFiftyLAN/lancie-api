@@ -36,6 +36,8 @@ import ch.wisv.areafiftylan.users.model.Gender;
 import ch.wisv.areafiftylan.users.model.Role;
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.users.service.UserRepository;
+import ch.wisv.areafiftylan.web.banner.model.Banner;
+import ch.wisv.areafiftylan.web.banner.service.BannerRepository;
 import ch.wisv.areafiftylan.web.committee.model.CommitteeMember;
 import ch.wisv.areafiftylan.web.committee.service.CommitteeRepository;
 import ch.wisv.areafiftylan.web.faq.model.FaqPair;
@@ -52,6 +54,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -71,6 +74,7 @@ public class TestDataRunner implements CommandLineRunner {
     private final PossibleConsumptionsRepository consumptionsRepository;
     private final ConsumptionService consumptionService;
 
+    private final BannerRepository bannerRepository;
     private final CommitteeRepository committeeRepository;
     private final FaqRepository faqRepository;
     private final SponsorRepository sponsorRepository;
@@ -81,7 +85,7 @@ public class TestDataRunner implements CommandLineRunner {
                           TeamRepository teamRepository, SeatService seatService,
                           TicketOptionRepository ticketOptionRepository, TicketTypeRepository ticketTypeRepository,
                           RFIDLinkRepository rfidLinkRepository, PossibleConsumptionsRepository consumptionsRepository,
-                          ConsumptionService consumptionService, CommitteeRepository committeeRepository,
+                          ConsumptionService consumptionService, BannerRepository bannerRepository, CommitteeRepository committeeRepository,
                           FaqRepository faqRepository, SponsorRepository sponsorRepository,
                           TournamentRepository tournamentRepository) {
         this.accountRepository = accountRepository;
@@ -93,6 +97,7 @@ public class TestDataRunner implements CommandLineRunner {
         this.rfidLinkRepository = rfidLinkRepository;
         this.consumptionsRepository = consumptionsRepository;
         this.consumptionService = consumptionService;
+        this.bannerRepository = bannerRepository;
         this.committeeRepository = committeeRepository;
         this.faqRepository = faqRepository;
         this.sponsorRepository = sponsorRepository;
@@ -214,6 +219,20 @@ public class TestDataRunner implements CommandLineRunner {
         seatService.reserveSeat("A", 2, ticketCaptain.getId(), false);
         seatService.reserveSeat("B", 1, ticketNormal.getId(), false);
         //endregion Seat
+        //region Banner
+        Date winterBreakStart = Date.valueOf("2017-12-23");
+        Date winterBreakEnd = Date.valueOf("2018-01-07");
+        String winterBreak = "Enjoy the winter break! AreaFiftyLAN isn't far from happening!";
+        Date soonAnnouncementStart = Date.valueOf("2017-02-03");
+        Date soonAnnouncementEnd = Date.valueOf("2018-02-28");
+        String soonAnnouncement = "AreaFiftyLAN starts in less than a month! Make sure to get your tickets!";
+        Date soldOutStart = Date.valueOf("2017-03-01");
+        Date soldOutEnd = Date.valueOf("2018-03-08");
+        String soldOut = "Tickets are sold out!";
+        banner(winterBreak, winterBreakStart, winterBreakEnd);
+        banner(soonAnnouncement, soonAnnouncementStart, soonAnnouncementEnd);
+        banner(soldOut, soldOutStart, soldOutEnd);
+        //endregion Banner
         //region Web Data
         committeeMember(1L, "Chairman", "Mark Rutte", "gavel");
         committeeMember(2L, "Secretary", "Lodewijk Asscher", "chrome-reader-mode");
@@ -288,5 +307,13 @@ public class TestDataRunner implements CommandLineRunner {
         tournament.setPrizes(prizes);
         tournament.setSponsor(sponsor);
         return tournamentRepository.save(tournament);
+    }
+
+    private Banner banner(String text, Date startDate, Date endDate) {
+        Banner banner = new Banner();
+        banner.setText(text);
+        banner.setStartDate(startDate);
+        banner.setEndDate(endDate);
+        return bannerRepository.save(banner);
     }
 }
