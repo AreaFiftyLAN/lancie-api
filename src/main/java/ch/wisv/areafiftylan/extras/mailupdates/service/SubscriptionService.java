@@ -27,7 +27,7 @@ import ch.wisv.areafiftylan.extras.mailupdates.model.Subscription;
 public interface SubscriptionService {
   Subscription addSubscription(String email);
 
-  void removeSubscription(String email);
+  void removeSubscription(Long id);
 
   Collection<Subscription> getSubscriptions();
 }

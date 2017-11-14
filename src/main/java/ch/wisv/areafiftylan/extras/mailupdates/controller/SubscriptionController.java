@@ -64,12 +64,11 @@ public class SubscriptionController {
         "Successfully added " + email + " to the subscriptions list.");
   }
 
-  @DeleteMapping
-  public ResponseEntity<?> removeSubscription(@RequestBody SubscriptionDTO subscriptionDTO) {
-    String email = subscriptionDTO.getEmail();
-    subscriptionService.removeSubscription(email);
+  @DeleteMapping("/{id}")
+  public ResponseEntity<?> removeSubscription(@PathVariable Long id) {
+    subscriptionService.removeSubscription(id);
     return createResponseEntity(HttpStatus.OK,
-        "Successfully removed the subscription with email: " + email);
+        "Successfully removed the subscription with ID: " + id);
   }
 
   @ExceptionHandler(SubscriptionNotFoundException.class)

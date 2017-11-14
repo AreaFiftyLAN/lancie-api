@@ -44,10 +44,10 @@ public class SubscriptionServiceImpl implements SubscriptionService {
   }
 
   @Override
-  public void removeSubscription(String email) {
+  public void removeSubscription(Long id) {
     Subscription subscription = subscriptionRepository
-            .findByEmail(email)
-            .orElseThrow(() -> new SubscriptionNotFoundException("Could not find subscription with email " + email));
+            .findById(id)
+            .orElseThrow(() -> new SubscriptionNotFoundException("Could not find subscription with ID " + id));
     subscriptionRepository.delete(subscription.getId());
   }
 
