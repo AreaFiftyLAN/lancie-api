@@ -76,13 +76,6 @@ public class SubscriptionController {
     return createResponseEntity(HttpStatus.NOT_FOUND, ex.getMessage());
   }
 
-  @ExceptionHandler(ConstraintViolationException.class)
-  public ResponseEntity<?> handleConstraintViolationException(ConstraintViolationException ex) {
-    Set<ConstraintViolation<?>> violations = ex.getConstraintViolations();
-    ConstraintViolation<?> violation = violations.iterator().next();
-    return createResponseEntity(HttpStatus.BAD_REQUEST, violation.getMessage());
-  }
-
   @ExceptionHandler(DataIntegrityViolationException.class)
   public ResponseEntity<?> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
     return createResponseEntity(HttpStatus.CONFLICT, "You have already subscribed with that email address!");
