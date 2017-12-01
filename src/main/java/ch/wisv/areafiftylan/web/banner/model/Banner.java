@@ -3,7 +3,6 @@ package ch.wisv.areafiftylan.web.banner.model;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -18,7 +17,6 @@ public class Banner {
     @GeneratedValue
     private Long id;
 
-    @Column(columnDefinition = "TEXT")
     private String text;
 
     private Date startDate;
