@@ -10,7 +10,7 @@ import java.util.Optional;
 @Repository
 public interface BannerRepository extends JpaRepository<Banner, Long> {
 
-    // [Start, End)
-    Optional<Banner> findByStartDateGreaterThanEqualAndEndDateLessThan(Date dateGreater, Date dateLess);
+    // Note that the latest inserted is returned in case of multiple results.
+    Optional<Banner> findFirstByStartDateBeforeAndEndDateAfterOrderByIdDesc(Date dateGreater, Date dateLess);
 
 }

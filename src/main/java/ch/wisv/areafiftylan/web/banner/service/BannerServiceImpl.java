@@ -26,13 +26,13 @@ public class BannerServiceImpl implements BannerService {
     @Override
     public Banner getCurrentbanner() {
         Date now = Date.valueOf(LocalDate.now());
-        return bannerRepository.findByStartDateGreaterThanEqualAndEndDateLessThan(now, now)
+        return bannerRepository.findFirstByStartDateBeforeAndEndDateAfterOrderByIdDesc(now, now)
                 .orElseThrow(BannerNotFoundException::new);
     }
 
     @Override
     public Banner addBanner(Banner banner) {
-        if (hasConflictingDates(banner.getStartDate(), banner.getEndDate()))
+        if (hasConflictingDates(banner))
             throw new ConflictingDateRangeException();
 
         return bannerRepository.save(banner);
@@ -40,12 +40,13 @@ public class BannerServiceImpl implements BannerService {
 
     @Override
     public Banner update(Long bannerId, Banner banner) {
-        Banner current = bannerRepository.findOne(bannerId);
+        if (!bannerRepository.exists(bannerId))
+            throw new BannerNotFoundException();
 
-        if (hasConflictingDates(banner.getStartDate(), banner.getEndDate()))
+        if (hasConflictingDates(banner))
             throw new ConflictingDateRangeException();
 
-        return bannerRepository.saveAndFlush(current);
+        return bannerRepository.saveAndFlush(banner);
     }
 
     @Override
@@ -58,8 +59,8 @@ public class BannerServiceImpl implements BannerService {
         bannerRepository.deleteAll();
     }
 
-    private boolean hasConflictingDates(Date startDate, Date endDate) {
+    private boolean hasConflictingDates(Banner banner) {
         // ... WHERE new_end >= existing_start AND new_start < existing_end ;
-        return bannerRepository.findByStartDateGreaterThanEqualAndEndDateLessThan(endDate, startDate).isPresent();
+        return bannerRepository.findFirstByStartDateBeforeAndEndDateAfterOrderByIdDesc(banner.getEndDate(), banner.getStartDate()).get().equals(banner);
     }
 }
