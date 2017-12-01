@@ -44,7 +44,7 @@ public class BannerController {
     @GetMapping("/current")
     public ResponseEntity<?> getCurrentBanner() {
         Banner currentBanner = bannerService.getCurrentbanner();
-        return new ResponseEntity<>(currentBanner, HttpStatus.OK);
+        return createResponseEntity(HttpStatus.OK, "Found a corresponding banner.", currentBanner);
     }
 
     /**
