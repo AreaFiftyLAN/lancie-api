@@ -223,10 +223,10 @@ public class TestDataRunner implements CommandLineRunner {
         Date winterBreakStart = Date.valueOf("2017-12-23");
         Date winterBreakEnd = Date.valueOf("2018-01-07");
         String winterBreak = "Enjoy the winter break! AreaFiftyLAN isn't far from happening!";
-        Date soonAnnouncementStart = Date.valueOf("2017-02-03");
+        Date soonAnnouncementStart = Date.valueOf("2018-02-03");
         Date soonAnnouncementEnd = Date.valueOf("2018-02-28");
         String soonAnnouncement = "AreaFiftyLAN starts in less than a month! Make sure to get your tickets!";
-        Date soldOutStart = Date.valueOf("2017-03-01");
+        Date soldOutStart = Date.valueOf("2018-03-01");
         Date soldOutEnd = Date.valueOf("2018-03-08");
         String soldOut = "Tickets are sold out!";
         banner(winterBreak, winterBreakStart, winterBreakEnd);
