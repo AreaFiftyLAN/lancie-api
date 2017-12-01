@@ -72,8 +72,10 @@ public class BannerController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{bannerId}")
-    public Banner updateBanner(@PathVariable Long bannerId, @RequestBody Banner banner) {
-        return bannerService.update(bannerId, banner);
+    public ResponseEntity<?> updateBanner(@PathVariable Long bannerId, @RequestBody Banner banner) {
+        Banner updated = bannerService.update(bannerId, banner);
+        return createResponseEntity(HttpStatus.OK,
+                "Successfully updated a banner with ID=" + bannerId, updated);
     }
 
     /**
