@@ -21,7 +21,6 @@ import ch.wisv.areafiftylan.exception.SubscriptionNotFoundException;
 import ch.wisv.areafiftylan.extras.mailupdates.model.Subscription;
 import ch.wisv.areafiftylan.extras.mailupdates.model.SubscriptionDTO;
 import ch.wisv.areafiftylan.extras.mailupdates.service.SubscriptionService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -29,11 +28,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-
 import java.util.Collection;
-import java.util.Set;
 
 import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEntity;
 
