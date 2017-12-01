@@ -75,7 +75,7 @@ public class BannerController {
     public ResponseEntity<?> updateBanner(@PathVariable Long bannerId, @RequestBody Banner banner) {
         Banner updated = bannerService.update(bannerId, banner);
         return createResponseEntity(HttpStatus.OK,
-                "Successfully updated a banner with ID=" + bannerId, updated);
+                "Successfully updated the banner with ID=" + bannerId, updated);
     }
 
     /**
