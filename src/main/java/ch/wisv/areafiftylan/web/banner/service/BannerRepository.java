@@ -13,7 +13,4 @@ public interface BannerRepository extends JpaRepository<Banner, Long> {
     // Note that the latest inserted is returned in case of multiple results.
     Optional<Banner> findFirstByStartDateLessThanEqualAndEndDateGreaterThanEqualOrderByIdDesc(Date dateGreater, Date dateLess);
 
-    Optional<Banner> findByEndDateGreaterThanEqual(Date date);
-
-    Optional<Banner> findByStartDateGreaterThanEqual(Date date);
 }

@@ -1,7 +1,6 @@
 package ch.wisv.areafiftylan.web.banner.service;
 
 import ch.wisv.areafiftylan.exception.BannerNotFoundException;
-import ch.wisv.areafiftylan.exception.ConflictingDateRangeException;
 import ch.wisv.areafiftylan.web.banner.model.Banner;
 import org.springframework.stereotype.Service;
 
@@ -32,9 +31,6 @@ public class BannerServiceImpl implements BannerService {
 
     @Override
     public Banner addBanner(Banner banner) {
-        if (hasConflictingDates(banner))
-            throw new ConflictingDateRangeException();
-
         return bannerRepository.save(banner);
     }
 
@@ -54,11 +50,5 @@ public class BannerServiceImpl implements BannerService {
     @Override
     public void deleteBanners() {
         bannerRepository.deleteAll();
-    }
-
-    private boolean hasConflictingDates(Banner banner) {
-        // ... WHERE new_end >= existing_start AND new_start < existing_end ;
-        return bannerRepository.findByEndDateGreaterThanEqual(banner.getStartDate()).isPresent()
-                || bannerRepository.findByStartDateGreaterThanEqual(banner.getEndDate()).isPresent();
     }
 }
