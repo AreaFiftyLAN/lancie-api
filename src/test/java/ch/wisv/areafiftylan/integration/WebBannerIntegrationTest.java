@@ -164,6 +164,29 @@ public class WebBannerIntegrationTest extends XAuthIntegrationTest {
         assertEquals(oldSize + 1, bannerRepository.findAll().size());
     }
 
+    /**
+     * Note: this test is dependent on a banner existing (done in the setup) that
+     * partly covers the date range of the newly created banner.
+     */
+    @Test
+    public void testAddWithConflictingDates() {
+        Banner newBanner = new Banner();
+        newBanner.setStartDate(Date.valueOf("2017-02-04"));
+        newBanner.setEndDate(Date.valueOf("2018-02-27"));
+        newBanner.setText("Conflicting Dates");
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(admin)).
+        when().
+            body(newBanner).
+            contentType(ContentType.JSON).
+            post(BANNER_ENDPOINT).
+        then().
+            statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR).
+            body("message", equalTo("An entity covering the given date range already exists"));
+        //@formatter:on
+    }
+
     //endregion
     //region POST update banner
     @Test

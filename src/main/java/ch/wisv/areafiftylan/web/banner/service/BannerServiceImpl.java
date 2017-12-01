@@ -43,9 +43,6 @@ public class BannerServiceImpl implements BannerService {
         if (!bannerRepository.exists(bannerId))
             throw new BannerNotFoundException();
 
-        if (hasConflictingDates(banner))
-            throw new ConflictingDateRangeException();
-
         return bannerRepository.saveAndFlush(banner);
     }
 
@@ -61,6 +58,6 @@ public class BannerServiceImpl implements BannerService {
 
     private boolean hasConflictingDates(Banner banner) {
         // ... WHERE new_end >= existing_start AND new_start < existing_end ;
-        return bannerRepository.findFirstByStartDateBeforeAndEndDateAfterOrderByIdDesc(banner.getEndDate(), banner.getStartDate()).get().equals(banner);
+        return bannerRepository.findFirstByStartDateBeforeAndEndDateAfterOrderByIdDesc(banner.getStartDate(), banner.getEndDate()).isPresent();
     }
 }
