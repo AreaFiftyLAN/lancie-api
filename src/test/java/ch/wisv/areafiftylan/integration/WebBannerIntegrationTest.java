@@ -58,7 +58,7 @@ public class WebBannerIntegrationTest extends XAuthIntegrationTest {
 
     //region GET all banners
     @Test
-    public void testGetBannersWithoutPermissions() {
+    public void testGetBannersAsUser() {
         //@formatter:off
         given().
             header(getXAuthTokenHeaderForUser(user)).
@@ -71,7 +71,7 @@ public class WebBannerIntegrationTest extends XAuthIntegrationTest {
     }
 
     @Test
-    public void testGetBannerWithPermissions() throws JsonProcessingException {
+    public void testGetBannerAsAdmin() throws JsonProcessingException {
         String expected = mapper.writeValueAsString(banners);
 
         //@formatter:off
@@ -128,7 +128,7 @@ public class WebBannerIntegrationTest extends XAuthIntegrationTest {
     //endregion
     //region POST add banner
     @Test
-    public void testAddBannerWithoutPermissions() {
+    public void testAddBannerAsUser() {
         //@formatter:off
         given().
             header(getXAuthTokenHeaderForUser(user)).
@@ -143,7 +143,7 @@ public class WebBannerIntegrationTest extends XAuthIntegrationTest {
     }
 
     @Test
-    public void testAddBannerWithPermissions() {
+    public void testAddBannerAsAdmin() {
         int oldSize = bannerRepository.findAll().size();
 
         Banner newBanner = new Banner();
@@ -167,7 +167,7 @@ public class WebBannerIntegrationTest extends XAuthIntegrationTest {
     //endregion
     //region POST update banner
     @Test
-    public void testUpdateBannerWithoutPermissions() {
+    public void testUpdateBannerAsUser() {
         //@formatter:off
         given().
             header(getXAuthTokenHeaderForUser(user)).
@@ -182,7 +182,7 @@ public class WebBannerIntegrationTest extends XAuthIntegrationTest {
     }
 
     @Test
-    public void testUpdateBannerWithPermissions() {
+    public void testUpdateBannerAsAdmin() {
         Banner banner = bannerRepository.findAll().get(0);
         banner.setText("Updated text");
         System.out.println(banner);
@@ -218,7 +218,7 @@ public class WebBannerIntegrationTest extends XAuthIntegrationTest {
     //endregion
     //region DELETE banner
     @Test
-    public void testDeleteBannerWithoutPermissions() {
+    public void testDeleteBannerAsUser() {
         //@formatter:off
         given().
             header(getXAuthTokenHeaderForUser(user)).
@@ -231,7 +231,7 @@ public class WebBannerIntegrationTest extends XAuthIntegrationTest {
     }
 
     @Test
-    public void testDeleteBannerWithPermissions() {
+    public void testDeleteBannerAsAdmin() {
         Long id = bannerRepository.findAll().get(0).getId();
         //@formatter:off
         given().
@@ -248,7 +248,7 @@ public class WebBannerIntegrationTest extends XAuthIntegrationTest {
     //region DELETE all banners
 
     @Test
-    public void testDeleteAllBannersWithoutPermissions() {
+    public void testDeleteAllBannersAsUser() {
         //@formatter:off
         given().
             header(getXAuthTokenHeaderForUser(user)).
@@ -261,7 +261,7 @@ public class WebBannerIntegrationTest extends XAuthIntegrationTest {
     }
 
     @Test
-    public void testDeleteAllBannersWithPermissions() {
+    public void testDeleteAllBannersAsAdmin() {
         //@formatter:off
         given().
             header(getXAuthTokenHeaderForUser(admin)).
