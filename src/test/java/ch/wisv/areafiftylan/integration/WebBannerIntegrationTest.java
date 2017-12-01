@@ -98,8 +98,6 @@ public class WebBannerIntegrationTest extends XAuthIntegrationTest {
 
         bannerRepository.save(banner);
 
-        String expected = mapper.writeValueAsString(banner);
-
         //@formatter:off
         given().
             header(getXAuthTokenHeaderForUser(user)).
@@ -107,7 +105,7 @@ public class WebBannerIntegrationTest extends XAuthIntegrationTest {
             get(BANNER_ENDPOINT + "current").
         then().
             statusCode(HttpStatus.SC_OK).
-            body(equalTo(expected));
+            body("object.text",equalTo(banner.getText()));
         //@formatter:on
     }
 
