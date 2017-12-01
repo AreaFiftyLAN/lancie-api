@@ -148,7 +148,7 @@ public class WebBannerIntegrationTest extends XAuthIntegrationTest {
 
         Banner newBanner = new Banner();
         newBanner.setText("Welcome to AreaFiftyLan");
-        newBanner.setStartDate(Date.valueOf("2017-03-03"));
+        newBanner.setStartDate(Date.valueOf("2018-03-03"));
         newBanner.setEndDate(Date.valueOf("2018-03-28"));
         //@formatter:off
         given().
@@ -221,6 +221,21 @@ public class WebBannerIntegrationTest extends XAuthIntegrationTest {
         //@formatter:on
 
         assertEquals(banner.getText(), bannerRepository.findOne(banner.getId()).getText());
+    }
+
+    @Test
+    public void testUpdateBannerNotFound() {
+        bannerRepository.deleteAll();
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(admin)).
+        when().
+            body(banner).
+            contentType(ContentType.JSON).
+            post(BANNER_ENDPOINT + 1).
+        then().
+            statusCode(HttpStatus.SC_NOT_FOUND);
+        //@formatter:on
     }
 
     //endregion
