@@ -22,9 +22,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
-/**
- * @author Jurriaan Den Toonder Created on 23-10-17
- */
 @Repository
 public interface SubscriptionRepository extends JpaRepository<Subscription, Long> {
   Optional<Subscription> findById(Long id);

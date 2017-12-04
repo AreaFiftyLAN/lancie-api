@@ -21,9 +21,6 @@ import java.util.Collection;
 
 import ch.wisv.areafiftylan.extras.mailupdates.model.Subscription;
 
-/**
- * @author Jurriaan Den Toonder Created on 23-10-17
- */
 public interface SubscriptionService {
   Subscription addSubscription(String email);
 

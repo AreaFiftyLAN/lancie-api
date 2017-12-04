@@ -32,9 +32,6 @@ import java.util.Collection;
 
 import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEntity;
 
-/**
- * @author Jurriaan Den Toonder Created on 23-10-17
- */
 @RestController
 @RequestMapping("/subscriptions")
 public class SubscriptionController {

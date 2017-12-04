@@ -25,9 +25,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 
-/**
- * @author Jurriaan Den Toonder Created on 23-10-17
- */
 @Service
 public class SubscriptionServiceImpl implements SubscriptionService {
   private final SubscriptionRepository subscriptionRepository;

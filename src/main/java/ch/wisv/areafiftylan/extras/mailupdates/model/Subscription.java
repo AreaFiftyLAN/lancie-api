@@ -31,8 +31,6 @@ import javax.persistence.Id;
 /**
  * Used to gather emails from the frontend, to allow interested users
  * to receive emails about the event.
- *
- * @author Jurriaan Den Toonder Created on 23-10-17
  */
 @Entity
 @Data
