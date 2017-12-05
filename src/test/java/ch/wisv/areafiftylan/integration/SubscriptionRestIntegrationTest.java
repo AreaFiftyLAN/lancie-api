@@ -151,4 +151,21 @@ public class SubscriptionRestIntegrationTest extends XAuthIntegrationTest {
         .then()
             .statusCode(HttpStatus.SC_NOT_FOUND);
     }
+
+    @Test
+    public void testInvalidEmail() throws Exception {
+        SubscriptionDTO invalidDTO = new SubscriptionDTO();
+        invalidDTO.setEmail("abc");
+
+        given()
+            .body(invalidDTO)
+        .when()
+            .contentType(ContentType.JSON)
+            .post(ENDPOINT)
+        .then()
+            .statusCode(HttpStatus.SC_BAD_REQUEST);
+
+        List<Subscription> expected = new LinkedList<>();
+        assertEquals(expected, subscriptionRepository.findAll());
+    }
 }
