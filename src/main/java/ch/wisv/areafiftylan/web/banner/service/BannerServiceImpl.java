@@ -36,8 +36,9 @@ public class BannerServiceImpl implements BannerService {
 
     @Override
     public Banner update(Long bannerId, Banner banner) {
-        if (!bannerRepository.exists(bannerId))
+        if (!bannerRepository.exists(bannerId)) {
             throw new BannerNotFoundException();
+        }
 
         return bannerRepository.saveAndFlush(banner);
     }
