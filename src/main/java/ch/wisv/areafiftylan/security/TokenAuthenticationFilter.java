@@ -21,6 +21,7 @@ import ch.wisv.areafiftylan.security.token.AuthenticationToken;
 import ch.wisv.areafiftylan.security.token.repository.AuthenticationTokenRepository;
 import ch.wisv.areafiftylan.users.model.User;
 import com.google.common.base.Strings;
+import org.slf4j.MDC;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.web.filter.GenericFilterBean;
@@ -60,6 +61,8 @@ class TokenAuthenticationFilter extends GenericFilterBean {
                     return;
                 } else {
                     User user = authenticationToken.getUser();
+                    // Add email to all logging for this request
+                    MDC.put("user_email", user.getEmail());
                     SecurityContextHolder.getContext()
                             .setAuthentication(new PreAuthenticatedAuthenticationToken(user, "N/A", user.getAuthorities()));
                 }
