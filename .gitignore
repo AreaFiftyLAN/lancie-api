@@ -51,3 +51,6 @@ bower_components
 
 # log folder
 logs/
+
+# JRebel configuration file
+**/rebel.xml

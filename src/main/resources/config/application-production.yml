@@ -1,4 +1,6 @@
-flyway.enabled: true
+flyway:
+  enabled: true
+  locations: ch/wisv/areafiftylan/utils/db/migration
 spring.jpa.hibernate.ddl-auto: validate
 spring.jpa.properties.hibernate.hbm2ddl.auto: none
 logging.config: classpath:log4j2-prod.xml

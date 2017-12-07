@@ -24,6 +24,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import javax.validation.ConstraintViolationException;
+
 import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEntity;
 
 /**
@@ -76,5 +78,12 @@ class GlobalControllerExceptionHandler {
     @ExceptionHandler(TicketAlreadyLinkedException.class)
     public ResponseEntity<?> handleInvalidRFIDException(TicketAlreadyLinkedException e) {
         return createResponseEntity(HttpStatus.CONFLICT, e.getMessage());
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<?> handleConstraintViolationException(ConstraintViolationException ex) {
+        StringBuilder b = new StringBuilder();
+        ex.getConstraintViolations().stream().forEach(c -> b.append(c.getMessage() + '\n'));
+        return createResponseEntity(HttpStatus.BAD_REQUEST, b.toString().substring(0, b.length() - 1));
     }
 }
