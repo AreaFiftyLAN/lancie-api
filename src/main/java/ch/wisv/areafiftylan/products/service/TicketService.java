@@ -75,14 +75,14 @@ public interface TicketService {
      *
      * @param token The token that refers to the TicketTransferToken
      */
-    void transferTicket(String token);
+    Ticket transferTicket(String token);
 
     /**
      * Cancel a ticket transfer
      *
      * @param token The token that refers to the TicketTransferToken
      */
-    void cancelTicketTransfer(String token);
+    Ticket cancelTicketTransfer(String token);
 
     /**
      * Get all tickets over which a user has control. His own, as well as his teammates their tickets if the user is

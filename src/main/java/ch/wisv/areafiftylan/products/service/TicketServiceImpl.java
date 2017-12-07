@@ -198,7 +198,7 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public void transferTicket(String token) {
+    public Ticket transferTicket(String token) {
         TicketTransferToken ttt = getTicketTransferTokenIfValid(token);
         Ticket t = ttt.getTicket();
 
@@ -208,21 +208,20 @@ public class TicketServiceImpl implements TicketService {
 
         User newOwner = ttt.getUser();
         t.setOwner(newOwner);
-
-        ticketRepository.save(t);
+        t = ticketRepository.save(t);
 
         ttt.use();
-
         tttRepository.save(ttt);
+
+        return t;
     }
 
     @Override
-    public void cancelTicketTransfer(String token) {
+    public Ticket cancelTicketTransfer(String token) {
         TicketTransferToken ttt = getTicketTransferTokenIfValid(token);
-
         ttt.revoke();
-
         tttRepository.save(ttt);
+        return ttt.getTicket();
     }
 
     @Override
