@@ -1,6 +1,5 @@
 flyway.enabled: false
 spring.jpa.hibernate.ddl-auto: create
-logging.config: classpath:log4j2.xml
 
 ## AREA FIFTYLAN SETTINGS
 a5l:

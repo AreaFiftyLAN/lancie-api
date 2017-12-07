@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}/}spring.log}"/>
+
+    <springProfile name="dev">
+        <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+        <appender name="ROLLING-FILE"
+                  class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+                <providers>
+                    <timestamp/>
+                    <mdc/> <!-- MDC variables on the Thread will be written as JSON fields-->
+                    <!--<context/> &lt;!&ndash;Outputs entries from logback's context &ndash;&gt;-->
+                    <!--<version/> &lt;!&ndash; Logstash json format version, the @version field in the output&ndash;&gt;-->
+                    <!--<logLevel/>-->
+
+                    <!--<threadName/>-->
+                    <message/>
+
+                    <logstashMarkers/> <!-- Useful so we can add extra information for specific log lines as Markers-->
+                    <arguments/> <!--or through StructuredArguments-->
+
+                    <stackTrace/>
+                </providers>
+            </encoder>
+            <file>${LOG_FILE}</file>
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <fileNamePattern>${LOG_FILE}.%d{yyyy-MM-dd}.log</fileNamePattern>
+            </rollingPolicy>
+        </appender>
+        <root level="ERROR">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ROLLING-FILE"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="prod">
+        <appender name="ROLLING-FILE"
+                  class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+                <providers>
+                    <timestamp/>
+                    <mdc/> <!-- MDC variables on the Thread will be written as JSON fields-->
+                    <!--<context/> &lt;!&ndash;Outputs entries from logback's context &ndash;&gt;-->
+                    <!--<version/> &lt;!&ndash; Logstash json format version, the @version field in the output&ndash;&gt;-->
+                    <!--<logLevel/>-->
+
+                    <!--<threadName/>-->
+                    <message/>
+
+                    <logstashMarkers/> <!-- Useful so we can add extra information for specific log lines as Markers-->
+                    <arguments/> <!--or through StructuredArguments-->
+
+                    <stackTrace/>
+                </providers>
+            </encoder>
+            <file>${LOG_FILE}</file>
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <fileNamePattern>${LOG_FILE}.%d{yyyy-MM-dd}.%i.gz</fileNamePattern>
+                <timeBasedFileNamingAndTriggeringPolicy
+                        class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                    <maxFileSize>10MB</maxFileSize>
+                </timeBasedFileNamingAndTriggeringPolicy>
+            </rollingPolicy>
+        </appender>
+
+        <root level="ERROR">
+            <appender-ref ref="ROLLING-FILE"/>
+        </root>
+    </springProfile>
+
+</configuration>
