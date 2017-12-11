@@ -45,3 +45,6 @@ endpoints:
   enabled: false
   health:
     enabled: true
+  logfile:
+    enabled: true
+    sensitive: true

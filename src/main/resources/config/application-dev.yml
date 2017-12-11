@@ -1,6 +1,10 @@
 flyway.enabled: false
 spring.jpa.hibernate.ddl-auto: create
 
+endpoints:
+  logfile:
+    sensitive: false
+
 ## AREA FIFTYLAN SETTINGS
 a5l:
   paymentReturnUrl: https://localhost:5100/order-check
@@ -16,3 +20,4 @@ a5l:
   orderLimit: 5
   ticketLimit: 200
   orderKeepAlive: 15
+
