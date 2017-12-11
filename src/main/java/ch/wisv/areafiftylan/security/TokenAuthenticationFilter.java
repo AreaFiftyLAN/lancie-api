@@ -50,7 +50,8 @@ class TokenAuthenticationFilter extends GenericFilterBean {
         String xAuth = ((HttpServletRequest) request).getHeader("X-Auth-Token");
 
         if (!Strings.isNullOrEmpty(xAuth)) {
-            Optional<AuthenticationToken> authenticationTokenOptional = authenticationTokenRepository.findByToken(xAuth);
+            Optional<AuthenticationToken> authenticationTokenOptional =
+                    authenticationTokenRepository.findByToken(xAuth);
             if (!authenticationTokenOptional.isPresent()) {
                 ((HttpServletResponse) response).sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token not found");
                 return;
@@ -62,9 +63,9 @@ class TokenAuthenticationFilter extends GenericFilterBean {
                 } else {
                     User user = authenticationToken.getUser();
                     // Add email to all logging for this request
-                    MDC.put("user_email", user.getEmail());
-                    SecurityContextHolder.getContext()
-                            .setAuthentication(new PreAuthenticatedAuthenticationToken(user, "N/A", user.getAuthorities()));
+                    MDC.put("user_id", user.getId().toString());
+                    SecurityContextHolder.getContext().setAuthentication(
+                            new PreAuthenticatedAuthenticationToken(user, "N/A", user.getAuthorities()));
                 }
             }
         }

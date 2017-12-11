@@ -106,12 +106,13 @@ public class AuthenticationController {
         try {
             User user = userService.getUserByEmail(email);
             userService.requestResetPassword(user);
+            log.info("Requested password reset for User {}", user.getId(),
+                    StructuredArguments.v("user_id", user.getId()));
         } catch (UsernameNotFoundException e) {
             log.warn("Password for {} can't be reset, User doesn't exist", email,
                     StructuredArguments.v("user_email", email));
         }
 
-        log.info("Requested password reset on email {}.", email, StructuredArguments.v("user_email", email));
 
         return createResponseEntity(HttpStatus.OK,
                 "If you're registered, a password reset link has been sent to " + email);

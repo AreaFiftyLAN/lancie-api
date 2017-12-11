@@ -159,7 +159,7 @@ public class OrderRestController {
     public ResponseEntity<?> assignOrderToUser(@AuthenticationPrincipal User user, @PathVariable Long orderId) {
         Order order = orderService.assignOrderToUser(orderId, user.getEmail());
 
-        log.info(controllerMarker, "Order {} assigned to {}", order.getId(), user.getEmail(),
+        log.info(controllerMarker, "Order {} assigned to {}", order.getId(), user.getId(),
                 StructuredArguments.v("order_id", order.getId()));
 
         return createResponseEntity(HttpStatus.OK, "Order successfully attached to User", order);

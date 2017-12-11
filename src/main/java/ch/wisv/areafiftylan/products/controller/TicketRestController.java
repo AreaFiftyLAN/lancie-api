@@ -73,7 +73,7 @@ public class TicketRestController {
     public ResponseEntity<?> transferTicket(@RequestBody String token, @AuthenticationPrincipal User user) {
         Ticket ticket = ticketService.transferTicket(token);
 
-        log.info(controllerMarker, "Ticket {} transferred to {}", ticket.getId(), user.getEmail(),
+        log.info(controllerMarker, "Ticket {} transferred to User ID: {}", ticket.getId(), user.getId(),
                 StructuredArguments.v("ticket_id", ticket.getId()),
                 StructuredArguments.v("ticket_type", ticket.getType()));
 
