@@ -1,5 +1,6 @@
 package ch.wisv.areafiftylan.web.tournament.controller;
 
+import ch.wisv.areafiftylan.exception.TournamentNotFoundException;
 import ch.wisv.areafiftylan.web.tournament.model.Tournament;
 import ch.wisv.areafiftylan.web.tournament.model.TournamentType;
 import ch.wisv.areafiftylan.web.tournament.service.TournamentService;
@@ -40,6 +41,29 @@ public class TournamentController {
     ResponseEntity<?> addTournament(@RequestBody Tournament tournament) {
         tournament = tournamentService.addTournament(tournament);
         return createResponseEntity(HttpStatus.CREATED, "Tournament added.", tournament);
+    }
+
+    @PostMapping("/{id}")
+    @PreAuthorize("hasRole('COMMITTEE')")
+    ResponseEntity<?> editTournament(@RequestBody Tournament tournament) {
+        Tournament dbTournament = tournamentService.getTournaments()
+                .stream()
+                .filter(tournament1 -> tournament1.getId().equals(tournament.getId()))
+                .findFirst()
+                .orElseThrow(TournamentNotFoundException::new);
+
+        // This is a bit double, but it ensures we update an existing tournament
+        dbTournament.setButtonImagePath(tournament.getButtonImagePath());
+        dbTournament.setButtonTitle(tournament.getButtonTitle());
+        dbTournament.setDescription(tournament.getDescription());
+        dbTournament.setFormat(tournament.getFormat());
+        dbTournament.setHeaderTitle(tournament.getHeaderTitle());
+        dbTournament.setPrizes(tournament.getPrizes());
+        dbTournament.setSponsor(tournament.getSponsor());
+        dbTournament.setType(tournament.getType());
+
+        dbTournament = tournamentService.addTournament(dbTournament);
+        return createResponseEntity(HttpStatus.CREATED, "Tournament updated.", dbTournament);
     }
 
     @DeleteMapping("/{id}")
