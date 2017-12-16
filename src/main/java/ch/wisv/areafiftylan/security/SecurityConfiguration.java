@@ -96,7 +96,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         http.addFilterBefore(new CORSFilter(), JsonLoginFilter.class);
         // Set the login point to get X-Auth-Tokens
         http.addFilterAfter(new JsonLoginFilter(this.authenticationManagerBean(),
-                        new JsonLoginAuthenticationSuccessHandler(authenticationService)),
+                        new JsonLoginAuthenticationAttemptHandler(authenticationService)),
                 UsernamePasswordAuthenticationFilter.class);
         // Add support for Token-base authentication
         http.addFilterAfter(new TokenAuthenticationFilter(authenticationTokenRepository),
