@@ -26,6 +26,10 @@ import ch.wisv.areafiftylan.products.service.OrderService;
 import ch.wisv.areafiftylan.products.service.TicketService;
 import ch.wisv.areafiftylan.security.token.TicketTransferToken;
 import ch.wisv.areafiftylan.users.model.User;
+import lombok.extern.slf4j.Slf4j;
+import net.logstash.logback.argument.StructuredArguments;
+import net.logstash.logback.marker.Markers;
+import org.slf4j.Marker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,9 +44,12 @@ import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEnt
 
 @RestController
 @RequestMapping(value = "/tickets")
+@Slf4j
 public class TicketRestController {
     private final TicketService ticketService;
     private final OrderService orderService;
+
+    private Marker controllerMarker = Markers.append("controller", "tickets");
 
     @Autowired
     public TicketRestController(TicketService ticketService, OrderService orderService) {
@@ -54,13 +61,21 @@ public class TicketRestController {
     @PostMapping("/transfer/{ticketId}")
     public ResponseEntity<?> requestTicketTransfer(@PathVariable Long ticketId, @RequestBody String goalEmail) {
         TicketTransferToken ttt = ticketService.setupForTransfer(ticketId, goalEmail);
+
+        log.info(controllerMarker, "Ticket {} set up for transfer to {}", ticketId, goalEmail,
+                StructuredArguments.v("ticket_id", ticketId));
+
         return createResponseEntity(HttpStatus.OK, "Ticket successfully set up for transfer.", ttt.getToken());
     }
 
     @PreAuthorize("@currentUserServiceImpl.isTicketReceiver(principal, #token)")
     @PutMapping("/transfer")
-    public ResponseEntity<?> transferTicket(@RequestBody String token) {
-        ticketService.transferTicket(token);
+    public ResponseEntity<?> transferTicket(@RequestBody String token, @AuthenticationPrincipal User user) {
+        Ticket ticket = ticketService.transferTicket(token);
+
+        log.info(controllerMarker, "Ticket {} transferred to User ID: {}", ticket.getId(), user.getId(),
+                StructuredArguments.v("ticket_id", ticket.getId()),
+                StructuredArguments.v("ticket_type", ticket.getType()));
 
         return createResponseEntity(HttpStatus.OK, "Ticket successfully transferred.");
     }
@@ -68,7 +83,10 @@ public class TicketRestController {
     @PreAuthorize("@currentUserServiceImpl.isTicketSender(principal, #token)")
     @DeleteMapping("/transfer")
     public ResponseEntity<?> cancelTicketTransfer(@RequestBody String token) {
-        ticketService.cancelTicketTransfer(token);
+        Ticket ticket = ticketService.cancelTicketTransfer(token);
+
+        log.info(controllerMarker, "Ticket {} transfer cancelled", ticket.getId(),
+                StructuredArguments.v("ticket_id", ticket.getId()));
 
         return createResponseEntity(HttpStatus.OK, "Ticket transfer successfully cancelled.");
     }
@@ -76,8 +94,7 @@ public class TicketRestController {
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/tokens")
     public ResponseEntity<?> getTicketTokensOpenForTransfer(@AuthenticationPrincipal User user) {
-        Collection<TicketTransferToken> tokens =
-                ticketService.getValidTicketTransferTokensByUserEmail(user.getEmail());
+        Collection<TicketTransferToken> tokens = ticketService.getValidTicketTransferTokensByUserEmail(user.getEmail());
 
         return createResponseEntity(HttpStatus.OK, "Ticket transfer tokens successfully retrieved.", tokens);
     }

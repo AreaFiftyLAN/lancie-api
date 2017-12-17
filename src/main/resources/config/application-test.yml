@@ -31,8 +31,6 @@ spring:
 
 server.context-path: /
 
-logging.config: classpath:log4j2-prod.xml
-
 ## AREA FIFTYLAN SETTINGS
 a5l:
   paymentReturnUrl: https://areafiftylan.nl/order-check

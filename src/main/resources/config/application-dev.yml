@@ -1,6 +1,9 @@
 flyway.enabled: false
 spring.jpa.hibernate.ddl-auto: create
-logging.config: classpath:log4j2.xml
+
+endpoints:
+  logfile:
+    sensitive: false
 
 ## AREA FIFTYLAN SETTINGS
 a5l:
@@ -17,3 +20,4 @@ a5l:
   orderLimit: 5
   ticketLimit: 200
   orderKeepAlive: 15
+

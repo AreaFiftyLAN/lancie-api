@@ -42,8 +42,6 @@ repositories {
 configurations {
     // We're using HikariCP instead
     compile.exclude module: "tomcat-jdbc"
-    // We're using Log4j2 instead
-    compile.exclude module: "spring-boot-starter-logging"
 }
 
 dependencies {
@@ -54,7 +52,7 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-mail")
     compile("org.springframework.boot:spring-boot-starter-thymeleaf")
     compile("org.springframework.boot:spring-boot-devtools")
-    compile("org.springframework.boot:spring-boot-starter-log4j2")
+    compile("org.springframework.boot:spring-boot-starter-logging")
     compile("org.springframework.boot:spring-boot-starter-actuator")
     compile("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     compile("com.zaxxer:HikariCP")
@@ -63,6 +61,7 @@ dependencies {
     compile("org.projectlombok:lombok:1.16.18")
     compile("com.google.guava:guava:23.5-jre")
     compile("nl.stil4m:mollie-api:2.7.0")
+    compile("net.logstash.logback:logstash-logback-encoder:4.11")
 
     runtime("org.hsqldb:hsqldb")
     runtime("org.postgresql:postgresql")

@@ -21,6 +21,15 @@ spring:
   jackson:
     date-format: com.fasterxml.jackson.databind.util.ISO8601DateFormat
 
+logging:
+  level:
+    org.springframework.boot: INFO
+    ch.wisv.areafiftylan: INFO
+    org.hibernate.SQL: ERROR
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file: logs/lancie-api.log
+
 server:
   port: 9000
   context-path: /api/v1
@@ -36,3 +45,6 @@ endpoints:
   enabled: false
   health:
     enabled: true
+  logfile:
+    enabled: true
+    sensitive: true

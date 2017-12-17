@@ -27,8 +27,11 @@ import ch.wisv.areafiftylan.products.service.OrderService;
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.utils.view.View;
 import com.fasterxml.jackson.annotation.JsonView;
-import lombok.extern.log4j.Log4j2;
-import org.apache.logging.log4j.Level;
+import lombok.extern.slf4j.Slf4j;
+import net.logstash.logback.argument.StructuredArgument;
+import net.logstash.logback.argument.StructuredArguments;
+import net.logstash.logback.marker.Markers;
+import org.slf4j.Marker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -46,11 +49,13 @@ import java.util.Collection;
 import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEntity;
 
 @RestController
-@Log4j2
+@Slf4j
 @RequestMapping("/orders")
 public class OrderRestController {
 
     private final OrderService orderService;
+
+    private Marker controllerMarker = Markers.append("controller", "orders");
 
     @Autowired
     public OrderRestController(OrderService orderService) {
@@ -83,6 +88,10 @@ public class OrderRestController {
 
         headers.setLocation(
                 ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(order.getId()).toUri());
+
+        log.info(controllerMarker, "Order created with id:{}", order.getId(),
+                StructuredArguments.v("order_id", order.getId()),
+                StructuredArguments.v("ticket_type", ticketDTO.getType()));
 
         return createResponseEntity(HttpStatus.CREATED, headers,
                 "Ticket available and order successfully created at " + headers.getLocation(), order);
@@ -122,8 +131,8 @@ public class OrderRestController {
     /**
      * Removes a ticket to an existing Order.
      *
-     * @param orderId   Id of the Order
-     * @param ticketDTO TicketDTO of the Ticket to be removed to the Order
+     * @param orderId  Id of the Order
+     * @param ticketId TicketID of the Ticket to be removed to the Order
      *
      * @return Message about the result of the request
      */
@@ -148,8 +157,12 @@ public class OrderRestController {
     @PostMapping("/{orderId}/assign")
     @JsonView(View.OrderOverview.class)
     public ResponseEntity<?> assignOrderToUser(@AuthenticationPrincipal User user, @PathVariable Long orderId) {
-        Order assignedOrder = orderService.assignOrderToUser(orderId, user.getEmail());
-        return createResponseEntity(HttpStatus.OK, "Order successfully attached to User", assignedOrder);
+        Order order = orderService.assignOrderToUser(orderId, user.getEmail());
+
+        log.info(controllerMarker, "Order {} assigned to {}", order.getId(), user.getId(),
+                StructuredArguments.v("order_id", order.getId()));
+
+        return createResponseEntity(HttpStatus.OK, "Order successfully attached to User", order);
     }
 
 
@@ -167,6 +180,8 @@ public class OrderRestController {
         String paymentUrl = orderService.requestPayment(orderId);
         HttpHeaders headers = new HttpHeaders();
         headers.setLocation(new URI(paymentUrl));
+
+        log.info(controllerMarker, "Order {} checked out", orderId, StructuredArguments.v("order_id", orderId));
 
         return createResponseEntity(HttpStatus.OK, headers, "Please go to the url to finish your payment", paymentUrl);
     }
@@ -215,11 +230,16 @@ public class OrderRestController {
      */
     @PostMapping("/status")
     public ResponseEntity<?> updateOrderStatus(@RequestParam(name = "id") String orderReference) {
-        log.log(Level.getLevel("A5L"), "Incoming paymentprovicer webhook for reference: {}", orderReference);
+        // Fields for logging
+        Marker mollieMarker = Markers.append("request_source", "webhook");
+        StructuredArgument logOrderReference = StructuredArguments.value("order_reference", orderReference);
+
+        log.info(mollieMarker, "Incoming paymentprovicer webhook for reference: {}", orderReference, logOrderReference);
         try {
             orderService.updateOrderStatusByReference(orderReference);
         } catch (OrderNotFoundException e) {
-            log.log(Level.getLevel("A5L"), "Paymentprovider webhook reference could not be found: {}", orderReference);
+            log.warn(mollieMarker, "Paymentprovider webhook reference could not be found: {}", orderReference,
+                    logOrderReference);
         }
         return createResponseEntity(HttpStatus.OK, "Status is being updated");
     }
@@ -242,6 +262,9 @@ public class OrderRestController {
     @GetMapping("/{orderId}/status")
     public ResponseEntity<?> updateOrderStatusManual(@PathVariable long orderId) {
         Order order = orderService.updateOrderStatusByOrderId(orderId);
+
+        log.info(controllerMarker, "Order {} updated", order.getId(), StructuredArguments.v("order_id", order.getId()));
+
         return createResponseEntity(HttpStatus.OK, "Order status updated", order);
     }
 

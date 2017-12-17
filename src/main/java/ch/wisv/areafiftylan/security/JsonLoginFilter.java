@@ -35,19 +35,19 @@ import java.io.Reader;
 /**
  * This Login filter uses the default "Form" login filter, but parses a JSON requestbody instead. It accepts requests on
  * /login and returns an X-Auth-Token Header on successful authentication using the
- * JsonLoginAuthenticationSuccessHandler
+ * JsonLoginAuthenticationAttemptHandler
  */
 public class JsonLoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private UserDTO userDTO = new UserDTO();
     private AuthenticationManager authenticationManager;
-    private JsonLoginAuthenticationSuccessHandler successHandler;
+    private JsonLoginAuthenticationAttemptHandler attemptHandler;
 
     public JsonLoginFilter(AuthenticationManager authenticationManager,
-                           JsonLoginAuthenticationSuccessHandler successHandler) {
+                           JsonLoginAuthenticationAttemptHandler successHandler) {
         super();
         this.authenticationManager = authenticationManager;
-        this.successHandler = successHandler;
+        this.attemptHandler = successHandler;
     }
 
     @Override
@@ -60,7 +60,15 @@ public class JsonLoginFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
                                             Authentication authResult) throws IOException, ServletException {
-        successHandler.onAuthenticationSuccess(request, response, authResult);
+        attemptHandler.onAuthenticationSuccess(request, response, authResult);
+    }
+
+    @Override
+    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
+                                              AuthenticationException failed) throws IOException, ServletException {
+        // Register failed attempts
+        attemptHandler.onAuthenticationFailure(userDTO.getEmail());
+        super.unsuccessfulAuthentication(request, response, failed);
     }
 
     private UserDTO getUserDTO(HttpServletRequest request) {

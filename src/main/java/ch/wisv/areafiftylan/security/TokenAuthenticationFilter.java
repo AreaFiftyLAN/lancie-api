@@ -21,6 +21,7 @@ import ch.wisv.areafiftylan.security.token.AuthenticationToken;
 import ch.wisv.areafiftylan.security.token.repository.AuthenticationTokenRepository;
 import ch.wisv.areafiftylan.users.model.User;
 import com.google.common.base.Strings;
+import org.slf4j.MDC;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.web.filter.GenericFilterBean;
@@ -49,7 +50,8 @@ class TokenAuthenticationFilter extends GenericFilterBean {
         String xAuth = ((HttpServletRequest) request).getHeader("X-Auth-Token");
 
         if (!Strings.isNullOrEmpty(xAuth)) {
-            Optional<AuthenticationToken> authenticationTokenOptional = authenticationTokenRepository.findByToken(xAuth);
+            Optional<AuthenticationToken> authenticationTokenOptional =
+                    authenticationTokenRepository.findByToken(xAuth);
             if (!authenticationTokenOptional.isPresent()) {
                 ((HttpServletResponse) response).sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token not found");
                 return;
@@ -60,8 +62,10 @@ class TokenAuthenticationFilter extends GenericFilterBean {
                     return;
                 } else {
                     User user = authenticationToken.getUser();
-                    SecurityContextHolder.getContext()
-                            .setAuthentication(new PreAuthenticatedAuthenticationToken(user, "N/A", user.getAuthorities()));
+                    // Add email to all logging for this request
+                    MDC.put("user_id", user.getId().toString());
+                    SecurityContextHolder.getContext().setAuthentication(
+                            new PreAuthenticatedAuthenticationToken(user, "N/A", user.getAuthorities()));
                 }
             }
         }

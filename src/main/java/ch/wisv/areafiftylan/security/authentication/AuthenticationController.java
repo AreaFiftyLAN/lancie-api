@@ -27,8 +27,8 @@ import ch.wisv.areafiftylan.security.token.repository.VerificationTokenRepositor
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.users.service.UserService;
 import com.google.common.base.Strings;
-import lombok.extern.log4j.Log4j2;
-import org.apache.logging.log4j.Level;
+import lombok.extern.slf4j.Slf4j;
+import net.logstash.logback.argument.StructuredArguments;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -49,7 +49,7 @@ import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEnt
  * respective repositories.
  */
 @Controller
-@Log4j2
+@Slf4j
 public class AuthenticationController {
 
     private final UserService userService;
@@ -94,7 +94,7 @@ public class AuthenticationController {
      * This method requests a passwordResetToken and sends it to the user. With this token, the user can reset his
      * password.
      *
-     * @param body    The body, should only contain an email parameter TODO: This can be done more elegantly
+     * @param body The body, should only contain an email parameter TODO: This can be done more elegantly
      *
      * @return A status message telling whether the action was successful
      */
@@ -103,17 +103,19 @@ public class AuthenticationController {
     public ResponseEntity<?> requestResetPassword(@RequestBody Map<String, String> body) {
         String email = body.get("email");
 
-        log.log(Level.getLevel("A5L"), "Requesting password reset on email {}.", email);
-
         try {
             User user = userService.getUserByEmail(email);
             userService.requestResetPassword(user);
-            log.log(Level.getLevel("A5L"), "Successfully requested password reset on email {}.", email);
+            log.info("Requested password reset for User {}", user.getId(),
+                    StructuredArguments.v("user_id", user.getId()));
         } catch (UsernameNotFoundException e) {
-            log.warn("Password for {} can't be reset, User doesn't exist");
+            log.warn("Password for {} can't be reset, User doesn't exist", email,
+                    StructuredArguments.v("user_email", email));
         }
 
-        return createResponseEntity(HttpStatus.OK, "If you're registered, a password reset link has been sent to " + email);
+
+        return createResponseEntity(HttpStatus.OK,
+                "If you're registered, a password reset link has been sent to " + email);
     }
 
     /**
@@ -151,6 +153,8 @@ public class AuthenticationController {
         if (!Strings.isNullOrEmpty(xAuth)) {
             authenticationService.removeAuthToken(xAuth);
         }
+
+        log.info("New password set for {}.", user.getEmail(), StructuredArguments.v("user_email", user.getEmail()));
 
         return createResponseEntity(HttpStatus.OK, "Password set!");
     }
