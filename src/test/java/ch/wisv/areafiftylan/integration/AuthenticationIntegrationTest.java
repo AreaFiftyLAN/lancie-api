@@ -207,4 +207,28 @@ public class AuthenticationIntegrationTest extends XAuthIntegrationTest {
         //@formatter:on
 
     }
+
+    @Test
+    public void testLogout() {
+        User user = createUser();
+        //@formatter:off
+        Header xAuthTokenHeaderForUser = getXAuthTokenHeaderForUser(user);
+
+        given().
+            header(xAuthTokenHeaderForUser).
+        when().
+            post("/logout").
+        then().
+            statusCode(HttpStatus.SC_OK);
+        //@formatter:on
+
+        //@formatter:off
+        given().
+            header(xAuthTokenHeaderForUser).
+        when().
+            get("/token/verify").
+        then().
+            statusCode(HttpStatus.SC_UNAUTHORIZED);
+        //@formatter:on
+    }
 }

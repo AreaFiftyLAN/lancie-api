@@ -72,11 +72,13 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
      * By default, all requests to the API should come from authenticated sources. (USER or ADMIN)
      *
      * @param http default parameter
+     *
      * @throws Exception
      */
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        http.logout().logoutSuccessHandler(new JsonLoginAuthenticationAttemptHandler(authenticationService));
 
         http.authorizeRequests().expressionHandler(webExpressionHandler()).anyRequest().permitAll();
 

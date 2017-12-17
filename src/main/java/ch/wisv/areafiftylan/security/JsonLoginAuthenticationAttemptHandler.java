@@ -25,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.logstash.logback.argument.StructuredArguments;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -33,7 +34,7 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
-public class JsonLoginAuthenticationAttemptHandler implements AuthenticationSuccessHandler {
+public class JsonLoginAuthenticationAttemptHandler implements AuthenticationSuccessHandler, LogoutSuccessHandler {
 
     private final AuthenticationService authenticationService;
     private final Cache<String, Integer> attemptsCache;
@@ -71,5 +72,12 @@ public class JsonLoginAuthenticationAttemptHandler implements AuthenticationSucc
         } else {
             attemptsCache.put(username, 1);
         }
+    }
+
+    @Override
+    public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
+            throws IOException, ServletException {
+        authenticationService.removeAuthToken(request.getHeader("X-Auth-Token"));
+        response.setStatus(200);
     }
 }
