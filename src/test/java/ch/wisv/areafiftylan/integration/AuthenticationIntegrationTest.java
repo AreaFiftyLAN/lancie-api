@@ -37,7 +37,7 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.core.IsEqual.equalTo;
 
-public class TokenAuthenticationTest extends XAuthIntegrationTest {
+public class AuthenticationIntegrationTest extends XAuthIntegrationTest {
 
     @Autowired
     AuthenticationTokenRepository authenticationTokenRepository;
@@ -110,6 +110,24 @@ public class TokenAuthenticationTest extends XAuthIntegrationTest {
     }
 
     @Test
+    public void testRequestTokenInvalidRequest() {
+        User user = createUser();
+        Map<String, String> userDTO = new HashMap<>();
+        userDTO.put("email", user.getEmail());
+        userDTO.put("password_invalid", cleartextPassword);
+
+        //@formatter:off
+        given().
+        when().
+            body(userDTO).contentType(ContentType.JSON).
+            post("/login").
+        then().
+            statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR).
+            body("message", containsString("Cant read request data"));
+        //@formatter:on
+    }
+
+    @Test
     public void testVerifyValidToken() {
         User user = createUser();
         //@formatter:off
@@ -176,5 +194,17 @@ public class TokenAuthenticationTest extends XAuthIntegrationTest {
         then().
             statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
+    }
+
+    @Test
+    public void testOptionsRequest() {
+        //@formatter:off
+        given().
+        when()
+            .options("/").
+        then()
+            .statusCode(HttpStatus.SC_OK);
+        //@formatter:on
+
     }
 }
