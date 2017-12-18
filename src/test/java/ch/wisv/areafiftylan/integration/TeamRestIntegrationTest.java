@@ -740,17 +740,59 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
             header(getXAuthTokenHeaderForUser(user)).
         when().
             body(token.getToken()).
-            post(TEAM_ENDPOINT + "invites").
+            delete(TEAM_ENDPOINT + "invites").
         then().
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
-
 
         Collection<TeamInviteToken> tokens = teamInviteTokenRepository.findByUserEmailIgnoreCase(user.getEmail());
         tokens.removeIf(t -> !t.isValid());
 
         assertTrue(tokens.isEmpty());
     }
+
+    @Test
+    public void testRevokeInviteAsCaptain() {
+        User captain = createUser();
+        User user = createUser();
+        Team team = createTeamWithCaptain(captain);
+
+        TeamInviteToken token = teamInviteTokenRepository.save(new TeamInviteToken(user, team));
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(captain)).
+        when().
+            body(token.getToken()).
+            delete(TEAM_ENDPOINT + "invites").
+        then().
+            statusCode(HttpStatus.SC_OK);
+        //@formatter:on
+
+        Collection<TeamInviteToken> tokens = teamInviteTokenRepository.findByUserEmailIgnoreCase(user.getEmail());
+        tokens.removeIf(t -> !t.isValid());
+
+        assertTrue(tokens.isEmpty());
+    }
+
+    @Test
+    public void testDeclineInviteAsAnon() {
+        User captain = createUser();
+        User user = createUser();
+        Team team = createTeamWithCaptain(captain);
+
+        TeamInviteToken token = teamInviteTokenRepository.save(new TeamInviteToken(user, team));
+
+        //@formatter:off
+        given().
+        when().
+            body(token.getToken()).
+            delete(TEAM_ENDPOINT + "invites").
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
+    }
+
 
     //endregion
 
@@ -788,6 +830,23 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
             delete(TEAM_ENDPOINT + team.getId() + "/members").
         then().
             statusCode(HttpStatus.SC_OK);
+        //@formatter:on
+    }
+
+    @Test
+    public void testRemoveMemberAsAnon() {
+        User captain = createUser();
+        User member = createUser();
+        Team team = createTeamWithCaptain(captain);
+        team = addMemberToTeam(team, member);
+
+        //@formatter:off
+        given().
+        when().
+            body(member.getEmail()).
+            delete(TEAM_ENDPOINT + team.getId() + "/members").
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
     }
 

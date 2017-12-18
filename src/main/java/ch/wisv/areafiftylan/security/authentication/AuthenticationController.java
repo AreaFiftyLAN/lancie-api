@@ -82,14 +82,6 @@ public class AuthenticationController {
         return createResponseEntity(HttpStatus.OK, "Token is valid!");
     }
 
-    @PreAuthorize("isAuthenticated()")
-    @PostMapping("/logout")
-    public ResponseEntity<?> removeSession(@RequestHeader("X-Auth-Token") String xAuth) {
-        authenticationService.removeAuthToken(xAuth);
-
-        return createResponseEntity(HttpStatus.OK, "Successfully logged out");
-    }
-
     /**
      * This method requests a passwordResetToken and sends it to the user. With this token, the user can reset his
      * password.

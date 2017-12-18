@@ -50,18 +50,14 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private final AuthenticationTokenRepository authenticationTokenRepository;
 
-    private final RESTAuthenticationEntryPoint authenticationEntryPoint;
-
     private AuthenticationService authenticationService;
 
     @Autowired
     public SecurityConfiguration(AuthenticationTokenRepository authenticationTokenRepository,
                                  UserDetailsService userDetailsService,
-                                 RESTAuthenticationEntryPoint authenticationEntryPoint,
                                  AuthenticationService authenticationService) {
         this.authenticationTokenRepository = authenticationTokenRepository;
         this.userDetailsService = userDetailsService;
-        this.authenticationEntryPoint = authenticationEntryPoint;
         this.authenticationService = authenticationService;
     }
 
@@ -76,16 +72,13 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
      * By default, all requests to the API should come from authenticated sources. (USER or ADMIN)
      *
      * @param http default parameter
+     *
      * @throws Exception
      */
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-
-        // We use our own exception handling for unauthorized request. THis simply returns a 401 when a request
-        // should have been authenticated.
-        http.exceptionHandling().authenticationEntryPoint(authenticationEntryPoint);
-
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        http.logout().logoutSuccessHandler(new JsonLoginAuthenticationAttemptHandler(authenticationService));
 
         http.authorizeRequests().expressionHandler(webExpressionHandler()).anyRequest().permitAll();
 
