@@ -9,8 +9,8 @@ cache:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
 script:
-- "./gradlew clean build -PbuildNumber=$TRAVIS_BUILD_NUMBER --scan"
-- docker build --no-cache --pull -t wisvch/areafifytlan-api:$TRAVIS_BUILD_NUMBER .
+- "./gradlew clean build"
+- docker build --no-cache --pull -t wisvch/areafiftylan-api:$TRAVIS_BUILD_NUMBER .
 notifications:
   slack:
     rooms:
