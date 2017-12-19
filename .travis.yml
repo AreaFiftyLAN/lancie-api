@@ -18,6 +18,6 @@ notifications:
 after_success:
   - bash <(curl -s https://codecov.io/bash)
   - if [ "${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}" == "live" ]; then
-    docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
-    docker push wisvch/areafiftylan-api:$TRAVIS_BUILD_NUMBER;
+      docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+      docker push wisvch/areafiftylan-api:$TRAVIS_BUILD_NUMBER;
     fi
