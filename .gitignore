@@ -2,7 +2,7 @@
 
 ### Gradle ###
 .gradle
-build/
+build
 .gradletasknamecache
 
 # Ignore Gradle GUI config
