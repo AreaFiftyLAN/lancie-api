@@ -43,27 +43,17 @@ public class TournamentController {
         return createResponseEntity(HttpStatus.CREATED, "Tournament added.", tournament);
     }
 
-    @PostMapping("/{id}")
+    @PutMapping("/{id}")
     @PreAuthorize("hasRole('COMMITTEE')")
     ResponseEntity<?> editTournament(@RequestBody Tournament tournament) {
-        Tournament dbTournament = tournamentService.getTournaments()
+        final Tournament finalTournament = tournament;
+        tournamentService.getTournaments()
                 .stream()
-                .filter(tournament1 -> tournament1.getId().equals(tournament.getId()))
+                .filter(dbTournament -> dbTournament.getId().equals(finalTournament.getId()))
                 .findFirst()
                 .orElseThrow(TournamentNotFoundException::new);
-
-        // This is a bit double, but it ensures we update an existing tournament
-        dbTournament.setButtonImagePath(tournament.getButtonImagePath());
-        dbTournament.setButtonTitle(tournament.getButtonTitle());
-        dbTournament.setDescription(tournament.getDescription());
-        dbTournament.setFormat(tournament.getFormat());
-        dbTournament.setHeaderTitle(tournament.getHeaderTitle());
-        dbTournament.setPrizes(tournament.getPrizes());
-        dbTournament.setSponsor(tournament.getSponsor());
-        dbTournament.setType(tournament.getType());
-
-        dbTournament = tournamentService.addTournament(dbTournament);
-        return createResponseEntity(HttpStatus.CREATED, "Tournament updated.", dbTournament);
+        tournament = tournamentService.addTournament(tournament);
+        return createResponseEntity(HttpStatus.CREATED, "Tournament updated.", tournament);
     }
 
     @DeleteMapping("/{id}")

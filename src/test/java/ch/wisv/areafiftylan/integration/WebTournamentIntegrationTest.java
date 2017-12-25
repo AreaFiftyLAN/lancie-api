@@ -247,14 +247,12 @@ public class WebTournamentIntegrationTest extends XAuthIntegrationTest {
             .body(updateTournament)
             .contentType(ContentType.JSON)
         .when()
-            .post(TOURNAMENT_ENDPOINT + tournament.getId())
+            .put(TOURNAMENT_ENDPOINT + tournament.getId())
         .then()
             .statusCode(HttpStatus.SC_FORBIDDEN);
 
         assertEquals(1, tournamentRepository.findAll().size());
-        /* toString() is used to force it to check the values, rather than the objects (somehow this failed)
-        * Because tournament is an @data class, the fields are represented correct in the toString() method */
-        assertEquals(tournament.toString(), tournamentRepository.findOne(tournament.getId()).toString());
+        assertEquals(tournament, tournamentRepository.findOne(tournament.getId()));
     }
 
     @Test
@@ -269,7 +267,7 @@ public class WebTournamentIntegrationTest extends XAuthIntegrationTest {
             .body(updateTournament)
             .contentType(ContentType.JSON)
         .when()
-            .post(TOURNAMENT_ENDPOINT + tournament.getId())
+            .put(TOURNAMENT_ENDPOINT + tournament.getId())
         .then()
             .statusCode(HttpStatus.SC_CREATED);
 
@@ -290,7 +288,7 @@ public class WebTournamentIntegrationTest extends XAuthIntegrationTest {
             .body(updateTournament)
             .contentType(ContentType.JSON)
         .when()
-            .post(TOURNAMENT_ENDPOINT + updateTournament.getId())
+            .put(TOURNAMENT_ENDPOINT + updateTournament.getId())
         .then()
             .statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
             .body("message", equalTo("Could not find tournament"));
