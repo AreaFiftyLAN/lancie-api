@@ -290,7 +290,7 @@ public class WebTournamentIntegrationTest extends XAuthIntegrationTest {
         .when()
             .put(TOURNAMENT_ENDPOINT + updateTournament.getId())
         .then()
-            .statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+            .statusCode(HttpStatus.SC_NOT_FOUND)
             .body("message", equalTo("Could not find tournament"));
 
         assertEquals(0, tournamentRepository.findAll().size());

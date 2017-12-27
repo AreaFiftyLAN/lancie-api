@@ -69,4 +69,9 @@ public class TournamentController {
         tournamentService.deleteAllTournaments();
         return createResponseEntity(HttpStatus.OK, "All Tournaments deleted.");
     }
+
+    @ExceptionHandler(TournamentNotFoundException.class)
+    public ResponseEntity<?> handleTournamentNotFoundException(TournamentNotFoundException ex) {
+        return createResponseEntity(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
 }
