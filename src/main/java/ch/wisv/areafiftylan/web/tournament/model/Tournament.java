@@ -31,5 +31,6 @@ public class Tournament {
     private List<String> prizes = new ArrayList<>();
 
     @ManyToOne(targetEntity = Sponsor.class)
+    @JoinColumn(foreignKey = @ForeignKey(name = "FK_TOURNAMENT_SPONSOR"))
     private Sponsor sponsor;
 }

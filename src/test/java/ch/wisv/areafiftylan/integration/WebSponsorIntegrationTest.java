@@ -12,6 +12,8 @@ import org.junit.After;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.HashSet;
+
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertEquals;
@@ -33,6 +35,7 @@ public class WebSponsorIntegrationTest extends XAuthIntegrationTest {
         sponsor.setImageName("redbulllogo.png");
         sponsor.setWebsite("www.redbull.com");
         sponsor.setType(SponsorType.PREMIUM);
+        sponsor.setTournaments(new HashSet<>());
         return sponsorRepository.save(sponsor);
     }
 
@@ -42,6 +45,7 @@ public class WebSponsorIntegrationTest extends XAuthIntegrationTest {
         sponsor.setImageName("epicowl.png");
         sponsor.setWebsite("www.thuischbezorgd.nl");
         sponsor.setType(SponsorType.PRESENTER);
+        sponsor.setTournaments(new HashSet<>());
         return sponsor;
     }
 

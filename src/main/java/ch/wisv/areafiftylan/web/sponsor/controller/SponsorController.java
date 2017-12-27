@@ -83,7 +83,11 @@ public class SponsorController {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<?> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
-        return createResponseEntity(HttpStatus.CONFLICT,
-                "Could not delete this sponsor because it is used by another entity!");
+        if (ex.getRootCause().getLocalizedMessage().contains("FK_TOURNAMENT_SPONSOR")) {
+            return createResponseEntity(HttpStatus.CONFLICT,
+                    "Could not delete this sponsor because it is used by another entity!");
+        } else {
+            return createResponseEntity(HttpStatus.CONFLICT, "Could not update or add this sponsor due to a DataIntegrityException");
+        }
     }
 }
