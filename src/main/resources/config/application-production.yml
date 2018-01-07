@@ -17,5 +17,5 @@ a5l:
     confirmUrl: https://areafiftylan.nl/register-confirm
 
   orderLimit: 5
-  ticketLimit: 200
+  ticketLimit: 220
   orderKeepAlive: 15
