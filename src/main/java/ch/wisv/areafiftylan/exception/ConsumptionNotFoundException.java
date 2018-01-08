@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016  W.I.S.V. 'Christiaan Huygens'
+ * Copyright (c) 2018  W.I.S.V. 'Christiaan Huygens'
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
