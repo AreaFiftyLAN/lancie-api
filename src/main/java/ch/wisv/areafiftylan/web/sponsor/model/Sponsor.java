@@ -40,15 +40,4 @@ public class Sponsor {
         if (website != null ? !website.equals(sponsor.website) : sponsor.website != null) return false;
         return type == sponsor.type;
     }
-
-    @Override
-    public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + id.hashCode();
-        result = 31 * result + (name != null ? name.hashCode() : 0);
-        result = 31 * result + (imageName != null ? imageName.hashCode() : 0);
-        result = 31 * result + (website != null ? website.hashCode() : 0);
-        result = 31 * result + (type != null ? type.hashCode() : 0);
-        return result;
-    }
 }
