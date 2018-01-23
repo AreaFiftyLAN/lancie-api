@@ -13,6 +13,8 @@ public interface TournamentService {
 
     Tournament addTournament(Tournament tournament);
 
+    Tournament replaceTournament(Tournament tournament);
+
     void deleteTournament(Long id);
 
     void deleteAllTournaments();

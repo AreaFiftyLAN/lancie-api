@@ -46,13 +46,7 @@ public class TournamentController {
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('COMMITTEE')")
     ResponseEntity<?> editTournament(@RequestBody Tournament tournament) {
-        final Tournament finalTournament = tournament;
-        tournamentService.getTournaments()
-                .stream()
-                .filter(dbTournament -> dbTournament.getId().equals(finalTournament.getId()))
-                .findFirst()
-                .orElseThrow(TournamentNotFoundException::new);
-        tournament = tournamentService.addTournament(tournament);
+        tournament = tournamentService.replaceTournament(tournament);
         return createResponseEntity(HttpStatus.CREATED, "Tournament updated.", tournament);
     }
 

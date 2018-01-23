@@ -1,14 +1,20 @@
 package ch.wisv.areafiftylan.web.tournament.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.CollectionTable;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+
 import ch.wisv.areafiftylan.web.sponsor.model.Sponsor;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import net.logstash.logback.encoder.org.apache.commons.lang.builder.EqualsBuilder;
-
-import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Data
@@ -59,20 +65,5 @@ public class Tournament {
             if (prizes == null ^ that.prizes == null) return false;
         }
         return sponsor != null ? sponsor.equals(that.sponsor) : that.sponsor == null;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (id != null ? id.hashCode() : 0);
-        result = 31 * result + (type != null ? type.hashCode() : 0);
-        result = 31 * result + (buttonTitle != null ? buttonTitle.hashCode() : 0);
-        result = 31 * result + (buttonImagePath != null ? buttonImagePath.hashCode() : 0);
-        result = 31 * result + (format != null ? format.hashCode() : 0);
-        result = 31 * result + (headerTitle != null ? headerTitle.hashCode() : 0);
-        result = 31 * result + (description != null ? description.hashCode() : 0);
-        result = 31 * result + (prizes != null ? prizes.hashCode() : 0);
-        result = 31 * result + (sponsor != null ? sponsor.hashCode() : 0);
-        return result;
     }
 }
