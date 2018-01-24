@@ -19,6 +19,7 @@ package ch.wisv.areafiftylan.utils.mail;
 
 import ch.wisv.areafiftylan.products.model.order.Order;
 import ch.wisv.areafiftylan.teams.model.Team;
+import ch.wisv.areafiftylan.users.model.Profile;
 import ch.wisv.areafiftylan.users.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -113,11 +114,11 @@ public class MailServiceImpl implements MailService {
     }
 
     private String formatRecipient(User user) {
-        if (user.getProfile() != null) {
-            return user.getProfile().getFirstName() + " " + user.getProfile().getLastName();
-        } else {
-            return user.getEmail();
+        Profile profile = user.getProfile();
+        if (profile != null && profile.getFirstName() != null && profile.getLastName() != null) {
+            return profile.getFirstName() + " " + profile.getLastName();
         }
+        return "User";
     }
 
     @Override
