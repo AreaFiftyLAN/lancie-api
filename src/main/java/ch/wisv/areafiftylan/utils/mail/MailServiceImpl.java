@@ -116,7 +116,7 @@ public class MailServiceImpl implements MailService {
     private String formatRecipient(User user) {
         Profile profile = user.getProfile();
         if (profile != null && profile.getFirstName() != null && profile.getLastName() != null) {
-            return profile.getFirstName() + " " + profile.getLastName();
+            return String.format(" %s %s", profile.getFirstName(), profile.getLastName());
         }
         return "";
     }
