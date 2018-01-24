@@ -118,7 +118,7 @@ public class MailServiceImpl implements MailService {
         if (profile != null && profile.getFirstName() != null && profile.getLastName() != null) {
             return profile.getFirstName() + " " + profile.getLastName();
         }
-        return "User";
+        return "";
     }
 
     @Override
