@@ -48,7 +48,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         // Delete the old Token
         authenticationTokenRepository.findByUserEmail(email).ifPresent(authenticationTokenRepository::delete);
 
-        return authenticationTokenRepository.save(new AuthenticationToken(user)).getToken();
+        return authenticationTokenRepository.saveAndFlush(new AuthenticationToken(user)).getToken();
     }
 
 
