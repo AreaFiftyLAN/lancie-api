@@ -1,16 +1,15 @@
 package ch.wisv.areafiftylan.web.sponsor.controller;
 
+import ch.wisv.areafiftylan.exception.SponsorStillUsedInTournamentException;
 import ch.wisv.areafiftylan.web.sponsor.model.Sponsor;
 import ch.wisv.areafiftylan.web.sponsor.model.SponsorType;
 import ch.wisv.areafiftylan.web.sponsor.service.SponsorService;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.ConstraintViolationException;
 import java.util.Collection;
 
 import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEntity;
@@ -81,13 +80,8 @@ public class SponsorController {
         return createResponseEntity(HttpStatus.OK, "Successfully deleted all sponsors.");
     }
 
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<?> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
-        if (ex.getRootCause().getLocalizedMessage().contains("FK_TOURNAMENT_SPONSOR")) {
-            return createResponseEntity(HttpStatus.CONFLICT,
-                    "Could not delete this sponsor because it is used by another entity!");
-        } else {
-            return createResponseEntity(HttpStatus.CONFLICT, "Could not update or add this sponsor due to a DataIntegrityException");
-        }
+    @ExceptionHandler(SponsorStillUsedInTournamentException.class)
+    public ResponseEntity<?> handleSponsorStillUsedInTournamentException(SponsorStillUsedInTournamentException ex) {
+        return createResponseEntity(HttpStatus.CONFLICT, ex.getMessage());
     }
 }

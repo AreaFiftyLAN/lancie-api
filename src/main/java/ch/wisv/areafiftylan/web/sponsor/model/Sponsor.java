@@ -1,6 +1,7 @@
 package ch.wisv.areafiftylan.web.sponsor.model;
 
 import ch.wisv.areafiftylan.web.tournament.model.Tournament;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -25,6 +26,7 @@ public class Sponsor {
     private SponsorType type;
 
     @OneToMany(mappedBy = "sponsor", fetch = FetchType.EAGER)
+    @JsonIgnoreProperties("sponsor")
     private Set<Tournament> tournaments;
 
     @Override

@@ -58,6 +58,7 @@ public class WebSponsorIntegrationTest extends XAuthIntegrationTest {
         sponsor = sponsorRepository.save(sponsor);
 
         Tournament tournament = new Tournament();
+        tournament.setHeaderTitle("A tournament");
         tournament.setSponsor(sponsor);
         return tournamentRepository.save(tournament);
     }
@@ -278,6 +279,6 @@ public class WebSponsorIntegrationTest extends XAuthIntegrationTest {
             .delete(SPONSOR_ENDPOINT + tournamentWithSponsor.getSponsor().getId())
         .then()
             .statusCode(HttpStatus.SC_CONFLICT)
-            .body("message", is("Could not delete this sponsor because it is used by another entity!"));
+            .body("message", is("Sponsor TU Delft is still used by tournaments: A tournament"));
     }
 }

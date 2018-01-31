@@ -10,5 +10,7 @@ import java.util.Collection;
 @Repository
 public interface SponsorRepository extends JpaRepository<Sponsor, Long> {
 
+    Sponsor findSponsorById(Long id);
+
     Collection<Sponsor> findByType(SponsorType type);
 }
