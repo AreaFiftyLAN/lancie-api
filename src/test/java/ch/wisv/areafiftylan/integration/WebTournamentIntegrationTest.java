@@ -252,7 +252,6 @@ public class WebTournamentIntegrationTest extends XAuthIntegrationTest {
             .statusCode(HttpStatus.SC_FORBIDDEN);
 
         assertEquals(1, tournamentRepository.findAll().size());
-        assertEquals(tournament, tournamentRepository.findOne(tournament.getId()));
     }
 
     @Test
