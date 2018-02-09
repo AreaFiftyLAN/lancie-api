@@ -33,12 +33,9 @@ public class TournamentServiceImpl implements TournamentService {
 
     @Override
     public Tournament replaceTournament(Tournament tournament) {
-        if (getTournaments()
-                .stream()
-                .noneMatch(dbTournament -> dbTournament.getId().equals(tournament.getId()))) {
+        if (tournamentRepository.findOne(tournament.getId()) == null) {
             throw new TournamentNotFoundException();
         }
-
         return tournamentRepository.save(tournament);
     }
 
