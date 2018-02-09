@@ -18,6 +18,7 @@ import java.util.Arrays;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
 
 public class WebTournamentIntegrationTest extends XAuthIntegrationTest {
 
@@ -48,6 +49,27 @@ public class WebTournamentIntegrationTest extends XAuthIntegrationTest {
 
         tournament.setSponsor(sponsor);
         return tournamentRepository.save(tournament);
+    }
+
+    private Tournament updateTournament() {
+        Tournament tournament = new Tournament();
+        tournament.setType(TournamentType.UNOFFICIAL);
+        tournament.setButtonTitle("AB");
+        tournament.setButtonImagePath("imgpath");
+        tournament.setFormat("1 v 1");
+        tournament.setHeaderTitle("AlphaBetus");
+        tournament.setDescription("AlphaBetus lorum ipsum");
+        tournament.setPrizes(Arrays.asList("one prize", "two prize"));
+
+        Sponsor sponsor = new Sponsor();
+        sponsor.setName("Sponsorzzz");
+        sponsor.setImageName("sponzor.png");
+        sponsor.setWebsite("www.sponzor.com");
+        sponsor.setType(SponsorType.NORMAL);
+        sponsorRepository.save(sponsor);
+
+        tournament.setSponsor(sponsor);
+        return tournament;
     }
 
     @After
@@ -211,5 +233,65 @@ public class WebTournamentIntegrationTest extends XAuthIntegrationTest {
             statusCode(HttpStatus.SC_OK).
             body("message", is("All Tournaments deleted."));
         //@formatter:on
+    }
+
+    @Test
+    public void testUpdateTournamentAsUser() {
+        User user = createUser();
+        Tournament tournament = createTournament(),
+                   updateTournament = updateTournament();
+        updateTournament.setId(tournament.getId());
+
+        given()
+            .header(getXAuthTokenHeaderForUser(user))
+            .body(updateTournament)
+            .contentType(ContentType.JSON)
+        .when()
+            .put(TOURNAMENT_ENDPOINT + tournament.getId())
+        .then()
+            .statusCode(HttpStatus.SC_FORBIDDEN);
+
+        assertEquals(1, tournamentRepository.findAll().size());
+    }
+
+    @Test
+    public void testUpdateTournamentAsCommittee() {
+        User committee = createCommitteeMember();
+        Tournament tournament = createTournament(),
+                   updateTournament = updateTournament();
+        updateTournament.setId(tournament.getId());
+
+        given()
+            .header(getXAuthTokenHeaderForUser(committee))
+            .body(updateTournament)
+            .contentType(ContentType.JSON)
+        .when()
+            .put(TOURNAMENT_ENDPOINT + tournament.getId())
+        .then()
+            .statusCode(HttpStatus.SC_CREATED);
+
+        assertEquals(1, tournamentRepository.findAll().size());
+        assertEquals(updateTournament, tournamentRepository.findOne(tournament.getId()));
+    }
+
+    @Test
+    public void testUpdateUnknownTournament() {
+        User admin = createAdmin();
+        Tournament updateTournament = updateTournament();
+        updateTournament.setId(123L);
+
+        assertEquals(0, tournamentRepository.findAll().size());
+
+        given()
+            .header(getXAuthTokenHeaderForUser(admin))
+            .body(updateTournament)
+            .contentType(ContentType.JSON)
+        .when()
+            .put(TOURNAMENT_ENDPOINT + updateTournament.getId())
+        .then()
+            .statusCode(HttpStatus.SC_NOT_FOUND)
+            .body("message", equalTo("Could not find tournament"));
+
+        assertEquals(0, tournamentRepository.findAll().size());
     }
 }

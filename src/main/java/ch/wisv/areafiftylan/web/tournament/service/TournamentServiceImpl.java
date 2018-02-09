@@ -1,5 +1,6 @@
 package ch.wisv.areafiftylan.web.tournament.service;
 
+import ch.wisv.areafiftylan.exception.TournamentNotFoundException;
 import ch.wisv.areafiftylan.web.tournament.model.Tournament;
 import ch.wisv.areafiftylan.web.tournament.model.TournamentType;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,14 @@ public class TournamentServiceImpl implements TournamentService {
 
     @Override
     public Tournament addTournament(Tournament tournament) {
+        return tournamentRepository.save(tournament);
+    }
+
+    @Override
+    public Tournament replaceTournament(Tournament tournament) {
+        if (tournamentRepository.findOne(tournament.getId()) == null) {
+            throw new TournamentNotFoundException();
+        }
         return tournamentRepository.save(tournament);
     }
 

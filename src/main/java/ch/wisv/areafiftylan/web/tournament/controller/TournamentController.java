@@ -1,5 +1,6 @@
 package ch.wisv.areafiftylan.web.tournament.controller;
 
+import ch.wisv.areafiftylan.exception.TournamentNotFoundException;
 import ch.wisv.areafiftylan.web.tournament.model.Tournament;
 import ch.wisv.areafiftylan.web.tournament.model.TournamentType;
 import ch.wisv.areafiftylan.web.tournament.service.TournamentService;
@@ -42,6 +43,13 @@ public class TournamentController {
         return createResponseEntity(HttpStatus.CREATED, "Tournament added.", tournament);
     }
 
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('COMMITTEE')")
+    ResponseEntity<?> editTournament(@RequestBody Tournament tournament) {
+        tournament = tournamentService.replaceTournament(tournament);
+        return createResponseEntity(HttpStatus.CREATED, "Tournament updated.", tournament);
+    }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('COMMITTEE')")
     ResponseEntity<?> deleteTournament(@PathVariable Long id) {
@@ -54,5 +62,10 @@ public class TournamentController {
     ResponseEntity<?> deleteAllTournaments() {
         tournamentService.deleteAllTournaments();
         return createResponseEntity(HttpStatus.OK, "All Tournaments deleted.");
+    }
+
+    @ExceptionHandler(TournamentNotFoundException.class)
+    public ResponseEntity<?> handleTournamentNotFoundException(TournamentNotFoundException ex) {
+        return createResponseEntity(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 }
