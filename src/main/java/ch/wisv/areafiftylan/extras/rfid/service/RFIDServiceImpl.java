@@ -20,7 +20,7 @@ package ch.wisv.areafiftylan.extras.rfid.service;
 import ch.wisv.areafiftylan.exception.*;
 import ch.wisv.areafiftylan.extras.rfid.model.RFIDLink;
 import ch.wisv.areafiftylan.products.model.Ticket;
-import ch.wisv.areafiftylan.products.service.TicketService;
+import ch.wisv.areafiftylan.products.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.users.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,12 +33,17 @@ public class RFIDServiceImpl implements RFIDService {
     public static final int RFID_CHAR_COUNT = 10;
 
     private final RFIDLinkRepository rfidLinkRepository;
-    private final TicketService ticketService;
+    private final TicketRepository ticketRepository;
 
     @Autowired
-    public RFIDServiceImpl(RFIDLinkRepository rfidLinkRepository, TicketService ticketService) {
+    public RFIDServiceImpl(RFIDLinkRepository rfidLinkRepository, TicketRepository ticketRepository) {
         this.rfidLinkRepository = rfidLinkRepository;
-        this.ticketService = ticketService;
+        this.ticketRepository = ticketRepository;
+    }
+
+    private Ticket getTicketById(Long ticketId) {
+        return ticketRepository.findById(ticketId).
+                orElseThrow(TicketNotFoundException::new);
     }
 
     @Override
@@ -71,7 +76,7 @@ public class RFIDServiceImpl implements RFIDService {
             throw new TicketAlreadyLinkedException();
         }
 
-        Ticket ticket = ticketService.getTicketById(ticketId);
+        Ticket ticket = getTicketById(ticketId);
         RFIDLink newLink = new RFIDLink(rfid, ticket);
         return rfidLinkRepository.saveAndFlush(newLink);
     }
@@ -104,7 +109,7 @@ public class RFIDServiceImpl implements RFIDService {
     }
 
     private boolean isValidTicket(Long ticketId) {
-        return ticketService.getTicketById(ticketId).isValid();
+        return getTicketById(ticketId).isValid();
     }
 
     private RFIDLink getLinkByRFID(String rfid) {
