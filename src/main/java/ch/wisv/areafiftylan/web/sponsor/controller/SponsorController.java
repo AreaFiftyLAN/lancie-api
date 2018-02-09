@@ -1,6 +1,6 @@
 package ch.wisv.areafiftylan.web.sponsor.controller;
 
-import ch.wisv.areafiftylan.exception.SponsorStillUsedInTournamentException;
+import ch.wisv.areafiftylan.exception.SponsorConstraintViolationException;
 import ch.wisv.areafiftylan.web.sponsor.model.Sponsor;
 import ch.wisv.areafiftylan.web.sponsor.model.SponsorType;
 import ch.wisv.areafiftylan.web.sponsor.service.SponsorService;
@@ -80,8 +80,8 @@ public class SponsorController {
         return createResponseEntity(HttpStatus.OK, "Successfully deleted all sponsors.");
     }
 
-    @ExceptionHandler(SponsorStillUsedInTournamentException.class)
-    public ResponseEntity<?> handleSponsorStillUsedInTournamentException(SponsorStillUsedInTournamentException ex) {
+    @ExceptionHandler(SponsorConstraintViolationException.class)
+    public ResponseEntity<?> handleSponsorStillUsedInTournamentException(SponsorConstraintViolationException ex) {
         return createResponseEntity(HttpStatus.CONFLICT, ex.getMessage());
     }
 }

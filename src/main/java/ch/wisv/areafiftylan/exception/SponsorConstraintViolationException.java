@@ -22,8 +22,8 @@ import ch.wisv.areafiftylan.web.tournament.model.Tournament;
 
 import java.util.stream.Collectors;
 
-public class SponsorStillUsedInTournamentException extends AreaFiftyLANException {
-    public SponsorStillUsedInTournamentException(Sponsor sponsor) {
+public class SponsorConstraintViolationException extends AreaFiftyLANException {
+    public SponsorConstraintViolationException(Sponsor sponsor) {
         super(String.format(
                 "Sponsor %s is still used by tournaments: %s",
                 sponsor.getName(),
@@ -34,7 +34,7 @@ public class SponsorStillUsedInTournamentException extends AreaFiftyLANException
         ));
     }
 
-    public SponsorStillUsedInTournamentException() {
+    public SponsorConstraintViolationException() {
         super("Sponsor is still being used by one or more tournaments");
     }
 }

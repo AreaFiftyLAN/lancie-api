@@ -1,6 +1,6 @@
 package ch.wisv.areafiftylan.web.sponsor.service;
 
-import ch.wisv.areafiftylan.exception.SponsorStillUsedInTournamentException;
+import ch.wisv.areafiftylan.exception.SponsorConstraintViolationException;
 import ch.wisv.areafiftylan.web.sponsor.model.Sponsor;
 import ch.wisv.areafiftylan.web.sponsor.model.SponsorType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,11 +35,11 @@ public class SponsorServiceImpl implements SponsorService {
 
     @Override
     public void deleteSponsor(Long sponsorId) {
-        Sponsor sponsor = sponsorRepository.findSponsorById(sponsorId);
+        Sponsor sponsor = sponsorRepository.findOne(sponsorId);
         if (sponsor.getTournaments().size() == 0) {
             sponsorRepository.delete(sponsorId);
         } else {
-            throw new SponsorStillUsedInTournamentException(sponsor);
+            throw new SponsorConstraintViolationException(sponsor);
         }
     }
 
