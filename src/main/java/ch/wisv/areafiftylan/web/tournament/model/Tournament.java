@@ -1,6 +1,7 @@
 package ch.wisv.areafiftylan.web.tournament.model;
 
 import ch.wisv.areafiftylan.web.sponsor.model.Sponsor;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -31,5 +32,6 @@ public class Tournament {
     private List<String> prizes = new ArrayList<>();
 
     @ManyToOne(targetEntity = Sponsor.class)
+    @JsonIgnoreProperties("tournaments")
     private Sponsor sponsor;
 }
