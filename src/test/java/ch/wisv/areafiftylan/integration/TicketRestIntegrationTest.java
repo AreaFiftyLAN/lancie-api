@@ -35,6 +35,7 @@ import org.apache.http.HttpStatus;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -51,6 +52,9 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
     private final String TICKETS_ENDPOINT = "/tickets";
     private final String TRANSFER_ENDPOINT = TICKETS_ENDPOINT + "/transfer";
     private final String TRANSPORT_ENDPOINT = TICKETS_ENDPOINT + "/transport";
+
+    @Value("${a5l.ticketLimit}")
+    private int TICKET_LIMIT;
 
     @Autowired
     private TicketRepository ticketRepository;
@@ -111,12 +115,13 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
             get(TICKETS_ENDPOINT + "/available").
         then().
             statusCode(HttpStatus.SC_OK).
-            body("ticketType", is(ticketTypes.stream()
+            body("ticketTypes.ticketType", is(ticketTypes.stream()
                     .map(TicketType::getName)
                     .collect(Collectors.toList()))).
-            body("price", is(ticketTypes.stream()
+            body("ticketTypes.price", is(ticketTypes.stream()
                     .map(TicketType::getPrice)
-                    .collect(Collectors.toList())));
+                    .collect(Collectors.toList()))).
+            body("ticketLimit", is(TICKET_LIMIT));
         //@formatter:on
     }
 
