@@ -2,12 +2,12 @@ package ch.wisv.areafiftylan.products.model;
 
 import ch.wisv.areafiftylan.utils.view.View;
 import com.fasterxml.jackson.annotation.JsonView;
-import lombok.Data;
+import lombok.AllArgsConstructor;
 
 import javax.validation.constraints.NotNull;
 import java.util.Collection;
 
-@Data
+@AllArgsConstructor
 public class AvailableTicketsDTO {
 
     @JsonView(View.Public.class)

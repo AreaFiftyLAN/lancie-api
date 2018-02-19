@@ -19,12 +19,14 @@ package ch.wisv.areafiftylan.seats.model;
 
 import ch.wisv.areafiftylan.utils.view.View;
 import com.fasterxml.jackson.annotation.JsonView;
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 import java.util.List;
 import java.util.Map;
 
-@Data
+@AllArgsConstructor
+@Getter
 public class SeatmapResponse {
 
     @JsonView(View.Public.class)
