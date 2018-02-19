@@ -18,8 +18,8 @@
 package ch.wisv.areafiftylan.products.controller;
 
 import ch.wisv.areafiftylan.exception.TicketTransferTokenException;
+import ch.wisv.areafiftylan.products.model.AvailableTicketsDTO;
 import ch.wisv.areafiftylan.products.model.Ticket;
-import ch.wisv.areafiftylan.products.model.TicketInformationResponse;
 import ch.wisv.areafiftylan.products.model.TicketOption;
 import ch.wisv.areafiftylan.products.model.TicketType;
 import ch.wisv.areafiftylan.products.service.OrderService;
@@ -31,6 +31,7 @@ import net.logstash.logback.argument.StructuredArguments;
 import net.logstash.logback.marker.Markers;
 import org.slf4j.Marker;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -48,6 +49,9 @@ import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEnt
 public class TicketRestController {
     private final TicketService ticketService;
     private final OrderService orderService;
+
+    @Value("${a5l.ticketLimit}")
+    private int TICKET_LIMIT;
 
     private Marker controllerMarker = Markers.append("controller", "tickets");
 
@@ -105,8 +109,8 @@ public class TicketRestController {
      * @return A collection of all TicketTypes and their availability
      */
     @GetMapping("/available")
-    public Collection<TicketInformationResponse> getAvailableTickets() {
-        return orderService.getAvailableTickets();
+    public AvailableTicketsDTO getAvailableTickets() {
+        return new AvailableTicketsDTO(orderService.getAvailableTickets(), TICKET_LIMIT);
     }
 
     @PreAuthorize("isAuthenticated()")
