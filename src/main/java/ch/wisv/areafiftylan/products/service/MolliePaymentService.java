@@ -55,7 +55,7 @@ public class MolliePaymentService implements PaymentService {
 
     @Override
     public String registerOrder(Order order) {
-        Client mollie =  new ClientBuilder().withApiKey(apiKey).build();
+        Client mollie = new ClientBuilder().withApiKey(apiKey).build();
         Map<String, Object> metadata = new HashMap<>();
         metadata.put("A5LId", order.getId());
 
@@ -94,7 +94,7 @@ public class MolliePaymentService implements PaymentService {
 
     @Override
     public Order updateStatus(String orderReference) {
-        Client mollie =  new ClientBuilder().withApiKey(apiKey).build();
+        Client mollie = new ClientBuilder().withApiKey(apiKey).build();
 
         Order order = orderRepository.findByReference(orderReference)
                 .orElseThrow(() -> new OrderNotFoundException("Order with reference " + orderReference + " not found"));
@@ -113,7 +113,15 @@ public class MolliePaymentService implements PaymentService {
                         order.setStatus(OrderStatus.PENDING);
                         break;
                     }
+                    case "open": {
+                        order.setStatus(OrderStatus.PENDING);
+                        break;
+                    }
                     case "cancelled": {
+                        order.setStatus(OrderStatus.CANCELLED);
+                        break;
+                    }
+                    case "failed": {
                         order.setStatus(OrderStatus.CANCELLED);
                         break;
                     }
@@ -144,7 +152,7 @@ public class MolliePaymentService implements PaymentService {
 
     @Override
     public String getPaymentUrl(String orderReference) {
-        Client mollie =  new ClientBuilder().withApiKey(apiKey).build();
+        Client mollie = new ClientBuilder().withApiKey(apiKey).build();
 
         try {
             ResponseOrError<Payment> paymentResponseOrError = mollie.payments().get(orderReference);
