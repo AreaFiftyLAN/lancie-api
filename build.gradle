@@ -54,6 +54,7 @@ dependencies {
     compile("org.springframework.boot:spring-boot-devtools")
     compile("org.springframework.boot:spring-boot-starter-logging")
     compile("org.springframework.boot:spring-boot-starter-actuator")
+    compile("org.springframework.boot:spring-boot-starter-aop")
     compile("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     compile("com.zaxxer:HikariCP")
     compile("org.flywaydb:flyway-core:4.2.0")
@@ -62,6 +63,8 @@ dependencies {
     compile("com.google.guava:guava:23.5-jre")
     compile("nl.stil4m:mollie-api:2.7.0")
     compile("net.logstash.logback:logstash-logback-encoder:4.11")
+
+    compile("in.ashwanthkumar:slack-java-webhook:0.0.9")
 
     runtime("org.hsqldb:hsqldb")
     runtime("org.postgresql:postgresql")
