@@ -11,7 +11,8 @@ import java.util.List;
 public class UserExportDTO {
 
     private String email;
-    private String password_hash;
+    private String passwordHash;
+    private String displayname;
     private Long userId;
-    private List<Seat> seat;
+    private List<String> seat;
 }

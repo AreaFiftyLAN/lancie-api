@@ -18,6 +18,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+
+/**
+ * This controller creates an export endpoint, meant for manual single-use export for use in different system.
+ * No production functionality should depend on this endpoint as it may change based on different requirements
+ */
 @RestController
 @RequestMapping("/export")
 @PreAuthorize("hasRole('ADMIN')")
@@ -35,15 +40,26 @@ public class ExportController {
     @GetMapping
     public Map<String, ?> exportUsers() {
         Map<String, Object> exportMap = new HashMap<>();
-        Map<Long, List<Seat>> seatMap = seatService.getAllSeats().stream().
-                collect(Collectors.groupingBy(seat -> seat.getUser().getId()));
-        exportMap.put("users", ticketService.getAllTickets().stream().map(Ticket::getOwner)
-                .map(user -> new UserExportDTO(user.getEmail(), user.getPassword(), user.getId(),
-                        seatMap.get(user.getId()))).collect(Collectors.toList()));
+        Map<Long, List<Seat>> seatMap = seatService.getAllSeats().stream()
+                .filter(Seat::isTaken)
+                .collect(Collectors.groupingBy(seat -> seat.getUser().getId()));
 
-        exportMap.put("teams", teamService.getAllTeams().stream()
-                .map(team -> new TeamExportDTO(team.getTeamName(), team.getCaptain().getId(),
-                        team.getMembers().stream().map(User::getId).collect(Collectors.toList()))));
+        exportMap.put("users",
+                ticketService.getAllTickets().stream()
+                        .filter(Ticket::isValid)
+                        .map(Ticket::getOwner)
+                        .map(user -> new UserExportDTO(user.getEmail(), user.getPassword(),
+                                user.getProfile().getDisplayName(), user.getId(),
+                                seatMap.get(user.getId()).stream()
+                                        .map(Seat::toString).collect(Collectors.toList())))
+                        .collect(Collectors.toList()));
+
+        exportMap.put("teams",
+                teamService.getAllTeams().stream()
+                        .map(team -> new TeamExportDTO(team.getTeamName(), team.getCaptain().getId(),
+                                team.getMembers().stream()
+                                        .map(User::getId).collect(Collectors.toList()))));
+
         return exportMap;
     }
 }

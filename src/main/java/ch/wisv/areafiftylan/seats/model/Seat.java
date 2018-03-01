@@ -68,6 +68,6 @@ public class Seat {
 
     @Override
     public String toString() {
-        return "" + seatGroup + seatNumber;
+        return seatGroup + seatNumber;
     }
 }
