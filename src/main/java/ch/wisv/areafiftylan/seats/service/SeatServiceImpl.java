@@ -53,10 +53,15 @@ public class SeatServiceImpl implements SeatService {
     }
 
     @Override
-    public SeatmapResponse getAllSeats() {
+    public SeatmapResponse getSeatMap() {
         return new SeatmapResponse(seatRepository.findAll().
                 stream().
                 collect(Collectors.groupingBy(Seat::getSeatGroup)));
+    }
+
+    @Override
+    public List<Seat> getAllSeats() {
+        return seatRepository.findAll();
     }
 
     @Override
