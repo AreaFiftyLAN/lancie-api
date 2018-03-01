@@ -796,7 +796,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
             statusCode(HttpStatus.SC_OK);
         //formatter:on
 
-        assertTrue(seatService.getAllSeats().getSeatmap().values()
+        assertTrue(seatService.getSeatMap().getSeatmap().values()
                 .stream()
                 .flatMap(Collection::stream)
                 .noneMatch(Seat::isLocked));
@@ -817,7 +817,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
             statusCode(HttpStatus.SC_OK);
         //formatter:on
 
-        assertTrue(seatService.getAllSeats().getSeatmap().values()
+        assertTrue(seatService.getSeatMap().getSeatmap().values()
                 .stream()
                 .flatMap(Collection::stream)
                 .allMatch(Seat::isLocked));
@@ -839,7 +839,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
             statusCode(HttpStatus.SC_OK);
         //formatter:on
 
-        assertTrue(seatService.getAllSeats().getSeatmap().get(group)
+        assertTrue(seatService.getSeatMap().getSeatmap().get(group)
                 .stream()
                 .noneMatch(Seat::isLocked));
     }
@@ -860,7 +860,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
             statusCode(HttpStatus.SC_OK);
         //formatter:on
 
-        assertTrue(seatService.getAllSeats().getSeatmap().get(group)
+        assertTrue(seatService.getSeatMap().getSeatmap().get(group)
                 .stream()
                 .allMatch(Seat::isLocked));
     }
@@ -881,7 +881,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
             statusCode(HttpStatus.SC_OK);
         //formatter:on
 
-        assertFalse(seatService.getAllSeats().getSeatmap().get(group).get(2).isLocked());
+        assertFalse(seatService.getSeatMap().getSeatmap().get(group).get(2).isLocked());
     }
 
     @Test
@@ -900,7 +900,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
             statusCode(HttpStatus.SC_OK);
         //formatter:on
 
-        assertTrue(seatService.getAllSeats().getSeatmap().get(group).get(2).isLocked());
+        assertTrue(seatService.getSeatMap().getSeatmap().get(group).get(2).isLocked());
     }
     //endregion Lock Seat
 }

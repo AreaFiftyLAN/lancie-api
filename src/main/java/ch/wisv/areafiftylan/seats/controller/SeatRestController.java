@@ -52,7 +52,7 @@ public class SeatRestController {
     @PreAuthorize("isAuthenticated()")
     @GetMapping
     MappingJacksonValue getAllSeats(@RequestParam(value = "admin", required = false) boolean admin, @AuthenticationPrincipal User user) {
-        MappingJacksonValue result = new MappingJacksonValue(seatService.getAllSeats());
+        MappingJacksonValue result = new MappingJacksonValue(seatService.getSeatMap());
         if (!admin || !user.getAuthorities().contains(Role.ROLE_ADMIN)) {
             result.setSerializationView(View.Public.class);
         }

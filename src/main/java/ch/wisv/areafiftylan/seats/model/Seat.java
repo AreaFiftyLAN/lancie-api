@@ -65,4 +65,9 @@ public class Seat {
     public boolean isTaken() {
         return ticket != null;
     }
+
+    @Override
+    public String toString() {
+        return seatGroup + seatNumber;
+    }
 }

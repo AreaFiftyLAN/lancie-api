@@ -25,7 +25,9 @@ import java.util.List;
 
 public interface SeatService {
 
-    SeatmapResponse getAllSeats();
+    SeatmapResponse getSeatMap();
+
+    List<Seat> getAllSeats();
 
     List<Seat> getSeatsByEmail(String email);
 
