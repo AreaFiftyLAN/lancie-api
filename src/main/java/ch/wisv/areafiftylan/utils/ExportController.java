@@ -58,7 +58,7 @@ public class ExportController {
 
         exportMap.put("teams",
                 teamService.getAllTeams().stream()
-                        .map(team -> new TeamExportDTO(team.getTeamName(), team.getCaptain().getId(),
+                        .map(team -> new TeamExportDTO(team.getId(), team.getTeamName(), team.getCaptain().getId(),
                                 team.getMembers().stream()
                                         .map(User::getId).collect(Collectors.toList()))));
 
