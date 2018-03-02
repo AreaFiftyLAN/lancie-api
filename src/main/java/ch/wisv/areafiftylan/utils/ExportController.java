@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,10 +49,11 @@ public class ExportController {
                 ticketService.getAllTickets().stream()
                         .filter(Ticket::isValid)
                         .map(Ticket::getOwner)
-                        .map(user -> new UserExportDTO(user.getEmail(), user.getPassword(),
-                                user.getProfile().getDisplayName(), user.getId(),
-                                seatMap.get(user.getId()).stream()
-                                        .map(Seat::toString).collect(Collectors.toList())))
+                        .map(user -> new UserExportDTO(user.getId(), user.getEmail(), user.getPassword(),
+                                user.getProfile() != null ? user.getProfile().getDisplayName() : null,
+                                seatMap.getOrDefault(user.getId(), Collections.emptyList()).stream()
+                                        .map(Seat::toString).collect(Collectors.toList())
+                        ))
                         .collect(Collectors.toList()));
 
         exportMap.put("teams",

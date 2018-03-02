@@ -775,17 +775,6 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         //@formatter:on
     }
 
-    @Test
-    public void testExportAsAnon(){
-        //@formatter:off
-        given().
-        when().
-            get("/export").
-        then().
-            statusCode(HttpStatus.SC_FORBIDDEN);
-        //@formatter:on
-    }
-
     //TODO: Move to SchedulerTest
 /*    @Test
     public void testExpiredUsersNoneExpired() {
