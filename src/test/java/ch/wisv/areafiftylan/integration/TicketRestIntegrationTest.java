@@ -733,4 +733,32 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
     }
+
+
+    @Test
+    public void testExportAsAnon(){
+        //@formatter:off
+        given().
+        when().
+            get("/export").
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
+    }
+
+    @Test
+    public void testGetExportAsAdmin() {
+        User admin = createAdmin();
+        createTicket(admin, Collections.singletonList(PICKUP_SERVICE));
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(admin)).
+        when().
+            get("/export").
+        then().
+            statusCode(HttpStatus.SC_OK);
+        //@formatter:on
+
+    }
 }
