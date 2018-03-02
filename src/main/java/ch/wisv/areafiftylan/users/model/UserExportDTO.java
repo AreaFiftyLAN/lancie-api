@@ -10,9 +10,9 @@ import java.util.List;
 @AllArgsConstructor
 public class UserExportDTO {
 
+    private Long userId;
     private String email;
     private String passwordHash;
     private String displayname;
-    private Long userId;
     private List<String> seat;
 }

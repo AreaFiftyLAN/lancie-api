@@ -49,17 +49,11 @@ public class ExportController {
                 ticketService.getAllTickets().stream()
                         .filter(Ticket::isValid)
                         .map(Ticket::getOwner)
-                        .map(user -> {
-                            String displayName = user.getProfile() != null ? user.getProfile().getDisplayName() : null;
-
-                            List<String> seats = Collections.emptyList();
-                            if (!seatMap.isEmpty()) {
-                                seatMap.get(user.getId()).forEach(seat -> seats.add(seat.toString()));
-                            }
-
-                            return new UserExportDTO(user.getEmail(), user.getPassword(),
-                                    displayName, user.getId(), seats);
-                        })
+                        .map(user -> new UserExportDTO(user.getId(), user.getEmail(), user.getPassword(),
+                                user.getProfile() != null ? user.getProfile().getDisplayName() : null,
+                                seatMap.getOrDefault(user.getId(), Collections.emptyList()).stream()
+                                        .map(Seat::toString).collect(Collectors.toList())
+                        ))
                         .collect(Collectors.toList()));
 
         exportMap.put("teams",
