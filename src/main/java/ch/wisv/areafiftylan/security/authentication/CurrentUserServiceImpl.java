@@ -120,9 +120,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
             Team team = teamService.getTeamById(teamId);
 
             // You can remove people from a Team if you're Admin, the Team Captain, or if you want to remove yourself
-            return  isTeamCaptain(team, user) ||
-                    isAdmin(user) ||
-                    user.getEmail().equals(email);
+            return isTeamCaptain(team, user) || isAdmin(user) || user.getEmail().equals(email);
         }
         return false;
     }
@@ -139,8 +137,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
         if (principal instanceof UserDetails) {
             User user = (User) principal;
             // Return true if the order is owned by the user, or the user is an admin
-            return order.getUser().getEmail().equals(user.getEmail()) ||
-                    isAdmin(user);
+            return order.getUser().getEmail().equals(user.getEmail()) || isAdmin(user);
         }
         return false;
     }
@@ -159,7 +156,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
         if (principal instanceof UserDetails) {
             User user = (User) principal;
 
-            User owner = ticketRepository.findOne(ticketId).getOwner();
+            User owner = ticketService.getTicketById(ticketId).getOwner();
             if (owner.equals(user) || isAdmin(user)) {
                 return true;
             }
@@ -181,8 +178,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
                     teamInviteTokenRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
 
             // Tokens can be revoked by the target user, an Admin or the Captain
-            return  teamInviteToken.getUser().equals(user) ||
-                    isAdmin(user) ||
+            return teamInviteToken.getUser().equals(user) || isAdmin(user) ||
                     teamInviteToken.getTeam().getCaptain().equals(user);
         }
         return false;

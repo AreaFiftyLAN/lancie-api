@@ -27,29 +27,28 @@ import java.util.Collection;
 
 @Service
 public class SubscriptionServiceImpl implements SubscriptionService {
-  private final SubscriptionRepository subscriptionRepository;
+    private final SubscriptionRepository subscriptionRepository;
 
-  @Autowired
-  public SubscriptionServiceImpl(SubscriptionRepository subscriptionRepository) {
-    this.subscriptionRepository = subscriptionRepository;
-  }
+    @Autowired
+    public SubscriptionServiceImpl(SubscriptionRepository subscriptionRepository) {
+        this.subscriptionRepository = subscriptionRepository;
+    }
 
-  @Override
-  public Subscription addSubscription(String email) {
-    Subscription newSubscription = new Subscription(email);
-    return subscriptionRepository.saveAndFlush(newSubscription);
-  }
+    @Override
+    public Subscription addSubscription(String email) {
+        Subscription newSubscription = new Subscription(email);
+        return subscriptionRepository.saveAndFlush(newSubscription);
+    }
 
-  @Override
-  public void removeSubscription(Long id) {
-    Subscription subscription = subscriptionRepository
-            .findById(id)
-            .orElseThrow(() -> new SubscriptionNotFoundException("Could not find subscription with ID " + id));
-    subscriptionRepository.delete(subscription.getId());
-  }
+    @Override
+    public void removeSubscription(Long id) {
+        Subscription subscription = subscriptionRepository.findById(id)
+                .orElseThrow(() -> new SubscriptionNotFoundException("Could not find subscription with ID " + id));
+        subscriptionRepository.delete(subscription);
+    }
 
-  @Override
-  public Collection<Subscription> getSubscriptions() {
-    return subscriptionRepository.findAll();
-  }
+    @Override
+    public Collection<Subscription> getSubscriptions() {
+        return subscriptionRepository.findAll();
+    }
 }

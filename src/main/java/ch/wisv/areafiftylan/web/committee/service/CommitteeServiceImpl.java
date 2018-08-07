@@ -26,7 +26,7 @@ public class CommitteeServiceImpl implements CommitteeService {
 
     @Override
     public void removeCommitteeMember(Long id) {
-        committeeRepository.delete(id);
+        committeeRepository.deleteById(id);
     }
 
     @Override

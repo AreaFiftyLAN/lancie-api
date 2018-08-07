@@ -137,7 +137,7 @@ public class SeatServiceImpl implements SeatService {
         for (int i = 1; i <= seatGroupDTO.getNumberOfSeats(); i++) {
             seatList.add(new Seat(seatGroupDTO.getSeatGroupName(), i));
         }
-        seatRepository.save(seatList);
+        seatRepository.saveAll(seatList);
     }
 
     @Override
@@ -169,13 +169,13 @@ public class SeatServiceImpl implements SeatService {
     public void setSeatGroupLocked(String groupName, boolean locked) {
         List<Seat> seatGroup = seatRepository.findBySeatGroup(groupName);
         seatGroup.forEach(seat -> seat.setLocked(locked));
-        seatRepository.save(seatGroup);
+        seatRepository.saveAll(seatGroup);
     }
 
     @Override
     public void setAllSeatsLock(boolean locked) {
         List<Seat> seats = seatRepository.findAll();
         seats.forEach(seat -> seat.setLocked(locked));
-        seatRepository.save(seats);
+        seatRepository.saveAll(seats);
     }
 }

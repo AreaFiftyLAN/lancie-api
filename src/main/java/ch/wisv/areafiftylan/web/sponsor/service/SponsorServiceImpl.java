@@ -35,9 +35,9 @@ public class SponsorServiceImpl implements SponsorService {
 
     @Override
     public void deleteSponsor(Long sponsorId) {
-        Sponsor sponsor = sponsorRepository.findOne(sponsorId);
+        Sponsor sponsor = sponsorRepository.findById(sponsorId).orElseThrow(SponsorConstraintViolationException::new);
         if (sponsor.getTournaments().size() == 0) {
-            sponsorRepository.delete(sponsorId);
+            sponsorRepository.deleteById(sponsorId);
         } else {
             throw new SponsorConstraintViolationException(sponsor);
         }

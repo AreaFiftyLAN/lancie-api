@@ -28,7 +28,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.thymeleaf.spring4.SpringTemplateEngine;
+import org.thymeleaf.spring5.SpringTemplateEngine;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -87,13 +87,15 @@ public abstract class ServiceTest {
     }
 
     protected Ticket persistTicket() {
-        Ticket ticket = ticketService.requestTicketOfType(TEST_TICKET, Arrays.asList(CH_MEMBER_OPTION, PICKUP_SERVICE_OPTION));
+        Ticket ticket =
+                ticketService.requestTicketOfType(TEST_TICKET, Arrays.asList(CH_MEMBER_OPTION, PICKUP_SERVICE_OPTION));
         ticket.setValid(true);
         return testEntityManager.persist(ticket);
     }
 
     protected Ticket persistTicketForUser(User user) {
-        Ticket ticket = ticketService.requestTicketOfType(user, TEST_TICKET, Arrays.asList(CH_MEMBER_OPTION, PICKUP_SERVICE_OPTION));
+        Ticket ticket = ticketService
+                .requestTicketOfType(user, TEST_TICKET, Arrays.asList(CH_MEMBER_OPTION, PICKUP_SERVICE_OPTION));
         ticket.setValid(true);
         return testEntityManager.persist(ticket);
     }

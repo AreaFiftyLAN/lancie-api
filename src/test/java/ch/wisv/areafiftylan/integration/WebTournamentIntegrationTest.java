@@ -17,7 +17,6 @@ import java.util.Arrays;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
-import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 
 public class WebTournamentIntegrationTest extends XAuthIntegrationTest {
@@ -238,18 +237,11 @@ public class WebTournamentIntegrationTest extends XAuthIntegrationTest {
     @Test
     public void testUpdateTournamentAsUser() {
         User user = createUser();
-        Tournament tournament = createTournament(),
-                   updateTournament = updateTournament();
+        Tournament tournament = createTournament(), updateTournament = updateTournament();
         updateTournament.setId(tournament.getId());
 
-        given()
-            .header(getXAuthTokenHeaderForUser(user))
-            .body(updateTournament)
-            .contentType(ContentType.JSON)
-        .when()
-            .put(TOURNAMENT_ENDPOINT + tournament.getId())
-        .then()
-            .statusCode(HttpStatus.SC_FORBIDDEN);
+        given().header(getXAuthTokenHeaderForUser(user)).body(updateTournament).contentType(ContentType.JSON).when()
+                .put(TOURNAMENT_ENDPOINT + tournament.getId()).then().statusCode(HttpStatus.SC_FORBIDDEN);
 
         assertEquals(1, tournamentRepository.findAll().size());
     }
@@ -257,21 +249,14 @@ public class WebTournamentIntegrationTest extends XAuthIntegrationTest {
     @Test
     public void testUpdateTournamentAsCommittee() {
         User committee = createCommitteeMember();
-        Tournament tournament = createTournament(),
-                   updateTournament = updateTournament();
+        Tournament tournament = createTournament(), updateTournament = updateTournament();
         updateTournament.setId(tournament.getId());
 
-        given()
-            .header(getXAuthTokenHeaderForUser(committee))
-            .body(updateTournament)
-            .contentType(ContentType.JSON)
-        .when()
-            .put(TOURNAMENT_ENDPOINT + tournament.getId())
-        .then()
-            .statusCode(HttpStatus.SC_CREATED);
+        given().header(getXAuthTokenHeaderForUser(committee)).body(updateTournament).contentType(ContentType.JSON)
+                .when().put(TOURNAMENT_ENDPOINT + tournament.getId()).then().statusCode(HttpStatus.SC_CREATED);
 
         assertEquals(1, tournamentRepository.findAll().size());
-        assertEquals(updateTournament, tournamentRepository.findOne(tournament.getId()));
+        assertEquals(updateTournament, tournamentRepository.findById(tournament.getId()).orElse(null));
     }
 
     @Test
@@ -282,15 +267,9 @@ public class WebTournamentIntegrationTest extends XAuthIntegrationTest {
 
         assertEquals(0, tournamentRepository.findAll().size());
 
-        given()
-            .header(getXAuthTokenHeaderForUser(admin))
-            .body(updateTournament)
-            .contentType(ContentType.JSON)
-        .when()
-            .put(TOURNAMENT_ENDPOINT + updateTournament.getId())
-        .then()
-            .statusCode(HttpStatus.SC_NOT_FOUND)
-            .body("message", equalTo("Could not find tournament"));
+        given().header(getXAuthTokenHeaderForUser(admin)).body(updateTournament).contentType(ContentType.JSON).when()
+                .put(TOURNAMENT_ENDPOINT + updateTournament.getId()).then().statusCode(HttpStatus.SC_NOT_FOUND)
+                .body("message", equalTo("Could not find tournament"));
 
         assertEquals(0, tournamentRepository.findAll().size());
     }

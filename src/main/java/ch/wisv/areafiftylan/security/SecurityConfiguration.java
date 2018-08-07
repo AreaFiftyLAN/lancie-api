@@ -20,10 +20,8 @@ package ch.wisv.areafiftylan.security;
 import ch.wisv.areafiftylan.security.authentication.AuthenticationService;
 import ch.wisv.areafiftylan.security.token.repository.AuthenticationTokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.autoconfigure.ManagementServerProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.security.access.expression.SecurityExpressionHandler;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -39,12 +37,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-@Order(ManagementServerProperties.ACCESS_OVERRIDE_ORDER)
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-    public static final String HIERARCHY = "ROLE_ADMIN > ROLE_COMMITTEE and " +
-                                            "ROLE_COMMITTEE > ROLE_OPERATOR and " +
-                                            "ROLE_OPERATOR > ROLE_USER";
+    public static final String HIERARCHY =
+            "ROLE_ADMIN > ROLE_COMMITTEE and " + "ROLE_COMMITTEE > ROLE_OPERATOR and " + "ROLE_OPERATOR > ROLE_USER";
 
     private final UserDetailsService userDetailsService;
 
@@ -54,8 +50,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Autowired
     public SecurityConfiguration(AuthenticationTokenRepository authenticationTokenRepository,
-                                 UserDetailsService userDetailsService,
-                                 AuthenticationService authenticationService) {
+                                 UserDetailsService userDetailsService, AuthenticationService authenticationService) {
         this.authenticationTokenRepository = authenticationTokenRepository;
         this.userDetailsService = userDetailsService;
         this.authenticationService = authenticationService;
