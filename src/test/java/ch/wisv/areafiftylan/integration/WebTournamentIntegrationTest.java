@@ -258,19 +258,4 @@ public class WebTournamentIntegrationTest extends XAuthIntegrationTest {
         assertEquals(1, tournamentRepository.findAll().size());
         assertEquals(updateTournament, tournamentRepository.findById(tournament.getId()).orElse(null));
     }
-
-    @Test
-    public void testUpdateUnknownTournament() {
-        User admin = createAdmin();
-        Tournament updateTournament = updateTournament();
-        updateTournament.setId(123L);
-
-        assertEquals(0, tournamentRepository.findAll().size());
-
-        given().header(getXAuthTokenHeaderForUser(admin)).body(updateTournament).contentType(ContentType.JSON).when()
-                .put(TOURNAMENT_ENDPOINT + updateTournament.getId()).then().statusCode(HttpStatus.SC_NOT_FOUND)
-                .body("message", equalTo("Could not find tournament"));
-
-        assertEquals(0, tournamentRepository.findAll().size());
-    }
 }

@@ -198,7 +198,7 @@ public class ConsumptionIntegrationTest extends XAuthIntegrationTest {
             header(getXAuthTokenHeaderForUser(user)).
             contentType(ContentType.JSON).
         when().
-            delete(CONSUMPTION_ENDPOINT + "/" + 9999F).
+            delete(CONSUMPTION_ENDPOINT + "/" + 9999).
         then().
             statusCode(HttpStatus.SC_NOT_FOUND).
             body("message", equalTo("Can't find a consumption with id: 9999"));

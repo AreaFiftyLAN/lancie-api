@@ -105,9 +105,8 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void testGetAvailableTickets() {
-        Collection<TicketType> ticketTypes = ticketService.getAllTicketTypes().stream()
-                .filter(TicketType::isBuyable)
-                .collect(Collectors.toList());
+        Collection<TicketType> ticketTypes =
+                ticketService.getAllTicketTypes().stream().filter(TicketType::isBuyable).collect(Collectors.toList());
 
         //@formatter:off
         given().
@@ -190,8 +189,7 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
     @Test
     public void testEditTicketType() {
         User admin = createAdmin();
-        TicketType type =
-                new TicketType("testEditType", "Type for edit test", 10, 0, LocalDateTime.now().plusDays(1), false);
+        TicketType type = new TicketType("testEditType", "Type for edit test", 10, 0, LocalDateTime.now(), false);
         type = ticketService.addTicketType(type);
 
         type.setPrice(15F);
@@ -375,7 +373,7 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         //@formatter:on
 
         ttt = tttRepository.findByToken(ttt.getToken()).get();
-        ticket = ticketRepository.findOne(ticket.getId());
+        ticket = ticketRepository.findById(ticket.getId()).orElse(new Ticket());
 
         Assert.assertTrue(ttt.isValid());
         Assert.assertTrue(ticket.getOwner().equals(ticketOwner));
@@ -399,7 +397,7 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         //@formatter:on
 
         ttt = tttRepository.findByToken(ttt.getToken()).get();
-        ticket = ticketRepository.findOne(ticket.getId());
+        ticket = ticketRepository.findById(ticket.getId()).orElse(new Ticket());
 
         Assert.assertTrue(ttt.isValid());
         Assert.assertTrue(ticket.getOwner().equals(ticketOwner));
@@ -423,7 +421,7 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         //@formatter:on
 
         ttt = tttRepository.findByToken(ttt.getToken()).get();
-        ticket = ticketRepository.findOne(ticket.getId());
+        ticket = ticketRepository.findById(ticket.getId()).orElse(new Ticket());
 
         Assert.assertFalse(ttt.isValid());
         Assert.assertTrue(ticket.getOwner().equals(ticketReceiver));
@@ -453,7 +451,7 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         //@formatter:on
 
         ttt = tttRepository.findByToken(ttt.getToken()).get();
-        ticket = ticketRepository.findOne(ticket.getId());
+        ticket = ticketRepository.findById(ticket.getId()).orElse(new Ticket());
 
         Assert.assertTrue(ttt.isValid());
         Assert.assertTrue(ticket.getOwner().equals(ticketOwner));
@@ -478,7 +476,7 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         //@formatter:on
 
         ttt = tttRepository.findByToken(ttt.getToken()).get();
-        ticket = ticketRepository.findOne(ticket.getId());
+        ticket = ticketRepository.findById(ticket.getId()).orElse(new Ticket());
 
         Assert.assertTrue(ttt.isValid());
         Assert.assertTrue(ticket.getOwner().equals(ticketOwner));
@@ -540,7 +538,7 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         //@formatter:on
 
         ttt = tttRepository.findByToken(ttt.getToken()).get();
-        ticket = ticketRepository.findOne(ticket.getId());
+        ticket = ticketRepository.findById(ticket.getId()).orElse(new Ticket());
 
         Assert.assertTrue(ttt.isValid());
         Assert.assertTrue(ticket.getOwner().equals(ticketOwner));
@@ -564,7 +562,7 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         //@formatter:on
 
         ttt = tttRepository.findByToken(ttt.getToken()).get();
-        ticket = ticketRepository.findOne(ticket.getId());
+        ticket = ticketRepository.findById(ticket.getId()).orElse(new Ticket());
 
         Assert.assertFalse(ttt.isValid());
         Assert.assertTrue(ticket.getOwner().equals(ticketOwner));
@@ -588,10 +586,10 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         //@formatter:on
 
         ttt = tttRepository.findByToken(ttt.getToken()).get();
-        ticket = ticketRepository.findOne(ticket.getId());
+        ticket = ticketRepository.findById(ticket.getId()).orElse(new Ticket());
 
         Assert.assertTrue(ttt.isValid());
-        Assert.assertTrue(ticket.getOwner().equals(ticketOwner));
+        Assert.assertEquals(ticket.getOwner(), ticketOwner);
     }
 
     @Test
@@ -613,10 +611,10 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         //@formatter:on
 
         ttt = tttRepository.findByToken(ttt.getToken()).get();
-        ticket = ticketRepository.findOne(ticket.getId());
+        ticket = ticketRepository.findById(ticket.getId()).orElse(new Ticket());
 
         Assert.assertTrue(ttt.isValid());
-        Assert.assertTrue(ticket.getOwner().equals(ticketOwner));
+        Assert.assertEquals(ticket.getOwner(), ticketOwner);
     }
 
     @Test
@@ -736,7 +734,7 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
 
 
     @Test
-    public void testExportAsAnon(){
+    public void testExportAsAnon() {
         //@formatter:off
         given().
         when().

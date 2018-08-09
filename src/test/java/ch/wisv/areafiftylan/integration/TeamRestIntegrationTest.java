@@ -358,8 +358,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
 
-        Collection<TeamInviteToken> tokens =
-                teamInviteTokenRepository.findByUserEmailIgnoreCase(member.getEmail());
+        Collection<TeamInviteToken> tokens = teamInviteTokenRepository.findByUserEmailIgnoreCase(member.getEmail());
         Assert.assertFalse(tokens.isEmpty());
     }
 
@@ -411,8 +410,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
 
-        Collection<TeamInviteToken> tokens =
-                teamInviteTokenRepository.findByUserEmailIgnoreCase(member.getEmail());
+        Collection<TeamInviteToken> tokens = teamInviteTokenRepository.findByUserEmailIgnoreCase(member.getEmail());
         Assert.assertFalse(tokens.isEmpty());
     }
 
@@ -918,7 +916,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
 
-        assertNull(teamRepository.findOne(team.getId()));
+        assertNull(teamRepository.findById(team.getId()).orElse(null));
     }
 
     @Test

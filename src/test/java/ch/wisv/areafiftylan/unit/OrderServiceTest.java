@@ -65,7 +65,6 @@ public class OrderServiceTest extends ServiceTest {
     @Test
     public void getOrderByIdNull() {
         thrown.expect(OrderNotFoundException.class);
-        thrown.expectMessage("Order with id: ");
 
         orderService.getOrderById(null);
     }

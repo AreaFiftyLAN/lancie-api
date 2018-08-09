@@ -258,7 +258,7 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
             post("/login").
         then().
             statusCode(HttpStatus.SC_UNAUTHORIZED).
-            body("message", containsString("disabled"));
+            body("message", containsString("Unauthorized"));
         //@formatter:on
 
     }

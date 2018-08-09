@@ -82,4 +82,48 @@ public class TicketType {
     public void addPossibleOption(TicketOption option) {
         this.possibleOptions.add(option);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        TicketType that = (TicketType) o;
+
+        if (Float.compare(that.price, price) != 0) {
+            return false;
+        }
+        if (numberAvailable != that.numberAvailable) {
+            return false;
+        }
+        if (buyable != that.buyable) {
+            return false;
+        }
+        if (!id.equals(that.id)) {
+            return false;
+        }
+        if (!name.equals(that.name)) {
+            return false;
+        }
+        if (!text.equals(that.text)) {
+            return false;
+        }
+        return possibleOptions != null ? possibleOptions.equals(that.possibleOptions) : that.possibleOptions == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id.hashCode();
+        result = 31 * result + name.hashCode();
+        result = 31 * result + text.hashCode();
+        result = 31 * result + (price != +0.0f ? Float.floatToIntBits(price) : 0);
+        result = 31 * result + numberAvailable;
+        result = 31 * result + (buyable ? 1 : 0);
+        result = 31 * result + (possibleOptions != null ? possibleOptions.hashCode() : 0);
+        return result;
+    }
 }

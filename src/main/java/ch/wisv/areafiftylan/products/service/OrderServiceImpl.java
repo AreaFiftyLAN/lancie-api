@@ -66,6 +66,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Order getOrderById(Long id) {
+        if (id == null) {
+            throw new OrderNotFoundException("OrderID can't be null");
+        }
         return orderRepository.findById(id)
                 .orElseThrow(() -> new OrderNotFoundException("Order with id: " + id + " not found"));
     }
@@ -266,7 +269,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public String getPaymentUrl(Long orderId) {
         Order order = getOrderById(orderId);
-        if(!order.getStatus().equals(OrderStatus.PENDING)){
+        if (!order.getStatus().equals(OrderStatus.PENDING)) {
             throw new ImmutableOrderException(orderId);
         }
         return paymentService.getPaymentUrl(order.getReference());

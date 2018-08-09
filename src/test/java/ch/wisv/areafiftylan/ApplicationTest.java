@@ -74,7 +74,7 @@ public class ApplicationTest {
 
         });
 
-        Mockito.when(mockMolliePaymentService.getPaymentUrl(Mockito.anyString()))
+        Mockito.when(mockMolliePaymentService.getPaymentUrl(Mockito.any()))
                 .thenReturn("http://newpaymentURL.com");
 
         return mockMolliePaymentService;

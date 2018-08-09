@@ -1,4 +1,5 @@
 spring:
+  flyway.enabled: false
   ## DATABASE PROPERTIES
   data.jpa.repositories.enabled: true
   datasource:
