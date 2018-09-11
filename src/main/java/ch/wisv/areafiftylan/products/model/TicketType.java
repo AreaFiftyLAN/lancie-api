@@ -20,6 +20,7 @@ package ch.wisv.areafiftylan.products.model;
 import ch.wisv.areafiftylan.utils.view.View;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
@@ -31,6 +32,7 @@ import java.util.Set;
 @Entity
 @Data
 @NoArgsConstructor
+
 public class TicketType {
     //    EARLY_FULL("Early Bird", 37.50F, 50, LocalDateTime.of(2016, 6, 3, 0, 0), true),
     //    REGULAR_FULL("Regular", 40.00F, 0, LocalDateTime.of(2016, 5, 28, 23, 59), true),
@@ -62,6 +64,7 @@ public class TicketType {
      * A time after which no more tickets of this type can be sold.
      * Will be null if no deadline is set.
      */
+    @EqualsAndHashCode.Exclude
     private LocalDateTime deadline;
 
     private boolean buyable;
@@ -81,49 +84,5 @@ public class TicketType {
 
     public void addPossibleOption(TicketOption option) {
         this.possibleOptions.add(option);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        TicketType that = (TicketType) o;
-
-        if (Float.compare(that.price, price) != 0) {
-            return false;
-        }
-        if (numberAvailable != that.numberAvailable) {
-            return false;
-        }
-        if (buyable != that.buyable) {
-            return false;
-        }
-        if (!id.equals(that.id)) {
-            return false;
-        }
-        if (!name.equals(that.name)) {
-            return false;
-        }
-        if (!text.equals(that.text)) {
-            return false;
-        }
-        return possibleOptions != null ? possibleOptions.equals(that.possibleOptions) : that.possibleOptions == null;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = id.hashCode();
-        result = 31 * result + name.hashCode();
-        result = 31 * result + text.hashCode();
-        result = 31 * result + (price != +0.0f ? Float.floatToIntBits(price) : 0);
-        result = 31 * result + numberAvailable;
-        result = 31 * result + (buyable ? 1 : 0);
-        result = 31 * result + (possibleOptions != null ? possibleOptions.hashCode() : 0);
-        return result;
     }
 }
