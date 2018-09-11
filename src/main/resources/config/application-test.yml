@@ -24,13 +24,16 @@ spring:
     suffix: .html
     mode: HTML5
     encoding: UTF-8
-    content-type: text/html
+    servlet:
+      content-type: text/html
 
   jackson:
     date-format: com.fasterxml.jackson.databind.util.ISO8601DateFormat
 
 
-server.context-path: /
+server:
+  servlet:
+    context-path: /
 
 ## AREA FIFTYLAN SETTINGS
 a5l:

@@ -1,24 +1,25 @@
-flyway:
-  enabled: true
-  locations: ch/wisv/areafiftylan/utils/db/migration
 spring.jpa.hibernate.ddl-auto: validate
 spring.jpa.properties.hibernate.hbm2ddl.auto: none
 
 logging:
-  file: /tmp/logs/lancie-api.log
+    file: /tmp/logs/lancie-api.log
 
 ## AREA FIFTYLAN SETTINGS
 a5l:
-  paymentReturnUrl: https://areafiftylan.nl/order-check
-  user:
-    resetUrl: https://areafiftylan.nl/password-reset
-    acceptTransferUrl: https://areafiftylan.nl/transfer-accept
+    paymentReturnUrl: https://areafiftylan.nl/order-check
+    user:
+        resetUrl: https://areafiftylan.nl/password-reset
+        acceptTransferUrl: https://areafiftylan.nl/transfer-accept
 
-  mail:
-    sender: LANcie <lancie@ch.tudelft.nl>
-    contact: LANcie <lancie@ch.tudelft.nl>
-    confirmUrl: https://areafiftylan.nl/register-confirm
+    mail:
+        sender: LANcie <lancie@ch.tudelft.nl>
+        contact: LANcie <lancie@ch.tudelft.nl>
+        confirmUrl: https://areafiftylan.nl/register-confirm
 
-  orderLimit: 5
-  ticketLimit: 220
-  orderKeepAlive: 15
+    orderLimit: 5
+    ticketLimit: 220
+    orderKeepAlive: 15
+spring:
+    flyway:
+        enabled: true
+        locations: ch/wisv/areafiftylan/utils/db/migration

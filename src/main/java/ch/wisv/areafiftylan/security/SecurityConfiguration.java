@@ -20,6 +20,7 @@ package ch.wisv.areafiftylan.security;
 import ch.wisv.areafiftylan.security.authentication.AuthenticationService;
 import ch.wisv.areafiftylan.security.token.repository.AuthenticationTokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.expression.SecurityExpressionHandler;
@@ -75,7 +76,15 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.logout().logoutSuccessHandler(new JsonLoginAuthenticationAttemptHandler(authenticationService));
 
-        http.authorizeRequests().expressionHandler(webExpressionHandler()).anyRequest().permitAll();
+        http
+            .authorizeRequests()
+                .expressionHandler(webExpressionHandler())
+                .requestMatchers(EndpointRequest.to("health"))
+                    .permitAll()
+                .requestMatchers(EndpointRequest.toAnyEndpoint())
+                    .hasRole("ADMIN")
+                .anyRequest()
+                    .permitAll();
 
         // We use custom Authentication Tokens, making csrf redundant
         http.csrf().disable();
