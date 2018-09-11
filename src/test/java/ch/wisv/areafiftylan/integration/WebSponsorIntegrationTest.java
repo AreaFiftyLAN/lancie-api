@@ -265,7 +265,7 @@ public class WebSponsorIntegrationTest extends XAuthIntegrationTest {
             .statusCode(HttpStatus.SC_CREATED);
 
         assertEquals(1, sponsorRepository.findAll().size());
-        assertEquals(updateSponsor, sponsorRepository.findOne(updateSponsor.getId()));
+        assertEquals(updateSponsor, sponsorRepository.findById(updateSponsor.getId()).orElse(new Sponsor()));
     }
 
     @Test

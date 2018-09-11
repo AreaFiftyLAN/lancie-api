@@ -3,7 +3,6 @@ package ch.wisv.areafiftylan.integration;
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.web.banner.model.Banner;
 import ch.wisv.areafiftylan.web.banner.service.BannerRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.http.ContentType;
 import org.apache.http.HttpStatus;
@@ -19,6 +18,7 @@ import java.util.Collection;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.hasItem;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
@@ -71,9 +71,7 @@ public class WebBannerIntegrationTest extends XAuthIntegrationTest {
     }
 
     @Test
-    public void testGetBannerAsAdmin() throws JsonProcessingException {
-        String expected = mapper.writeValueAsString(banners);
-
+    public void testGetBannerAsAdmin() {
         //@formatter:off
         given().
             header(getXAuthTokenHeaderForUser(admin)).
@@ -81,14 +79,14 @@ public class WebBannerIntegrationTest extends XAuthIntegrationTest {
             get(BANNER_ENDPOINT).
         then().
             statusCode(HttpStatus.SC_OK).
-            body(equalTo(expected));
+            body("text", hasItem(banner.getText()));
         //@formatter:on
     }
 
     //endregion
     //region GET current banner
     @Test
-    public void testGetCurrentBanner() throws JsonProcessingException {
+    public void testGetCurrentBanner() {
         LocalDate lastWeek = LocalDate.now().minusWeeks(1);
         LocalDate nextWeek = LocalDate.now().plusWeeks(1);
         Banner banner = new Banner();
@@ -105,7 +103,7 @@ public class WebBannerIntegrationTest extends XAuthIntegrationTest {
             get(BANNER_ENDPOINT + "current").
         then().
             statusCode(HttpStatus.SC_OK).
-            body("object.text",equalTo(banner.getText()));
+            body("object.text",equalTo(banner.getText().toString()));
         //@formatter:on
     }
 
@@ -195,7 +193,7 @@ public class WebBannerIntegrationTest extends XAuthIntegrationTest {
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
 
-        assertEquals(banner.getText(), bannerRepository.findOne(banner.getId()).getText());
+        assertEquals(banner.getText(), bannerRepository.findById(banner.getId()).orElse(new Banner()).getText());
     }
 
     @Test
@@ -240,7 +238,7 @@ public class WebBannerIntegrationTest extends XAuthIntegrationTest {
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
 
-        assertFalse(bannerRepository.exists(id));
+        assertFalse(bannerRepository.existsById(id));
     }
     //endregion
     //region DELETE all banners

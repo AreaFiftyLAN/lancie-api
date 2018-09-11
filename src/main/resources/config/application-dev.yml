@@ -1,9 +1,5 @@
-flyway.enabled: false
+spring.flyway.enabled: false
 spring.jpa.hibernate.ddl-auto: create
-
-endpoints:
-  logfile:
-    sensitive: false
 
 ## AREA FIFTYLAN SETTINGS
 a5l:

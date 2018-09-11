@@ -17,15 +17,12 @@
 
 package ch.wisv.areafiftylan.users.service;
 
+import ch.wisv.areafiftylan.exception.UserNotFoundException;
 import ch.wisv.areafiftylan.security.token.PasswordResetToken;
 import ch.wisv.areafiftylan.security.token.VerificationToken;
 import ch.wisv.areafiftylan.security.token.repository.PasswordResetTokenRepository;
 import ch.wisv.areafiftylan.security.token.repository.VerificationTokenRepository;
-import ch.wisv.areafiftylan.users.model.Profile;
-import ch.wisv.areafiftylan.users.model.ProfileDTO;
-import ch.wisv.areafiftylan.users.model.Role;
-import ch.wisv.areafiftylan.users.model.User;
-import ch.wisv.areafiftylan.users.model.UserDTO;
+import ch.wisv.areafiftylan.users.model.*;
 import ch.wisv.areafiftylan.utils.mail.MailService;
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
@@ -73,7 +70,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public User getUserById(long id) {
-        return userRepository.findOne(id);
+        return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
     }
 
     @Override
@@ -148,7 +145,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public User edit(Long userId, UserDTO userDTO) {
-        User user = userRepository.findOne(userId);
+        User user = getUserById(userId);
         if (!Strings.isNullOrEmpty(userDTO.getEmail())) {
             user.setEmail(userDTO.getEmail());
         }
@@ -171,7 +168,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             }
         });
 
-        User user = userRepository.findOne(userId);
+        User user = getUserById(userId);
 
         // Set all the profile fields at once
         user.getProfile().setAllFields(profileDTO.getFirstName(), profileDTO.getLastName(), profileDTO.getDisplayName(),
@@ -188,28 +185,28 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public Profile resetProfile(Long userId) {
-        Profile profile = userRepository.findOne(userId).getProfile();
-        userRepository.findOne(userId).resetProfile();
+        Profile profile = getUserById(userId).getProfile();
+        getUserById(userId).resetProfile();
         return profile;
     }
 
     @Override
     public void unlock(Long userId) {
-        User user = userRepository.findOne(userId);
+        User user = getUserById(userId);
         user.setAccountNonLocked(true);
         userRepository.saveAndFlush(user);
     }
 
     @Override
     public void lock(Long userId) {
-        User user = userRepository.findOne(userId);
+        User user = getUserById(userId);
         user.setAccountNonLocked(false);
         userRepository.saveAndFlush(user);
     }
 
     @Override
     public void verify(Long userId) {
-        User user = userRepository.findOne(userId);
+        User user = getUserById(userId);
         user.setEnabled(true);
         userRepository.saveAndFlush(user);
     }
@@ -226,7 +223,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public void resetPassword(Long userId, String password) {
-        User user = userRepository.findOne(userId);
+        User user = getUserById(userId);
         if (Strings.isNullOrEmpty(password)) {
             throw new IllegalArgumentException("Password can't be empty");
         }
@@ -237,7 +234,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public void changePassword(Long userId, String oldPassword, String newPassword) {
-        User user = userRepository.findOne(userId);
+        User user = getUserById(userId);
 
         if (new BCryptPasswordEncoder().matches(oldPassword, user.getPassword())) {
             user.setPasswordHash(getPasswordHash(newPassword));
@@ -255,7 +252,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public Boolean alcoholCheck(Long userId) {
-        User user = userRepository.findOne(userId);
+        User user = getUserById(userId);
         return user.getProfile().getBirthday().isBefore(LocalDate.now().minusYears(ALCOHOL_AGE));
     }
 
@@ -272,7 +269,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        return userRepository.findOneByEmailIgnoreCase(email)
-                .orElseThrow(() -> new UsernameNotFoundException(email));
+        return userRepository.findOneByEmailIgnoreCase(email).orElseThrow(() -> new UsernameNotFoundException(email));
     }
 }

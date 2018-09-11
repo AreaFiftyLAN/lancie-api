@@ -36,7 +36,7 @@ public class BannerServiceImpl implements BannerService {
 
     @Override
     public Banner update(Long bannerId, Banner banner) {
-        if (!bannerRepository.exists(bannerId)) {
+        if (!bannerRepository.existsById(bannerId)) {
             throw new BannerNotFoundException();
         }
 
@@ -45,7 +45,7 @@ public class BannerServiceImpl implements BannerService {
 
     @Override
     public void removeBanner(Long id) {
-        bannerRepository.delete(id);
+        bannerRepository.deleteById(id);
     }
 
     @Override

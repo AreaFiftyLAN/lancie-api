@@ -45,7 +45,7 @@ public class TicketServiceTest extends ServiceTest {
         Long id = persistTicket().getId();
         Ticket ticket = ticketService.removeTicket(id);
         assertEquals(id, ticket.getId());
-        assertNull(ticketRepository.findOne(id));
+        assertNull(ticketRepository.findById(id).orElse(null));
     }
 
     @Test
@@ -111,8 +111,7 @@ public class TicketServiceTest extends ServiceTest {
         ticket2.setValid(false);
         testEntityManager.persist(ticket2);
 
-        Collection<Ticket> validTicketsByOwnerEmail =
-                ticketService.findValidTicketsByOwnerEmail(user.getEmail());
+        Collection<Ticket> validTicketsByOwnerEmail = ticketService.findValidTicketsByOwnerEmail(user.getEmail());
 
         assertThat(validTicketsByOwnerEmail).containsExactly(ticket);
     }
@@ -497,8 +496,9 @@ public class TicketServiceTest extends ServiceTest {
 
         Collection<Ticket> tickets = ticketService.getOwnedTicketsAndFromTeamMembers(captain);
 
-        assertThat(tickets).containsAll(Arrays.asList(captainTicket, member1Team1Ticket, member2Team1Ticket, member1Team2Ticket,
-                member2Team2Ticket));
+        assertThat(tickets).containsAll(
+                Arrays.asList(captainTicket, member1Team1Ticket, member2Team1Ticket, member1Team2Ticket,
+                        member2Team2Ticket));
     }
 
     @Test

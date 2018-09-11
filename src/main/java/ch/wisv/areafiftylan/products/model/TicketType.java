@@ -20,6 +20,7 @@ package ch.wisv.areafiftylan.products.model;
 import ch.wisv.areafiftylan.utils.view.View;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
@@ -31,6 +32,7 @@ import java.util.Set;
 @Entity
 @Data
 @NoArgsConstructor
+
 public class TicketType {
     //    EARLY_FULL("Early Bird", 37.50F, 50, LocalDateTime.of(2016, 6, 3, 0, 0), true),
     //    REGULAR_FULL("Regular", 40.00F, 0, LocalDateTime.of(2016, 5, 28, 23, 59), true),
@@ -62,6 +64,7 @@ public class TicketType {
      * A time after which no more tickets of this type can be sold.
      * Will be null if no deadline is set.
      */
+    @EqualsAndHashCode.Exclude
     private LocalDateTime deadline;
 
     private boolean buyable;

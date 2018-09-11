@@ -117,7 +117,7 @@ public class TeamServiceImpl implements TeamService {
                 map(TeamInviteResponse::getToken).
                 forEach(this::revokeInvite);
         Team team = teamRepository.getOne(teamId);
-        teamRepository.delete(teamId);
+        teamRepository.delete(team);
         return team;
     }
 

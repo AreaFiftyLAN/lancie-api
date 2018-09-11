@@ -103,7 +103,8 @@ public class ConsumptionServiceImpl implements ConsumptionService {
     @Override
     public void removePossibleConsumption(Long consumptionId) {
         resetConsumptionEverywhere(consumptionId);
-        possibleConsumptionsRepository.delete(consumptionId);
+        Consumption consumption = getByConsumptionId(consumptionId);
+        possibleConsumptionsRepository.delete(consumption);
     }
 
     @Override

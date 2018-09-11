@@ -26,7 +26,7 @@ public class FaqServiceImpl implements FaqService {
 
     @Override
     public void deleteQuestion(Long id) {
-        faqRepository.delete(id);
+        faqRepository.deleteById(id);
     }
 
     @Override

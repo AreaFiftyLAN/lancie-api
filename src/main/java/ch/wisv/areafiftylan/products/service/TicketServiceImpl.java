@@ -82,6 +82,9 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public Ticket getTicketById(Long ticketId) {
+        if (ticketId == null) {
+            throw new TicketNotFoundException();
+        }
         return ticketRepository.findById(ticketId).
                 orElseThrow(TicketNotFoundException::new);
     }
@@ -265,7 +268,7 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public TicketType updateTicketType(Long typeId, TicketType type) {
-        if (typeId == null || !ticketTypeRepository.exists(typeId)) {
+        if (typeId == null || !ticketTypeRepository.existsById(typeId)) {
             throw new TicketTypeNotFoundException("with ID " + typeId);
         }
         type.setId(typeId);
@@ -274,7 +277,7 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public void deleteTicketType(Long typeId) {
-        ticketTypeRepository.delete(typeId);
+        ticketTypeRepository.deleteById(typeId);
     }
 
     @Override

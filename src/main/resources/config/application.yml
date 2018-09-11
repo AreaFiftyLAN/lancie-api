@@ -1,50 +1,46 @@
 ## SPRING SETTINGS
 spring:
-  thymeleaf:
-    check-template-location: true
-    prefix: classpath:/templates/
-    suffix: .html
-    mode: HTML5
-    encoding: UTF-8
-    content-type: text/html
+    thymeleaf:
+        check-template-location: true
+        prefix: classpath:/templates/
+        suffix: .html
+        mode: HTML5
+        encoding: UTF-8
+        servlet:
+            content-type: text/html
 
-  datasource.driverClassName: org.postgresql.Driver
-  data.jpa.repositories.enabled: true
+    datasource.driverClassName: org.postgresql.Driver
+    data.jpa.repositories.enabled: true
 
-  jpa:
-    show-sql: false
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-    generate-ddl: true
-    properties:
-      hibernate.default_schema: public
+    jpa:
+        show-sql: false
+        database-platform: org.hibernate.dialect.PostgreSQLDialect
+        generate-ddl: true
+        properties:
+            hibernate.default_schema: public
 
-  jackson:
-    date-format: com.fasterxml.jackson.databind.util.ISO8601DateFormat
+    jackson:
+        date-format: com.fasterxml.jackson.databind.util.ISO8601DateFormat
 
 logging:
-  level:
-    org.springframework.boot: INFO
-    ch.wisv.areafiftylan: INFO
-    org.hibernate.SQL: ERROR
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
-  file: logs/lancie-api.log
+    level:
+        org.springframework.boot: INFO
+        ch.wisv.areafiftylan: INFO
+        org.hibernate.SQL: ERROR
+    pattern:
+        console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: logs/lancie-api.log
 
 server:
-  port: 9000
-  context-path: /api/v1
+    port: 9000
+    servlet:
+        context-path: /api/v1
 
 # Spring Boot Actuator endpoint settings
 management:
-  context-path: /management
-  security:
-    roles: ROLE_ADMIN
-
-# Disable all endpoints except logfile and health
-endpoints:
-  enabled: false
-  health:
-    enabled: true
-  logfile:
-    enabled: true
-    sensitive: true
+    endpoints:
+        web:
+            base-path: /management
+    endpoint:
+        logfile:
+            enabled: true
