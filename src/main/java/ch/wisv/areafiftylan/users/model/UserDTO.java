@@ -18,7 +18,7 @@
 package ch.wisv.areafiftylan.users.model;
 
 import lombok.Getter;
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 @Getter
 public class UserDTO {

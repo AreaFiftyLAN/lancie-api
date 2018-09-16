@@ -1,7 +1,7 @@
 package ch.wisv.areafiftylan.utils.mail;
 
 import lombok.Getter;
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 public class ContactMailDTO extends MailDTO {
     @Getter
