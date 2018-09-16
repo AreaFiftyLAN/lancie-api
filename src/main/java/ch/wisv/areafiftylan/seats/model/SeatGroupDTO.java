@@ -19,9 +19,9 @@ package ch.wisv.areafiftylan.seats.model;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotEmpty;
 
 @Getter
 @Setter

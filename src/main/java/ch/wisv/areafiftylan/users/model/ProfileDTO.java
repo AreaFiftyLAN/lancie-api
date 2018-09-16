@@ -18,7 +18,7 @@
 package ch.wisv.areafiftylan.users.model;
 
 import lombok.Data;
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;

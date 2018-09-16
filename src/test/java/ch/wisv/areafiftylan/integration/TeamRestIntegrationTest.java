@@ -83,7 +83,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
             extract().response().path("object.id");
         //@formatter:on
 
-        Team team = teamRepository.getOne(new Long(teamId));
+        Team team = teamRepository.getOne(Long.valueOf(teamId));
         Assert.assertNotNull(team);
     }
 
@@ -109,7 +109,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
             extract().response().path("object.id");
         //@formatter:on
 
-        Team team = teamRepository.getOne(new Long(teamId));
+        Team team = teamRepository.getOne(Long.valueOf(teamId));
         Assert.assertNotNull(team);
     }
 
@@ -135,7 +135,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
             extract().response().path("object.id");
         //@formatter:on
 
-        Team team = teamRepository.getOne(new Long(teamId));
+        Team team = teamRepository.getOne(Long.valueOf(teamId));
         Assert.assertNotNull(team);
     }
 
