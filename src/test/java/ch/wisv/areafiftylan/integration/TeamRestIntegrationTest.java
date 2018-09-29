@@ -901,6 +901,33 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
     }
 
     @Test
+    public void testRemoveCaptainAsCaptainWithOpenInvite() {
+        User captain = createUser();
+        User member = createUser();
+        Team team = createTeamWithCaptain(captain);
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(captain)).
+        when().
+            body(member.getEmail()).
+            post(TEAM_ENDPOINT + team.getId() + "/invites").
+        then().
+            statusCode(HttpStatus.SC_OK);
+        //@formatter:on
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(captain)).
+        when().
+            body(captain.getEmail()).
+            delete(TEAM_ENDPOINT + team.getId() + "/members").
+        then().
+            statusCode(HttpStatus.SC_OK);
+        //@formatter:on
+    }
+
+    @Test
     public void testRemoveCaptainAsAdmin() {
         User admin = createAdmin();
         User captain = createUser();
@@ -973,5 +1000,23 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
     }
+
+    @Test
+    public void testRemoveEmptyTeamAsCaptain() {
+        User captain = createUser();
+        User user = createUser();
+        Team team = createTeamWithCaptain(captain);
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(captain)).
+        when().
+            body(user.getEmail()).
+            delete(TEAM_ENDPOINT + team.getId() + "/members").
+        then().
+            statusCode(HttpStatus.SC_OK);
+        //@formatter:on
+    }
     //endregion
+
 }
