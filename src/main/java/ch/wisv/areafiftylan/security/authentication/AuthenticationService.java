@@ -22,4 +22,6 @@ public interface AuthenticationService {
     String createNewAuthToken(String email);
 
     void removeAuthToken(String xAuth);
+
+    void removeAllAuthTokens();
 }
