@@ -112,11 +112,8 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public Team delete(Long teamId) {
-        List<TeamInviteResponse> invites = findTeamInvitesByTeamId(teamId);
-        invites.stream().
-                map(TeamInviteResponse::getToken).
-                forEach(this::revokeInvite);
         Team team = teamRepository.getOne(teamId);
+        teamInviteTokenRepository.deleteByTeam(team);
         teamRepository.delete(team);
         return team;
     }
