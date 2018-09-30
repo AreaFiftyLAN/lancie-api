@@ -18,6 +18,7 @@
 package ch.wisv.areafiftylan.security.token.repository;
 
 import ch.wisv.areafiftylan.security.token.TeamInviteToken;
+import ch.wisv.areafiftylan.teams.model.Team;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
@@ -29,5 +30,6 @@ public interface TeamInviteTokenRepository extends TokenRepository<TeamInviteTok
 
     Collection<TeamInviteToken> findByTeamId(Long teamId);
 
+    void deleteByTeam(Team team);
 
 }

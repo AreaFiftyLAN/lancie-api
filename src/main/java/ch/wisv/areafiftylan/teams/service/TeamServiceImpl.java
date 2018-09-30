@@ -32,6 +32,7 @@ import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -111,12 +112,10 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
+    @Transactional
     public Team delete(Long teamId) {
-        List<TeamInviteResponse> invites = findTeamInvitesByTeamId(teamId);
-        invites.stream().
-                map(TeamInviteResponse::getToken).
-                forEach(this::revokeInvite);
         Team team = teamRepository.getOne(teamId);
+        teamInviteTokenRepository.deleteByTeam(team);
         teamRepository.delete(team);
         return team;
     }
@@ -203,6 +202,7 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
+    @Transactional
     public boolean removeMember(Long teamId, String email) {
         Team team = getTeamById(teamId);
         User user = userService.getUserByEmail(email);

@@ -54,6 +54,9 @@ public class JsonLoginAuthenticationAttemptHandler implements AuthenticationSucc
             attemptsCache.invalidate(authentication.getName());
             log.warn("Successful authentication after {} attempts", previousAttempts,
                     StructuredArguments.v("user_id", ((User) authentication.getPrincipal()).getId()));
+        } else {
+            log.info("Successful authentication for user {}", ((User) authentication.getPrincipal()).getId(),
+                    StructuredArguments.v("user_id", ((User) authentication.getPrincipal()).getId()));
         }
 
         response.setHeader("X-Auth-Token", authenticationService.createNewAuthToken(authentication.getName()));

@@ -24,10 +24,12 @@ import ch.wisv.areafiftylan.security.token.repository.AuthenticationTokenReposit
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.users.service.UserService;
 import com.google.common.base.Strings;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final AuthenticationTokenRepository authenticationTokenRepository;
@@ -67,5 +69,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         token.revoke();
         authenticationTokenRepository.saveAndFlush(token);
+    }
+
+    @Override
+    public void removeAllAuthTokens() {
+        authenticationTokenRepository.deleteAll();
+        log.info("Deleted all authentication tokens");
     }
 }

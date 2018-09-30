@@ -21,10 +21,11 @@ import ch.wisv.areafiftylan.products.model.order.Order;
 import ch.wisv.areafiftylan.products.model.order.OrderStatus;
 import ch.wisv.areafiftylan.products.service.OrderService;
 import ch.wisv.areafiftylan.products.service.repository.OrderRepository;
+import ch.wisv.areafiftylan.security.authentication.AuthenticationService;
 import ch.wisv.areafiftylan.security.token.VerificationToken;
 import ch.wisv.areafiftylan.security.token.repository.VerificationTokenRepository;
 import ch.wisv.areafiftylan.users.service.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -41,7 +42,7 @@ import java.util.stream.Collectors;
  * Class with all scheduled tasks
  */
 @Component
-public class TaskScheduler {
+public class TaskScheduler implements InitializingBean {
 
     @Value("${a5l.orderKeepAlive:15}")
     private int ORDER_STAY_ALIVE_MINUTES;
@@ -51,15 +52,17 @@ public class TaskScheduler {
 
     private final OrderRepository orderRepository;
     private final OrderService orderService;
+    private final AuthenticationService authenticationService;
 
     private final UserRepository userRepository;
     private final VerificationTokenRepository verificationTokenRepository;
 
-    @Autowired
     public TaskScheduler(OrderRepository orderRepository, OrderService orderService,
+                         AuthenticationService authenticationService,
                          VerificationTokenRepository verificationTokenRepository, UserRepository userRepository) {
         this.orderRepository = orderRepository;
         this.orderService = orderService;
+        this.authenticationService = authenticationService;
         this.userRepository = userRepository;
         this.verificationTokenRepository = verificationTokenRepository;
     }
@@ -81,7 +84,8 @@ public class TaskScheduler {
         LocalDateTime now = LocalDateTime.now();
         List<VerificationToken> allExpiredVerificationTokens =
                 verificationTokenRepository.findAllByExpiryDateBefore(now);
-        allExpiredVerificationTokens.stream().filter((verificationToken) -> !verificationToken.isUsed()).forEach(this::handleExpiredVerificationToken);
+        allExpiredVerificationTokens.stream().filter((verificationToken) -> !verificationToken.isUsed())
+                .forEach(this::handleExpiredVerificationToken);
     }
 
     private static Predicate<Order> isExpired() {
@@ -92,5 +96,10 @@ public class TaskScheduler {
     private void handleExpiredVerificationToken(VerificationToken verificationToken) {
         verificationTokenRepository.delete(verificationToken);
         userRepository.delete(verificationToken.getUser());
+    }
+
+    @Override
+    public void afterPropertiesSet() {
+        authenticationService.removeAllAuthTokens();
     }
 }
