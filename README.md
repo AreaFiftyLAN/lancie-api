@@ -6,8 +6,8 @@ The API is a Spring based application to suit the needs of a LAN-party.
 
 ### Tools
 -   [PostgresQL](https://www.postgresql.org/)
--   [Mailcatcher](https://mailcatcher.me/), creates a mailserver locally on your pc. Mailcatcher catches all mail sent from the API and displays them in a web interface. Unix-like systems: `gem install mailcatcher`. Windows users can try mailcatcher as well, but [Papercut](https://github.com/changemakerstudios/papercut) has an easier installation. 
--   [Docker](https://www.docker.com), can be used as an alternative to postgresql.
+-   [Mailcatcher](https://mailcatcher.me/). Creates a mailserver locally on your pc. Mailcatcher catches all mail sent from the API and displays them in a web interface. Unix-like systems: `gem install mailcatcher`. Windows users can try mailcatcher as well, but [Papercut](https://github.com/changemakerstudios/papercut) has an easier installation. 
+-   [Docker](https://www.docker.com). Can be used as an alternative to postgresql.
 
 ### Docker
 The postgres install can be quite a hassle, docker can also be used for this. After docker is installed, create a postgres container: `docker run --name lancie_postgres -p 5432:5432 -d postgres`. Connect to the running container with `docker exec -tiu postgres lancie_postgres psql` and create a new database with `CREATE DATABASE lancie-dev`. This is everything you need to start the LANcie-API, if, at any later point, you need to connect to the database, you can enter `docker exec -tiu postgres lancie_postgres psql -d lancie-dev`
