@@ -18,9 +18,7 @@ apply plugin: 'io.spring.dependency-management'
 apply plugin: 'jacoco'
 
 jar {
-    baseName = 'lancie-api'
-    version = '2017.1.6'
-    archiveName = "${baseName}.${extension}"
+    archiveName = 'lancie-api'
 }
 
 //springBoot {
@@ -55,6 +53,7 @@ dependencies {
     compile("com.google.guava:guava:23.5-jre")
     compile("nl.stil4m:mollie-api:2.7.0")
     compile("net.logstash.logback:logstash-logback-encoder:4.11")
+    compile("javax.xml.bind:jaxb-api:2.3.0")
 
     runtime("org.hsqldb:hsqldb")
     runtime("org.postgresql:postgresql")
