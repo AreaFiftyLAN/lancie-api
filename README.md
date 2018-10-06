@@ -6,11 +6,11 @@ The API is a Spring based application to suit the needs of a LAN-party.
 
 ### Tools
 -   [PostgresQL](https://www.postgresql.org/)
--   [Mailcatcher](https://mailcatcher.me/), mailcatcher creates a mailserver locally on your pc. All mail sent from the API is cought here, you end up with a mailbox with every outgoing mailaddress. Unix-like systems: `gem install mailcatcher`. Windows users can try mailcatcher as well, but [Papercut](https://github.com/changemakerstudios/papercut) has an easier installation. 
+-   [Mailcatcher](https://mailcatcher.me/), creates a mailserver locally on your pc. Mailcatcher catches all mail sent from the API and displays them in a web interface. Unix-like systems: `gem install mailcatcher`. Windows users can try mailcatcher as well, but [Papercut](https://github.com/changemakerstudios/papercut) has an easier installation. 
 -   [Docker](https://www.docker.com), can be used as an alternative to postgresql.
 
 ### Docker
-The postgres install can be quite a hassle, docker can also be used for this. After docker is installed, create a postgres container: `docker run --name lancie_postgres -p 5432:5432 -d postgres`. Connect to the running container with `docker exec -tiu postgres lancie_postgres psql` and create a new database with `CREATE DATABASE lancie-dev`. This is everything you need to start the LANcie-api, if, at any later point, you need to connect to the database, you can enter `docker exec -tiu postgres lancie_postgres psql -d lancie-dev`
+The postgres install can be quite a hassle, docker can also be used for this. After docker is installed, create a postgres container: `docker run --name lancie_postgres -p 5432:5432 -d postgres`. Connect to the running container with `docker exec -tiu postgres lancie_postgres psql` and create a new database with `CREATE DATABASE lancie-dev`. This is everything you need to start the LANcie-API, if, at any later point, you need to connect to the database, you can enter `docker exec -tiu postgres lancie_postgres psql -d lancie-dev`
 
 ### Run
 1.  Import the project into IntelliJ IDEA, we really recommend using [IntelliJ IDEA Ultimate Edition](https://www.jetbrains.com/idea/), since it includes all the support for Spring. You could use another IDE, but we do not recommend this
