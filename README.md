@@ -10,7 +10,7 @@ The API is a Spring based application to suit the needs of a LAN-party.
 -   [Docker](https://www.docker.com). Can be used as an alternative to postgresql.
 
 ### Docker
-The postgres install can be quite a hassle, docker can also be used for this. After docker is installed, create a postgres container: `docker run --name lancie_postgres -p 5432:5432 -d postgres`. Connect to the running container with `docker exec -tiu postgres lancie_postgres psql` and create a new database with `CREATE DATABASE lancie-dev`. This is everything you need to start the LANcie-API, if, at any later point, you need to connect to the database, you can enter `docker exec -tiu postgres lancie_postgres psql -d lancie-dev`
+The postgres install can be quite a hassle, docker can also be used for this. After docker is installed, create a postgres container: `docker run --name lancie_postgres -p 5432:5432 -d postgres`. Connect to the running container with `docker exec -tiu postgres lancie_postgres psql` and create a new database with `CREATE DATABASE lancie-dev;`. This is everything you need to initially start the LANcie-API, if, at any later point, you need to connect to the database, you can enter `docker exec -tiu postgres lancie_postgres psql -d lancie-dev`. The next time you want to start developing, a `docker start lancie_postgres` is enough. To stop the container again, `docker stop lancie_postgres` will do.
 
 ### Run
 1.  Import the project into IntelliJ IDEA, we really recommend using [IntelliJ IDEA Ultimate Edition](https://www.jetbrains.com/idea/), since it includes all the support for Spring. You could use another IDE, but we do not recommend this
