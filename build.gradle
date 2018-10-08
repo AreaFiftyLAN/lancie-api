@@ -18,10 +18,6 @@ jar {
     archiveName = 'lancie-api'
 }
 
-//springBoot {
-//    executable = true
-//}
-
 sourceCompatibility = JavaVersion.VERSION_1_10
 targetCompatibility = JavaVersion.VERSION_1_10
 
@@ -71,15 +67,6 @@ eclipse {
 wrapper {
     gradleVersion = '4.10'
 }
-
-//task bootRunDev(type: BootRunTask) {
-//    group = 'Application'
-//    doFirst() {
-//        main = project.mainClassName
-//        classpath = sourceSets.main.runtimeClasspath
-//        systemProperty 'spring.profiles.active', 'dev'
-//    }
-//}
 
 jacocoTestReport {
     reports {
