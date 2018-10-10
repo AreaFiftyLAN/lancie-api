@@ -224,8 +224,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public void resetPassword(Long userId, String password) {
         User user = getUserById(userId);
-        if (Strings.isNullOrEmpty(password)) {
-            throw new IllegalArgumentException("Password can't be empty");
+        if (password.length() < 6) {
+            throw new IllegalArgumentException("New password should be at least 6 characters long");
         }
         // The token is being checked in the authentication, so just set the password here
         user.setPasswordHash(new BCryptPasswordEncoder().encode(password));
@@ -234,6 +234,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public void changePassword(Long userId, String oldPassword, String newPassword) {
+        if (newPassword.length() < 6) {
+            throw new IllegalArgumentException("New password should be at least 6 characters long");
+        }
         User user = getUserById(userId);
 
         if (new BCryptPasswordEncoder().matches(oldPassword, user.getPassword())) {
