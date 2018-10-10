@@ -20,6 +20,7 @@ package ch.wisv.areafiftylan.security.authentication;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.validator.constraints.Length;
+import ch.wisv.areafiftylan.users.service.UserServiceImpl;
 
 import javax.validation.constraints.NotEmpty;
 
@@ -31,7 +32,7 @@ public class PasswordChangeDTO {
     String oldPassword = "";
     @Getter
     @Setter
-    @Length(min = 6)
+    @Length(min = UserServiceImpl.MIN_PASSWORD_LENGTH)
     String newPassword = "";
 
 }

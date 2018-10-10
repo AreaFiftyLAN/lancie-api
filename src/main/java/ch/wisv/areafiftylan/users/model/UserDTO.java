@@ -19,6 +19,8 @@ package ch.wisv.areafiftylan.users.model;
 
 import lombok.Getter;
 import javax.validation.constraints.NotEmpty;
+import org.hibernate.validator.constraints.Length;
+import ch.wisv.areafiftylan.users.service.UserServiceImpl;
 
 @Getter
 public class UserDTO {
@@ -27,6 +29,7 @@ public class UserDTO {
     private String email = "";
 
     @NotEmpty
+    @Length(min = UserServiceImpl.MIN_PASSWORD_LENGTH)
     private String password = "";
 
     private Long orderId;

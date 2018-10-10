@@ -59,6 +59,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Value("${a51.user.alcoholage : 18}")
     Long ALCOHOL_AGE;
 
+    public static final int MIN_PASSWORD_LENGTH = 6;
+
     @Autowired
     public UserServiceImpl(UserRepository userRepository, VerificationTokenRepository verificationTokenRepository,
                            PasswordResetTokenRepository passwordResetTokenRepository, MailService mailService) {
@@ -224,8 +226,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public void resetPassword(Long userId, String password) {
         User user = getUserById(userId);
-        if (password.length() < 6) {
-            throw new IllegalArgumentException("New password should be at least 6 characters long");
+        if (password.length() < this.MIN_PASSWORD_LENGTH) {
+            throw new IllegalArgumentException(String.format("New password should be at least %d characters long", this.MIN_PASSWORD_LENGTH));
         }
         // The token is being checked in the authentication, so just set the password here
         user.setPasswordHash(new BCryptPasswordEncoder().encode(password));
@@ -234,8 +236,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public void changePassword(Long userId, String oldPassword, String newPassword) {
-        if (newPassword.length() < 6) {
-            throw new IllegalArgumentException("New password should be at least 6 characters long");
+        if (newPassword.length() < this.MIN_PASSWORD_LENGTH) {
+            throw new IllegalArgumentException(String.format("New password should be at least %d characters long", this.MIN_PASSWORD_LENGTH));
         }
         User user = getUserById(userId);
 
