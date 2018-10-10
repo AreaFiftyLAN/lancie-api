@@ -231,4 +231,36 @@ public class AuthenticationIntegrationTest extends XAuthIntegrationTest {
             statusCode(HttpStatus.SC_UNAUTHORIZED);
         //@formatter:on
     }
+
+    @Test
+    public void testRateLimit() {
+        User user = createUser();
+        Map<String, String> userDTO = new HashMap<>();
+        userDTO.put("email", user.getEmail());
+        userDTO.put("password", cleartextPassword);
+
+        for (int i = 0; i < 24; i++) {
+            //@formatter:off
+            given().
+                header("Origin", "rest-assured").
+                header("X-Forwarded-For", "10.0.0.1").
+            when().
+                body(userDTO).contentType(ContentType.JSON).
+                post("/login").
+            then().
+                statusCode(HttpStatus.SC_OK);
+            //@formatter:on
+        }
+
+        //@formatter:off
+        given().
+            header("Origin", "rest-assured").
+            header("X-Forwarded-For", "10.0.0.1").
+        when().
+            body(userDTO).contentType(ContentType.JSON).
+            post("/login").
+        then().
+            statusCode(HttpStatus.SC_UNAUTHORIZED);
+        //@formatter:on
+    }
 }
