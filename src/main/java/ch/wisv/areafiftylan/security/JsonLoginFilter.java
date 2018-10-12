@@ -27,6 +27,7 @@ import org.springframework.security.authentication.AuthenticationServiceExceptio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -48,7 +49,7 @@ public class JsonLoginFilter extends UsernamePasswordAuthenticationFilter {
     private AuthenticationManager authenticationManager;
     private JsonLoginAuthenticationAttemptHandler attemptHandler;
     private final Cache<String, Integer> attemptsCache;
-    private final int MAX_ATTEMPTS_MINUTE = 25;
+    public final static int MAX_ATTEMPTS_MINUTE = 10;
 
 
     public JsonLoginFilter(AuthenticationManager authenticationManager,
@@ -81,7 +82,7 @@ public class JsonLoginFilter extends UsernamePasswordAuthenticationFilter {
         }
         attemptsCache.put(ip, attempts);
 
-        if (attempts >= MAX_ATTEMPTS_MINUTE) {
+        if (attempts > MAX_ATTEMPTS_MINUTE) {
             log.warn("Blocking IP address {}", ip);
             return false;
         }
@@ -91,6 +92,7 @@ public class JsonLoginFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
                                             Authentication authResult) throws IOException, ServletException {
+        attemptsCache.invalidate(getClientIP(request));
         attemptHandler.onAuthenticationSuccess(request, response, authResult);
     }
 
