@@ -21,8 +21,8 @@ import ch.wisv.areafiftylan.users.model.UserDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
@@ -50,10 +50,10 @@ public class JsonLoginFilter extends UsernamePasswordAuthenticationFilter {
     private JsonLoginAuthenticationAttemptHandler attemptHandler;
     private final Cache<String, Integer> attemptsCache;
 
-    @Value("${a5l.ratelimit.minutes:10}")
-    public static int MAX_ATTEMPTS_MINUTE = 10;
-    @Value("${a5l.ratelimit.enabled:false}")
-    public static boolean RATELIMIT_ENABLED = false;
+    @Setter
+    public static int MAX_ATTEMPTS_MINUTE;
+    @Setter
+    public static boolean RATELIMIT_ENABLED;
 
 
     public JsonLoginFilter(AuthenticationManager authenticationManager,

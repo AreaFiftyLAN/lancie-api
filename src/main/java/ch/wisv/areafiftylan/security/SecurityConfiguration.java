@@ -20,6 +20,8 @@ package ch.wisv.areafiftylan.security;
 import ch.wisv.areafiftylan.security.authentication.AuthenticationService;
 import ch.wisv.areafiftylan.security.token.repository.AuthenticationTokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -49,9 +51,15 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private AuthenticationService authenticationService;
 
+    @Value("${a5l.ratelimit.minutes:10}")
+    private int MAX_ATTEMPTS_MINUTE;
+    @Value("${a5l.ratelimit.enabled:true}")
+    private boolean RATELIMIT_ENABLED;
+
     @Autowired
     public SecurityConfiguration(AuthenticationTokenRepository authenticationTokenRepository,
-                                 UserDetailsService userDetailsService, AuthenticationService authenticationService) {
+                                 @Qualifier("userServiceImpl") UserDetailsService userDetailsService,
+                                 AuthenticationService authenticationService) {
         this.authenticationTokenRepository = authenticationTokenRepository;
         this.userDetailsService = userDetailsService;
         this.authenticationService = authenticationService;
@@ -69,32 +77,29 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
      *
      * @param http default parameter
      *
-     * @throws Exception
      */
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        http.logout().logoutSuccessHandler(new JsonLoginAuthenticationAttemptHandler(authenticationService));
+        JsonLoginAuthenticationAttemptHandler attemptHandler =
+                new JsonLoginAuthenticationAttemptHandler(authenticationService);
+        http.logout().logoutSuccessHandler(attemptHandler);
 
-        http
-            .authorizeRequests()
-                .expressionHandler(webExpressionHandler())
-                .requestMatchers(EndpointRequest.to("health"))
-                    .permitAll()
-                .requestMatchers(EndpointRequest.toAnyEndpoint())
-                    .hasRole("ADMIN")
-                .anyRequest()
-                    .permitAll();
+        http.authorizeRequests().expressionHandler(webExpressionHandler()).requestMatchers(EndpointRequest.to("health"))
+                .permitAll().requestMatchers(EndpointRequest.toAnyEndpoint()).hasRole("ADMIN").anyRequest().permitAll();
 
         // We use custom Authentication Tokens, making csrf redundant
         http.csrf().disable();
 
         // Add the default headers first
         http.addFilterBefore(new CORSFilter(), JsonLoginFilter.class);
+
         // Set the login point to get X-Auth-Tokens
-        http.addFilterAfter(new JsonLoginFilter(this.authenticationManagerBean(),
-                        new JsonLoginAuthenticationAttemptHandler(authenticationService)),
-                UsernamePasswordAuthenticationFilter.class);
+        JsonLoginFilter jsonLoginFilter = new JsonLoginFilter(this.authenticationManagerBean(), attemptHandler);
+        JsonLoginFilter.setMAX_ATTEMPTS_MINUTE(MAX_ATTEMPTS_MINUTE);
+        JsonLoginFilter.setRATELIMIT_ENABLED(RATELIMIT_ENABLED);
+
+        http.addFilterAfter(jsonLoginFilter, UsernamePasswordAuthenticationFilter.class);
         // Add support for Token-base authentication
         http.addFilterAfter(new TokenAuthenticationFilter(authenticationTokenRepository),
                 UsernamePasswordAuthenticationFilter.class);
