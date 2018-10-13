@@ -25,6 +25,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -68,8 +69,15 @@ public class JsonLoginFilter extends UsernamePasswordAuthenticationFilter {
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException {
         userDTO = getUserDTO(request);
+
+        UsernamePasswordAuthenticationToken token =
+                new UsernamePasswordAuthenticationToken(userDTO.getEmail(), userDTO.getPassword());
+
+        // Allow subclasses to set the "details" property
+        setDetails(request, token);
+
         if (!RATELIMIT_ENABLED || addAttempt(request)) {
-            return super.attemptAuthentication(request, response);
+            return this.authenticationManager.authenticate(token);
         } else {
             throw new AuthenticationServiceException("IP Address blocked");
         }
@@ -116,21 +124,6 @@ public class JsonLoginFilter extends UsernamePasswordAuthenticationFilter {
         } catch (IOException e) {
             throw new IllegalArgumentException("Cant read request data");
         }
-    }
-
-    @Override
-    protected String obtainUsername(HttpServletRequest request) {
-        return userDTO.getEmail();
-    }
-
-    @Override
-    protected String obtainPassword(HttpServletRequest request) {
-        return userDTO.getPassword();
-    }
-
-    @Override
-    public AuthenticationManager getAuthenticationManager() {
-        return this.authenticationManager;
     }
 
     private String getClientIP(HttpServletRequest request) {
