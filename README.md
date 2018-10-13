@@ -25,6 +25,7 @@ The next time you want to start developing, a `docker start lancie_postgres` is 
   You should fill in:
   - `spring.datasource.[…]` (`url`, `username`, `password`) to your database url and credentials
   - `a5l.molliekey` and `a5l.googleMapsAPIkey` to their respective keys if you have those
+  - `a5l.ratelimit.[...]` to enable rate limiting on the login endpoint. This requires a direct connection to connecting clients or a correct `X-Forwarded-For` header in the request.
 
 5.  Right click the `Application` class (`src -> main -> java -> ch.wisv.areafiftylan`) and choose `Run`. Terminate the process (you don't have to wait for it to finish starting). Now go to the Run/Debug Configuration window `Run -> Edit Configurations` choose the `Spring Boot` configuration called `Application`. Enable the dev profile for this configuration by entering `dev` in the `Active Profiles` box.
 

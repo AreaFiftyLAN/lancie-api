@@ -22,12 +22,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.WebAuthenticationDetails;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -49,7 +49,11 @@ public class JsonLoginFilter extends UsernamePasswordAuthenticationFilter {
     private AuthenticationManager authenticationManager;
     private JsonLoginAuthenticationAttemptHandler attemptHandler;
     private final Cache<String, Integer> attemptsCache;
-    public final static int MAX_ATTEMPTS_MINUTE = 10;
+
+    @Value("${a5l.ratelimit.minutes:10}")
+    public static int MAX_ATTEMPTS_MINUTE = 10;
+    @Value("${a5l.ratelimit.enabled:false}")
+    public static boolean RATELIMIT_ENABLED = false;
 
 
     public JsonLoginFilter(AuthenticationManager authenticationManager,
@@ -64,7 +68,7 @@ public class JsonLoginFilter extends UsernamePasswordAuthenticationFilter {
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException {
         userDTO = getUserDTO(request);
-        if (addAttempt(request)) {
+        if (!RATELIMIT_ENABLED || addAttempt(request)) {
             return super.attemptAuthentication(request, response);
         } else {
             throw new AuthenticationServiceException("IP Address blocked");

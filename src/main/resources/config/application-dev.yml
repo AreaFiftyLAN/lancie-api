@@ -3,17 +3,18 @@ spring.jpa.hibernate.ddl-auto: create
 
 ## AREA FIFTYLAN SETTINGS
 a5l:
-  paymentReturnUrl: https://localhost:5100/order-check
-  user:
-    resetUrl: https://localhost:5100/password-reset
-    acceptTransferUrl: https://localhost:5100/transfer-accept
+    paymentReturnUrl: https://localhost:5100/order-check
+    user:
+        resetUrl: https://localhost:5100/password-reset
+        acceptTransferUrl: https://localhost:5100/transfer-accept
 
-  mail:
-    sender: LANcie <lancie@ch.tudelft.nl>
-    contact: LANcie <lancie@ch.tudelft.nl>
-    confirmUrl: https://localhost:5100/register-confirm
+    mail:
+        sender: LANcie <lancie@ch.tudelft.nl>
+        contact: LANcie <lancie@ch.tudelft.nl>
+        confirmUrl: https://localhost:5100/register-confirm
 
-  orderLimit: 5
-  ticketLimit: 200
-  orderKeepAlive: 15
-
+    orderLimit: 5
+    ticketLimit: 200
+    orderKeepAlive: 15
+    ratelimit:
+        enabled: false
