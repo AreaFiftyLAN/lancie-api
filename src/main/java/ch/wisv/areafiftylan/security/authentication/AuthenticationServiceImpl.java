@@ -18,9 +18,14 @@
 package ch.wisv.areafiftylan.security.authentication;
 
 import ch.wisv.areafiftylan.exception.InvalidTokenException;
+import ch.wisv.areafiftylan.exception.TokenNotFoundException;
 import ch.wisv.areafiftylan.exception.XAuthTokenNotFoundException;
 import ch.wisv.areafiftylan.security.token.AuthenticationToken;
+import ch.wisv.areafiftylan.security.token.PasswordResetToken;
+import ch.wisv.areafiftylan.security.token.VerificationToken;
 import ch.wisv.areafiftylan.security.token.repository.AuthenticationTokenRepository;
+import ch.wisv.areafiftylan.security.token.repository.PasswordResetTokenRepository;
+import ch.wisv.areafiftylan.security.token.repository.VerificationTokenRepository;
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.users.service.UserService;
 import com.google.common.base.Strings;
@@ -33,13 +38,19 @@ import org.springframework.stereotype.Service;
 public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final AuthenticationTokenRepository authenticationTokenRepository;
+    private final VerificationTokenRepository verificationTokenRepository;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
 
     private final UserService userService;
 
     @Autowired
     public AuthenticationServiceImpl(AuthenticationTokenRepository authenticationTokenRepository,
+                                     VerificationTokenRepository verificationTokenRepository,
+                                     PasswordResetTokenRepository passwordResetTokenRepository,
                                      UserService userService) {
         this.authenticationTokenRepository = authenticationTokenRepository;
+        this.verificationTokenRepository = verificationTokenRepository;
+        this.passwordResetTokenRepository = passwordResetTokenRepository;
         this.userService = userService;
     }
 
@@ -72,8 +83,58 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
+    public void removeAuthTokenForUser(User user) {
+        authenticationTokenRepository.deleteByUser(user);
+    }
+
+    @Override
     public void removeAllAuthTokens() {
         authenticationTokenRepository.deleteAll();
         log.info("Deleted all authentication tokens");
+    }
+
+    @Override
+    public User verifyUserByToken(String token) {
+        VerificationToken verificationToken =
+                verificationTokenRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
+
+        // Get the user associated with this token
+        User user = verificationToken.getUser();
+        if (!verificationToken.isValid()) {
+            throw new InvalidTokenException();
+        }
+
+        userService.verify(user.getId());
+
+        //Disable the token for future use.
+        verificationToken.use();
+        verificationTokenRepository.saveAndFlush(verificationToken);
+
+        return user;
+    }
+
+    @Override
+    public void resetPasswordByToken(String token, String password) {
+        if (token == null || Strings.isNullOrEmpty(password)) {
+            throw new IllegalArgumentException("Token and password fields should be set");
+        }
+
+        PasswordResetToken passwordResetToken =
+                passwordResetTokenRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
+
+        //Check validity of the token
+        if (!passwordResetToken.isValid()) {
+            throw new InvalidTokenException();
+        }
+
+        // Get the user associated to the token
+        User user = passwordResetToken.getUser();
+        userService.resetPassword(user.getId(), password);
+
+        // Disable the token for future use.
+        passwordResetToken.use();
+        passwordResetTokenRepository.saveAndFlush(passwordResetToken);
+
+        removeAuthTokenForUser(user);
     }
 }

@@ -17,11 +17,19 @@
 
 package ch.wisv.areafiftylan.security.authentication;
 
+import ch.wisv.areafiftylan.users.model.User;
+
 public interface AuthenticationService {
 
     String createNewAuthToken(String email);
 
     void removeAuthToken(String xAuth);
 
+    void removeAuthTokenForUser(User user);
+
     void removeAllAuthTokens();
+
+    User verifyUserByToken(String token);
+
+    void resetPasswordByToken(String token, String password);
 }
