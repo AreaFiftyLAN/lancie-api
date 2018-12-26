@@ -48,6 +48,11 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
+    public void removeAllSubscriptions() {
+        subscriptionRepository.deleteAll();
+    }
+
+    @Override
     public Collection<Subscription> getSubscriptions() {
         return subscriptionRepository.findAll();
     }
