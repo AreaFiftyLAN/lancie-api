@@ -131,6 +131,7 @@ public class JsonLoginFilter extends UsernamePasswordAuthenticationFilter {
         if (xfHeader == null) {
             return request.getRemoteAddr();
         }
+        // Proxies sometimes store the entire path. We want the first step only
         return xfHeader.split(",")[0];
     }
 }
