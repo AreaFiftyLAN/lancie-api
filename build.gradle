@@ -1,12 +1,9 @@
 buildscript {
-    ext {
-        springBootVersion = '2.0.4.RELEASE'
-    }
     repositories {
         mavenCentral()
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.0.4.RELEASE")
     }
 }
 
@@ -20,10 +17,6 @@ apply plugin: 'jacoco'
 jar {
     archiveName = 'lancie-api'
 }
-
-//springBoot {
-//    executable = true
-//}
 
 sourceCompatibility = JavaVersion.VERSION_1_10
 targetCompatibility = JavaVersion.VERSION_1_10
@@ -49,11 +42,13 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-json")
     compile("org.flywaydb:flyway-core")
 
-    compile("org.projectlombok:lombok:1.18.2")
     compile("com.google.guava:guava:23.5-jre")
     compile("nl.stil4m:mollie-api:2.7.0")
     compile("net.logstash.logback:logstash-logback-encoder:4.11")
     compile("javax.xml.bind:jaxb-api:2.3.0")
+
+    compileOnly("org.projectlombok:lombok:1.18.2")
+    annotationProcessor("org.projectlombok:lombok:1.18.2")
 
     runtime("org.hsqldb:hsqldb")
     runtime("org.postgresql:postgresql")
@@ -69,18 +64,9 @@ eclipse {
     }
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '4.4'
+wrapper {
+    gradleVersion = '4.10'
 }
-
-//task bootRunDev(type: BootRunTask) {
-//    group = 'Application'
-//    doFirst() {
-//        main = project.mainClassName
-//        classpath = sourceSets.main.runtimeClasspath
-//        systemProperty 'spring.profiles.active', 'dev'
-//    }
-//}
 
 jacocoTestReport {
     reports {
