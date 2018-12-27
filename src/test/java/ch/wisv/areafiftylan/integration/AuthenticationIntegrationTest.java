@@ -17,6 +17,7 @@
 
 package ch.wisv.areafiftylan.integration;
 
+import ch.wisv.areafiftylan.security.JsonLoginFilter;
 import ch.wisv.areafiftylan.security.token.AuthenticationToken;
 import ch.wisv.areafiftylan.security.token.repository.AuthenticationTokenRepository;
 import ch.wisv.areafiftylan.users.model.User;
@@ -26,6 +27,7 @@ import io.restassured.response.Response;
 import org.apache.http.HttpStatus;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -42,7 +44,17 @@ public class AuthenticationIntegrationTest extends XAuthIntegrationTest {
     @Autowired
     AuthenticationTokenRepository authenticationTokenRepository;
 
+    private User user;
+    Map<String, String> userDTO;
     private final String AUTH_HEADER = "X-Auth-Token";
+
+    @Before
+    public void setup() {
+        user = createUser();
+        userDTO = new HashMap<>();
+        userDTO.put("email", user.getEmail());
+        userDTO.put("password", cleartextPassword);
+    }
 
     @After
     public void cleanupAuthTest() {
@@ -51,11 +63,6 @@ public class AuthenticationIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void testRequestToken() {
-        User user = createUser();
-        Map<String, String> userDTO = new HashMap<>();
-        userDTO.put("email", user.getEmail());
-        userDTO.put("password", cleartextPassword);
-
         //@formatter:off
         Response response = given().
                 header("Origin", "rest-assured").
@@ -77,11 +84,6 @@ public class AuthenticationIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void testRequestTokenRenew() {
-        User user = createUser();
-        Map<String, String> userDTO = new HashMap<>();
-        userDTO.put("email", user.getEmail());
-        userDTO.put("password", cleartextPassword);
-
         //@formatter:off
         given().
         when().
@@ -111,9 +113,7 @@ public class AuthenticationIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void testRequestTokenInvalidRequest() {
-        User user = createUser();
-        Map<String, String> userDTO = new HashMap<>();
-        userDTO.put("email", user.getEmail());
+        userDTO.remove("password");
         userDTO.put("password_invalid", cleartextPassword);
 
         //@formatter:off
@@ -129,7 +129,6 @@ public class AuthenticationIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void testVerifyValidToken() {
-        User user = createUser();
         //@formatter:off
         given().
             header(getXAuthTokenHeaderForUser(user)).
@@ -170,8 +169,6 @@ public class AuthenticationIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void testGetCurrentUserWithToken() {
-        User user = createUser();
-
         //@formatter:off
         given().
             header(getXAuthTokenHeaderForUser(user)).
@@ -185,7 +182,6 @@ public class AuthenticationIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void testForbiddenRequestWithToken() {
-        User user = createUser();
         //@formatter:off
         given().
             header(getXAuthTokenHeaderForUser(user)).
@@ -210,10 +206,8 @@ public class AuthenticationIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void testLogout() {
-        User user = createUser();
-        //@formatter:off
         Header xAuthTokenHeaderForUser = getXAuthTokenHeaderForUser(user);
-
+        //@formatter:off
         given().
             header(xAuthTokenHeaderForUser).
         when().
@@ -230,5 +224,57 @@ public class AuthenticationIntegrationTest extends XAuthIntegrationTest {
         then().
             statusCode(HttpStatus.SC_UNAUTHORIZED);
         //@formatter:on
+    }
+
+    public void failLogins(int n) {
+        userDTO.put("password", "!" + cleartextPassword);
+        for (int i = 0; i < n; i++) {
+            //@formatter:off
+            given().
+                header("Origin", "rest-assured").
+                header("X-Forwarded-For", "10.0.0.1").
+            when().
+                body(userDTO).contentType(ContentType.JSON).
+                post("/login").
+            then().
+                statusCode(HttpStatus.SC_UNAUTHORIZED);
+            //@formatter:on
+        }
+    }
+
+    @Test
+    public void testRateLimitBlock() {
+        failLogins(JsonLoginFilter.MAX_ATTEMPTS_MINUTE);
+
+        userDTO.put("password", cleartextPassword);
+        //@formatter:off
+        given().
+            header("Origin", "rest-assured").
+            header("X-Forwarded-For", "10.0.0.1").
+        when().
+            body(userDTO).contentType(ContentType.JSON).
+            post("/login").
+        then().
+            statusCode(HttpStatus.SC_UNAUTHORIZED);
+        //@formatter:on
+    }
+
+    @Test
+    public void testRateLimitInvalidateCache() {
+        failLogins(JsonLoginFilter.MAX_ATTEMPTS_MINUTE - 1);
+
+        userDTO.put("password", cleartextPassword);
+        for (int i = 0; i < 2; i++) {
+            //@formatter:off
+            given().
+                header("Origin", "rest-assured").
+                header("X-Forwarded-For", "10.0.0.1").
+            when().
+                body(userDTO).contentType(ContentType.JSON).
+                post("/login").
+            then().
+                statusCode(HttpStatus.SC_OK);
+            //@formatter:on
+        }
     }
 }

@@ -695,6 +695,30 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
     }
 
     @Test
+    public void testChangeShortPassword() {
+        //TODO: Move to new AuthenticationTest
+        User user = createUser();
+
+        String newPassword = "short";
+        Map<String, String> passwordDTO = new HashMap<>();
+        passwordDTO.put("oldPassword", cleartextPassword);
+        passwordDTO.put("newPassword", newPassword);
+
+        //@formatter:off
+        Header xAuthTokenHeader = getXAuthTokenHeaderForUser(user);
+
+        given().
+            header(xAuthTokenHeader).
+        when().
+            body(passwordDTO).
+            contentType(ContentType.JSON).
+            post("/users/current/password").
+        then().
+            statusCode(HttpStatus.SC_BAD_REQUEST);
+        //@formatter:on
+    }
+
+    @Test
     public void testChangePasswordEmptyPassword() {
         //TODO: Move to new AuthenticationTest
         User user = createUser();

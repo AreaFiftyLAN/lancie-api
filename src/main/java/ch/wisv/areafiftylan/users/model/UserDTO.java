@@ -18,6 +18,7 @@
 package ch.wisv.areafiftylan.users.model;
 
 import lombok.Getter;
+
 import javax.validation.constraints.NotEmpty;
 
 @Getter

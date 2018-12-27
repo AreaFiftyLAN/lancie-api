@@ -26,7 +26,8 @@ import ch.wisv.areafiftylan.users.model.*;
 import ch.wisv.areafiftylan.utils.mail.MailService;
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
+import net.logstash.logback.argument.StructuredArguments;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Sort;
@@ -43,6 +44,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Service
+@Slf4j
 public class UserServiceImpl implements UserService, UserDetailsService {
 
     private final UserRepository userRepository;
@@ -59,7 +61,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Value("${a51.user.alcoholage : 18}")
     Long ALCOHOL_AGE;
 
-    @Autowired
+    public static final int MIN_PASSWORD_LENGTH = 6;
+
     public UserServiceImpl(UserRepository userRepository, VerificationTokenRepository verificationTokenRepository,
                            PasswordResetTokenRepository passwordResetTokenRepository, MailService mailService) {
         this.userRepository = userRepository;
@@ -224,16 +227,23 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public void resetPassword(Long userId, String password) {
         User user = getUserById(userId);
-        if (Strings.isNullOrEmpty(password)) {
-            throw new IllegalArgumentException("Password can't be empty");
+        if (password.length() < MIN_PASSWORD_LENGTH) {
+            throw new IllegalArgumentException(
+                    String.format("New password should be at least %d characters long", MIN_PASSWORD_LENGTH));
         }
         // The token is being checked in the authentication, so just set the password here
         user.setPasswordHash(new BCryptPasswordEncoder().encode(password));
         userRepository.saveAndFlush(user);
+
+        log.info("New password set for {}.", user.getEmail(), StructuredArguments.v("user_email", user.getEmail()));
     }
 
     @Override
     public void changePassword(Long userId, String oldPassword, String newPassword) {
+        if (newPassword.length() < MIN_PASSWORD_LENGTH) {
+            throw new IllegalArgumentException(
+                    String.format("New password should be at least %d characters long", MIN_PASSWORD_LENGTH));
+        }
         User user = getUserById(userId);
 
         if (new BCryptPasswordEncoder().matches(oldPassword, user.getPassword())) {

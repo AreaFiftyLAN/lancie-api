@@ -17,16 +17,10 @@
 
 package ch.wisv.areafiftylan.security.authentication;
 
-import ch.wisv.areafiftylan.exception.InvalidTokenException;
 import ch.wisv.areafiftylan.exception.TokenNotFoundException;
 import ch.wisv.areafiftylan.products.service.OrderService;
-import ch.wisv.areafiftylan.security.token.PasswordResetToken;
-import ch.wisv.areafiftylan.security.token.VerificationToken;
-import ch.wisv.areafiftylan.security.token.repository.PasswordResetTokenRepository;
-import ch.wisv.areafiftylan.security.token.repository.VerificationTokenRepository;
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.users.service.UserService;
-import com.google.common.base.Strings;
 import lombok.extern.slf4j.Slf4j;
 import net.logstash.logback.argument.StructuredArguments;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +32,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
-import java.util.Optional;
 
 import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEntity;
 
@@ -56,24 +49,13 @@ public class AuthenticationController {
     private final AuthenticationService authenticationService;
     private final OrderService orderService;
 
-    private final VerificationTokenRepository verificationTokenRepository;
-    private final PasswordResetTokenRepository passwordResetTokenRepository;
 
     @Autowired
     public AuthenticationController(UserService userService, AuthenticationService authenticationService,
-                                    OrderService orderService, VerificationTokenRepository verificationTokenRepository,
-                                    PasswordResetTokenRepository passwordResetTokenRepository) {
+                                    OrderService orderService) {
         this.userService = userService;
         this.authenticationService = authenticationService;
         this.orderService = orderService;
-
-        this.verificationTokenRepository = verificationTokenRepository;
-        this.passwordResetTokenRepository = passwordResetTokenRepository;
-    }
-
-    @GetMapping("/token")
-    public ResponseEntity<?> checkSession() {
-        return createResponseEntity(HttpStatus.OK, "Here's your token!");
     }
 
     @PreAuthorize("isAuthenticated()")
@@ -114,39 +96,17 @@ public class AuthenticationController {
      * After requesting a token, the user can reset his password with a POST call to this method. It should contain the
      * token and a password. The user is derived from the token.
      *
-     * @param body The body, containing a token and password parameter. TODO: This should be validated
+     * @param body The body, containing a token and password parameter.
      *
      * @return A status message telling whether the action was successful
      */
     @PostMapping("/resetPassword")
     @ResponseBody
-    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> body,
-                                           @RequestHeader("X-Auth-Token") String xAuth) throws InvalidTokenException {
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> body) {
         String token = body.get("token");
         String password = body.get("password");
 
-        PasswordResetToken passwordResetToken =
-                passwordResetTokenRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
-
-        //Check validity of the token
-        if (!passwordResetToken.isValid()) {
-            throw new InvalidTokenException();
-        }
-
-        // Get the user associated to the token
-        User user = passwordResetToken.getUser();
-        userService.resetPassword(user.getId(), password);
-
-        // Disable the token for future use.
-        passwordResetToken.use();
-        passwordResetTokenRepository.saveAndFlush(passwordResetToken);
-
-        // Remove the Auth token for this password
-        if (!Strings.isNullOrEmpty(xAuth)) {
-            authenticationService.removeAuthToken(xAuth);
-        }
-
-        log.info("New password set for {}.", user.getEmail(), StructuredArguments.v("user_email", user.getEmail()));
+        authenticationService.resetPasswordByToken(token, password);
 
         return createResponseEntity(HttpStatus.OK, "Password set!");
     }
@@ -156,7 +116,6 @@ public class AuthenticationController {
      * repository. From this token, we get the user. For this user, the enabled flag is set to true. After this, the
      * token is marked as used so it can not be used again.
      * <p>
-     * TODO: Token logic could be moved to a dedicated service
      *
      * @param token The token as generated for the user opon registration
      *
@@ -166,27 +125,15 @@ public class AuthenticationController {
      */
     @GetMapping("/confirmRegistration")
     public ResponseEntity<?> confirmRegistration(@RequestParam("token") String token,
-                                                 @RequestParam("orderId") Optional<Long> orderId)
-            throws TokenNotFoundException, InvalidTokenException {
+                                                 @RequestParam(value = "orderId", required = false) Long orderId) {
 
-        VerificationToken verificationToken =
-                verificationTokenRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));
-
-        // Get the user associated with this token
-        User user = verificationToken.getUser();
-        if (!verificationToken.isValid()) {
-            throw new InvalidTokenException();
-        }
-
-        userService.verify(user.getId());
-        verificationToken.use();
-
-        //Disable the token for future use.
-        verificationTokenRepository.saveAndFlush(verificationToken);
+        User user = authenticationService.verifyUserByToken(token);
 
         //Bind the order to the user
-        orderId.ifPresent(id -> orderService.assignOrderToUser(id, user.getEmail()));
+        if (orderId != null) {
+            orderService.assignOrderToUser(orderId, user.getEmail());
+        }
 
-        return createResponseEntity(HttpStatus.OK, "Succesfully verified");
+        return createResponseEntity(HttpStatus.OK, "Successfully verified");
     }
 }

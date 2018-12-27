@@ -19,7 +19,13 @@ package ch.wisv.areafiftylan.security;
 
 import ch.wisv.areafiftylan.users.model.UserDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -30,35 +36,75 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This Login filter uses the default "Form" login filter, but parses a JSON requestbody instead. It accepts requests on
  * /login and returns an X-Auth-Token Header on successful authentication using the
  * JsonLoginAuthenticationAttemptHandler
  */
+@Slf4j
 public class JsonLoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private UserDTO userDTO = new UserDTO();
     private AuthenticationManager authenticationManager;
     private JsonLoginAuthenticationAttemptHandler attemptHandler;
+    private final Cache<String, Integer> attemptsCache;
+
+    @Setter
+    public static int MAX_ATTEMPTS_MINUTE;
+    @Setter
+    public static boolean RATELIMIT_ENABLED;
+
 
     public JsonLoginFilter(AuthenticationManager authenticationManager,
                            JsonLoginAuthenticationAttemptHandler successHandler) {
         super();
         this.authenticationManager = authenticationManager;
         this.attemptHandler = successHandler;
+        attemptsCache = CacheBuilder.newBuilder().maximumSize(1000).expireAfterAccess(5, TimeUnit.MINUTES).build();
     }
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException {
         userDTO = getUserDTO(request);
-        return super.attemptAuthentication(request, response);
+
+        UsernamePasswordAuthenticationToken token =
+                new UsernamePasswordAuthenticationToken(userDTO.getEmail(), userDTO.getPassword());
+
+        // Allow subclasses to set the "details" property
+        setDetails(request, token);
+
+        if (!RATELIMIT_ENABLED || addAttempt(request)) {
+            return this.authenticationManager.authenticate(token);
+        } else {
+            throw new AuthenticationServiceException("IP Address blocked");
+        }
+    }
+
+    private boolean addAttempt(HttpServletRequest request) {
+        String ip = getClientIP(request);
+
+        Integer attempts = this.attemptsCache.getIfPresent(ip);
+        if (attempts != null) {
+            attempts++;
+        } else {
+            attempts = 1;
+        }
+        attemptsCache.put(ip, attempts);
+
+        if (attempts > MAX_ATTEMPTS_MINUTE) {
+            log.warn("Blocking IP address {}", ip);
+            return false;
+        }
+        return true;
     }
 
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
                                             Authentication authResult) throws IOException, ServletException {
+        attemptsCache.invalidate(getClientIP(request));
         attemptHandler.onAuthenticationSuccess(request, response, authResult);
     }
 
@@ -80,18 +126,12 @@ public class JsonLoginFilter extends UsernamePasswordAuthenticationFilter {
         }
     }
 
-    @Override
-    protected String obtainUsername(HttpServletRequest request) {
-        return userDTO.getEmail();
-    }
-
-    @Override
-    protected String obtainPassword(HttpServletRequest request) {
-        return userDTO.getPassword();
-    }
-
-    @Override
-    public AuthenticationManager getAuthenticationManager() {
-        return this.authenticationManager;
+    private String getClientIP(HttpServletRequest request) {
+        String xfHeader = request.getHeader("X-Forwarded-For");
+        if (xfHeader == null) {
+            return request.getRemoteAddr();
+        }
+        // Proxies sometimes store the entire path. We want the first step only
+        return xfHeader.split(",")[0];
     }
 }
