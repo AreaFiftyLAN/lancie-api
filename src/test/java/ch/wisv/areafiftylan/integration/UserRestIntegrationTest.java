@@ -483,7 +483,7 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         user = userRepository.save(user);
 
         Map<String, String> profileDTO = getProfileDTO();
-        profileDTO.remove("city");
+        profileDTO.remove("firstName");
 
         //@formatter:off
         given().
