@@ -19,7 +19,7 @@ a5l:
         enabled: true
         minute: 10
 
-    orderLimit: 5
+    orderLimit: 15
     ticketLimit: 220
     orderKeepAlive: 15
 spring:
