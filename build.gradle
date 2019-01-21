@@ -2,7 +2,7 @@ import org.springframework.boot.gradle.run.BootRunTask
 
 buildscript {
     ext {
-        springBootVersion = '1.5.12.RELEASE'
+        springBootVersion = '1.5.18.RELEASE'
     }
     repositories {
         mavenCentral()
@@ -58,16 +58,19 @@ dependencies {
     compile("com.zaxxer:HikariCP")
     compile("org.flywaydb:flyway-core:4.2.0")
 
-    compile("org.projectlombok:lombok:1.16.18")
     compile("com.google.guava:guava:23.5-jre")
     compile("nl.stil4m:mollie-api:2.7.0")
     compile("net.logstash.logback:logstash-logback-encoder:4.11")
+    compile("javax.xml.bind:jaxb-api:2.3.0")
+
+    compileOnly("org.projectlombok:lombok:1.18.2")
+    annotationProcessor("org.projectlombok:lombok:1.18.2")
 
     runtime("org.hsqldb:hsqldb")
     runtime("org.postgresql:postgresql")
 
     testCompile("org.springframework.boot:spring-boot-starter-test")
-    testCompile("io.rest-assured:rest-assured:3.0.6")
+    testCompile("io.rest-assured:rest-assured:3.1.0")
 }
 
 eclipse {
