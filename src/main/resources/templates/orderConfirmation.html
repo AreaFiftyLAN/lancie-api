@@ -29,7 +29,7 @@
     </div>
     <div style="background-color: white; padding: 32px;">
       <p>Hi<span th:text="${name}"></span>!</p>
-      <p>You have successfully ordered tickets for AreaFiftyLAN 2018. We are looking forward to seeing you there!</p>
+        <p>You have successfully ordered tickets for AreaFiftyLAN <span th:text="${year}"></span>. We are looking forward to seeing you there!</p>
       <p>Order ID: <span th:text="${order.getId()}">#reference</span></p>
       <div style="background-color: white; margin: 0 auto; border-top: 1px solid #e8e8e8;">
         <div style="display: flex; padding: 16px 8px; border-bottom: 1px solid #e8e8e8; background-color: #EEECED; font-weight: 600;">
@@ -50,7 +50,7 @@
           <span th:text="${'&euro;' + #numbers.formatDecimal(order.getAmount(), 0, 'COMMA', 2, 'POINT')}" style="width: 20%;">price</span>
         </div>
       </div>
-      <p>Best Regards,<br />LANcie 2018</p>
+      <p>Best Regards,<br />LANcie <span th:text="${year}"></span></p>
     </div>
   </div>
 </body>
