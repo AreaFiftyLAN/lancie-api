@@ -22,6 +22,7 @@ a5l:
     orderLimit: 15
     ticketLimit: 220
     orderKeepAlive: 15
+    year: 2019
 spring:
     flyway:
         enabled: true
