@@ -38,10 +38,11 @@ a5l:
     resetUrl: https://areafiftylan.nl/password-reset
     acceptTransferUrl: https://areafiftylan.nl/transfer-accept
 
-  mail:
-    sender: LANcie <lancie@ch.tudelft.nl>
-    contact: LANcie <lancie@ch.tudelft.nl>
-    confirmUrl: https://areafiftylan.nl/register-confirm
+    mail:
+        sender: LANcie <lancie@ch.tudelft.nl>
+        contact: LANcie <lancie@ch.tudelft.nl>
+        confirmUrl: https://areafiftylan.nl/register-confirm
+        year: 2019
 
-  orderLimit: 5
+  orderLimit: 15
   ticketLimit: 200

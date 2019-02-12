@@ -16,6 +16,7 @@ a5l:
     sender: LANcie <lancie@ch.tudelft.nl>
     contact: LANcie <lancie@ch.tudelft.nl>
     confirmUrl: https://localhost:5100/register-confirm
+    year: 2019
 
   orderLimit: 5
   ticketLimit: 200

@@ -18,6 +18,7 @@ a5l:
     sender: LANcie <lancie@ch.tudelft.nl>
     contact: LANcie <lancie@ch.tudelft.nl>
     confirmUrl: https://areafiftylan.nl/register-confirm
+    year: 2019
 
   orderLimit: 15
   ticketLimit: 220
