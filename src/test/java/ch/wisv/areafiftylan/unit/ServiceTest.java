@@ -1,6 +1,5 @@
 package ch.wisv.areafiftylan.unit;
 
-import ch.wisv.areafiftylan.ApplicationTest;
 import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.service.OrderService;
 import ch.wisv.areafiftylan.products.service.PaymentService;
@@ -36,7 +35,7 @@ import java.util.Collections;
 import java.util.List;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = ApplicationTest.class)
+@SpringBootTest
 @ActiveProfiles("test")
 @DataJpaTest
 public abstract class ServiceTest {

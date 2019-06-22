@@ -18,47 +18,26 @@
 package ch.wisv.areafiftylan;
 
 
-import ch.wisv.areafiftylan.products.model.TicketOption;
-import ch.wisv.areafiftylan.products.model.TicketType;
 import ch.wisv.areafiftylan.products.model.order.Order;
 import ch.wisv.areafiftylan.products.model.order.OrderStatus;
 import ch.wisv.areafiftylan.products.service.MolliePaymentService;
 import ch.wisv.areafiftylan.products.service.PaymentService;
 import ch.wisv.areafiftylan.products.service.repository.OrderRepository;
-import ch.wisv.areafiftylan.products.service.repository.TicketOptionRepository;
-import ch.wisv.areafiftylan.products.service.repository.TicketTypeRepository;
-import ch.wisv.areafiftylan.seats.model.Seat;
-import ch.wisv.areafiftylan.seats.service.SeatRepository;
-import ch.wisv.areafiftylan.utils.mail.MailService;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.stereotype.Component;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 
-import java.time.LocalDateTime;
-
-@Configuration
-@ComponentScan
-@EnableAutoConfiguration
-@ActiveProfiles("test")
+@TestConfiguration
 public class ApplicationTest {
 
-    public static void main(String[] args) {
-        SpringApplication.run(ApplicationTest.class, args);
-    }
-
-
     @Bean
-    @Primary
-    public MailService mailService() {
-        return Mockito.mock(MailService.class);
+    public JavaMailSender mailService() {
+        JavaMailSenderImpl mailSender = Mockito.mock(JavaMailSenderImpl.class);
+        Mockito.when(mailSender.createMimeMessage()).thenCallRealMethod();
+        return mailSender;
     }
 
     @Bean
@@ -80,39 +59,4 @@ public class ApplicationTest {
         return mockMolliePaymentService;
     }
 
-    @Component
-    public class TestRunner implements CommandLineRunner {
-
-
-        private final TicketOptionRepository ticketOptionRepository;
-        private final TicketTypeRepository ticketTypeRepository;
-        private final SeatRepository seatRepository;
-
-        @Autowired
-        public TestRunner(TicketOptionRepository ticketOptionRepository, TicketTypeRepository ticketTypeRepository,
-                          SeatRepository seatRepository) {
-            this.ticketOptionRepository = ticketOptionRepository;
-            this.ticketTypeRepository = ticketTypeRepository;
-            this.seatRepository = seatRepository;
-        }
-
-        @Override
-        public void run(String... evt) throws Exception {
-            TicketOption chMember = ticketOptionRepository.save(new TicketOption("chMember", -5F));
-            TicketOption pickupService = ticketOptionRepository.save(new TicketOption("pickupService", 2.5F));
-            TicketOption extraOption = ticketOptionRepository.save(new TicketOption("extraOption", 10F));
-
-            TicketType ticketType =
-                    new TicketType("test", "Testing Ticket", 30F, 0, LocalDateTime.now().plusDays(1), true);
-            ticketType.addPossibleOption(chMember);
-            ticketType.addPossibleOption(pickupService);
-            ticketTypeRepository.save(ticketType);
-
-            for (int i = 1; i <= 5; i++) {
-                Seat seat = new Seat("A", i);
-                seat.setLocked(false);
-                seatRepository.save(seat);
-            }
-        }
-    }
 }

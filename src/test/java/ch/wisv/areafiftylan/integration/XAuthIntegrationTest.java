@@ -42,6 +42,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDate;
@@ -50,7 +51,8 @@ import java.util.List;
 
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = ApplicationTest.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ContextConfiguration(classes = ApplicationTest.class)
 @ActiveProfiles("test")
 public abstract class XAuthIntegrationTest {
 
@@ -79,7 +81,6 @@ public abstract class XAuthIntegrationTest {
     protected final String CH_MEMBER = "chMember";
     protected final String PICKUP_SERVICE = "pickupService";
     protected final String TEST_TICKET = "test";
-
 
     @Before
     public void setXAuthIntegrationTest() {
