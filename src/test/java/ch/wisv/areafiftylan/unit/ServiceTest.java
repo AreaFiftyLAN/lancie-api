@@ -1,17 +1,22 @@
 package ch.wisv.areafiftylan.unit;
 
+import ch.wisv.areafiftylan.TestRunner;
+import ch.wisv.areafiftylan.extras.mailupdates.service.SubscriptionServiceImpl;
+import ch.wisv.areafiftylan.extras.rfid.service.RFIDServiceImpl;
 import ch.wisv.areafiftylan.products.model.Ticket;
-import ch.wisv.areafiftylan.products.service.OrderService;
-import ch.wisv.areafiftylan.products.service.PaymentService;
-import ch.wisv.areafiftylan.products.service.TicketService;
+import ch.wisv.areafiftylan.products.service.*;
 import ch.wisv.areafiftylan.products.service.repository.OrderRepository;
 import ch.wisv.areafiftylan.products.service.repository.TicketOptionRepository;
 import ch.wisv.areafiftylan.products.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.products.service.repository.TicketTypeRepository;
+import ch.wisv.areafiftylan.seats.service.SeatServiceImpl;
 import ch.wisv.areafiftylan.teams.model.Team;
+import ch.wisv.areafiftylan.teams.service.TeamServiceImpl;
 import ch.wisv.areafiftylan.users.model.Gender;
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.users.service.UserRepository;
+import ch.wisv.areafiftylan.users.service.UserServiceImpl;
+import ch.wisv.areafiftylan.utils.mail.MailServiceImpl;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -21,9 +26,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -35,23 +39,27 @@ import java.util.Collections;
 import java.util.List;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest
 @ActiveProfiles("test")
 @DataJpaTest
+@Import({TestRunner.class, OrderServiceImpl.class, RFIDServiceImpl.class, SeatServiceImpl.class, TicketServiceImpl.class, SubscriptionServiceImpl.class, UserServiceImpl.class, TeamServiceImpl.class})
 public abstract class ServiceTest {
 
     @MockBean
     SpringTemplateEngine springTemplateEngine;
     @MockBean
-    JavaMailSender javaMailSender;
+    MailServiceImpl mailService;
+    @MockBean
+    MolliePaymentService paymentService;
 
     @Autowired
     protected OrderService orderService;
     @Autowired
-    protected PaymentService paymentService;
-    @Autowired
     protected TicketService ticketService;
+    /**
+     * The usage of testEntityManager comes with the @DataJpaTest, which complicates things a lot. Don't use it for new tests
+     */
     @Autowired
+    @Deprecated
     protected TestEntityManager testEntityManager;
     @Autowired
     protected OrderRepository orderRepository;

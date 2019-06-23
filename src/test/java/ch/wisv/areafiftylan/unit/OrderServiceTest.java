@@ -22,10 +22,8 @@ import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.model.order.Order;
 import ch.wisv.areafiftylan.products.model.order.OrderStatus;
 import ch.wisv.areafiftylan.users.model.User;
-import ch.wisv.areafiftylan.utils.mail.MailService;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
@@ -40,9 +38,6 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 public class OrderServiceTest extends ServiceTest {
-
-    @Autowired
-    private MailService mailService;
 
     @Test
     public void getOrderById() {
