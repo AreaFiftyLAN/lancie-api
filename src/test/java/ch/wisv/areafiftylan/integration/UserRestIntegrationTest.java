@@ -20,7 +20,6 @@ package ch.wisv.areafiftylan.integration;
 import ch.wisv.areafiftylan.security.token.repository.VerificationTokenRepository;
 import ch.wisv.areafiftylan.users.model.Role;
 import ch.wisv.areafiftylan.users.model.User;
-import ch.wisv.areafiftylan.utils.TaskScheduler;
 import io.restassured.http.ContentType;
 import io.restassured.http.Header;
 import org.apache.http.HttpStatus;
@@ -43,9 +42,6 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
 
     @Autowired
     private VerificationTokenRepository verificationTokenRepository;
-
-    @Autowired
-    private TaskScheduler taskScheduler;
 
     static Map<String, String> getProfileDTO() {
         Map<String, String> profileDTO = new HashMap<>();
