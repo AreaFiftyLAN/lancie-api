@@ -47,16 +47,9 @@ dependencies {
     runtime("org.postgresql:postgresql")
 
     testCompile("org.springframework.boot:spring-boot-starter-test")
-    testCompile 'io.rest-assured:rest-assured:4.0.0'
-    testCompile 'io.rest-assured:json-path:4.0.0'
-    testCompile 'io.rest-assured:xml-path:4.0.0'
-}
-
-eclipse {
-    classpath {
-        containers.remove('org.eclipse.jdt.launching.JRE_CONTAINER')
-        containers 'org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8'
-    }
+    testCompile 'io.rest-assured:rest-assured:4.1.2'
+    testCompile 'io.rest-assured:json-path:4.1.2'
+    testCompile 'io.rest-assured:xml-path:4.1.2'
 }
 
 jacocoTestReport {
