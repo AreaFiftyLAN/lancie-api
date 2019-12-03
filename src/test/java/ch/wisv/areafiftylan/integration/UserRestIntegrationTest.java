@@ -19,6 +19,7 @@ package ch.wisv.areafiftylan.integration;
 
 import ch.wisv.areafiftylan.security.token.repository.VerificationTokenRepository;
 import ch.wisv.areafiftylan.users.model.Role;
+import ch.wisv.areafiftylan.users.model.RoleDTO;
 import ch.wisv.areafiftylan.users.model.User;
 import io.restassured.http.ContentType;
 import io.restassured.http.Header;
@@ -854,6 +855,44 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         then().statusCode(HttpStatus.SC_OK).
             body("email", equalTo(user.getEmail())).
             body("authorities", hasItem("ROLE_USER"));
+        //@formatter:on
+    }
+
+    @Test
+    public void testAddRole() {
+        User admin = createAdmin();
+        User user = createUser();
+        RoleDTO roleDTO = new RoleDTO();
+        roleDTO.setRole(Role.ROLE_ADMIN);
+        //@formatter:off
+        given().
+                header(getXAuthTokenHeaderForUser(admin.getEmail())).
+        when().
+                body(roleDTO).
+                contentType(ContentType.JSON).
+                post("/users/" + user.getId() + "/role").
+        then().statusCode(HttpStatus.SC_OK).
+                body("email", equalTo(user.getEmail())).
+                body("authorities", hasItem("ROLE_ADMIN"));
+        //@formatter:on
+    }
+
+    @Test
+    public void testDeleteRole() {
+        User admin = createAdmin();
+        User user = createCommitteeMember();
+        RoleDTO roleDTO = new RoleDTO();
+        roleDTO.setRole(Role.ROLE_COMMITTEE);
+        //@formatter:off
+        given().
+                header(getXAuthTokenHeaderForUser(admin.getEmail())).
+        when().
+                body(roleDTO).
+                contentType(ContentType.JSON).
+                post("/users/" + user.getId() + "/role/delete").
+        then().statusCode(HttpStatus.SC_OK).
+                body("email", equalTo(user.getEmail())).
+                body("authorities", not(hasItem("ROLE_COMMITTEE")));
         //@formatter:on
     }
 }

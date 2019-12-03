@@ -20,6 +20,7 @@ package ch.wisv.areafiftylan.users.service;
 
 import ch.wisv.areafiftylan.users.model.Profile;
 import ch.wisv.areafiftylan.users.model.ProfileDTO;
+import ch.wisv.areafiftylan.users.model.RoleDTO;
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.users.model.UserDTO;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -67,4 +68,8 @@ public interface UserService {
      * @return A boolean indicating wether a user is old enough.
      */
     Boolean alcoholCheck(Long userId);
+
+    void addRole(Long userId, RoleDTO input);
+
+    void deleteRole(Long userId, RoleDTO input);
 }
