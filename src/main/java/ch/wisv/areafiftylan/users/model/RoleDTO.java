@@ -10,5 +10,5 @@ import javax.validation.constraints.NotNull;
 public class RoleDTO {
 
     @NotNull
-    private Role role = Role.ROLE_USER;
+    private Role role;
 }

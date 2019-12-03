@@ -895,4 +895,35 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
                 body("authorities", not(hasItem("ROLE_COMMITTEE")));
         //@formatter:on
     }
+
+    @Test
+    public void testDeleteUserRole() {
+        User admin = createAdmin();
+        User user = createUser();
+        RoleDTO roleDTO = new RoleDTO();
+        roleDTO.setRole(Role.ROLE_USER);
+        given().
+                header(getXAuthTokenHeaderForUser(admin.getEmail())).
+        when().
+                body(roleDTO).
+                contentType(ContentType.JSON).
+                post("/users/" + user.getId() + "/role/delete").
+        then().statusCode(HttpStatus.SC_BAD_REQUEST);
+        //@formatter:on
+    }
+
+    @Test
+    public void testDeleteNullRole() {
+        User admin = createAdmin();
+        User user = createUser();
+        RoleDTO roleDTO = new RoleDTO();
+        given().
+                header(getXAuthTokenHeaderForUser(admin.getEmail())).
+                when().
+                body(roleDTO).
+                contentType(ContentType.JSON).
+                post("/users/" + user.getId() + "/role/delete").
+                then().statusCode(HttpStatus.SC_BAD_REQUEST);
+        //@formatter:on
+    }
 }

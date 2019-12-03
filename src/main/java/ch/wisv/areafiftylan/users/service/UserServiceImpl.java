@@ -17,6 +17,7 @@
 
 package ch.wisv.areafiftylan.users.service;
 
+import ch.wisv.areafiftylan.exception.CannotRemoveUserRoleException;
 import ch.wisv.areafiftylan.exception.UserNotFoundException;
 import ch.wisv.areafiftylan.security.token.PasswordResetToken;
 import ch.wisv.areafiftylan.security.token.VerificationToken;
@@ -276,8 +277,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public void deleteRole(Long userId, RoleDTO input) {
         User user = getUserById(userId);
-        user.deleteRole(input.getRole());
-        userRepository.saveAndFlush(user);
+        if (input.getRole() != Role.ROLE_USER) {
+            user.deleteRole(input.getRole());
+            userRepository.saveAndFlush(user);
+        } else {
+            throw new CannotRemoveUserRoleException(input.getRole());
+        }
     }
 
     /**

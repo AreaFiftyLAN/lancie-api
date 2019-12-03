@@ -17,6 +17,7 @@
 
 package ch.wisv.areafiftylan.users.controller;
 
+import ch.wisv.areafiftylan.exception.CannotRemoveUserRoleException;
 import ch.wisv.areafiftylan.seats.model.Seat;
 import ch.wisv.areafiftylan.seats.service.SeatService;
 import ch.wisv.areafiftylan.users.model.RoleDTO;
@@ -182,6 +183,11 @@ public class UserRestController {
     public ResponseEntity<?> deleteRole(@PathVariable Long userId, @Validated @RequestBody RoleDTO input) {
         userService.deleteRole(userId, input);
         return new ResponseEntity<>(getUserById(userId), HttpStatus.OK);
+    }
+
+    @ExceptionHandler(CannotRemoveUserRoleException.class)
+    public ResponseEntity<?> handleCannotRemoveUserRoleException(CannotRemoveUserRoleException ex) {
+        return createResponseEntity(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
