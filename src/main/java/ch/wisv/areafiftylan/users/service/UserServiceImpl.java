@@ -276,13 +276,13 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public void deleteRole(Long userId, RoleDTO input) {
-        User user = getUserById(userId);
-        if (input.getRole() != Role.ROLE_USER) {
-            user.deleteRole(input.getRole());
-            userRepository.saveAndFlush(user);
-        } else {
+        if (input.getRole() == Role.ROLE_USER) {
             throw new CannotRemoveUserRoleException(input.getRole());
         }
+
+        User user = getUserById(userId);
+        user.deleteRole(input.getRole());
+        userRepository.saveAndFlush(user);
     }
 
     /**

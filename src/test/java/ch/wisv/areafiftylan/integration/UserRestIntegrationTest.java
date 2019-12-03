@@ -902,6 +902,7 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         User user = createUser();
         RoleDTO roleDTO = new RoleDTO();
         roleDTO.setRole(Role.ROLE_USER);
+        //@formatter:off
         given().
                 header(getXAuthTokenHeaderForUser(admin.getEmail())).
         when().
@@ -917,13 +918,14 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         User admin = createAdmin();
         User user = createUser();
         RoleDTO roleDTO = new RoleDTO();
+        //@formatter:off
         given().
                 header(getXAuthTokenHeaderForUser(admin.getEmail())).
-                when().
+        when().
                 body(roleDTO).
                 contentType(ContentType.JSON).
                 post("/users/" + user.getId() + "/role/delete").
-                then().statusCode(HttpStatus.SC_BAD_REQUEST);
+        then().statusCode(HttpStatus.SC_BAD_REQUEST);
         //@formatter:on
     }
 }
