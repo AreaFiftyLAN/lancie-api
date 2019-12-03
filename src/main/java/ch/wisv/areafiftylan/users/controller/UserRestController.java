@@ -17,8 +17,10 @@
 
 package ch.wisv.areafiftylan.users.controller;
 
+import ch.wisv.areafiftylan.exception.CannotRemoveUserRoleException;
 import ch.wisv.areafiftylan.seats.model.Seat;
 import ch.wisv.areafiftylan.seats.service.SeatService;
+import ch.wisv.areafiftylan.users.model.RoleDTO;
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.users.model.UserDTO;
 import ch.wisv.areafiftylan.users.service.UserService;
@@ -167,6 +169,25 @@ public class UserRestController {
     public List<Seat> getSeatByUser(@PathVariable Long userId) {
         User user = userService.getUserById(userId);
         return seatService.getSeatsByEmail(user.getEmail());
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/{userId}/role")
+    public ResponseEntity<?> addRole(@PathVariable Long userId, @Validated @RequestBody RoleDTO input) {
+        userService.addRole(userId, input);
+        return new ResponseEntity<>(getUserById(userId), HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/{userId}/role/delete")
+    public ResponseEntity<?> deleteRole(@PathVariable Long userId, @Validated @RequestBody RoleDTO input) {
+        userService.deleteRole(userId, input);
+        return new ResponseEntity<>(getUserById(userId), HttpStatus.OK);
+    }
+
+    @ExceptionHandler(CannotRemoveUserRoleException.class)
+    public ResponseEntity<?> handleCannotRemoveUserRoleException(CannotRemoveUserRoleException ex) {
+        return createResponseEntity(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)

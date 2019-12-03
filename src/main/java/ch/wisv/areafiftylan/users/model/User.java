@@ -110,4 +110,8 @@ public class User implements Serializable, UserDetails {
     public int getReference() {
         return email.hashCode();
     }
+
+    public void deleteRole(Role role) {
+        this.roles.remove(role);
+    }
 }
