@@ -1,6 +1,3 @@
-spring.flyway.enabled: false
-spring.jpa.hibernate.ddl-auto: create
-
 ## AREA FIFTYLAN SETTINGS
 a5l:
     paymentReturnUrl: https://localhost:5100/order-check

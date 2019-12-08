@@ -40,7 +40,7 @@ import java.util.Set;
 @Data
 @RequiredArgsConstructor
 @NoArgsConstructor
-@Table(uniqueConstraints = { @UniqueConstraint(name = "email", columnNames = { "email" }) })
+@Table(name = "users", uniqueConstraints = { @UniqueConstraint(name = "email", columnNames = { "email" }) })
 public class User implements Serializable, UserDetails {
 
     @NonNull

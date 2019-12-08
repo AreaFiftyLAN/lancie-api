@@ -1,5 +1,4 @@
 spring.jpa.hibernate.ddl-auto: validate
-spring.jpa.properties.hibernate.hbm2ddl.auto: none
 
 logging:
     file: /tmp/logs/lancie-api.log
@@ -26,4 +25,4 @@ a5l:
 spring:
     flyway:
         enabled: true
-        locations: ch/wisv/areafiftylan/utils/db/migration
+        locations: db/migration

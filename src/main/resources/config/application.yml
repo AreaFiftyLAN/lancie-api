@@ -11,18 +11,11 @@ spring:
         servlet:
             content-type: text/html
 
-    datasource.driverClassName: org.postgresql.Driver
-    data.jpa.repositories.enabled: true
-
+    flyway.enabled: true
     jpa:
         show-sql: false
-        database-platform: org.hibernate.dialect.PostgreSQLDialect
-        generate-ddl: true
-        properties:
-            hibernate.default_schema: public
-
-    jackson:
-        date-format: com.fasterxml.jackson.databind.util.ISO8601DateFormat
+        hibernate:
+            ddl-auto: validate
 
 logging:
     level:

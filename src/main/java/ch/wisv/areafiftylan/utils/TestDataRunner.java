@@ -18,6 +18,7 @@
 package ch.wisv.areafiftylan.utils;
 
 import ch.wisv.areafiftylan.extras.consumption.model.Consumption;
+import ch.wisv.areafiftylan.extras.consumption.model.ConsumptionMapsRepository;
 import ch.wisv.areafiftylan.extras.consumption.model.PossibleConsumptionsRepository;
 import ch.wisv.areafiftylan.extras.consumption.service.ConsumptionService;
 import ch.wisv.areafiftylan.extras.rfid.model.RFIDLink;
@@ -49,8 +50,9 @@ import ch.wisv.areafiftylan.web.tournament.model.Tournament;
 import ch.wisv.areafiftylan.web.tournament.model.TournamentType;
 import ch.wisv.areafiftylan.web.tournament.service.TournamentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.annotation.Profile;
+import org.springframework.context.event.EventListener;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -63,7 +65,7 @@ import java.util.List;
 
 @Component
 @Profile("dev")
-public class TestDataRunner implements CommandLineRunner {
+public class TestDataRunner {
     private final UserRepository accountRepository;
     private final TicketRepository ticketRepository;
     private final SeatService seatService;
@@ -73,6 +75,7 @@ public class TestDataRunner implements CommandLineRunner {
     private final RFIDLinkRepository rfidLinkRepository;
     private final PossibleConsumptionsRepository consumptionsRepository;
     private final ConsumptionService consumptionService;
+    private final ConsumptionMapsRepository consumptionMapsRepository;
 
     private final BannerRepository bannerRepository;
     private final CommitteeRepository committeeRepository;
@@ -85,7 +88,7 @@ public class TestDataRunner implements CommandLineRunner {
                           TeamRepository teamRepository, SeatService seatService,
                           TicketOptionRepository ticketOptionRepository, TicketTypeRepository ticketTypeRepository,
                           RFIDLinkRepository rfidLinkRepository, PossibleConsumptionsRepository consumptionsRepository,
-                          ConsumptionService consumptionService, BannerRepository bannerRepository, CommitteeRepository committeeRepository,
+                          ConsumptionService consumptionService, ConsumptionMapsRepository consumptionMapsRepository, BannerRepository bannerRepository, CommitteeRepository committeeRepository,
                           FaqRepository faqRepository, SponsorRepository sponsorRepository,
                           TournamentRepository tournamentRepository) {
         this.accountRepository = accountRepository;
@@ -97,6 +100,7 @@ public class TestDataRunner implements CommandLineRunner {
         this.rfidLinkRepository = rfidLinkRepository;
         this.consumptionsRepository = consumptionsRepository;
         this.consumptionService = consumptionService;
+        this.consumptionMapsRepository = consumptionMapsRepository;
         this.bannerRepository = bannerRepository;
         this.committeeRepository = committeeRepository;
         this.faqRepository = faqRepository;
@@ -104,8 +108,10 @@ public class TestDataRunner implements CommandLineRunner {
         this.tournamentRepository = tournamentRepository;
     }
 
-    @Override
-    public void run(String... evt) throws Exception {
+    @EventListener(ApplicationStartedEvent.class)
+    public void insertTestData() {
+
+        clearAll();
         //region Users
         LocalDate localDate = LocalDate.of(2000, 1, 2);
 
@@ -268,6 +274,23 @@ public class TestDataRunner implements CommandLineRunner {
         tournament(TournamentType.UNOFFICIAL, "JD", "images-optimized/unofficial/justdance.jpg", "2 V 2", "Just Dance",
                 "Just Dance is about dancing.", Collections.singletonList("Nothing."), sogeti);
         //endregion Web Data
+    }
+
+    private void clearAll() {
+
+        teamRepository.deleteAll();
+        ticketRepository.deleteAll();
+        ticketOptionRepository.deleteAll();
+        ticketTypeRepository.deleteAll();
+        rfidLinkRepository.deleteAll();
+        consumptionsRepository.deleteAll();
+        bannerRepository.deleteAll();
+        committeeRepository.deleteAll();
+        faqRepository.deleteAll();
+        sponsorRepository.deleteAll();
+        tournamentRepository.deleteAll();
+        accountRepository.deleteAll();
+
     }
 
     private CommitteeMember committeeMember(Long position, String function, String name, String icon) {

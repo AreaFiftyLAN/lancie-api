@@ -11,8 +11,8 @@ The API is a Spring based application to suit the needs of a LAN-party.
 
 ### Docker
 The postgres install can be quite a hassle, docker can also be used for this.
-After docker is installed, create a postgres container: `docker run --name lancie_postgres -p 5432:5432 -d postgres`.
-Connect to the running container with `docker exec -tiu postgres lancie_postgres psql` and create a new database with `CREATE DATABASE lancie-dev;`.
+After docker is installed, create a postgres container: `docker run --name lancie_postgres -e POSTGRES_PASSWORD=areafiftylan -p 5432:5432 -d postgres`.
+Connect to the running container with `docker exec -tiu postgres lancie_postgres psql` and create a new database with `CREATE DATABASE lancie_dev;`.
 This is everything you need to initially start the LANcie-API, if, at any later point, you need to connect to the database, you can enter `docker exec -tiu postgres lancie_postgres psql -d lancie-dev`.
 The next time you want to start developing, a `docker start lancie_postgres` is enough. To stop the container again, `docker stop lancie_postgres` will do.
 

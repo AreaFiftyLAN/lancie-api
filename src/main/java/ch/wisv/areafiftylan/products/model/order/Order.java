@@ -32,6 +32,7 @@ import java.util.Set;
 
 @Entity
 @Getter
+@Table(name = "orders")
 public class Order {
 
     @Id

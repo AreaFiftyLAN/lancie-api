@@ -1,10 +1,11 @@
 plugins {
-    id 'org.springframework.boot' version '2.1.9.RELEASE'
+    id 'org.springframework.boot' version '2.2.2.RELEASE'
     id 'io.spring.dependency-management' version '1.0.8.RELEASE'
     id 'java'
     id 'idea'
     id 'eclipse'
     id 'jacoco'
+    id "io.freefair.lombok" version "4.1.6"
 }
 
 jar {
@@ -35,13 +36,9 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-json")
     compile("org.flywaydb:flyway-core")
 
-    compile("com.google.guava:guava:23.5-jre")
+    compile("com.google.guava:guava:28.1-jre")
     compile("nl.stil4m:mollie-api:2.7.0")
     compile("net.logstash.logback:logstash-logback-encoder:4.11")
-    compile("javax.xml.bind:jaxb-api:2.3.0")
-
-    compileOnly("org.projectlombok:lombok:1.18.2")
-    annotationProcessor("org.projectlombok:lombok:1.18.2")
 
     runtime("org.hsqldb:hsqldb")
     runtime("org.postgresql:postgresql")
