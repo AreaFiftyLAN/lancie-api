@@ -1,12 +1,12 @@
 create sequence hibernate_sequence start 1 increment 1;
 create table authentication_token (id int8 not null, primary key (id));
-create table banner (id int8 not null, end_date date, start_date date, text varchar(255), primary key (id));
+create table banner (id int8 not null, end_date date, start_date date, text text, primary key (id));
 create table committee_member (position int8 not null, function varchar(255), icon varchar(255), name varchar(255), primary key (position));
 create table consumption (id int8 not null, name varchar(255), primary key (id));
 create table consumption_map (id int8 not null, ticket_id int8, primary key (id));
 create table consumption_map_consumptions_made (consumption_map_id int8 not null, consumptions_made_id int8 not null);
 create table expired_order (id int8 not null, created_at varchar(255), created_by varchar(255), expired_at varchar(255), number_of_tickets int4 not null, primary key (id));
-create table faq_pair (id int8 not null, answer varchar(255), question varchar(255), primary key (id));
+create table faq_pair (id int8 not null, answer text, question varchar(255), primary key (id));
 create table orders (id int8 not null, creation_date_time timestamp, reference varchar(255), status int4, user_id int8, primary key (id));
 create table orders_tickets (order_id int8 not null, tickets_id int8 not null, primary key (order_id, tickets_id));
 create table password_reset_token (id int8 not null, primary key (id));
@@ -25,7 +25,7 @@ create table ticket_transfer_token (id int8 not null, ticket_id int8 not null, p
 create table ticket_type (id int8 not null, buyable boolean not null, deadline timestamp, name varchar(255), number_available int4 not null, price float4 not null, text varchar(255), primary key (id));
 create table ticket_type_possible_options (ticket_type_id int8 not null, possible_options_id int8 not null, primary key (ticket_type_id, possible_options_id));
 create table token (id int8 not null, expirable BOOLEAN DEFAULT TRUE not null, expiry_date timestamp, revoked BOOLEAN DEFAULT FALSE not null, token varchar(255), used BOOLEAN DEFAULT FALSE not null, user_id int8 not null, primary key (id));
-create table tournament (id int8 not null, button_image_path varchar(255), button_title varchar(255), description varchar(255), format varchar(255), header_title varchar(255), type int4, sponsor_id int8, primary key (id));
+create table tournament (id int8 not null, button_image_path varchar(255), button_title varchar(255), description text, format varchar(255), header_title varchar(255), type int4, sponsor_id int8, primary key (id));
 create table tournament_prize (tournament_id int8 not null, prizes varchar(255));
 create table user_role (user_id int8 not null, roles varchar(255));
 create table users (id int8 not null, account_non_expired boolean not null, account_non_locked boolean not null, credentials_non_expired boolean not null, email varchar(255) not null, enabled boolean not null, password_hash varchar(255) not null, profile_id int8, primary key (id));
