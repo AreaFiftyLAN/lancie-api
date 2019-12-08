@@ -13,6 +13,7 @@ a5l:
         sender: LANcie <lancie@ch.tudelft.nl>
         contact: LANcie <lancie@ch.tudelft.nl>
         confirmUrl: https://areafiftylan.nl/register-confirm
+        year: 2020
     ratelimit:
         enabled: true
         minute: 10
