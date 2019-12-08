@@ -18,7 +18,6 @@
 package ch.wisv.areafiftylan.utils;
 
 import ch.wisv.areafiftylan.extras.consumption.model.Consumption;
-import ch.wisv.areafiftylan.extras.consumption.model.ConsumptionMapsRepository;
 import ch.wisv.areafiftylan.extras.consumption.model.PossibleConsumptionsRepository;
 import ch.wisv.areafiftylan.extras.consumption.service.ConsumptionService;
 import ch.wisv.areafiftylan.extras.rfid.model.RFIDLink;
@@ -49,9 +48,7 @@ import ch.wisv.areafiftylan.web.sponsor.service.SponsorRepository;
 import ch.wisv.areafiftylan.web.tournament.model.Tournament;
 import ch.wisv.areafiftylan.web.tournament.model.TournamentType;
 import ch.wisv.areafiftylan.web.tournament.service.TournamentRepository;
-import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.flyway.FlywayMigrationStrategy;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.EventListener;
@@ -89,7 +86,7 @@ public class TestDataRunner {
                           TeamRepository teamRepository, SeatService seatService,
                           TicketOptionRepository ticketOptionRepository, TicketTypeRepository ticketTypeRepository,
                           RFIDLinkRepository rfidLinkRepository, PossibleConsumptionsRepository consumptionsRepository,
-                          ConsumptionService consumptionService, ConsumptionMapsRepository consumptionMapsRepository, BannerRepository bannerRepository, CommitteeRepository committeeRepository,
+                          ConsumptionService consumptionService, BannerRepository bannerRepository, CommitteeRepository committeeRepository,
                           FaqRepository faqRepository, SponsorRepository sponsorRepository,
                           TournamentRepository tournamentRepository) {
         this.accountRepository = accountRepository;
@@ -272,23 +269,6 @@ public class TestDataRunner {
         tournament(TournamentType.UNOFFICIAL, "JD", "images-optimized/unofficial/justdance.jpg", "2 V 2", "Just Dance",
                 "Just Dance is about dancing.", Collections.singletonList("Nothing."), sogeti);
         //endregion Web Data
-    }
-
-    private void clearAll() {
-
-        teamRepository.deleteAll();
-        ticketRepository.deleteAll();
-        ticketOptionRepository.deleteAll();
-        ticketTypeRepository.deleteAll();
-        rfidLinkRepository.deleteAll();
-        consumptionsRepository.deleteAll();
-        bannerRepository.deleteAll();
-        committeeRepository.deleteAll();
-        faqRepository.deleteAll();
-        sponsorRepository.deleteAll();
-        tournamentRepository.deleteAll();
-        accountRepository.deleteAll();
-
     }
 
     private CommitteeMember committeeMember(Long position, String function, String name, String icon) {
