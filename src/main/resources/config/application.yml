@@ -3,19 +3,14 @@ spring:
     main:
         allow-bean-definition-overriding: true
     thymeleaf:
-        check-template-location: true
-        prefix: classpath:/templates/
-        suffix: .html
         mode: HTML5
         encoding: UTF-8
-        servlet:
-            content-type: text/html
 
-    flyway.enabled: true
     jpa:
         show-sql: false
         hibernate:
             ddl-auto: validate
+        open-in-view: true
 
 logging:
     level:
@@ -24,7 +19,8 @@ logging:
         org.hibernate.SQL: ERROR
     pattern:
         console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
-    file: logs/lancie-api.log
+    file:
+        name: logs/lancie-api.log
 
 server:
     port: 9000

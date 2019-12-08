@@ -49,7 +49,9 @@ import ch.wisv.areafiftylan.web.sponsor.service.SponsorRepository;
 import ch.wisv.areafiftylan.web.tournament.model.Tournament;
 import ch.wisv.areafiftylan.web.tournament.model.TournamentType;
 import ch.wisv.areafiftylan.web.tournament.service.TournamentRepository;
+import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.flyway.FlywayMigrationStrategy;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.EventListener;
@@ -75,7 +77,6 @@ public class TestDataRunner {
     private final RFIDLinkRepository rfidLinkRepository;
     private final PossibleConsumptionsRepository consumptionsRepository;
     private final ConsumptionService consumptionService;
-    private final ConsumptionMapsRepository consumptionMapsRepository;
 
     private final BannerRepository bannerRepository;
     private final CommitteeRepository committeeRepository;
@@ -100,7 +101,6 @@ public class TestDataRunner {
         this.rfidLinkRepository = rfidLinkRepository;
         this.consumptionsRepository = consumptionsRepository;
         this.consumptionService = consumptionService;
-        this.consumptionMapsRepository = consumptionMapsRepository;
         this.bannerRepository = bannerRepository;
         this.committeeRepository = committeeRepository;
         this.faqRepository = faqRepository;
@@ -110,8 +110,6 @@ public class TestDataRunner {
 
     @EventListener(ApplicationStartedEvent.class)
     public void insertTestData() {
-
-        clearAll();
         //region Users
         LocalDate localDate = LocalDate.of(2000, 1, 2);
 

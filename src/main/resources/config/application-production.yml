@@ -1,7 +1,6 @@
-spring.jpa.hibernate.ddl-auto: validate
-
 logging:
-    file: /tmp/logs/lancie-api.log
+    file:
+        name: /tmp/logs/lancie-api.log
 
 ## AREA FIFTYLAN SETTINGS
 a5l:
@@ -22,7 +21,3 @@ a5l:
     ticketLimit: 220
     orderKeepAlive: 15
     year: 2019
-spring:
-    flyway:
-        enabled: true
-        locations: db/migration

@@ -16,3 +16,12 @@ a5l:
     orderKeepAlive: 15
     ratelimit:
         enabled: false
+
+logging:
+    level:
+        ch.wisv.areafiftylan: DEBUG
+
+management:
+    health:
+        mail:
+            enabled: false
