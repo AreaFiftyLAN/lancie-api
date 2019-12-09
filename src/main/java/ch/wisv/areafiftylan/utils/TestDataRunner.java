@@ -49,8 +49,9 @@ import ch.wisv.areafiftylan.web.tournament.model.Tournament;
 import ch.wisv.areafiftylan.web.tournament.model.TournamentType;
 import ch.wisv.areafiftylan.web.tournament.service.TournamentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.annotation.Profile;
+import org.springframework.context.event.EventListener;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -63,7 +64,7 @@ import java.util.List;
 
 @Component
 @Profile("dev")
-public class TestDataRunner implements CommandLineRunner {
+public class TestDataRunner {
     private final UserRepository accountRepository;
     private final TicketRepository ticketRepository;
     private final SeatService seatService;
@@ -104,8 +105,8 @@ public class TestDataRunner implements CommandLineRunner {
         this.tournamentRepository = tournamentRepository;
     }
 
-    @Override
-    public void run(String... evt) throws Exception {
+    @EventListener(ApplicationStartedEvent.class)
+    public void insertTestData() {
         //region Users
         LocalDate localDate = LocalDate.of(2000, 1, 2);
 

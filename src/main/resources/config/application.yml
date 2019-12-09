@@ -3,26 +3,14 @@ spring:
     main:
         allow-bean-definition-overriding: true
     thymeleaf:
-        check-template-location: true
-        prefix: classpath:/templates/
-        suffix: .html
         mode: HTML5
         encoding: UTF-8
-        servlet:
-            content-type: text/html
-
-    datasource.driverClassName: org.postgresql.Driver
-    data.jpa.repositories.enabled: true
 
     jpa:
         show-sql: false
-        database-platform: org.hibernate.dialect.PostgreSQLDialect
-        generate-ddl: true
-        properties:
-            hibernate.default_schema: public
-
-    jackson:
-        date-format: com.fasterxml.jackson.databind.util.ISO8601DateFormat
+        hibernate:
+            ddl-auto: validate
+        open-in-view: true
 
 logging:
     level:
@@ -31,7 +19,8 @@ logging:
         org.hibernate.SQL: ERROR
     pattern:
         console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
-    file: logs/lancie-api.log
+    file:
+        name: logs/lancie-api.log
 
 server:
     port: 9000
