@@ -26,6 +26,7 @@ import ch.wisv.areafiftylan.users.model.User;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public interface TicketService {
     Ticket getTicketById(Long ticketId);
@@ -44,6 +45,8 @@ public interface TicketService {
      * @param ticketId The ID of the ticket to be marked as valid
      */
     void validateTicket(Long ticketId);
+
+    TicketOption getTicketOptionByName(String name);
 
     /**
      * Check if a ticket is available, and return when it is. When a ticket is unavailable (sold out for instance) a
@@ -106,7 +109,13 @@ public interface TicketService {
 
     TicketType updateTicketType(Long typeId, TicketType type);
 
+    TicketType getTicketTypeById(Long typeId);
+
     void deleteTicketType(Long typeId);
 
     TicketOption addTicketOption(TicketOption option);
+
+    void deleteTicketOption(Long optionID);
+
+    Collection<TicketOption> getAllTicketOptions();
 }

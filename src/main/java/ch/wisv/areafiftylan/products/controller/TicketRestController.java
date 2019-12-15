@@ -39,6 +39,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.Collection;
 
 import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEntity;
@@ -159,12 +160,47 @@ public class TicketRestController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/types/{typeId}/buyable/{buyable}")
+    public ResponseEntity<?> updateTicketTypeBuyable(@PathVariable Long typeId, @PathVariable boolean buyable) {
+        TicketType ticketType = ticketService.getTicketTypeById(typeId);
+        ticketType.setBuyable(buyable);
+        ticketService.updateTicketType(typeId, ticketType);
+        return createResponseEntity(HttpStatus.OK, "TicketType successfully updated", ticketType);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/types/{typeId}/{optionString}")
+    public ResponseEntity<?> addOptionToType(@PathVariable Long typeId, @PathVariable String optionString) {
+        TicketOption option = ticketService.getTicketOptionByName(optionString);
+        TicketType type = ticketService.getTicketTypeById(typeId);
+        type.addPossibleOption(option);
+        if (type.getPossibleOptions().contains(option)) {
+            ticketService.updateTicketType(typeId, type);
+            return createResponseEntity(HttpStatus.OK, "TicketOption successfully added to Ticket Type", type);
+        }
+        return createResponseEntity(HttpStatus.BAD_REQUEST, "TicketOption not added to Ticket Type");
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/options")
     public ResponseEntity<?> addTicketOption(@RequestBody @Validated TicketOption option) {
 
         TicketOption ticketOption = ticketService.addTicketOption(option);
 
         return createResponseEntity(HttpStatus.CREATED, "TicketOption successfully added", ticketOption);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/options")
+    public Collection<TicketOption> readTicketOptions() {
+        return ticketService.getAllTicketOptions();
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/options/{optionId}")
+    public ResponseEntity<?> deleteTicketOption(@PathVariable Long optionId) {
+        ticketService.deleteTicketOption(optionId);
+        return createResponseEntity(HttpStatus.OK, "TicketOption successfully deleted.");
     }
 
     @ExceptionHandler(TicketTransferTokenException.class)
