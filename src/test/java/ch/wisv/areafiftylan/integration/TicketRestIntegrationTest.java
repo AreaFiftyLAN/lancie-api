@@ -760,4 +760,37 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         //@formatter:on
 
     }
+
+    @Test
+    public void testChangeBuyable() {
+        User admin = createAdmin();
+        TicketType ticket = getTicketType();
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(admin)).
+        when().
+            post(TICKETS_ENDPOINT + "/types/" + ticket.getId() + "/buyable/false").
+        then().
+            statusCode(HttpStatus.SC_OK).
+            body("object.buyable", equalTo(false));
+        //@formatter:on
+    }
+
+    @Test
+    public void testAddOptionToType() {
+        User admin = createAdmin();
+        TicketType ticket = getTicketType();
+        TicketOption option = new TicketOption("testOption", 2);
+        ticketService.addTicketOption(option);
+        //@formatter:off
+        given().
+                header(getXAuthTokenHeaderForUser(admin)).
+        when().
+            post(TICKETS_ENDPOINT + "/types/" + ticket.getId() + "/" + option.getName()).
+        then().
+            statusCode(HttpStatus.SC_OK).
+            body("object.possibleOptions.id", hasItem(Math.toIntExact(option.getId())));
+        //@formatter:on
+    }
 }
