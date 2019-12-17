@@ -20,7 +20,9 @@ package ch.wisv.areafiftylan.products.controller;
 import ch.wisv.areafiftylan.exception.TicketTransferTokenException;
 import ch.wisv.areafiftylan.products.model.AvailableTicketsDTO;
 import ch.wisv.areafiftylan.products.model.Ticket;
+import ch.wisv.areafiftylan.products.model.TicketBuyableDTO;
 import ch.wisv.areafiftylan.products.model.TicketOption;
+import ch.wisv.areafiftylan.products.model.TicketOptionDTO;
 import ch.wisv.areafiftylan.products.model.TicketType;
 import ch.wisv.areafiftylan.products.service.OrderService;
 import ch.wisv.areafiftylan.products.service.TicketService;
@@ -39,7 +41,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.Collection;
 
 import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEntity;
@@ -160,25 +161,21 @@ public class TicketRestController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/types/{typeId}/buyable/{buyable}")
-    public ResponseEntity<?> updateTicketTypeBuyable(@PathVariable Long typeId, @PathVariable boolean buyable) {
+    @PostMapping("/types/{typeId}/buyable")
+    public ResponseEntity<?> updateTicketTypeBuyable(@PathVariable Long typeId, @RequestBody @Validated TicketBuyableDTO buyable) {
         TicketType ticketType = ticketService.getTicketTypeById(typeId);
-        ticketType.setBuyable(buyable);
+        ticketType.setBuyable(buyable.isBuyable());
         ticketService.updateTicketType(typeId, ticketType);
         return createResponseEntity(HttpStatus.OK, "TicketType successfully updated", ticketType);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/types/{typeId}/{optionString}")
-    public ResponseEntity<?> addOptionToType(@PathVariable Long typeId, @PathVariable String optionString) {
-        TicketOption option = ticketService.getTicketOptionByName(optionString);
+    @PostMapping("/types/{typeId}/option")
+    public ResponseEntity<?> addOptionToType(@PathVariable Long typeId, @RequestBody @Validated TicketOptionDTO option) {
         TicketType type = ticketService.getTicketTypeById(typeId);
-        type.addPossibleOption(option);
-        if (type.getPossibleOptions().contains(option)) {
-            ticketService.updateTicketType(typeId, type);
-            return createResponseEntity(HttpStatus.OK, "TicketOption successfully added to Ticket Type", type);
-        }
-        return createResponseEntity(HttpStatus.BAD_REQUEST, "TicketOption not added to Ticket Type");
+        type.addPossibleOption(option.getOption());
+        ticketService.updateTicketType(typeId, type);
+        return createResponseEntity(HttpStatus.OK, "TicketOption successfully added to Ticket Type", type);
     }
 
     @PreAuthorize("hasRole('ADMIN')")

@@ -23,7 +23,9 @@ import ch.wisv.areafiftylan.exception.TicketNotFoundException;
 import ch.wisv.areafiftylan.extras.rfid.model.RFIDLink;
 import ch.wisv.areafiftylan.extras.rfid.service.RFIDLinkRepository;
 import ch.wisv.areafiftylan.products.model.Ticket;
+import ch.wisv.areafiftylan.products.model.TicketBuyableDTO;
 import ch.wisv.areafiftylan.products.model.TicketOption;
+import ch.wisv.areafiftylan.products.model.TicketOptionDTO;
 import ch.wisv.areafiftylan.products.model.TicketType;
 import ch.wisv.areafiftylan.products.service.TicketService;
 import ch.wisv.areafiftylan.products.service.repository.TicketRepository;
@@ -765,12 +767,16 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
     public void testChangeBuyable() {
         User admin = createAdmin();
         TicketType ticket = getTicketType();
+        TicketBuyableDTO buyableDTO = new TicketBuyableDTO();
+        buyableDTO.setBuyable(false);
 
         //@formatter:off
         given().
             header(getXAuthTokenHeaderForUser(admin)).
         when().
-            post(TICKETS_ENDPOINT + "/types/" + ticket.getId() + "/buyable/false").
+            body(buyableDTO).
+            contentType(ContentType.JSON).
+            post(TICKETS_ENDPOINT + "/types/" + ticket.getId() + "/buyable").
         then().
             statusCode(HttpStatus.SC_OK).
             body("object.buyable", equalTo(false));
@@ -783,11 +789,15 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         TicketType ticket = getTicketType();
         TicketOption option = new TicketOption("testOption", 2);
         ticketService.addTicketOption(option);
+        TicketOptionDTO optionDTO = new TicketOptionDTO();
+        optionDTO.setOption(option);
         //@formatter:off
         given().
                 header(getXAuthTokenHeaderForUser(admin)).
         when().
-            post(TICKETS_ENDPOINT + "/types/" + ticket.getId() + "/" + option.getName()).
+            body(optionDTO).
+            contentType(ContentType.JSON).
+            post(TICKETS_ENDPOINT + "/types/" + ticket.getId() + "/option").
         then().
             statusCode(HttpStatus.SC_OK).
             body("object.possibleOptions.id", hasItem(Math.toIntExact(option.getId())));
