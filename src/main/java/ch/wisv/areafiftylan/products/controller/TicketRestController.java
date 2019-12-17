@@ -20,9 +20,7 @@ package ch.wisv.areafiftylan.products.controller;
 import ch.wisv.areafiftylan.exception.TicketTransferTokenException;
 import ch.wisv.areafiftylan.products.model.AvailableTicketsDTO;
 import ch.wisv.areafiftylan.products.model.Ticket;
-import ch.wisv.areafiftylan.products.model.TicketBuyableDTO;
 import ch.wisv.areafiftylan.products.model.TicketOption;
-import ch.wisv.areafiftylan.products.model.TicketOptionDTO;
 import ch.wisv.areafiftylan.products.model.TicketType;
 import ch.wisv.areafiftylan.products.service.OrderService;
 import ch.wisv.areafiftylan.products.service.TicketService;
@@ -161,19 +159,17 @@ public class TicketRestController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/types/{typeId}/buyable")
-    public ResponseEntity<?> updateTicketTypeBuyable(@PathVariable Long typeId, @RequestBody @Validated TicketBuyableDTO buyable) {
-        TicketType ticketType = ticketService.getTicketTypeById(typeId);
-        ticketType.setBuyable(buyable.isBuyable());
+    @PutMapping("/tickettype/{typeId}")
+    public ResponseEntity<?> updateTicketTypeBuyable(@PathVariable Long typeId, @RequestBody @Validated TicketType ticketType) {
         ticketService.updateTicketType(typeId, ticketType);
         return createResponseEntity(HttpStatus.OK, "TicketType successfully updated", ticketType);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/types/{typeId}/option")
-    public ResponseEntity<?> addOptionToType(@PathVariable Long typeId, @RequestBody @Validated TicketOptionDTO option) {
+    public ResponseEntity<?> addOptionToType(@PathVariable Long typeId, @RequestBody @Validated TicketOption option) {
         TicketType type = ticketService.getTicketTypeById(typeId);
-        type.addPossibleOption(option.getOption());
+        type.addPossibleOption(option);
         ticketService.updateTicketType(typeId, type);
         return createResponseEntity(HttpStatus.OK, "TicketOption successfully added to Ticket Type", type);
     }

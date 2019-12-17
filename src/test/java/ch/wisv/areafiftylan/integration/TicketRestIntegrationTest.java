@@ -23,9 +23,7 @@ import ch.wisv.areafiftylan.exception.TicketNotFoundException;
 import ch.wisv.areafiftylan.extras.rfid.model.RFIDLink;
 import ch.wisv.areafiftylan.extras.rfid.service.RFIDLinkRepository;
 import ch.wisv.areafiftylan.products.model.Ticket;
-import ch.wisv.areafiftylan.products.model.TicketBuyableDTO;
 import ch.wisv.areafiftylan.products.model.TicketOption;
-import ch.wisv.areafiftylan.products.model.TicketOptionDTO;
 import ch.wisv.areafiftylan.products.model.TicketType;
 import ch.wisv.areafiftylan.products.service.TicketService;
 import ch.wisv.areafiftylan.products.service.repository.TicketRepository;
@@ -767,16 +765,15 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
     public void testChangeBuyable() {
         User admin = createAdmin();
         TicketType ticket = getTicketType();
-        TicketBuyableDTO buyableDTO = new TicketBuyableDTO();
-        buyableDTO.setBuyable(false);
+        ticket.setBuyable(false);
 
         //@formatter:off
         given().
             header(getXAuthTokenHeaderForUser(admin)).
         when().
-            body(buyableDTO).
+            body(ticket).
             contentType(ContentType.JSON).
-            post(TICKETS_ENDPOINT + "/types/" + ticket.getId() + "/buyable").
+            put(TICKETS_ENDPOINT + "/tickettype/" + ticket.getId()).
         then().
             statusCode(HttpStatus.SC_OK).
             body("object.buyable", equalTo(false));
@@ -789,13 +786,11 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         TicketType ticket = getTicketType();
         TicketOption option = new TicketOption("testOption", 2);
         ticketService.addTicketOption(option);
-        TicketOptionDTO optionDTO = new TicketOptionDTO();
-        optionDTO.setOption(option);
         //@formatter:off
         given().
                 header(getXAuthTokenHeaderForUser(admin)).
         when().
-            body(optionDTO).
+            body(option).
             contentType(ContentType.JSON).
             post(TICKETS_ENDPOINT + "/types/" + ticket.getId() + "/option").
         then().
