@@ -21,6 +21,7 @@ import ch.wisv.areafiftylan.ApplicationTest;
 import ch.wisv.areafiftylan.exception.TicketOptionNotFoundException;
 import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.model.TicketOption;
+import ch.wisv.areafiftylan.products.model.TicketType;
 import ch.wisv.areafiftylan.products.service.repository.TicketOptionRepository;
 import ch.wisv.areafiftylan.products.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.products.service.repository.TicketTypeRepository;
@@ -131,6 +132,10 @@ public abstract class XAuthIntegrationTest {
 
     private TicketOption getTicketOption(String option) {
         return ticketOptionRepository.findByName(option).orElseThrow(TicketOptionNotFoundException::new);
+    }
+
+    protected TicketType getTicketType() {
+        return ticketTypeRepository.findByName(TEST_TICKET).orElseThrow(IllegalArgumentException::new);
     }
 
     protected Team createTeamWithCaptain(User captain) {
