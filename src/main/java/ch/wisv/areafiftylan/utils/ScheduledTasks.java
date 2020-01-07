@@ -74,7 +74,7 @@ public class ScheduledTasks {
         Collection<Order> allOrdersBeforeDate = orderRepository.findAllByCreationDateTimeBefore(expireBeforeDate);
 
         List<Order> expiredOrders = allOrdersBeforeDate.stream().filter(isExpired()).collect(Collectors.toList());
-        if (expiredOrders.size() > 0) {
+        if (!expiredOrders.isEmpty()) {
             log.info("Found {} orders to expire", expiredOrders.size());
             expiredOrders.forEach(orderService::expireOrder);
         }
