@@ -26,8 +26,9 @@ import ch.wisv.areafiftylan.security.token.VerificationToken;
 import ch.wisv.areafiftylan.security.token.repository.VerificationTokenRepository;
 import ch.wisv.areafiftylan.users.service.UserRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.event.ApplicationStartedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -37,18 +38,13 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-/**
- * Created by beer on 28-12-15.
- * <p>
- * Class with all scheduled tasks
- */
 @Component
 @Slf4j
-public class TaskScheduler implements InitializingBean {
+public class ScheduledTasks {
 
     @Value("${a5l.orderKeepAlive:15}")
     private int ORDER_STAY_ALIVE_MINUTES;
-    private final int ORDER_EXPIRY_CHECK_INTERVAL_SECONDS = 60;
+    private final int ORDER_EXPIRY_CHECK_INTERVAL_SECONDS = 5;
 
     private final int USER_CLEANUP_CHECK_INTERVAL_MINUTES = 60;
 
@@ -59,9 +55,9 @@ public class TaskScheduler implements InitializingBean {
     private final UserRepository userRepository;
     private final VerificationTokenRepository verificationTokenRepository;
 
-    public TaskScheduler(OrderRepository orderRepository, OrderService orderService,
-                         AuthenticationService authenticationService,
-                         VerificationTokenRepository verificationTokenRepository, UserRepository userRepository) {
+    public ScheduledTasks(OrderRepository orderRepository, OrderService orderService,
+                          AuthenticationService authenticationService,
+                          VerificationTokenRepository verificationTokenRepository, UserRepository userRepository) {
         this.orderRepository = orderRepository;
         this.orderService = orderService;
         this.authenticationService = authenticationService;
@@ -72,6 +68,7 @@ public class TaskScheduler implements InitializingBean {
 
     @Scheduled(fixedRate = ORDER_EXPIRY_CHECK_INTERVAL_SECONDS * 1000)
     public void ExpireOrders() {
+        log.debug("Expiring orders");
         LocalDateTime expireBeforeDate = LocalDateTime.now().minusMinutes(ORDER_STAY_ALIVE_MINUTES);
 
         Collection<Order> allOrdersBeforeDate = orderRepository.findAllByCreationDateTimeBefore(expireBeforeDate);
@@ -102,8 +99,8 @@ public class TaskScheduler implements InitializingBean {
         userRepository.delete(verificationToken.getUser());
     }
 
-    @Override
-    public void afterPropertiesSet() {
+    @EventListener(ApplicationStartedEvent.class)
+    public void removeTokens() {
         authenticationService.removeAllAuthTokens();
     }
 }
