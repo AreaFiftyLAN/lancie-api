@@ -50,6 +50,7 @@ public class Order {
 
     @JsonView(View.OrderOverview.class)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+    @Setter
     private LocalDateTime creationDateTime;
 
     /**
