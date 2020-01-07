@@ -30,6 +30,8 @@ import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.users.service.UserService;
 import ch.wisv.areafiftylan.utils.mail.MailService;
 import com.google.common.base.Strings;
+import lombok.extern.slf4j.Slf4j;
+import net.logstash.logback.argument.StructuredArguments;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -40,6 +42,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
@@ -247,6 +250,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public void expireOrder(Order o) {
+        log.info("Expiring {} order {}", o.getStatus().toString(), o.getId(), StructuredArguments.v("order_id", o.getId()));
         orderRepository.delete(o);
         ExpiredOrder eo = new ExpiredOrder(o);
         expiredOrderRepository.save(eo);

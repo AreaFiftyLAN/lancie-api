@@ -25,6 +25,7 @@ import ch.wisv.areafiftylan.security.authentication.AuthenticationService;
 import ch.wisv.areafiftylan.security.token.VerificationToken;
 import ch.wisv.areafiftylan.security.token.repository.VerificationTokenRepository;
 import ch.wisv.areafiftylan.users.service.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -42,6 +43,7 @@ import java.util.stream.Collectors;
  * Class with all scheduled tasks
  */
 @Component
+@Slf4j
 public class TaskScheduler implements InitializingBean {
 
     @Value("${a5l.orderKeepAlive:15}")
@@ -75,8 +77,10 @@ public class TaskScheduler implements InitializingBean {
         Collection<Order> allOrdersBeforeDate = orderRepository.findAllByCreationDateTimeBefore(expireBeforeDate);
 
         List<Order> expiredOrders = allOrdersBeforeDate.stream().filter(isExpired()).collect(Collectors.toList());
-
-        expiredOrders.forEach(orderService::expireOrder);
+        if (expiredOrders.size() > 0) {
+            log.info("Found {} orders to expire", expiredOrders.size());
+            expiredOrders.forEach(orderService::expireOrder);
+        }
     }
 
     @Scheduled(fixedRate = USER_CLEANUP_CHECK_INTERVAL_MINUTES * 60 * 1000)
