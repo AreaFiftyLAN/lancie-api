@@ -132,9 +132,19 @@ public class SeatServiceImpl implements SeatService {
 
     @Override
     public void addSeats(SeatGroupDTO seatGroupDTO) {
+        int highestSeat=  0;
+        if (getSeatMap().getSeatmap().containsKey(seatGroupDTO.getSeatGroupName())) {
+            List<Seat> seatGroup = seatRepository.findBySeatGroup(seatGroupDTO.getSeatGroupName());
+            for (Seat s : seatGroup) {
+                if (s.seatNumber > highestSeat) {
+                    highestSeat = s.seatNumber;
+                }
+            }
+        }
+
         List<Seat> seatList = new ArrayList<>(seatGroupDTO.getNumberOfSeats());
 
-        for (int i = 1; i <= seatGroupDTO.getNumberOfSeats(); i++) {
+        for (int i = 1 + highestSeat; i <= seatGroupDTO.getNumberOfSeats() + highestSeat; i++) {
             seatList.add(new Seat(seatGroupDTO.getSeatGroupName(), i));
         }
         seatRepository.saveAll(seatList);
