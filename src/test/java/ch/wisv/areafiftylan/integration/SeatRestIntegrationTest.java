@@ -390,6 +390,29 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
     }
 
     @Test
+    public void addSeatsToExistingGroupAsAdmin() {
+        User admin = createAdmin();
+        SeatGroupDTO seatGroupDTO = new SeatGroupDTO();
+        seatGroupDTO.setSeatGroupName(TEMP_SEATGROUP);
+        seatGroupDTO.setNumberOfSeats(5);
+        seatService.addSeats(seatGroupDTO);
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(admin)).
+        when().
+            body(seatGroupDTO).
+            contentType(ContentType.JSON).
+            post(SEAT_ENDPOINT).
+        then().
+            statusCode(HttpStatus.SC_OK);
+        //@formatter:on
+
+        List<Seat> seatGroup = seatRepository.findBySeatGroup(TEMP_SEATGROUP);
+        assertTrue(seatGroup.size() == 10);
+    }
+
+    @Test
     public void removeSeatGroupAsAnon() {
         SeatGroupDTO seatGroupDTO = new SeatGroupDTO();
         seatGroupDTO.setSeatGroupName(TEMP_SEATGROUP);
