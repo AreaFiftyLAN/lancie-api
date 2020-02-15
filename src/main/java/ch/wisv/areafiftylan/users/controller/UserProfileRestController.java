@@ -17,6 +17,8 @@
 
 package ch.wisv.areafiftylan.users.controller;
 
+import ch.wisv.areafiftylan.extras.rfid.model.RFIDLink;
+import ch.wisv.areafiftylan.extras.rfid.service.RFIDLinkRepository;
 import ch.wisv.areafiftylan.users.model.Profile;
 import ch.wisv.areafiftylan.users.model.ProfileDTO;
 import ch.wisv.areafiftylan.users.model.User;
@@ -29,6 +31,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.util.Collection;
+
 import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEntity;
 
 @RestController
@@ -36,19 +41,20 @@ import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEnt
 public class UserProfileRestController {
 
     private final UserService userService;
+    private final RFIDLinkRepository rfidLinkRepository;
 
     @Autowired
-    UserProfileRestController(UserService userService) {
+    UserProfileRestController(UserService userService, RFIDLinkRepository rfidLinkRepository) {
         this.userService = userService;
+        this.rfidLinkRepository = rfidLinkRepository;
     }
 
     /**
-     * Add a profile to a user. An empty profile is created when a user is created, so this method fills the existing
-     * fields
+     * Add a profile to a user. An empty profile is created when a user is created, so this method
+     * fills the existing fields
      *
      * @param userId The userId of the user to which the profile needs to be added
      * @param input  A representation of the profile
-     *
      * @return The user with the new profile
      */
     @PreAuthorize("@currentUserServiceImpl.canAccessUser(principal, #userId)")
@@ -60,16 +66,28 @@ public class UserProfileRestController {
     }
 
     /**
-     * Add a profile to the current user. An empty profile is created when a user is created, so this method fills the
-     * existing fields
+     * Add a profile to the current user. An empty profile is created when a user is created, so
+     * this method fills the existing fields
      *
      * @param input A representation of the profile
-     *
      * @return The user with the new profile
      */
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/current/profile")
     public ResponseEntity<?> addProfile(@AuthenticationPrincipal User user, @Validated @RequestBody ProfileDTO input) {
+        Collection<RFIDLink> linkCollection = rfidLinkRepository.findRFIDLinksByEmail(user.getEmail());
+        if (linkCollection.isEmpty())
+            return this.addProfile(user.getId(), input);
+
+        LocalDate currentBirthday = user.getProfile().getBirthday();
+        boolean isDateChanged = currentBirthday != input.getBirthday();
+
+        if (isDateChanged) {
+            ProfileDTO changedInput = input;
+            changedInput.setBirthday(currentBirthday);
+            return this.addProfile(user.getId(), input);
+        }
+
         return this.addProfile(user.getId(), input);
     }
 
@@ -78,7 +96,6 @@ public class UserProfileRestController {
      *
      * @param userId The userId of the user to which the profile needs to be added
      * @param input  A representation of the profile
-     *
      * @return The user with the changed profile
      */
     @PreAuthorize("@currentUserServiceImpl.canAccessUser(principal, #userId)")
@@ -90,10 +107,10 @@ public class UserProfileRestController {
     }
 
     /**
-     * Resets the profile fields to null. The profile can't actually be deleted as it is a required field.
+     * Resets the profile fields to null. The profile can't actually be deleted as it is a required
+     * field.
      *
      * @param userId The userId of the user which needs the profile reset
-     *
      * @return Empty body with StatusCode OK.
      */
     @PreAuthorize("hasRole('ADMIN')")

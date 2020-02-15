@@ -19,8 +19,11 @@ package ch.wisv.areafiftylan.extras.rfid.service;
 
 import ch.wisv.areafiftylan.extras.rfid.model.RFIDLink;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.Optional;
 
 @Repository
@@ -28,4 +31,7 @@ public interface RFIDLinkRepository extends JpaRepository<RFIDLink, Long> {
     Optional<RFIDLink> findByRfid(String rfid);
 
     Optional<RFIDLink> findByTicketId(Long ticketId);
+
+    @Query("select rf from RFIDLink rf where rf.ticket.owner.email = :email")
+    Collection<RFIDLink> findRFIDLinksByEmail(@Param("email") String email);
 }

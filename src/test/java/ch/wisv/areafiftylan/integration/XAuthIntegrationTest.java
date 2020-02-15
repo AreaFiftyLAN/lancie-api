@@ -19,6 +19,8 @@ package ch.wisv.areafiftylan.integration;
 
 import ch.wisv.areafiftylan.ApplicationTest;
 import ch.wisv.areafiftylan.exception.TicketOptionNotFoundException;
+import ch.wisv.areafiftylan.extras.rfid.model.RFIDLink;
+import ch.wisv.areafiftylan.extras.rfid.service.RFIDLinkRepository;
 import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.model.TicketOption;
 import ch.wisv.areafiftylan.products.model.TicketType;
@@ -78,6 +80,8 @@ public abstract class XAuthIntegrationTest {
     private TicketRepository ticketRepository;
     @Autowired
     private TeamRepository teamRepository;
+    @Autowired
+    private RFIDLinkRepository rfidLinkRepository;
 
     protected final String CH_MEMBER = "chMember";
     protected final String PICKUP_SERVICE = "pickupService";
@@ -124,6 +128,11 @@ public abstract class XAuthIntegrationTest {
         ticket.setValid(true);
 
         return ticketRepository.save(ticket);
+    }
+
+    protected RFIDLink createRFIDLink(String rfidString, Ticket ticket){
+        RFIDLink rfidLink = new RFIDLink(rfidString, ticket);
+        return rfidLinkRepository.save(rfidLink);
     }
 
     protected Ticket createTicketForUser(User user) {
