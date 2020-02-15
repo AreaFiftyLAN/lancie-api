@@ -5,12 +5,13 @@ import ch.wisv.areafiftylan.products.model.order.Order;
 import ch.wisv.areafiftylan.products.model.order.OrderStatus;
 import in.ashwanthkumar.slack.webhook.Slack;
 import in.ashwanthkumar.slack.webhook.SlackMessage;
-import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +19,10 @@ import java.io.IOException;
 
 @Aspect
 @Component
+@ConditionalOnProperty(
+        value="slack",
+        havingValue = "true",
+        matchIfMissing = true)
 @Profile("production")
 public class SlackNotificationAspect {
 
@@ -51,6 +56,4 @@ public class SlackNotificationAspect {
     public void forwardException(Throwable ex) {
         sendSlackMessage("An exception has been thrown: " + ex.getMessage());
     }
-
-
 }
