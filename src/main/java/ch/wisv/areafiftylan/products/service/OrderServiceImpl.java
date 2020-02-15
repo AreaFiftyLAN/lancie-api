@@ -18,7 +18,6 @@
 package ch.wisv.areafiftylan.products.service;
 
 import ch.wisv.areafiftylan.exception.*;
-import ch.wisv.areafiftylan.utils.SlackNotificationAspect;
 import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.model.TicketInformationResponse;
 import ch.wisv.areafiftylan.products.model.TicketType;

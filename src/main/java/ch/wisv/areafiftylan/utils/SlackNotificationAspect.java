@@ -22,7 +22,7 @@ import java.io.IOException;
 public class SlackNotificationAspect {
 
     private Slack slackApi;
-    
+
     public SlackNotificationAspect(@Value("${slack}") String webHookUrl) {
         slackApi = new Slack(webHookUrl);
     }
@@ -47,7 +47,7 @@ public class SlackNotificationAspect {
         sendSlackMessage("A ticket transfer has been performed");
     }
 
-    @AfterThrowing(pointcut = "execution(* ch.wisv.areafiftylan.exception.AreaFiftyLANException.AreaFiftyLANException(..))", throwing = "ex")
+    @AfterThrowing(pointcut = "execution(* ch.wisv.areafiftylan.exception.*.*(..)) && !execution(* ch.wisv.areafiftylan.exception.SlackNotificationException.*(..))", throwing = "ex")
     public void forwardException(Throwable ex) {
         sendSlackMessage("An exception has been thrown: " + ex.getMessage());
     }
