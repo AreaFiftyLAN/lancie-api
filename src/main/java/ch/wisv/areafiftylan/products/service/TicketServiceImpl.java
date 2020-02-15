@@ -19,6 +19,7 @@ package ch.wisv.areafiftylan.products.service;
 
 import ch.wisv.areafiftylan.exception.*;
 import ch.wisv.areafiftylan.extras.rfid.service.RFIDService;
+import ch.wisv.areafiftylan.notifications.SlackNotificationService;
 import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.model.TicketOption;
 import ch.wisv.areafiftylan.products.model.TicketType;
@@ -42,7 +43,6 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -54,6 +54,7 @@ public class TicketServiceImpl implements TicketService {
     private final TicketOptionRepository ticketOptionRepository;
     private final MailService mailService;
     private final TeamService teamService;
+    private final SlackNotificationService slackNotificationService;
     private RFIDService rfidService;
 
     @Value("${a5l.user.acceptTransferUrl}")
@@ -66,7 +67,7 @@ public class TicketServiceImpl implements TicketService {
     public TicketServiceImpl(TicketRepository ticketRepository, UserService userService,
                              TicketTransferTokenRepository tttRepository, TicketTypeRepository ticketTypeRepository,
                              TicketOptionRepository ticketOptionRepository, MailService mailService,
-                             TeamService teamService) {
+                             TeamService teamService, SlackNotificationService slackNotificationService) {
         this.ticketRepository = ticketRepository;
         this.tttRepository = tttRepository;
         this.ticketTypeRepository = ticketTypeRepository;
@@ -74,6 +75,7 @@ public class TicketServiceImpl implements TicketService {
         this.ticketOptionRepository = ticketOptionRepository;
         this.mailService = mailService;
         this.teamService = teamService;
+        this.slackNotificationService = slackNotificationService;
     }
 
     @Autowired
@@ -217,6 +219,8 @@ public class TicketServiceImpl implements TicketService {
 
         ttt.use();
         tttRepository.save(ttt);
+
+        slackNotificationService.sendSlackMessage("A ticket transfer has been performed");
 
         return t;
     }

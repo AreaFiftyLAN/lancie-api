@@ -20,6 +20,7 @@ package ch.wisv.areafiftylan.products.service;
 import ch.wisv.areafiftylan.exception.OrderNotFoundException;
 import ch.wisv.areafiftylan.exception.PaymentException;
 import ch.wisv.areafiftylan.exception.PaymentServiceConnectionException;
+import ch.wisv.areafiftylan.notifications.SlackNotificationService;
 import ch.wisv.areafiftylan.products.model.order.Order;
 import ch.wisv.areafiftylan.products.model.order.OrderStatus;
 import ch.wisv.areafiftylan.products.service.repository.OrderRepository;
@@ -41,6 +42,7 @@ import java.util.Optional;
 public class MolliePaymentService implements PaymentService {
 
     private final OrderRepository orderRepository;
+    private final SlackNotificationService slackNotificationService;
 
     @Value("${a5l.molliekey:null}")
     String apiKey;
@@ -49,8 +51,9 @@ public class MolliePaymentService implements PaymentService {
     String returnUrl;
 
     @Autowired
-    public MolliePaymentService(OrderRepository orderRepository) {
+    public MolliePaymentService(OrderRepository orderRepository, SlackNotificationService slackNotificationService) {
         this.orderRepository = orderRepository;
+        this.slackNotificationService = slackNotificationService;
     }
 
     @Override
@@ -131,6 +134,7 @@ public class MolliePaymentService implements PaymentService {
                     }
                     case "paid": {
                         order.setStatus(OrderStatus.PAID);
+                        slackNotificationService.sendSlackMessage(order.getTickets().size() + " tickets bought!");
                         break;
                     }
                     case "paidout": {

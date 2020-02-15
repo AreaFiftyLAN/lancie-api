@@ -18,6 +18,7 @@
 package ch.wisv.areafiftylan.products.service;
 
 import ch.wisv.areafiftylan.exception.*;
+import ch.wisv.areafiftylan.notifications.SlackNotificationService;
 import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.model.TicketInformationResponse;
 import ch.wisv.areafiftylan.products.model.TicketType;
@@ -209,6 +210,8 @@ public class OrderServiceImpl implements OrderService {
         validateTicketsIfPaid(order);
         if (statusBefore != OrderStatus.PAID && order.getStatus().equals(OrderStatus.PAID)) {
             mailService.sendOrderConfirmation(order);
+            SlackNotificationService slack = new SlackNotificationService();
+            slack.sendSlackMessage("Another ticket has been ordered!");
         }
         return order;
     }
