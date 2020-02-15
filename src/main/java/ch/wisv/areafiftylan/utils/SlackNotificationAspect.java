@@ -18,7 +18,7 @@ import java.io.IOException;
 
 @Aspect
 @Component
-@Profile("!development && !test")
+@Profile("production")
 public class SlackNotificationAspect {
 
     private Slack slackApi;
