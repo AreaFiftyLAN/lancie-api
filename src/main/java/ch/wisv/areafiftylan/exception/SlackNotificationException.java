@@ -22,6 +22,6 @@ import java.io.IOException;
 
 public class SlackNotificationException extends AreaFiftyLANException {
     public SlackNotificationException(IOException e) {
-        super("Unable to send a notification to slack error:" + e.getMessage());
+        super("Unable to send a notification to slack:" + e.getMessage());
     }
 }
