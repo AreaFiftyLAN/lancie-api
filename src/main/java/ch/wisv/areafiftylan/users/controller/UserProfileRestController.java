@@ -67,7 +67,11 @@ public class UserProfileRestController {
 
     /**
      * Add a profile to the current user. An empty profile is created when a user is created, so
-     * this method fills the existing fields
+     * this method fills the existing fields.
+     * <p>
+     * This method is also called when users change their profile. It is unwanted behaviour that
+     * users can change their birth date during the event. This is checked before writing the
+     * changes in the function
      *
      * @param input A representation of the profile
      * @return The user with the new profile
@@ -75,13 +79,16 @@ public class UserProfileRestController {
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/current/profile")
     public ResponseEntity<?> addProfile(@AuthenticationPrincipal User user, @Validated @RequestBody ProfileDTO input) {
+        // Check profile for existing rfidLinks
         Collection<RFIDLink> linkCollection = rfidLinkRepository.findRFIDLinksByEmail(user.getEmail());
-        if (linkCollection.isEmpty())
+        if (linkCollection.isEmpty()) {
             return this.addProfile(user.getId(), input);
+        }
 
         LocalDate currentBirthday = user.getProfile().getBirthday();
         boolean isDateChanged = currentBirthday != input.getBirthday();
 
+        // If rfidLinks are present and the date is changed then remove the date change from the input
         if (isDateChanged) {
             ProfileDTO changedInput = input;
             changedInput.setBirthday(currentBirthday);
