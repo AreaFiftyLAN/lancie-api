@@ -45,6 +45,9 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
     @Autowired
     private VerificationTokenRepository verificationTokenRepository;
 
+    @Autowired
+    private RFIDLinkRepository rfidLinkRepository;
+
     static Map<String, String> getProfileDTO() {
         Map<String, String> profileDTO = new HashMap<>();
         profileDTO.put("birthday", "2000-01-02");
@@ -60,13 +63,13 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         return profileDTO;
     }
 
-   @Test
+    @Test
     public void testGetAllUsersAsAnonymous() {
         //@formatter:off
         when().
-            get("/users").
-        then().
-            statusCode(HttpStatus.SC_FORBIDDEN);
+                get("/users").
+                then().
+                statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
     }
 
@@ -76,12 +79,12 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
 
         //@formatter:off
         given().
-            header(getXAuthTokenHeaderForUser(user)).
-        when().
-            get("/users").
-        then().
-            statusCode(HttpStatus.SC_FORBIDDEN).
-            body("message", equalTo("Access denied"));
+                header(getXAuthTokenHeaderForUser(user)).
+                when().
+                get("/users").
+                then().
+                statusCode(HttpStatus.SC_FORBIDDEN).
+                body("message", equalTo("Access denied"));
         //@formatter:on
     }
 
@@ -92,14 +95,14 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
 
         //@formatter:off
         given().
-            header(getXAuthTokenHeaderForUser(admin)).
-        when().
-            get("/users").
-        then().
-            statusCode(HttpStatus.SC_OK).
-            body("email", hasItems(user.getEmail(), admin.getEmail())).
-            body("profile.displayName",
-            hasItems(user.getProfile().getDisplayName(), admin.getProfile().getDisplayName()));
+                header(getXAuthTokenHeaderForUser(admin)).
+                when().
+                get("/users").
+                then().
+                statusCode(HttpStatus.SC_OK).
+                body("email", hasItems(user.getEmail(), admin.getEmail())).
+                body("profile.displayName",
+                        hasItems(user.getProfile().getDisplayName(), admin.getProfile().getDisplayName()));
         //@formatter:on
     }
 
@@ -107,11 +110,11 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
     public void testGetCurrentUserAsAnonymous() {
         //@formatter:off
         when().
-            get("/users/current").
-        then().
-            statusCode(HttpStatus.SC_OK).
-            body("object", nullValue()).
-            body("message", containsString("Not logged in"));
+                get("/users/current").
+                then().
+                statusCode(HttpStatus.SC_OK).
+                body("object", nullValue()).
+                body("message", containsString("Not logged in"));
 
         //@formatter:on
     }
@@ -121,14 +124,14 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         User user = createUser();
         //@formatter:off
         given().
-            header(getXAuthTokenHeaderForUser(user)).
-        when().
-            get("/users/current").
-        then().
-            statusCode(HttpStatus.SC_OK).
-            body("email", equalTo(user.getEmail())).
-            body("authorities", hasItem("ROLE_USER")).
-            body("authorities", not(hasItem("ROLE_ADMIN")));
+                header(getXAuthTokenHeaderForUser(user)).
+                when().
+                get("/users/current").
+                then().
+                statusCode(HttpStatus.SC_OK).
+                body("email", equalTo(user.getEmail())).
+                body("authorities", hasItem("ROLE_USER")).
+                body("authorities", not(hasItem("ROLE_ADMIN")));
         //@formatter:on
     }
 
@@ -137,11 +140,11 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         User user = createUser();
         //@formatter:off
         given().
-            header(getXAuthTokenHeaderForUser(user)).
-        when().
-            get("/users/current").
-        then().
-            body("passwordHash", isEmptyOrNullString());
+                header(getXAuthTokenHeaderForUser(user)).
+                when().
+                get("/users/current").
+                then().
+                body("passwordHash", isEmptyOrNullString());
         //@formatter:on
     }
 
@@ -151,12 +154,12 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
 
         //@formatter:off
         given().
-            header(getXAuthTokenHeaderForUser(admin)).
-        when().
-            get("/users/current").
-        then().statusCode(HttpStatus.SC_OK).
-            body("email", equalTo(admin.getEmail())).
-            body("authorities", hasItem("ROLE_ADMIN"));
+                header(getXAuthTokenHeaderForUser(admin)).
+                when().
+                get("/users/current").
+                then().statusCode(HttpStatus.SC_OK).
+                body("email", equalTo(admin.getEmail())).
+                body("authorities", hasItem("ROLE_ADMIN"));
         //@formatter:on
     }
 
@@ -164,9 +167,9 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
     public void testGetOtherUserAsAnonymous() {
         //@formatter:off
         when().
-            get("/users/1").
-        then().
-            statusCode(HttpStatus.SC_FORBIDDEN);
+                get("/users/1").
+                then().
+                statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
     }
 
@@ -179,8 +182,8 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         //@formatter:off
         given().
                 header(getXAuthTokenHeaderForUser(user)).
-        when().get("/users/" + id).
-            then().statusCode(HttpStatus.SC_FORBIDDEN).body("message", equalTo("Access denied"));
+                when().get("/users/" + id).
+                then().statusCode(HttpStatus.SC_FORBIDDEN).body("message", equalTo("Access denied"));
         //@formatter:on
     }
 
@@ -192,11 +195,11 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
 
         //@formatter:off
         given().
-            header(getXAuthTokenHeaderForUser(admin)).
-        when().
-            get("/users/" + userId).
-        then().statusCode(HttpStatus.SC_OK).
-            body("email", equalTo(user.getEmail()));
+                header(getXAuthTokenHeaderForUser(admin)).
+                when().
+                get("/users/" + userId).
+                then().statusCode(HttpStatus.SC_OK).
+                body("email", equalTo(user.getEmail()));
         //@formatter:on
     }
 
@@ -206,11 +209,11 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
 
         //@formatter:off
         given().
-            header(getXAuthTokenHeaderForUser(user)).
-        when().
-            get("/users/" + user.getId()).
-        then().statusCode(HttpStatus.SC_OK).
-            body("email", equalTo(user.getEmail()));
+                header(getXAuthTokenHeaderForUser(user)).
+                when().
+                get("/users/" + user.getId()).
+                then().statusCode(HttpStatus.SC_OK).
+                body("email", equalTo(user.getEmail()));
         //@formatter:on
     }
 
@@ -224,13 +227,13 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
 
         //@formatter:off
         given().
-        when().
-            body(userDTO).contentType(ContentType.JSON).
-            post("/users").
-        then().
-            statusCode(HttpStatus.SC_CREATED).
-            body("message", containsString("User successfully created at")).
-            body("object.email", is(userDTO.get("email")));
+                when().
+                body(userDTO).contentType(ContentType.JSON).
+                post("/users").
+                then().
+                statusCode(HttpStatus.SC_CREATED).
+                body("message", containsString("User successfully created at")).
+                body("object.email", is(userDTO.get("email")));
         //@formatter:on
     }
 
@@ -242,21 +245,21 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
 
         //@formatter:off
         given().
-        when().
-            body(userDTO).contentType(ContentType.JSON).
-            post("/users").
-        then().
-            statusCode(HttpStatus.SC_CREATED).
-            body("message", containsString("User successfully created at")).
-            body("object.email", is(userDTO.get("email")));
+                when().
+                body(userDTO).contentType(ContentType.JSON).
+                post("/users").
+                then().
+                statusCode(HttpStatus.SC_CREATED).
+                body("message", containsString("User successfully created at")).
+                body("object.email", is(userDTO.get("email")));
 
         given().
-            body(userDTO).
-        when().
-            post("/login").
-        then().
-            statusCode(HttpStatus.SC_UNAUTHORIZED).
-            body("message", containsString("Unauthorized"));
+                body(userDTO).
+                when().
+                post("/login").
+                then().
+                statusCode(HttpStatus.SC_UNAUTHORIZED).
+                body("message", containsString("Unauthorized"));
         //@formatter:on
 
     }
@@ -268,11 +271,11 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
 
         //@formatter:off
         given().
-        when().
-            body(userDTO).contentType(ContentType.JSON).
-            post("/users").
-        then().
-            statusCode(HttpStatus.SC_BAD_REQUEST);
+                when().
+                body(userDTO).contentType(ContentType.JSON).
+                post("/users").
+                then().
+                statusCode(HttpStatus.SC_BAD_REQUEST);
         //@formatter:on
     }
 
@@ -284,11 +287,11 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
 
         //@formatter:off
         given().
-        when().
-            body(userDTO).contentType(ContentType.JSON).
-            post("/users").
-        then().
-            statusCode(HttpStatus.SC_BAD_REQUEST);
+                when().
+                body(userDTO).contentType(ContentType.JSON).
+                post("/users").
+                then().
+                statusCode(HttpStatus.SC_BAD_REQUEST);
         //@formatter:on
     }
 
@@ -299,11 +302,11 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
 
         //@formatter:off
         given().
-        when().
-            body(userDTO).contentType(ContentType.JSON).
-            post("/users").
-        then().
-            statusCode(HttpStatus.SC_BAD_REQUEST);
+                when().
+                body(userDTO).contentType(ContentType.JSON).
+                post("/users").
+                then().
+                statusCode(HttpStatus.SC_BAD_REQUEST);
         //@formatter:on
     }
 
@@ -315,11 +318,11 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
 
         //@formatter:off
         given().
-        when().
-            body(userDTO).contentType(ContentType.JSON).
-            post("/users").
-        then().
-            statusCode(HttpStatus.SC_BAD_REQUEST);
+                when().
+                body(userDTO).contentType(ContentType.JSON).
+                post("/users").
+                then().
+                statusCode(HttpStatus.SC_BAD_REQUEST);
         //@formatter:on
     }
 
@@ -332,11 +335,11 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
 
         //@formatter:off
         given().
-        when().
-            body(userDTO).contentType(ContentType.JSON).
-            post("/users").
-        then().
-            statusCode(HttpStatus.SC_CONFLICT);
+                when().
+                body(userDTO).contentType(ContentType.JSON).
+                post("/users").
+                then().
+                statusCode(HttpStatus.SC_CONFLICT);
         //@formatter:on
     }
 
@@ -349,11 +352,11 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
 
         //@formatter:off
         given().
-        when().
-            body(userDTO).contentType(ContentType.JSON).
-            post("/users").
-        then().
-            statusCode(HttpStatus.SC_CONFLICT);
+                when().
+                body(userDTO).contentType(ContentType.JSON).
+                post("/users").
+                then().
+                statusCode(HttpStatus.SC_CONFLICT);
         //@formatter:on
     }
 
@@ -368,23 +371,56 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
 
         //@formatter:off
         given().
-            header(getXAuthTokenHeaderForUser(user)).
-        when().
-            body(profileDTO).
-            contentType(ContentType.JSON).
-            post("/users/current/profile").
-        then().
-            statusCode(HttpStatus.SC_OK).
-            body("object.birthday", equalTo("2000-01-02")).
-            body("object.gender", is("MALE")).
-            body("object.address", equalTo("Testaddress")).
-            body("object.zipcode", equalTo("Testzipcode")).
-            body("object.city", equalTo("Testcity")).
-            body("object.phoneNumber", equalTo("TestphoneNumber")).
-            body("object.notes", equalTo("Testnotes")).
-            body("object.firstName", equalTo("TestfirstName")).
-            body("object.lastName", equalTo("TestlastName")).
-            body("object.displayName", equalTo("TestdisplayName" + user.getId()));
+                header(getXAuthTokenHeaderForUser(user)).
+                when().
+                body(profileDTO).
+                contentType(ContentType.JSON).
+                post("/users/current/profile").
+                then().
+                statusCode(HttpStatus.SC_OK).
+                body("object.birthday", equalTo("2000-01-02")).
+                body("object.gender", is("MALE")).
+                body("object.address", equalTo("Testaddress")).
+                body("object.zipcode", equalTo("Testzipcode")).
+                body("object.city", equalTo("Testcity")).
+                body("object.phoneNumber", equalTo("TestphoneNumber")).
+                body("object.notes", equalTo("Testnotes")).
+                body("object.firstName", equalTo("TestfirstName")).
+                body("object.lastName", equalTo("TestlastName")).
+                body("object.displayName", equalTo("TestdisplayName" + user.getId()));
+        //@formatter:on
+    }
+
+    @Test
+    public void createProfileAsCurrentUserAndChangeDate() {
+        User user = createUser();
+        Ticket ticket = createTicketForUser(user);
+        createRFIDLink("", ticket);
+        user.resetProfile();
+        user = userRepository.save(user);
+
+        Map<String, String> profileDTO = getProfileDTO();
+        profileDTO.put("displayName", "TestdisplayName" + user.getId());
+
+        //@formatter:off
+        given().
+                header(getXAuthTokenHeaderForUser(user)).
+                when().
+                body(profileDTO).
+                contentType(ContentType.JSON).
+                post("/users/current/profile").
+                then().
+                statusCode(HttpStatus.SC_OK).
+                body("object.birthday", not(equalTo("2000-01-02"))).
+                body("object.gender", is("MALE")).
+                body("object.address", equalTo("Testaddress")).
+                body("object.zipcode", equalTo("Testzipcode")).
+                body("object.city", equalTo("Testcity")).
+                body("object.phoneNumber", equalTo("TestphoneNumber")).
+                body("object.notes", equalTo("Testnotes")).
+                body("object.firstName", equalTo("TestfirstName")).
+                body("object.lastName", equalTo("TestlastName")).
+                body("object.displayName", equalTo("TestdisplayName" + user.getId()));
         //@formatter:on
     }
 
@@ -398,23 +434,23 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
 
         //@formatter:off
         given().
-            header(getXAuthTokenHeaderForUser(user)).
-        when().
-            body(profileDTO).
-            contentType(ContentType.JSON).
-            post("/users/" + user.getId() + "/profile").
-        then().
-            statusCode(HttpStatus.SC_OK).
-            body("object.birthday", equalTo("2000-01-02")).
-            body("object.gender", is("MALE")).
-            body("object.address", equalTo("Testaddress")).
-            body("object.zipcode", equalTo("Testzipcode")).
-            body("object.city", equalTo("Testcity")).
-            body("object.phoneNumber", equalTo("TestphoneNumber")).
-            body("object.notes", equalTo("Testnotes")).
-            body("object.firstName", equalTo("TestfirstName")).
-            body("object.lastName", equalTo("TestlastName")).
-            body("object.displayName", equalTo("TestdisplayName"));
+                header(getXAuthTokenHeaderForUser(user)).
+                when().
+                body(profileDTO).
+                contentType(ContentType.JSON).
+                post("/users/" + user.getId() + "/profile").
+                then().
+                statusCode(HttpStatus.SC_OK).
+                body("object.birthday", equalTo("2000-01-02")).
+                body("object.gender", is("MALE")).
+                body("object.address", equalTo("Testaddress")).
+                body("object.zipcode", equalTo("Testzipcode")).
+                body("object.city", equalTo("Testcity")).
+                body("object.phoneNumber", equalTo("TestphoneNumber")).
+                body("object.notes", equalTo("Testnotes")).
+                body("object.firstName", equalTo("TestfirstName")).
+                body("object.lastName", equalTo("TestlastName")).
+                body("object.displayName", equalTo("TestdisplayName"));
         //@formatter:on
     }
 
@@ -432,23 +468,23 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
 
         //@formatter:off
         given().
-            header(getXAuthTokenHeaderForUser(admin)).
-        when().
-            body(profileDTO).
-            contentType(ContentType.JSON).
-            post("/users/" + user.getId() + "/profile").
-        then().
-            statusCode(HttpStatus.SC_OK).
-            body("object.birthday", equalTo("2000-01-02")).
-            body("object.gender", is("MALE")).
-            body("object.address", equalTo("Testaddress")).
-            body("object.zipcode", equalTo("Testzipcode")).
-            body("object.city", equalTo("Testcity")).
-            body("object.phoneNumber", equalTo("TestphoneNumber")).
-            body("object.notes", equalTo("Testnotes")).
-            body("object.firstName", equalTo("TestfirstName")).
-            body("object.lastName", equalTo("TestlastName")).
-            body("object.displayName", equalTo("TestdisplayName" + user.getId()));
+                header(getXAuthTokenHeaderForUser(admin)).
+                when().
+                body(profileDTO).
+                contentType(ContentType.JSON).
+                post("/users/" + user.getId() + "/profile").
+                then().
+                statusCode(HttpStatus.SC_OK).
+                body("object.birthday", equalTo("2000-01-02")).
+                body("object.gender", is("MALE")).
+                body("object.address", equalTo("Testaddress")).
+                body("object.zipcode", equalTo("Testzipcode")).
+                body("object.city", equalTo("Testcity")).
+                body("object.phoneNumber", equalTo("TestphoneNumber")).
+                body("object.notes", equalTo("Testnotes")).
+                body("object.firstName", equalTo("TestfirstName")).
+                body("object.lastName", equalTo("TestlastName")).
+                body("object.displayName", equalTo("TestdisplayName" + user.getId()));
         //@formatter:on
     }
 
@@ -464,13 +500,13 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
 
         //@formatter:off
         given().
-            header(getXAuthTokenHeaderForUser(user2)).
-        when().
-            body(profileDTO).
-            contentType(ContentType.JSON).
-            post("/users/" + user.getId() + "/profile").
-        then().
-            statusCode(HttpStatus.SC_FORBIDDEN);
+                header(getXAuthTokenHeaderForUser(user2)).
+                when().
+                body(profileDTO).
+                contentType(ContentType.JSON).
+                post("/users/" + user.getId() + "/profile").
+                then().
+                statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
     }
 
@@ -485,13 +521,13 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
 
         //@formatter:off
         given().
-            header(getXAuthTokenHeaderForUser(user)).
-        when().
-            body(profileDTO).
-            contentType(ContentType.JSON).
-            post("/users/current/profile").
-        then().
-            statusCode(HttpStatus.SC_BAD_REQUEST);
+                header(getXAuthTokenHeaderForUser(user)).
+                when().
+                body(profileDTO).
+                contentType(ContentType.JSON).
+                post("/users/current/profile").
+                then().
+                statusCode(HttpStatus.SC_BAD_REQUEST);
         //@formatter:on
     }
 
@@ -506,13 +542,13 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
 
         //@formatter:off
         given().
-            header(getXAuthTokenHeaderForUser(user)).
-        when().
-            body(profileDTO).
-            contentType(ContentType.JSON).
-            post("/users/current/profile").
-        then().
-            statusCode(HttpStatus.SC_BAD_REQUEST);
+                header(getXAuthTokenHeaderForUser(user)).
+                when().
+                body(profileDTO).
+                contentType(ContentType.JSON).
+                post("/users/current/profile").
+                then().
+                statusCode(HttpStatus.SC_BAD_REQUEST);
         //@formatter:on
     }
 
@@ -527,13 +563,13 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
 
         //@formatter:off
         given().
-            header(getXAuthTokenHeaderForUser(user)).
-        when().
-            body(profileDTO).
-            contentType(ContentType.JSON).
-            post("/users/current/profile").
-        then().
-            statusCode(HttpStatus.SC_BAD_REQUEST);
+                header(getXAuthTokenHeaderForUser(user)).
+                when().
+                body(profileDTO).
+                contentType(ContentType.JSON).
+                post("/users/current/profile").
+                then().
+                statusCode(HttpStatus.SC_BAD_REQUEST);
         //@formatter:on
     }
 
@@ -550,14 +586,14 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
 
         //@formatter:off
         given().
-            header(getXAuthTokenHeaderForUser(user)).
-        when().
-            body(profileDTO).
-            contentType(ContentType.JSON).
-            post("/users/current/profile").
-        then().
-            statusCode(HttpStatus.SC_CONFLICT).
-            body("message", equalTo("DisplayName already in use"));
+                header(getXAuthTokenHeaderForUser(user)).
+                when().
+                body(profileDTO).
+                contentType(ContentType.JSON).
+                post("/users/current/profile").
+                then().
+                statusCode(HttpStatus.SC_CONFLICT).
+                body("message", equalTo("DisplayName already in use"));
         //@formatter:on
     }
 
@@ -568,12 +604,12 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
 
         //@formatter:off
         given().
-            header(getXAuthTokenHeaderForUser(admin)).
-        when().
-            delete("/users/" + user.getId()).
-        then().
-            statusCode(HttpStatus.SC_OK).
-            body("message", equalTo("User disabled"));
+                header(getXAuthTokenHeaderForUser(admin)).
+                when().
+                delete("/users/" + user.getId()).
+                then().
+                statusCode(HttpStatus.SC_OK).
+                body("message", equalTo("User disabled"));
         //@formatter:on
 
         User disabledUser = userRepository.findOneByEmailIgnoreCase(user.getEmail()).orElse(user);
@@ -587,11 +623,11 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
 
         //@formatter:off
         given().
-            header(getXAuthTokenHeaderForUser(user)).
-        when().
-            delete("/users/" + user2.getId()).
-        then().
-            statusCode(HttpStatus.SC_FORBIDDEN);
+                header(getXAuthTokenHeaderForUser(user)).
+                when().
+                delete("/users/" + user2.getId()).
+                then().
+                statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
 
     }
@@ -602,9 +638,9 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
 
         //@formatter:off
         when().
-            delete("/users/" + user.getId()).
-        then().
-            statusCode(HttpStatus.SC_FORBIDDEN);
+                delete("/users/" + user.getId()).
+                then().
+                statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
     }
 
@@ -614,9 +650,9 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
 
         //@formatter:off
         when().
-            get("/users/" + user.getId() + "/alcoholcheck").
-        then().
-            statusCode(HttpStatus.SC_FORBIDDEN);
+                get("/users/" + user.getId() + "/alcoholcheck").
+                then().
+                statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
     }
 
@@ -627,12 +663,12 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
 
         //@formatter:off
         given().
-            header(getXAuthTokenHeaderForUser(admin)).
-        when().
-            get("/users/" + user.getId() + "/alcoholcheck").
-        then().
-            statusCode(HttpStatus.SC_OK).
-            body("object", equalTo(false));
+                header(getXAuthTokenHeaderForUser(admin)).
+                when().
+                get("/users/" + user.getId() + "/alcoholcheck").
+                then().
+                statusCode(HttpStatus.SC_OK).
+                body("object", equalTo(false));
         //@formatter:on
     }
 
@@ -643,12 +679,12 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
 
         //@formatter:off
         given().
-            header(getXAuthTokenHeaderForUser(admin)).
-        when().
-            get("/users/" + user.getId() + "/alcoholcheck").
-        then().
-            statusCode(HttpStatus.SC_OK).
-            body("object", equalTo(true));
+                header(getXAuthTokenHeaderForUser(admin)).
+                when().
+                get("/users/" + user.getId() + "/alcoholcheck").
+                then().
+                statusCode(HttpStatus.SC_OK).
+                body("object", equalTo(true));
         //@formatter:on
     }
 
@@ -666,13 +702,13 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         Header xAuthTokenHeader = getXAuthTokenHeaderForUser(user);
 
         given().
-            header(xAuthTokenHeader).
-        when().
-            body(passwordDTO).
-            contentType(ContentType.JSON).
-            post("/users/current/password").
-        then().
-            statusCode(HttpStatus.SC_OK);
+                header(xAuthTokenHeader).
+                when().
+                body(passwordDTO).
+                contentType(ContentType.JSON).
+                post("/users/current/password").
+                then().
+                statusCode(HttpStatus.SC_OK);
         //@formatter:on
 
         removeXAuthToken(xAuthTokenHeader);
@@ -683,12 +719,12 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
 
         //@formatter:off
         given().
-            body(userDTO).
-        when().
-            post("/login").
-        then().
-            statusCode(HttpStatus.SC_OK).
-            header("X-Auth-Token", not(isEmptyOrNullString()));
+                body(userDTO).
+                when().
+                post("/login").
+                then().
+                statusCode(HttpStatus.SC_OK).
+                header("X-Auth-Token", not(isEmptyOrNullString()));
         //@formatter:on
     }
 
@@ -706,13 +742,13 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         Header xAuthTokenHeader = getXAuthTokenHeaderForUser(user);
 
         given().
-            header(xAuthTokenHeader).
-        when().
-            body(passwordDTO).
-            contentType(ContentType.JSON).
-            post("/users/current/password").
-        then().
-            statusCode(HttpStatus.SC_BAD_REQUEST);
+                header(xAuthTokenHeader).
+                when().
+                body(passwordDTO).
+                contentType(ContentType.JSON).
+                post("/users/current/password").
+                then().
+                statusCode(HttpStatus.SC_BAD_REQUEST);
         //@formatter:on
     }
 
@@ -730,13 +766,13 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         Header xAuthTokenHeader = getXAuthTokenHeaderForUser(user);
 
         given().
-            header(xAuthTokenHeader).
-        when().
-            body(passwordDTO).
-            contentType(ContentType.JSON).
-            post("/users/current/password").
-        then().
-            statusCode(HttpStatus.SC_BAD_REQUEST);
+                header(xAuthTokenHeader).
+                when().
+                body(passwordDTO).
+                contentType(ContentType.JSON).
+                post("/users/current/password").
+                then().
+                statusCode(HttpStatus.SC_BAD_REQUEST);
         //@formatter:on
 
         removeXAuthToken(xAuthTokenHeader);
@@ -747,12 +783,12 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
 
         //@formatter:off
         given().
-            body(userDTO).
-        when().
-            post("/login").
-        then().
-            statusCode(HttpStatus.SC_OK).
-            header("X-Auth-Token", not(isEmptyOrNullString()));
+                body(userDTO).
+                when().
+                post("/login").
+                then().
+                statusCode(HttpStatus.SC_OK).
+                header("X-Auth-Token", not(isEmptyOrNullString()));
         //@formatter:on
     }
 
@@ -767,13 +803,13 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
 
         //@formatter:off
         given().
-            header(getXAuthTokenHeaderForUser(user)).
-        when().
-            body(passwordDTO).
-            contentType(ContentType.JSON).
-            post("/users/current/password").
-        then().
-            statusCode(HttpStatus.SC_FORBIDDEN);
+                header(getXAuthTokenHeaderForUser(user)).
+                when().
+                body(passwordDTO).
+                contentType(ContentType.JSON).
+                post("/users/current/password").
+                then().
+                statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
     }
 
@@ -787,13 +823,13 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
 
         //@formatter:off
         given().
-            header(getXAuthTokenHeaderForUser(user)).
-        when().
-            body(passwordDTO).
-            contentType(ContentType.JSON).
-            post("/users/current/password").
-        then().
-            statusCode(HttpStatus.SC_BAD_REQUEST);
+                header(getXAuthTokenHeaderForUser(user)).
+                when().
+                body(passwordDTO).
+                contentType(ContentType.JSON).
+                post("/users/current/password").
+                then().
+                statusCode(HttpStatus.SC_BAD_REQUEST);
         //@formatter:on
     }
 
@@ -850,12 +886,12 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         User user = createUser();
         //@formatter:off
         given().
-            header(getXAuthTokenHeaderForUser(user.getEmail().toUpperCase())).
-        when().
-            get("/users/current").
-        then().statusCode(HttpStatus.SC_OK).
-            body("email", equalTo(user.getEmail())).
-            body("authorities", hasItem("ROLE_USER"));
+                header(getXAuthTokenHeaderForUser(user.getEmail().toUpperCase())).
+                when().
+                get("/users/current").
+                then().statusCode(HttpStatus.SC_OK).
+                body("email", equalTo(user.getEmail())).
+                body("authorities", hasItem("ROLE_USER"));
         //@formatter:on
     }
 
@@ -868,11 +904,11 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         //@formatter:off
         given().
                 header(getXAuthTokenHeaderForUser(admin.getEmail())).
-        when().
+                when().
                 body(roleDTO).
                 contentType(ContentType.JSON).
                 post("/users/" + user.getId() + "/role").
-        then().statusCode(HttpStatus.SC_OK).
+                then().statusCode(HttpStatus.SC_OK).
                 body("email", equalTo(user.getEmail())).
                 body("authorities", hasItem("ROLE_ADMIN"));
         //@formatter:on
@@ -887,11 +923,11 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         //@formatter:off
         given().
                 header(getXAuthTokenHeaderForUser(admin.getEmail())).
-        when().
+                when().
                 body(roleDTO).
                 contentType(ContentType.JSON).
                 post("/users/" + user.getId() + "/role/delete").
-        then().statusCode(HttpStatus.SC_OK).
+                then().statusCode(HttpStatus.SC_OK).
                 body("email", equalTo(user.getEmail())).
                 body("authorities", not(hasItem("ROLE_COMMITTEE")));
         //@formatter:on
@@ -906,11 +942,11 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         //@formatter:off
         given().
                 header(getXAuthTokenHeaderForUser(admin.getEmail())).
-        when().
+                when().
                 body(roleDTO).
                 contentType(ContentType.JSON).
                 post("/users/" + user.getId() + "/role/delete").
-        then().statusCode(HttpStatus.SC_BAD_REQUEST);
+                then().statusCode(HttpStatus.SC_BAD_REQUEST);
         //@formatter:on
     }
 
@@ -922,11 +958,11 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         //@formatter:off
         given().
                 header(getXAuthTokenHeaderForUser(admin.getEmail())).
-        when().
+                when().
                 body(roleDTO).
                 contentType(ContentType.JSON).
                 post("/users/" + user.getId() + "/role/delete").
-        then().statusCode(HttpStatus.SC_BAD_REQUEST);
+                then().statusCode(HttpStatus.SC_BAD_REQUEST);
         //@formatter:on
     }
 
