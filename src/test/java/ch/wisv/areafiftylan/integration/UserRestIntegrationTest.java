@@ -17,7 +17,6 @@
 
 package ch.wisv.areafiftylan.integration;
 
-import ch.wisv.areafiftylan.extras.rfid.service.RFIDLinkRepository;
 import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.security.token.repository.VerificationTokenRepository;
 import ch.wisv.areafiftylan.users.model.Role;
@@ -45,9 +44,6 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
 
     @Autowired
     private VerificationTokenRepository verificationTokenRepository;
-
-    @Autowired
-    private RFIDLinkRepository rfidLinkRepository;
 
     static Map<String, String> getProfileDTO() {
         Map<String, String> profileDTO = new HashMap<>();
@@ -380,39 +376,6 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
                 then().
                 statusCode(HttpStatus.SC_OK).
                 body("object.birthday", equalTo("2000-01-02")).
-                body("object.gender", is("MALE")).
-                body("object.address", equalTo("Testaddress")).
-                body("object.zipcode", equalTo("Testzipcode")).
-                body("object.city", equalTo("Testcity")).
-                body("object.phoneNumber", equalTo("TestphoneNumber")).
-                body("object.notes", equalTo("Testnotes")).
-                body("object.firstName", equalTo("TestfirstName")).
-                body("object.lastName", equalTo("TestlastName")).
-                body("object.displayName", equalTo("TestdisplayName" + user.getId()));
-        //@formatter:on
-    }
-
-    @Test
-    public void createProfileAsCurrentUserAndChangeDate() {
-        User user = createUser();
-        Ticket ticket = createTicketForUser(user);
-        createRFIDLink("", ticket);
-        user.resetProfile();
-        user = userRepository.save(user);
-
-        Map<String, String> profileDTO = getProfileDTO();
-        profileDTO.put("displayName", "TestdisplayName" + user.getId());
-
-        //@formatter:off
-        given().
-                header(getXAuthTokenHeaderForUser(user)).
-                when().
-                body(profileDTO).
-                contentType(ContentType.JSON).
-                post("/users/current/profile").
-                then().
-                statusCode(HttpStatus.SC_OK).
-                body("object.birthday", not(equalTo("2000-01-02"))).
                 body("object.gender", is("MALE")).
                 body("object.address", equalTo("Testaddress")).
                 body("object.zipcode", equalTo("Testzipcode")).
@@ -964,6 +927,39 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
                 contentType(ContentType.JSON).
                 post("/users/" + user.getId() + "/role/delete").
                 then().statusCode(HttpStatus.SC_BAD_REQUEST);
+        //@formatter:on
+    }
+
+    @Test
+    public void createProfileAsCurrentUserAndChangeDate() {
+        User user = createUser();
+        Ticket ticket = createTicketForUser(user);
+        createRFIDLink("", ticket);
+        user.resetProfile();
+        user = userRepository.save(user);
+
+        Map<String, String> profileDTO = getProfileDTO();
+        profileDTO.put("displayName", "TestdisplayName" + user.getId());
+
+        //@formatter:off
+        given().
+                header(getXAuthTokenHeaderForUser(user)).
+                when().
+                body(profileDTO).
+                contentType(ContentType.JSON).
+                post("/users/current/profile").
+                then().
+                statusCode(HttpStatus.SC_OK).
+                body("object.birthday", not(equalTo("2000-01-02"))).
+                body("object.gender", is("MALE")).
+                body("object.address", equalTo("Testaddress")).
+                body("object.zipcode", equalTo("Testzipcode")).
+                body("object.city", equalTo("Testcity")).
+                body("object.phoneNumber", equalTo("TestphoneNumber")).
+                body("object.notes", equalTo("Testnotes")).
+                body("object.firstName", equalTo("TestfirstName")).
+                body("object.lastName", equalTo("TestlastName")).
+                body("object.displayName", equalTo("TestdisplayName" + user.getId()));
         //@formatter:on
     }
 }
