@@ -30,6 +30,8 @@ public class AreaFiftyLANException extends RuntimeException {
         logEnum.logMessage(message);
     }
 
+
+
     public AreaFiftyLANException(String message) {
         this(LogLevelEnum.WARN, message);
     }
