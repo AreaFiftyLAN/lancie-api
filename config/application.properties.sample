@@ -5,3 +5,4 @@ spring.datasource.username=
 spring.datasource.password=
 a5l.molliekey=[CHANGE ME]
 a5l.googleMapsAPIkey=[CHANGE ME]
+slack.slackWebHook.url=[CHANGE ME]

@@ -35,10 +35,12 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-actuator")
     compile("org.springframework.boot:spring-boot-starter-json")
     compile("org.flywaydb:flyway-core")
-
+    compile("org.springframework.boot:spring-boot-starter-aop")
     compile("com.google.guava:guava:28.1-jre")
     compile("nl.stil4m:mollie-api:2.7.0")
     compile("net.logstash.logback:logstash-logback-encoder:4.11")
+
+    compile("in.ashwanthkumar:slack-java-webhook:0.0.9")
 
     runtime("org.hsqldb:hsqldb")
     runtime("org.postgresql:postgresql")
