@@ -17,6 +17,7 @@
 
 package ch.wisv.areafiftylan.users.controller;
 
+import ch.wisv.areafiftylan.extras.rfid.service.RFIDService;
 import ch.wisv.areafiftylan.users.model.Profile;
 import ch.wisv.areafiftylan.users.model.ProfileDTO;
 import ch.wisv.areafiftylan.users.model.User;
@@ -29,6 +30,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+
 import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEntity;
 
 @RestController
@@ -36,19 +39,20 @@ import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEnt
 public class UserProfileRestController {
 
     private final UserService userService;
+    private final RFIDService rfidService;
 
     @Autowired
-    UserProfileRestController(UserService userService) {
+    UserProfileRestController(UserService userService, RFIDService rfidService) {
         this.userService = userService;
+        this.rfidService = rfidService;
     }
 
     /**
-     * Add a profile to a user. An empty profile is created when a user is created, so this method fills the existing
-     * fields
+     * Add a profile to a user. An empty profile is created when a user is created, so this method
+     * fills the existing fields
      *
      * @param userId The userId of the user to which the profile needs to be added
      * @param input  A representation of the profile
-     *
      * @return The user with the new profile
      */
     @PreAuthorize("@currentUserServiceImpl.canAccessUser(principal, #userId)")
@@ -60,16 +64,34 @@ public class UserProfileRestController {
     }
 
     /**
-     * Add a profile to the current user. An empty profile is created when a user is created, so this method fills the
-     * existing fields
+     * Add a profile to the current user. An empty profile is created when a user is created, so
+     * this method fills the existing fields.
+     * <p>
+     * This method is also called when users change their profile. It is unwanted behaviour that
+     * users can change their birth date during the event. This is checked before writing the
+     * changes in the function
      *
      * @param input A representation of the profile
-     *
      * @return The user with the new profile
      */
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/current/profile")
     public ResponseEntity<?> addProfile(@AuthenticationPrincipal User user, @Validated @RequestBody ProfileDTO input) {
+        // Check profile for existing rfidLinks
+        boolean isUserCheckedIn = rfidService.isOwnerLinked(user.getEmail());
+
+        if (!isUserCheckedIn) {
+            return this.addProfile(user.getId(), input);
+        }
+
+        LocalDate currentBirthday = user.getProfile().getBirthday();
+        boolean isDateChanged = currentBirthday != input.getBirthday();
+
+        // If rfidLinks are present and the date is changed then return an error
+        if (isDateChanged) {
+            return createResponseEntity(HttpStatus.BAD_REQUEST, "Unable to change date during event", user.getProfile());
+        }
+
         return this.addProfile(user.getId(), input);
     }
 
@@ -78,7 +100,6 @@ public class UserProfileRestController {
      *
      * @param userId The userId of the user to which the profile needs to be added
      * @param input  A representation of the profile
-     *
      * @return The user with the changed profile
      */
     @PreAuthorize("@currentUserServiceImpl.canAccessUser(principal, #userId)")
@@ -90,10 +111,10 @@ public class UserProfileRestController {
     }
 
     /**
-     * Resets the profile fields to null. The profile can't actually be deleted as it is a required field.
+     * Resets the profile fields to null. The profile can't actually be deleted as it is a required
+     * field.
      *
      * @param userId The userId of the user which needs the profile reset
-     *
      * @return Empty body with StatusCode OK.
      */
     @PreAuthorize("hasRole('ADMIN')")

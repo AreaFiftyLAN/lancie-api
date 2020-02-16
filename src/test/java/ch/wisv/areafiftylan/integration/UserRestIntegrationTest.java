@@ -17,6 +17,7 @@
 
 package ch.wisv.areafiftylan.integration;
 
+import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.security.token.repository.VerificationTokenRepository;
 import ch.wisv.areafiftylan.users.model.Role;
 import ch.wisv.areafiftylan.users.model.RoleDTO;
@@ -926,6 +927,39 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
                 contentType(ContentType.JSON).
                 post("/users/" + user.getId() + "/role/delete").
         then().statusCode(HttpStatus.SC_BAD_REQUEST);
+        //@formatter:on
+    }
+
+    @Test
+    public void createProfileAsCurrentUserAndChangeDate() {
+        User user = createUser();
+        Ticket ticket = createTicketForUser(user);
+        createRFIDLink("", ticket);
+        user.resetProfile();
+        user = userRepository.save(user);
+
+        Map<String, String> profileDTO = getProfileDTO();
+        profileDTO.put("displayName", "TestdisplayName" + user.getId());
+
+        //@formatter:off
+        given().
+                header(getXAuthTokenHeaderForUser(user)).
+                when().
+                body(profileDTO).
+                contentType(ContentType.JSON).
+                post("/users/current/profile").
+                then().
+                statusCode(HttpStatus.SC_BAD_REQUEST).
+                body("object.birthday", not(equalTo("2000-01-02"))).
+                body("object.gender", equalTo(null)).
+                body("object.address", equalTo(null)).
+                body("object.zipcode", equalTo(null)).
+                body("object.city", equalTo(null)).
+                body("object.phoneNumber", equalTo(null)).
+                body("object.notes", equalTo(null)).
+                body("object.firstName", equalTo(null)).
+                body("object.lastName", equalTo(null)).
+                body("object.displayName", equalTo(null));
         //@formatter:on
     }
 }

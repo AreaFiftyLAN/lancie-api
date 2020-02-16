@@ -438,4 +438,21 @@ public class RFIDIntegrationTest extends XAuthIntegrationTest {
             .statusCode(HttpStatus.SC_NOT_FOUND);
         //@formatter:on
     }
+
+    @Test
+    public void testOwnerExistForRFIDLinkAsUser() {
+        User user = createUser();
+        Ticket ticket = createTicketForUser(user);
+        createRfidLink(ticket);
+
+        Assert.assertTrue(rfidLinkRepository.existsRFIDLinkByTicket_Owner_Email(user.getEmail()));
+    }
+
+    @Test
+    public void testOwnerDoesNotExistForRFIDLinkAsUser() {
+        User user = createUser();
+        createTicketForUser(user);
+
+        Assert.assertFalse(rfidLinkRepository.existsRFIDLinkByTicket_Owner_Email(user.getEmail()));
+    }
 }
