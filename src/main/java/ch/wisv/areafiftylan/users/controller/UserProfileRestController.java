@@ -64,19 +64,16 @@ public class UserProfileRestController {
     }
 
     /**
-     * An addProfile function that returns a custom message used during the event.
-     *
-     * Add a profile to a user. An empty profile is created when a user is created, so this method
-     * fills the existing fields
+     * Sends a bad request to the user informing them that they tried to change profile parameters
+     * that are not allowed to be changed
      *
      * @param userId The userId of the user to which the profile needs to be added
-     * @param input  A representation of the profile
-     * @return The user with the new profile
+     * @return The user with the same profile
      */
-    public ResponseEntity<?> addProfileDuringEvent(Long userId, ProfileDTO input) {
-        User user = userService.addProfile(userId, input);
+    public ResponseEntity<?> unableToChangeProfile(Long userId) {
+        User user = userService.getUserById(userId);
 
-        return createResponseEntity(HttpStatus.OK, "Unable to change date during event. The rest of profile successfully set", user.getProfile());
+        return createResponseEntity(HttpStatus.BAD_REQUEST, "Unable to change date during event", user.getProfile());
     }
 
     /**
