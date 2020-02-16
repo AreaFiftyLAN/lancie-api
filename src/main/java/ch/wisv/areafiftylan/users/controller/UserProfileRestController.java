@@ -64,19 +64,6 @@ public class UserProfileRestController {
     }
 
     /**
-     * Sends a bad request to the user informing them that they tried to change profile parameters
-     * that are not allowed to be changed
-     *
-     * @param userId The userId of the user to which the profile needs to be added
-     * @return The user with the same profile
-     */
-    public ResponseEntity<?> unableToChangeProfile(Long userId) {
-        User user = userService.getUserById(userId);
-
-        return createResponseEntity(HttpStatus.BAD_REQUEST, "Unable to change date during event", user.getProfile());
-    }
-
-    /**
      * Add a profile to the current user. An empty profile is created when a user is created, so
      * this method fills the existing fields.
      * <p>
