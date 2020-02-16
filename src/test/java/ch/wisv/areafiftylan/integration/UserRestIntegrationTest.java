@@ -949,17 +949,17 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
                 contentType(ContentType.JSON).
                 post("/users/current/profile").
                 then().
-                statusCode(HttpStatus.SC_OK).
+                statusCode(HttpStatus.SC_BAD_REQUEST).
                 body("object.birthday", not(equalTo("2000-01-02"))).
-                body("object.gender", is("MALE")).
-                body("object.address", equalTo("Testaddress")).
-                body("object.zipcode", equalTo("Testzipcode")).
-                body("object.city", equalTo("Testcity")).
-                body("object.phoneNumber", equalTo("TestphoneNumber")).
-                body("object.notes", equalTo("Testnotes")).
-                body("object.firstName", equalTo("TestfirstName")).
-                body("object.lastName", equalTo("TestlastName")).
-                body("object.displayName", equalTo("TestdisplayName" + user.getId()));
+                body("object.gender", equalTo(null)).
+                body("object.address", equalTo(null)).
+                body("object.zipcode", equalTo(null)).
+                body("object.city", equalTo(null)).
+                body("object.phoneNumber", equalTo(null)).
+                body("object.notes", equalTo(null)).
+                body("object.firstName", equalTo(null)).
+                body("object.lastName", equalTo(null)).
+                body("object.displayName", equalTo(null));
         //@formatter:on
     }
 }
