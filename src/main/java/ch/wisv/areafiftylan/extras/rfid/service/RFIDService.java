@@ -37,4 +37,6 @@ public interface RFIDService {
     RFIDLink removeRFIDLink(Long ticketId);
 
     boolean isTicketLinked(Long ticketId);
+
+    boolean isOwnerLinked(String email);
 }

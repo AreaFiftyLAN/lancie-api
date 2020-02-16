@@ -19,6 +19,7 @@ package ch.wisv.areafiftylan.users.controller;
 
 import ch.wisv.areafiftylan.extras.rfid.model.RFIDLink;
 import ch.wisv.areafiftylan.extras.rfid.service.RFIDLinkRepository;
+import ch.wisv.areafiftylan.extras.rfid.service.RFIDService;
 import ch.wisv.areafiftylan.users.model.Profile;
 import ch.wisv.areafiftylan.users.model.ProfileDTO;
 import ch.wisv.areafiftylan.users.model.User;
@@ -41,12 +42,12 @@ import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEnt
 public class UserProfileRestController {
 
     private final UserService userService;
-    private final RFIDLinkRepository rfidLinkRepository;
+    private final RFIDService rfidService;
 
     @Autowired
-    UserProfileRestController(UserService userService, RFIDLinkRepository rfidLinkRepository) {
+    UserProfileRestController(UserService userService, RFIDService rfidService) {
         this.userService = userService;
-        this.rfidLinkRepository = rfidLinkRepository;
+        this.rfidService = rfidService;
     }
 
     /**
@@ -96,8 +97,9 @@ public class UserProfileRestController {
     @PostMapping("/current/profile")
     public ResponseEntity<?> addProfile(@AuthenticationPrincipal User user, @Validated @RequestBody ProfileDTO input) {
         // Check profile for existing rfidLinks
-        Collection<RFIDLink> linkCollection = rfidLinkRepository.findRFIDLinksByEmail(user.getEmail());
-        if (linkCollection.isEmpty()) {
+        boolean isUserCheckedIn = rfidService.isOwnerLinked(user.getEmail());
+
+        if (!isUserCheckedIn) {
             return this.addProfile(user.getId(), input);
         }
 

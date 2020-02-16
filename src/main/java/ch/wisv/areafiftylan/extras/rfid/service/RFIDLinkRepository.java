@@ -32,6 +32,5 @@ public interface RFIDLinkRepository extends JpaRepository<RFIDLink, Long> {
 
     Optional<RFIDLink> findByTicketId(Long ticketId);
 
-    @Query("select rf from RFIDLink rf where rf.ticket.owner.email = :email")
-    Collection<RFIDLink> findRFIDLinksByEmail(@Param("email") String email);
+    boolean existsRFIDLinkByTicket_Owner_Email(String email);
 }
