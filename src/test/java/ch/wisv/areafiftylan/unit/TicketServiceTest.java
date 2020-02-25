@@ -569,7 +569,7 @@ public class TicketServiceTest extends ServiceTest {
         ticketWithoutPickup.setValid(true);
         testEntityManager.persist(ticketWithoutPickup);
 
-        Collection<Ticket> tickets = ticketService.getAllTicketsWithTransport();
+        Collection<Ticket> tickets = ticketService.getAllTicketsWithTransport(PICKUP_SERVICE_OPTION);
 
         assertEquals(tickets, Arrays.asList(ticketWithPickup, ticketWithPickup2));
     }
@@ -581,7 +581,7 @@ public class TicketServiceTest extends ServiceTest {
         ticketWithoutPickup.setValid(true);
         testEntityManager.persist(ticketWithoutPickup);
 
-        Collection<Ticket> tickets = ticketService.getAllTicketsWithTransport();
+        Collection<Ticket> tickets = ticketService.getAllTicketsWithTransport(PICKUP_SERVICE_OPTION);
 
         assertThat(tickets).isEmpty();
     }

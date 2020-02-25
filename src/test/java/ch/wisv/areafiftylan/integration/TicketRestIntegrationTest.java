@@ -52,7 +52,7 @@ import static org.hamcrest.Matchers.*;
 public class TicketRestIntegrationTest extends XAuthIntegrationTest {
     private final String TICKETS_ENDPOINT = "/tickets";
     private final String TRANSFER_ENDPOINT = TICKETS_ENDPOINT + "/transfer";
-    private final String TRANSPORT_ENDPOINT = TICKETS_ENDPOINT + "/transport";
+    private final String TRANSPORT_ENDPOINT = TICKETS_ENDPOINT + "/transport/" + PICKUP_SERVICE;
 
     @Value("${a5l.ticketLimit}")
     private int TICKET_LIMIT;
