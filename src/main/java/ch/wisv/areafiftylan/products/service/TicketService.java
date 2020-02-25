@@ -99,7 +99,7 @@ public interface TicketService {
 
     Collection<TicketTransferToken> getValidTicketTransferTokensByUserEmail(String email);
 
-    Collection<Ticket> getAllTicketsWithTransport();
+    Collection<Ticket> getAllTicketsWithTransport(String ticketOption);
 
     Ticket assignTicketToUser(Long TicketId, String email);
 

@@ -126,9 +126,9 @@ public class TicketRestController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/transport")
-    public Collection<Ticket> getAllTicketsWithTransport() {
-        return ticketService.getAllTicketsWithTransport();
+    @GetMapping("/transport/{optionName}")
+    public Collection<Ticket> getAllTicketsWithTransport(@PathVariable String optionName) {
+        return ticketService.getAllTicketsWithTransport(optionName);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
