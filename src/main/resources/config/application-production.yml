@@ -15,7 +15,7 @@ a5l:
         confirmUrl: https://areafiftylan.nl/register-confirm
         year: 2020
     ratelimit:
-        enabled: true
+        enabled: false
         minute: 10
 
     orderLimit: 15
