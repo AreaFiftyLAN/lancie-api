@@ -962,4 +962,38 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
                 body("object.displayName", equalTo(null));
         //@formatter:on
     }
+
+    @Test
+    public void createProfileAsCurrentUserAndChangeProfileWithoutDate() {
+        User user = createUser();
+        Ticket ticket = createTicketForUser(user);
+        createRFIDLink("", ticket);
+        System.out.println(user.getProfile().getBirthday().toString());
+        user = userRepository.save(user);
+
+        Map<String, String> profileDTO = getProfileDTO();
+        profileDTO.put("displayName", "TestdisplayName" + user.getId());
+        profileDTO.put("birthday", user.getProfile().getBirthday().toString());
+
+        //@formatter:off
+        given().
+                header(getXAuthTokenHeaderForUser(user)).
+                when().
+                body(profileDTO).
+                contentType(ContentType.JSON).
+                post("/users/current/profile").
+                then().
+                statusCode(HttpStatus.SC_OK).
+                body("object.birthday", equalTo("2001-03-03")).
+                body("object.gender", equalTo("MALE")).
+                body("object.address", equalTo("Testaddress")).
+                body("object.zipcode", equalTo("Testzipcode")).
+                body("object.city", equalTo("Testcity")).
+                body("object.phoneNumber", equalTo("TestphoneNumber")).
+                body("object.notes", equalTo("Testnotes")).
+                body("object.firstName", equalTo("TestfirstName")).
+                body("object.lastName", equalTo("TestlastName")).
+                body("object.displayName", equalTo(profileDTO.get("displayName")));
+        //@formatter:on
+    }
 }

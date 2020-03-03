@@ -85,7 +85,7 @@ public class UserProfileRestController {
         }
 
         LocalDate currentBirthday = user.getProfile().getBirthday();
-        boolean isDateChanged = currentBirthday != input.getBirthday();
+        boolean isDateChanged = !currentBirthday.toString().equals(input.getBirthday().toString());
 
         // If rfidLinks are present and the date is changed then return an error
         if (isDateChanged) {
