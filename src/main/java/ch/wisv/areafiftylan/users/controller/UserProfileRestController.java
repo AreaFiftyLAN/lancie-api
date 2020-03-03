@@ -46,38 +46,7 @@ public class UserProfileRestController {
         this.userService = userService;
         this.rfidService = rfidService;
     }
-
-    /**
-     * Add a profile to a user. An empty profile is created when a user is created, so this method
-     * fills the existing fields
-     *
-     * @param userId The userId of the user to which the profile needs to be added
-     * @param input  A representation of the profile
-     * @return The user with the new profile
-     */
-    @PreAuthorize("@currentUserServiceImpl.canAccessUser(principal, #userId)")
-    @PostMapping("/{userId}/profile")
-    public ResponseEntity<?> addProfile(@PathVariable Long userId, @Validated @RequestBody ProfileDTO input) {
-        User user = userService.addProfile(userId, input);
-
-        return createResponseEntity(HttpStatus.OK, "Profile successfully set", user.getProfile());
-    }
-
-    /**
-     * Add a profile to the current user. An empty profile is created when a user is created, so
-     * this method fills the existing fields.
-     * <p>
-     * This method is also called when users change their profile. It is unwanted behaviour that
-     * users can change their birth date during the event. This is checked before writing the
-     * changes in the function
-     *
-     * @param input A representation of the profile
-     * @return The user with the new profile
-     */
-    @PreAuthorize("isAuthenticated()")
-    @PostMapping("/current/profile")
-    public ResponseEntity<?> addProfile(@AuthenticationPrincipal User user, @Validated @RequestBody ProfileDTO input) {
-        // Check profile for existing rfidLinks
+    private ResponseEntity<?> checkBeforeAddingProfile(User user, ProfileDTO input){
         boolean isUserCheckedIn = rfidService.isOwnerLinked(user.getEmail());
 
         if (!isUserCheckedIn) {
@@ -96,6 +65,39 @@ public class UserProfileRestController {
     }
 
     /**
+     * Add a profile to a user. An empty profile is created when a user is created, so this method
+     * fills the existing fields
+     *
+     * @param userId The userId of the user to which the profile needs to be added
+     * @param input  A representation of the profile
+     * @return The user with the new profile
+     */
+    @PreAuthorize("@currentUserServiceImpl.canAccessUser(principal, #userId)")
+    @PostMapping("/{userId}/profile")
+    public ResponseEntity<?> addProfile(@PathVariable Long userId, @Validated @RequestBody ProfileDTO input) {
+        User user = userService.getUserById(userId);
+
+        return checkBeforeAddingProfile(user,input);
+    }
+
+    /**
+     * Add a profile to the current user. An empty profile is created when a user is created, so
+     * this method fills the existing fields.
+     * <p>
+     * This method is also called when users change their profile. It is unwanted behaviour that
+     * users can change their birth date during the event. This is checked before writing the
+     * changes in the function
+     *
+     * @param input A representation of the profile
+     * @return The user with the new profile
+     */
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/current/profile")
+    public ResponseEntity<?> addProfile(@AuthenticationPrincipal User user, @Validated @RequestBody ProfileDTO input) {
+        return checkBeforeAddingProfile(user,input);
+    }
+
+    /**
      * Change the profile fields of the User. Basically the same as the POST request.
      *
      * @param userId The userId of the user to which the profile needs to be added
@@ -105,9 +107,9 @@ public class UserProfileRestController {
     @PreAuthorize("@currentUserServiceImpl.canAccessUser(principal, #userId)")
     @PutMapping("/{userId}/profile")
     public ResponseEntity<?> changeProfile(@PathVariable Long userId, @Validated @RequestBody ProfileDTO input) {
-        User user = userService.changeProfile(userId, input);
+        User user = userService.getUserById(userId);
 
-        return createResponseEntity(HttpStatus.OK, "Profile successfully updated", user.getProfile());
+        return checkBeforeAddingProfile(user,input);
     }
 
     /**

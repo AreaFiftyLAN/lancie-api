@@ -28,6 +28,7 @@ import org.apache.http.HttpStatus;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -936,6 +937,7 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         Ticket ticket = createTicketForUser(user);
         createRFIDLink("", ticket);
         user.resetProfile();
+        user.getProfile().setBirthday(LocalDate.now());
         user = userRepository.save(user);
 
         Map<String, String> profileDTO = getProfileDTO();

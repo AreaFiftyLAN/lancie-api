@@ -183,11 +183,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public User changeProfile(Long userId, ProfileDTO profileDTO) {
-        return addProfile(userId, profileDTO);
-    }
-
-    @Override
     public Profile resetProfile(Long userId) {
         Profile profile = getUserById(userId).getProfile();
         getUserById(userId).resetProfile();

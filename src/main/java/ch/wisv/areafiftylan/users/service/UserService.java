@@ -44,8 +44,6 @@ public interface UserService {
 
     User addProfile(Long userId, ProfileDTO profileDTO);
 
-    User changeProfile(Long userId, ProfileDTO profileDTO);
-
     Profile resetProfile(Long userId);
 
     void lock(Long userId);
