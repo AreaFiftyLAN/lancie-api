@@ -25,6 +25,7 @@ import ch.wisv.areafiftylan.users.model.User;
 import io.restassured.http.ContentType;
 import io.restassured.http.Header;
 import org.apache.http.HttpStatus;
+import org.apache.tomcat.jni.Local;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -376,8 +377,8 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
             post("/users/current/profile").
         then().
             statusCode(HttpStatus.SC_OK).
-            body("object.birthday", equalTo("2000-01-02")).
-            body("object.gender", is("MALE")).
+            body("object.birthday", equalTo(profileDTO.get("birthday"))).
+            body("object.gender", equalTo("MALE")).
             body("object.address", equalTo("Testaddress")).
             body("object.zipcode", equalTo("Testzipcode")).
             body("object.city", equalTo("Testcity")).
@@ -970,7 +971,6 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         User user = createUser();
         Ticket ticket = createTicketForUser(user);
         createRFIDLink("", ticket);
-        System.out.println(user.getProfile().getBirthday().toString());
         user = userRepository.save(user);
 
         Map<String, String> profileDTO = getProfileDTO();

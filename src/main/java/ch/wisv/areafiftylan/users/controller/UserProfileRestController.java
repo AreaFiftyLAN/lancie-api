@@ -46,11 +46,20 @@ public class UserProfileRestController {
         this.userService = userService;
         this.rfidService = rfidService;
     }
-    private ResponseEntity<?> checkBeforeAddingProfile(User user, ProfileDTO input){
+
+    /**
+     * This method returns a boolean indicating whether an user is allowed to make the changes to
+     * their profile or not.
+     *
+     * @param user The concerning user
+     * @param input The changes
+     * @return boolean whether they are allowed to edit their profile
+     */
+    private boolean checkAllowedToEditProfile(User user, ProfileDTO input) {
         boolean isUserCheckedIn = rfidService.isOwnerLinked(user.getEmail());
 
         if (!isUserCheckedIn) {
-            return this.addProfile(user.getId(), input);
+            return true;
         }
 
         LocalDate currentBirthday = user.getProfile().getBirthday();
@@ -58,26 +67,10 @@ public class UserProfileRestController {
 
         // If rfidLinks are present and the date is changed then return an error
         if (isDateChanged) {
-            return createResponseEntity(HttpStatus.BAD_REQUEST, "Unable to change date during event", user.getProfile());
+            return false;
         }
 
-        return this.addProfile(user.getId(), input);
-    }
-
-    /**
-     * Add a profile to a user. An empty profile is created when a user is created, so this method
-     * fills the existing fields
-     *
-     * @param userId The userId of the user to which the profile needs to be added
-     * @param input  A representation of the profile
-     * @return The user with the new profile
-     */
-    @PreAuthorize("@currentUserServiceImpl.canAccessUser(principal, #userId)")
-    @PostMapping("/{userId}/profile")
-    public ResponseEntity<?> addProfile(@PathVariable Long userId, @Validated @RequestBody ProfileDTO input) {
-        User user = userService.getUserById(userId);
-
-        return checkBeforeAddingProfile(user,input);
+        return true;
     }
 
     /**
@@ -94,7 +87,28 @@ public class UserProfileRestController {
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/current/profile")
     public ResponseEntity<?> addProfile(@AuthenticationPrincipal User user, @Validated @RequestBody ProfileDTO input) {
-        return checkBeforeAddingProfile(user,input);
+        if (checkAllowedToEditProfile(user, input)) {
+            User changedUser = userService.addProfile(user.getId(), input);
+            return createResponseEntity(HttpStatus.OK, "Profile successfully changed", changedUser.getProfile());
+        } else {
+            return createResponseEntity(HttpStatus.BAD_REQUEST, "Unable to change date during event", user.getProfile());
+        }
+    }
+
+    /**
+     * Add a profile to a user. An empty profile is created when a user is created, so this method
+     * fills the existing fields
+     *
+     * @param userId The userId of the user to which the profile needs to be added
+     * @param input  A representation of the profile
+     * @return The user with the new profile
+     */
+    @PreAuthorize("@currentUserServiceImpl.canAccessUser(principal, #userId)")
+    @PostMapping("/{userId}/profile")
+    public ResponseEntity<?> addProfile(@PathVariable Long userId, @Validated @RequestBody ProfileDTO input) {
+        User user = userService.getUserById(userId);
+
+        return this.addProfile(user, input);
     }
 
     /**
@@ -109,7 +123,7 @@ public class UserProfileRestController {
     public ResponseEntity<?> changeProfile(@PathVariable Long userId, @Validated @RequestBody ProfileDTO input) {
         User user = userService.getUserById(userId);
 
-        return checkBeforeAddingProfile(user,input);
+        return this.addProfile(user, input);
     }
 
     /**
