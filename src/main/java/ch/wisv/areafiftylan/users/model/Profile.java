@@ -31,7 +31,7 @@ import java.time.LocalDate;
 
 @Entity
 @Data
-@NoArgsConstructor
+    @NoArgsConstructor
 public class Profile implements Serializable {
 
     @Id
@@ -81,5 +81,9 @@ public class Profile implements Serializable {
         this.city = city;
         this.phoneNumber = phoneNumber;
         this.notes = notes;
+    }
+
+    public void setBirthday(LocalDate birthday){
+        this.birthday = birthday;
     }
 }

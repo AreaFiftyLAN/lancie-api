@@ -32,6 +32,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -100,6 +101,7 @@ public class User implements Serializable, UserDetails {
 
     public void resetProfile() {
         this.profile = new Profile();
+        this.profile.setBirthday(LocalDate.now());
     }
 
     public void addRole(Role role) {
