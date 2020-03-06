@@ -82,8 +82,4 @@ public class Profile implements Serializable {
         this.phoneNumber = phoneNumber;
         this.notes = notes;
     }
-
-    public void setBirthday(LocalDate birthday){
-        this.birthday = birthday;
-    }
 }
