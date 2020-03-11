@@ -101,7 +101,7 @@ public class User implements Serializable, UserDetails {
 
     public void resetProfile() {
         this.profile = new Profile();
-        this.profile.setBirthday(LocalDate.parse("2000-01-01"));
+        this.profile.setBirthday(LocalDate.now());
     }
 
     public void addRole(Role role) {
