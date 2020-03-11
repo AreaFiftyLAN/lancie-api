@@ -31,7 +31,7 @@ import java.time.LocalDate;
 
 @Entity
 @Data
-    @NoArgsConstructor
+@NoArgsConstructor
 public class Profile implements Serializable {
 
     @Id

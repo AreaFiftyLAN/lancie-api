@@ -55,7 +55,7 @@ public class UserProfileRestController {
      * @param input The changes
      * @return boolean whether they are allowed to edit their profile
      */
-    private boolean checkAllowedToEditProfile(User user, ProfileDTO input) {
+    private boolean allowedToEditProfile(User user, ProfileDTO input) {
         boolean isUserCheckedIn = rfidService.isOwnerLinked(user.getEmail());
         LocalDate currentBirthday = user.getProfile().getBirthday();
         boolean isDateChanged = !currentBirthday.equals(input.getBirthday());
@@ -78,11 +78,11 @@ public class UserProfileRestController {
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/current/profile")
     public ResponseEntity<?> addProfile(@AuthenticationPrincipal User user, @Validated @RequestBody ProfileDTO input) {
-        if (checkAllowedToEditProfile(user, input)) {
+        if (allowedToEditProfile(user, input)) {
             User changedUser = userService.addProfile(user.getId(), input);
             return createResponseEntity(HttpStatus.OK, "Profile successfully changed", changedUser.getProfile());
         } else {
-            return createResponseEntity(HttpStatus.BAD_REQUEST, "Unable to change date during event", user.getProfile());
+            return createResponseEntity(HttpStatus.BAD_REQUEST, "Not permitted to change date during event", user.getProfile());
         }
     }
 
