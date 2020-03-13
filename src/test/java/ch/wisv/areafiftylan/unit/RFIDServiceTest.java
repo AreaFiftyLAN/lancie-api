@@ -171,4 +171,20 @@ public class RFIDServiceTest extends ServiceTest{
         Ticket ticket = persistTicketForUser(user);
         assertFalse(rfidService.isTicketLinked(ticket.getId()));
     }
+
+    @Test
+    public void isOwnerLinkedTest() throws Exception {
+        User user = persistUser();
+        Ticket ticket = persistTicketForUser(user);
+        String rfid = "0000000001";
+        rfidService.addRFIDLink(rfid, ticket.getId());
+        assertTrue(rfidService.isOwnerLinked(user.getEmail()));
+    }
+
+    @Test
+    public void isOwnerLinkedNotLinkedTest() throws Exception {
+        User user = persistUser();
+        persistTicketForUser(user);
+        assertFalse(rfidService.isOwnerLinked(user.getEmail()));
+    }
 }

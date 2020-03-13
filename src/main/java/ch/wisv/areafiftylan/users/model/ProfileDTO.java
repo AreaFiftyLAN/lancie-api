@@ -32,13 +32,10 @@ public class ProfileDTO {
     @NotNull
     private LocalDate birthday;
 
-    @NotEmpty
     private String address = "";
 
-    @NotEmpty
     private String zipcode = "";
 
-    @NotEmpty
     private String city = "";
 
     @NotEmpty

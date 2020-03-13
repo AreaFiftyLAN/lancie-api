@@ -32,6 +32,7 @@ import java.util.Set;
 
 @Entity
 @Getter
+@Table(name = "orders")
 public class Order {
 
     @Id
@@ -49,6 +50,7 @@ public class Order {
 
     @JsonView(View.OrderOverview.class)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+    @Setter
     private LocalDateTime creationDateTime;
 
     /**

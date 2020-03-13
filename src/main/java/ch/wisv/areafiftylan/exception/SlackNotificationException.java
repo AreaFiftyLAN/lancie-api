@@ -15,24 +15,13 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ch.wisv.areafiftylan.seats.service;
+package ch.wisv.areafiftylan.exception;
 
-import ch.wisv.areafiftylan.seats.model.Seat;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
+import java.io.IOException;
 
-@Repository
-public interface SeatRepository extends JpaRepository<Seat, Long> {
-    List<Seat> findByTicketOwnerEmailIgnoreCase(String email);
-
-    List<Seat> findBySeatGroup(String seatGroup);
-
-    Optional<Seat> findBySeatGroupAndSeatNumber(String seatGroup, int seatNumber);
-
-    Optional<Seat> findByTicketId(Long ticketId);
-
-    Optional<Seat> findFirstBySeatGroupOrderBySeatNumberDesc(String seatGroup);
+public class SlackNotificationException extends AreaFiftyLANException {
+    public SlackNotificationException(IOException e) {
+        super("Unable to send a notification to slack:" + e.getMessage());
+    }
 }

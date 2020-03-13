@@ -17,10 +17,11 @@
 
 package ch.wisv.areafiftylan.integration;
 
+import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.security.token.repository.VerificationTokenRepository;
 import ch.wisv.areafiftylan.users.model.Role;
+import ch.wisv.areafiftylan.users.model.RoleDTO;
 import ch.wisv.areafiftylan.users.model.User;
-import ch.wisv.areafiftylan.utils.TaskScheduler;
 import io.restassured.http.ContentType;
 import io.restassured.http.Header;
 import org.apache.http.HttpStatus;
@@ -43,9 +44,6 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
 
     @Autowired
     private VerificationTokenRepository verificationTokenRepository;
-
-    @Autowired
-    private TaskScheduler taskScheduler;
 
     static Map<String, String> getProfileDTO() {
         Map<String, String> profileDTO = new HashMap<>();
@@ -483,7 +481,7 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         user = userRepository.save(user);
 
         Map<String, String> profileDTO = getProfileDTO();
-        profileDTO.remove("city");
+        profileDTO.remove("firstName");
 
         //@formatter:off
         given().
@@ -858,6 +856,110 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         then().statusCode(HttpStatus.SC_OK).
             body("email", equalTo(user.getEmail())).
             body("authorities", hasItem("ROLE_USER"));
+        //@formatter:on
+    }
+
+    @Test
+    public void testAddRole() {
+        User admin = createAdmin();
+        User user = createUser();
+        RoleDTO roleDTO = new RoleDTO();
+        roleDTO.setRole(Role.ROLE_ADMIN);
+        //@formatter:off
+        given().
+                header(getXAuthTokenHeaderForUser(admin.getEmail())).
+        when().
+                body(roleDTO).
+                contentType(ContentType.JSON).
+                post("/users/" + user.getId() + "/role").
+        then().statusCode(HttpStatus.SC_OK).
+                body("email", equalTo(user.getEmail())).
+                body("authorities", hasItem("ROLE_ADMIN"));
+        //@formatter:on
+    }
+
+    @Test
+    public void testDeleteRole() {
+        User admin = createAdmin();
+        User user = createCommitteeMember();
+        RoleDTO roleDTO = new RoleDTO();
+        roleDTO.setRole(Role.ROLE_COMMITTEE);
+        //@formatter:off
+        given().
+                header(getXAuthTokenHeaderForUser(admin.getEmail())).
+        when().
+                body(roleDTO).
+                contentType(ContentType.JSON).
+                post("/users/" + user.getId() + "/role/delete").
+        then().statusCode(HttpStatus.SC_OK).
+                body("email", equalTo(user.getEmail())).
+                body("authorities", not(hasItem("ROLE_COMMITTEE")));
+        //@formatter:on
+    }
+
+    @Test
+    public void testDeleteUserRole() {
+        User admin = createAdmin();
+        User user = createUser();
+        RoleDTO roleDTO = new RoleDTO();
+        roleDTO.setRole(Role.ROLE_USER);
+        //@formatter:off
+        given().
+                header(getXAuthTokenHeaderForUser(admin.getEmail())).
+        when().
+                body(roleDTO).
+                contentType(ContentType.JSON).
+                post("/users/" + user.getId() + "/role/delete").
+        then().statusCode(HttpStatus.SC_BAD_REQUEST);
+        //@formatter:on
+    }
+
+    @Test
+    public void testDeleteNullRole() {
+        User admin = createAdmin();
+        User user = createUser();
+        RoleDTO roleDTO = new RoleDTO();
+        //@formatter:off
+        given().
+                header(getXAuthTokenHeaderForUser(admin.getEmail())).
+        when().
+                body(roleDTO).
+                contentType(ContentType.JSON).
+                post("/users/" + user.getId() + "/role/delete").
+        then().statusCode(HttpStatus.SC_BAD_REQUEST);
+        //@formatter:on
+    }
+
+    @Test
+    public void createProfileAsCurrentUserAndChangeDate() {
+        User user = createUser();
+        Ticket ticket = createTicketForUser(user);
+        createRFIDLink("", ticket);
+        user.resetProfile();
+        user = userRepository.save(user);
+
+        Map<String, String> profileDTO = getProfileDTO();
+        profileDTO.put("displayName", "TestdisplayName" + user.getId());
+
+        //@formatter:off
+        given().
+                header(getXAuthTokenHeaderForUser(user)).
+                when().
+                body(profileDTO).
+                contentType(ContentType.JSON).
+                post("/users/current/profile").
+                then().
+                statusCode(HttpStatus.SC_BAD_REQUEST).
+                body("object.birthday", not(equalTo("2000-01-02"))).
+                body("object.gender", equalTo(null)).
+                body("object.address", equalTo(null)).
+                body("object.zipcode", equalTo(null)).
+                body("object.city", equalTo(null)).
+                body("object.phoneNumber", equalTo(null)).
+                body("object.notes", equalTo(null)).
+                body("object.firstName", equalTo(null)).
+                body("object.lastName", equalTo(null)).
+                body("object.displayName", equalTo(null));
         //@formatter:on
     }
 }

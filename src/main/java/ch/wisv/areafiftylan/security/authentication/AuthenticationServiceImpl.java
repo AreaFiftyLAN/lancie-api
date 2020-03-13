@@ -74,10 +74,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         AuthenticationToken token =
                 authenticationTokenRepository.findByToken(xAuth).orElseThrow(XAuthTokenNotFoundException::new);
 
-        if (!token.isValid()) {
-            throw new InvalidTokenException();
-        }
-
         token.revoke();
         authenticationTokenRepository.saveAndFlush(token);
     }

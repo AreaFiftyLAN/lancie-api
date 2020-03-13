@@ -115,7 +115,8 @@ public class TicketServiceImpl implements TicketService {
         ticketRepository.save(ticket);
     }
 
-    private TicketOption getTicketOptionByName(String name) {
+    @Override
+    public TicketOption getTicketOptionByName(String name) {
         return ticketOptionRepository.findByName(name).
                 orElseThrow(TicketOptionNotFoundException::new);
     }
@@ -276,6 +277,12 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
+    public TicketType getTicketTypeById(Long typeId) {
+        return ticketTypeRepository.findById(typeId).
+                orElseThrow(() -> new TicketTypeNotFoundException("with Id" + typeId));
+    }
+
+    @Override
     public void deleteTicketType(Long typeId) {
         ticketTypeRepository.deleteById(typeId);
     }
@@ -285,6 +292,15 @@ public class TicketServiceImpl implements TicketService {
         return ticketOptionRepository.save(option);
     }
 
+    @Override
+    public void deleteTicketOption(Long optionId) {
+        ticketOptionRepository.deleteById(optionId);
+    }
+
+    @Override
+    public Collection<TicketOption> getAllTicketOptions() {
+        return ticketOptionRepository.findAll();
+    }
 
     private TicketTransferToken getTicketTransferTokenIfValid(String token) {
         TicketTransferToken ttt = tttRepository.findByToken(token).orElseThrow(() -> new TokenNotFoundException(token));

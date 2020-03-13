@@ -40,7 +40,7 @@ import java.util.Set;
 @Data
 @RequiredArgsConstructor
 @NoArgsConstructor
-@Table(uniqueConstraints = { @UniqueConstraint(name = "email", columnNames = { "email" }) })
+@Table(name = "users", uniqueConstraints = { @UniqueConstraint(name = "email", columnNames = { "email" }) })
 public class User implements Serializable, UserDetails {
 
     @NonNull
@@ -109,5 +109,9 @@ public class User implements Serializable, UserDetails {
     @JsonView(View.Public.class)
     public int getReference() {
         return email.hashCode();
+    }
+
+    public void deleteRole(Role role) {
+        this.roles.remove(role);
     }
 }

@@ -19,8 +19,11 @@ package ch.wisv.areafiftylan.integration;
 
 import ch.wisv.areafiftylan.ApplicationTest;
 import ch.wisv.areafiftylan.exception.TicketOptionNotFoundException;
+import ch.wisv.areafiftylan.extras.rfid.model.RFIDLink;
+import ch.wisv.areafiftylan.extras.rfid.service.RFIDLinkRepository;
 import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.model.TicketOption;
+import ch.wisv.areafiftylan.products.model.TicketType;
 import ch.wisv.areafiftylan.products.service.repository.TicketOptionRepository;
 import ch.wisv.areafiftylan.products.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.products.service.repository.TicketTypeRepository;
@@ -42,6 +45,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDate;
@@ -50,7 +54,8 @@ import java.util.List;
 
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = ApplicationTest.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ContextConfiguration(classes = ApplicationTest.class)
 @ActiveProfiles("test")
 public abstract class XAuthIntegrationTest {
 
@@ -75,11 +80,12 @@ public abstract class XAuthIntegrationTest {
     private TicketRepository ticketRepository;
     @Autowired
     private TeamRepository teamRepository;
+    @Autowired
+    private RFIDLinkRepository rfidLinkRepository;
 
     protected final String CH_MEMBER = "chMember";
     protected final String PICKUP_SERVICE = "pickupService";
     protected final String TEST_TICKET = "test";
-
 
     @Before
     public void setXAuthIntegrationTest() {
@@ -124,12 +130,21 @@ public abstract class XAuthIntegrationTest {
         return ticketRepository.save(ticket);
     }
 
+    protected RFIDLink createRFIDLink(String rfidString, Ticket ticket){
+        RFIDLink rfidLink = new RFIDLink(rfidString, ticket);
+        return rfidLinkRepository.save(rfidLink);
+    }
+
     protected Ticket createTicketForUser(User user) {
         return createTicket(user, Collections.emptyList());
     }
 
     private TicketOption getTicketOption(String option) {
         return ticketOptionRepository.findByName(option).orElseThrow(TicketOptionNotFoundException::new);
+    }
+
+    protected TicketType getTicketType() {
+        return ticketTypeRepository.findByName(TEST_TICKET).orElseThrow(IllegalArgumentException::new);
     }
 
     protected Team createTeamWithCaptain(User captain) {

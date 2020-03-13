@@ -100,6 +100,11 @@ public class RFIDServiceImpl implements RFIDService {
         return rfidLinkRepository.findByTicketId(ticketId).isPresent();
     }
 
+    @Override
+    public boolean isOwnerLinked(String email) {
+        return rfidLinkRepository.existsRFIDLinkByTicket_Owner_Email(email);
+    }
+
     private boolean isValidRfid(String rfid) {
         return rfid.length() == RFID_CHAR_COUNT;
     }

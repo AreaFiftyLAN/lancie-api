@@ -28,4 +28,6 @@ public interface RFIDLinkRepository extends JpaRepository<RFIDLink, Long> {
     Optional<RFIDLink> findByRfid(String rfid);
 
     Optional<RFIDLink> findByTicketId(Long ticketId);
+
+    boolean existsRFIDLinkByTicket_Owner_Email(String email);
 }

@@ -43,7 +43,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     public static final String HIERARCHY =
-            "ROLE_ADMIN > ROLE_COMMITTEE and ROLE_COMMITTEE > ROLE_OPERATOR and ROLE_OPERATOR > ROLE_USER";
+            "ROLE_ADMIN > ROLE_COMMITTEE \n ROLE_COMMITTEE > ROLE_OPERATOR \n ROLE_OPERATOR > ROLE_USER";
 
     private final UserDetailsService userDetailsService;
 

@@ -51,6 +51,9 @@ public class MailServiceImpl implements MailService {
     @Value("${a5l.mail.contact}")
     String contact;
 
+    @Value("${a5l.mail.year}")
+    String year;
+
     @Autowired
     public MailServiceImpl(JavaMailSender mailSender, SpringTemplateEngine templateEngine) {
         this.mailSender = mailSender;
@@ -110,6 +113,7 @@ public class MailServiceImpl implements MailService {
         final Context ctx = new Context(new Locale("en"));
         ctx.setVariable("name", name);
         ctx.setVariable("message", message);
+        ctx.setVariable("year", year);
         return this.templateEngine.process("mailTemplate", ctx);
     }
 
@@ -156,6 +160,7 @@ public class MailServiceImpl implements MailService {
         ctx.setVariable("name",
                 order.getUser().getProfile().getFirstName() + " " + order.getUser().getProfile().getLastName());
         ctx.setVariable("order", order);
+        ctx.setVariable("year", year);
         String content = this.templateEngine.process("orderConfirmation", ctx);
 
         sendMailWithContent(order.getUser().getEmail(), "Order Confirmation", content);
