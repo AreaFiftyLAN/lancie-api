@@ -28,6 +28,7 @@ import org.apache.http.HttpStatus;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -375,8 +376,8 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
             post("/users/current/profile").
         then().
             statusCode(HttpStatus.SC_OK).
-            body("object.birthday", equalTo("2000-01-02")).
-            body("object.gender", is("MALE")).
+            body("object.birthday", equalTo(profileDTO.get("birthday"))).
+            body("object.gender", equalTo("MALE")).
             body("object.address", equalTo("Testaddress")).
             body("object.zipcode", equalTo("Testzipcode")).
             body("object.city", equalTo("Testcity")).
@@ -936,6 +937,7 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         Ticket ticket = createTicketForUser(user);
         createRFIDLink("", ticket);
         user.resetProfile();
+        user.getProfile().setBirthday(LocalDate.now());
         user = userRepository.save(user);
 
         Map<String, String> profileDTO = getProfileDTO();
@@ -960,6 +962,39 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
                 body("object.firstName", equalTo(null)).
                 body("object.lastName", equalTo(null)).
                 body("object.displayName", equalTo(null));
+        //@formatter:on
+    }
+
+    @Test
+    public void createProfileAsCurrentUserAndChangeProfileWithoutDate() {
+        User user = createUser();
+        Ticket ticket = createTicketForUser(user);
+        createRFIDLink("", ticket);
+        user = userRepository.save(user);
+
+        Map<String, String> profileDTO = getProfileDTO();
+        profileDTO.put("displayName", "TestdisplayName" + user.getId());
+        profileDTO.put("birthday", user.getProfile().getBirthday().toString());
+
+        //@formatter:off
+        given().
+                header(getXAuthTokenHeaderForUser(user)).
+                when().
+                body(profileDTO).
+                contentType(ContentType.JSON).
+                post("/users/current/profile").
+                then().
+                statusCode(HttpStatus.SC_OK).
+                body("object.birthday", equalTo(user.getProfile().getBirthday().toString())).
+                body("object.gender", equalTo("MALE")).
+                body("object.address", equalTo("Testaddress")).
+                body("object.zipcode", equalTo("Testzipcode")).
+                body("object.city", equalTo("Testcity")).
+                body("object.phoneNumber", equalTo("TestphoneNumber")).
+                body("object.notes", equalTo("Testnotes")).
+                body("object.firstName", equalTo("TestfirstName")).
+                body("object.lastName", equalTo("TestlastName")).
+                body("object.displayName", equalTo(profileDTO.get("displayName")));
         //@formatter:on
     }
 }
