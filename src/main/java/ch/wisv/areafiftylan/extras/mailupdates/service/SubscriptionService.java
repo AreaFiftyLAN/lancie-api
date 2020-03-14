@@ -26,5 +26,7 @@ public interface SubscriptionService {
 
   void removeSubscription(Long id);
 
+  void removeAllSubscriptions();
+
   Collection<Subscription> getSubscriptions();
 }

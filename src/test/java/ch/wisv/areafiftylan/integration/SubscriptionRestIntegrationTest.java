@@ -131,6 +131,28 @@ public class SubscriptionRestIntegrationTest extends XAuthIntegrationTest {
     }
 
     @Test
+    public void testRemoveAllSubscriptionAsCommittee() {
+        addSubscriptionsToRepository();
+
+        given().
+            header(getXAuthTokenHeaderForUser(committeMember)).
+        when()
+            .delete(ENDPOINT)
+        .then()
+            .statusCode(HttpStatus.SC_OK);
+
+        assertEquals(0, subscriptionRepository.count());
+    }
+
+    @Test
+    public void testRemoveAllSubscriptionAsAnon() {
+        when()
+            .delete(ENDPOINT)
+        .then()
+            .statusCode(HttpStatus.SC_FORBIDDEN);
+    }
+
+    @Test
     public void testDataIntegrityViolationException() throws Exception {
         addSubscriptionsToRepository();
 

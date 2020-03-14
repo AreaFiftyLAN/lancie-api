@@ -19,6 +19,7 @@ package ch.wisv.areafiftylan.unit;
 
 import ch.wisv.areafiftylan.extras.mailupdates.model.Subscription;
 import ch.wisv.areafiftylan.extras.mailupdates.model.SubscriptionDTO;
+import ch.wisv.areafiftylan.extras.mailupdates.model.SubscriptionRepository;
 import ch.wisv.areafiftylan.extras.mailupdates.service.SubscriptionService;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,6 +37,9 @@ public class SubscriptionServiceTest extends ServiceTest {
 
     @Autowired
     private SubscriptionService subscriptionService;
+
+    @Autowired
+    private SubscriptionRepository subscriptionRepository;
 
     private SubscriptionDTO subscriptionDTO;
 
@@ -73,5 +77,17 @@ public class SubscriptionServiceTest extends ServiceTest {
         expectedSubscriptions.add(secondExpected);
 
         assertEquals(subscriptionService.getSubscriptions(), expectedSubscriptions);
+    }
+
+    @Test
+    public void testRemoveAllSubscriptions() {
+        subscriptionService.addSubscription(USER_EMAIL1);
+        subscriptionService.addSubscription(USER_EMAIL2);
+
+        assertEquals(2, subscriptionRepository.count());
+
+        subscriptionService.removeAllSubscriptions();
+
+        assertEquals(0, subscriptionRepository.count());
     }
 }
