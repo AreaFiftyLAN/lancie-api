@@ -1,5 +1,8 @@
 ## SPRING SETTINGS
 spring:
+    # TODO: Migrate properties and profiles to new version: https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-Config-Data-Migration-Guide
+    config:
+        use-legacy-processing: true
     main:
         allow-bean-definition-overriding: true
     thymeleaf:
