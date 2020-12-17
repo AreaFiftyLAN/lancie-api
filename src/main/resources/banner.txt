@@ -6,4 +6,4 @@ ${AnsiColor.BRIGHT_YELLOW}#   ######################  ${AnsiColor.BRIGHT_BLUE} |
 ${AnsiColor.BRIGHT_YELLOW}#   ##  ##############  ##  ${AnsiColor.BRIGHT_BLUE} \_| |_/_|  \___|\__,_| \_|   |_|_|  \__|\__, /${AnsiColor.BRIGHT_YELLOW} \_____/\_| |_/\_| \_/
 ${AnsiColor.BRIGHT_YELLOW}#   ##  ##          ##  ##  ${AnsiColor.BRIGHT_BLUE}                                         __/ |
 ${AnsiColor.BRIGHT_YELLOW}#         ####  ####        ${AnsiColor.BRIGHT_BLUE}                                        |___/
-${AnsiColor.BRIGHT_RED}:: Running Spring Boot ${spring-boot.version} ::${AnsiColor.BLACK}
+${AnsiColor.BRIGHT_RED}:: Running Spring Boot ${spring-boot.version} ::${AnsiColor.DEFAULT}

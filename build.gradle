@@ -42,7 +42,7 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-actuator")
     compile("org.springframework.boot:spring-boot-starter-json")
     compile("org.springframework.boot:spring-boot-starter-validation")
-    compile("org.flywaydb:flyway-core")
+    compile "org.flywaydb:flyway-core:7.3.2"
     compile("org.springframework.boot:spring-boot-starter-aop")
     compile("com.google.guava:guava:30.0-jre")
     compile("nl.stil4m:mollie-api:2.7.0")
