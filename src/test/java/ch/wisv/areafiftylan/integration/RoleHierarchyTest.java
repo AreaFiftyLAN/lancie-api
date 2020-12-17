@@ -1,6 +1,6 @@
 package ch.wisv.areafiftylan.integration;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -10,8 +10,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ch.wisv.areafiftylan.security.SecurityConfiguration.HIERARCHY;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class RoleHierarchyTest extends XAuthIntegrationTest {
 

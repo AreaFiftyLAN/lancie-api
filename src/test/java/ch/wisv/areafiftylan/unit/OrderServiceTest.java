@@ -23,7 +23,7 @@ import ch.wisv.areafiftylan.products.model.order.Order;
 import ch.wisv.areafiftylan.products.model.order.OrderStatus;
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.utils.mail.MailService;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -35,7 +35,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
@@ -56,24 +56,18 @@ public class OrderServiceTest extends ServiceTest {
     @Test
     public void getOrderByIdNotFound() {
         Long id = 9999L;
-        thrown.expect(OrderNotFoundException.class);
-        thrown.expectMessage("Order with id: " + id + " not found");
-
-        orderService.getOrderById(id);
+        Exception exception = assertThrows(OrderNotFoundException.class, () -> orderService.getOrderById(id));
+        assertEquals("Order with id: " + id + " not found", exception.getMessage());
     }
 
     @Test
     public void getOrderByIdNull() {
-        thrown.expect(OrderNotFoundException.class);
-
-        orderService.getOrderById(null);
+        assertThrows(OrderNotFoundException.class, () -> orderService.getOrderById(null));
     }
 
     @Test
     public void getOrderByEmptyReference() {
-        thrown.expect(IllegalArgumentException.class);
-
-        orderService.getOrderByReference("");
+        assertThrows(IllegalArgumentException.class, () -> orderService.getOrderByReference(""));
     }
 
     @Test
@@ -184,9 +178,9 @@ public class OrderServiceTest extends ServiceTest {
         assertNull(order.getUser());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void createNullType() {
-        orderService.create(null, Arrays.asList(CH_MEMBER_OPTION, PICKUP_SERVICE_OPTION));
+        assertThrows(IllegalArgumentException.class, () -> orderService.create(null, Arrays.asList(CH_MEMBER_OPTION, PICKUP_SERVICE_OPTION)));
         assertEquals(0, orderRepository.findAll().size());
     }
 
@@ -225,8 +219,6 @@ public class OrderServiceTest extends ServiceTest {
 
     @Test
     public void addTicketToOrderPending() {
-        thrown.expect(ImmutableOrderException.class);
-
         User user = persistUser();
         Ticket ticket = persistTicket();
         Order order = new Order(user);
@@ -234,13 +226,11 @@ public class OrderServiceTest extends ServiceTest {
         order.addTicket(ticket);
         Long id = testEntityManager.persistAndGetId(order, Long.class);
 
-        orderService.addTicketToOrder(id, TEST_TICKET, Collections.singletonList(CH_MEMBER_OPTION));
+        assertThrows(ImmutableOrderException.class, () -> orderService.addTicketToOrder(id, TEST_TICKET, Collections.singletonList(CH_MEMBER_OPTION)));
     }
 
     @Test
     public void addTicketToOrderPaid() {
-        thrown.expect(ImmutableOrderException.class);
-
         User user = persistUser();
         Ticket ticket = persistTicket();
         Order order = new Order(user);
@@ -248,13 +238,11 @@ public class OrderServiceTest extends ServiceTest {
         order.addTicket(ticket);
         Long id = testEntityManager.persistAndGetId(order, Long.class);
 
-        orderService.addTicketToOrder(id, TEST_TICKET, Collections.singletonList(CH_MEMBER_OPTION));
+        assertThrows(ImmutableOrderException.class, () -> orderService.addTicketToOrder(id, TEST_TICKET, Collections.singletonList(CH_MEMBER_OPTION)));
     }
 
     @Test
     public void addTicketToOrderCancelled() {
-        thrown.expect(ImmutableOrderException.class);
-
         User user = persistUser();
         Ticket ticket = persistTicket();
         Order order = new Order(user);
@@ -262,13 +250,11 @@ public class OrderServiceTest extends ServiceTest {
         order.addTicket(ticket);
         Long id = testEntityManager.persistAndGetId(order, Long.class);
 
-        orderService.addTicketToOrder(id, TEST_TICKET, Collections.singletonList(CH_MEMBER_OPTION));
+        assertThrows(ImmutableOrderException.class, () -> orderService.addTicketToOrder(id, TEST_TICKET, Collections.singletonList(CH_MEMBER_OPTION)));
     }
 
     @Test
     public void addTicketToOrderExpired() {
-        thrown.expect(ImmutableOrderException.class);
-
         User user = persistUser();
         Ticket ticket = persistTicket();
         Order order = new Order(user);
@@ -276,7 +262,7 @@ public class OrderServiceTest extends ServiceTest {
         order.addTicket(ticket);
         Long id = testEntityManager.persistAndGetId(order, Long.class);
 
-        orderService.addTicketToOrder(id, TEST_TICKET, Collections.singletonList(CH_MEMBER_OPTION));
+        assertThrows(ImmutableOrderException.class, () -> orderService.addTicketToOrder(id, TEST_TICKET, Collections.singletonList(CH_MEMBER_OPTION)));
     }
 
     @Test
@@ -312,94 +298,76 @@ public class OrderServiceTest extends ServiceTest {
 
     @Test
     public void assignOrderToUserOrderNotFound() {
-        thrown.expect(OrderNotFoundException.class);
-
         User user = persistUser();
 
-        orderService.assignOrderToUser(9999L, user.getEmail());
+        assertThrows(OrderNotFoundException.class, () -> orderService.assignOrderToUser(9999L, user.getEmail()));
     }
 
     @Test
     public void assignOrderToUserOrderIdNull() {
-        thrown.expect(OrderNotFoundException.class);
-
         User user = persistUser();
         Order order = new Order();
         testEntityManager.persistAndGetId(order, Long.class);
 
-        orderService.assignOrderToUser(null, user.getEmail());
+        assertThrows(OrderNotFoundException.class, () -> orderService.assignOrderToUser(null, user.getEmail()));
     }
 
     @Test
     public void assignOrderToUserEmailNotFound() {
-        thrown.expect(UsernameNotFoundException.class);
-
         Long id = testEntityManager.persistAndGetId(new Order(), Long.class);
 
-        orderService.assignOrderToUser(id, "nouser@mail.com");
+        assertThrows(UsernameNotFoundException.class, () -> orderService.assignOrderToUser(id, "nouser@mail.com"));
     }
 
     @Test
     public void assignOrderToUserEmailNull() {
-        thrown.expect(UsernameNotFoundException.class);
-
         Long id = testEntityManager.persistAndGetId(new Order(), Long.class);
 
-        orderService.assignOrderToUser(id, null);
+        assertThrows(UsernameNotFoundException.class, () -> orderService.assignOrderToUser(id, null));
     }
 
     @Test
     public void assignOrderToUserPending() {
-        thrown.expect(ImmutableOrderException.class);
-
         User user = persistUser();
         Order order = new Order();
         order.setStatus(OrderStatus.PENDING);
         testEntityManager.persist(order);
 
-        orderService.assignOrderToUser(order.getId(), user.getEmail());
+        assertThrows(ImmutableOrderException.class, () -> orderService.assignOrderToUser(order.getId(), user.getEmail()));
     }
 
     @Test
     public void assignOrderToUserCancelled() {
-        thrown.expect(ImmutableOrderException.class);
-
         User user = persistUser();
         Order order = new Order();
         order.setStatus(OrderStatus.CANCELLED);
         testEntityManager.persist(order);
 
-        orderService.assignOrderToUser(order.getId(), user.getEmail());
+        assertThrows(ImmutableOrderException.class, () -> orderService.assignOrderToUser(order.getId(), user.getEmail()));
     }
 
     @Test
     public void assignOrderToUserPaid() {
-        thrown.expect(ImmutableOrderException.class);
-
         User user = persistUser();
         Order order = new Order();
         order.setStatus(OrderStatus.PAID);
         testEntityManager.persist(order);
 
-        orderService.assignOrderToUser(order.getId(), user.getEmail());
+        assertThrows(ImmutableOrderException.class, () -> orderService.assignOrderToUser(order.getId(), user.getEmail()));
     }
 
     @Test
     public void assignOrderToUserExpired() {
-        thrown.expect(ImmutableOrderException.class);
-
         User user = persistUser();
         Order order = new Order();
         order.setStatus(OrderStatus.EXPIRED);
         testEntityManager.persist(order);
 
-        orderService.assignOrderToUser(order.getId(), user.getEmail());
+        assertThrows(ImmutableOrderException.class, () -> orderService.assignOrderToUser(order.getId(), user.getEmail()));
     }
 
     @Test
     public void assignOrderToUserAlreadyAssigned() {
-        thrown.expect(ImmutableOrderException.class);
-
         User user = persistUser();
         User user2 =
                 testEntityManager.persist(new User("user2@mail.com", new BCryptPasswordEncoder().encode("password")));
@@ -407,7 +375,7 @@ public class OrderServiceTest extends ServiceTest {
         order.addTicket(persistTicket());
         Long id = testEntityManager.persistAndGetId(order, Long.class);
 
-        orderService.assignOrderToUser(id, user2.getEmail());
+        assertThrows(ImmutableOrderException.class, () -> orderService.assignOrderToUser(id, user2.getEmail()));
 
         assertEquals(user, testEntityManager.find(Order.class, id).getUser());
     }
@@ -427,11 +395,10 @@ public class OrderServiceTest extends ServiceTest {
 
     @Test
     public void removeTicketFromOrderNoTickets() {
-        thrown.expect(TicketNotFoundException.class);
         Order order = new Order();
         Long id = testEntityManager.persistAndGetId(order, Long.class);
 
-        orderService.removeTicketFromOrder(id, 4L);
+        assertThrows(TicketNotFoundException.class, () -> orderService.removeTicketFromOrder(id, 4L));
     }
 
     @Test
@@ -444,11 +411,8 @@ public class OrderServiceTest extends ServiceTest {
 
         assertEquals(1, testEntityManager.find(Order.class, id).getTickets().size());
 
-        try {
-            orderService.removeTicketFromOrder(id, ticket.getId());
-        } catch (TicketNotFoundException e) {
-            assertEquals(1, testEntityManager.find(Order.class, id).getTickets().size());
-        }
+        assertThrows(TicketNotFoundException.class, () -> orderService.removeTicketFromOrder(id, 0L));
+        assertEquals(1, testEntityManager.find(Order.class, id).getTickets().size());
     }
 
     @Test
@@ -488,39 +452,33 @@ public class OrderServiceTest extends ServiceTest {
 
     @Test
     public void removeTicketFromOrderOrderNotFound() {
-        thrown.expect(OrderNotFoundException.class);
-
         Order order = new Order();
         Ticket ticket = persistTicket();
         order.addTicket(testEntityManager.persist(ticket));
         testEntityManager.persistAndGetId(order, Long.class);
 
-        orderService.removeTicketFromOrder(9999L, ticket.getId());
+        assertThrows(OrderNotFoundException.class, () -> orderService.removeTicketFromOrder(9999L, ticket.getId()));
     }
 
     @Test
     public void removeTicketFromOrderOrderIdNull() {
-        thrown.expect(OrderNotFoundException.class);
-
         Order order = new Order();
         Ticket ticket = persistTicket();
         order.addTicket(testEntityManager.persist(ticket));
         testEntityManager.persistAndGetId(order, Long.class);
 
-        orderService.removeTicketFromOrder(null, ticket.getId());
+        assertThrows(OrderNotFoundException.class, () -> orderService.removeTicketFromOrder(null, ticket.getId()));
     }
 
     @Test
     public void removeTicketFromOrderStatusPending() {
-        thrown.expect(ImmutableOrderException.class);
-
         Order order = new Order();
         Ticket ticket = persistTicket();
         order.addTicket(testEntityManager.persist(ticket));
         order.setStatus(OrderStatus.PENDING);
         testEntityManager.persistAndGetId(order, Long.class);
 
-        orderService.removeTicketFromOrder(order.getId(), ticket.getId());
+        assertThrows(ImmutableOrderException.class, () -> orderService.removeTicketFromOrder(order.getId(), ticket.getId()));
     }
 
     @Test
@@ -600,12 +558,12 @@ public class OrderServiceTest extends ServiceTest {
 
     @Test
     public void updateOrdersStatusByIdEmptyReference() {
-        thrown.expect(PaymentException.class);
         Order order = new Order();
         order.setUser(persistUser());
         order.setReference("");
         order = testEntityManager.persist(order);
-        orderService.updateOrderStatusByOrderId(order.getId());
+        Order finalOrder = order;
+        assertThrows(PaymentException.class, () -> orderService.updateOrderStatusByOrderId(finalOrder.getId()));
     }
 
     @Test
@@ -667,14 +625,12 @@ public class OrderServiceTest extends ServiceTest {
     @Test
     public void updateOrderStatusByReferenceOrderStatusAnonymous() {
         Order order = new Order();
-        thrown.expect(UnassignedOrderException.class);
-
         order.addTicket(persistTicket());
         order.setReference("updateOrderStatusByReferenceOrderStatusAnonymous");
         order = testEntityManager.persist(order);
         given(paymentService.updateStatus(Mockito.anyString())).willReturn(order);
 
-        orderService.updateOrderStatusByReference("updateOrderStatusByReferenceOrderStatusAnonymous");
+        assertThrows(UnassignedOrderException.class, () -> orderService.updateOrderStatusByReference("updateOrderStatusByReferenceOrderStatusAnonymous"));
 
         assertTrue(order.getTickets().stream().noneMatch(Ticket::isValid));
         assertTrue(order.getTickets().stream().allMatch(t -> t.getOwner() == null));
@@ -707,14 +663,13 @@ public class OrderServiceTest extends ServiceTest {
     @Test
     public void updateOrderStatusByReferenceUnassignedOrder() {
         Order order = new Order();
-        thrown.expect(UnassignedOrderException.class);
 
         order.addTicket(persistTicket());
         order.setReference("updateOrderStatusByReferenceUnassignedOrder");
         order = testEntityManager.persist(order);
         given(paymentService.updateStatus(Mockito.anyString())).willReturn(order);
 
-        orderService.updateOrderStatusByReference("updateOrderStatusByReferenceUnassignedOrder");
+        assertThrows(UnassignedOrderException.class, () -> orderService.updateOrderStatusByReference("updateOrderStatusByReferenceUnassignedOrder"));
 
         assertTrue(order.getTickets().stream().noneMatch(Ticket::isValid));
 
@@ -756,13 +711,13 @@ public class OrderServiceTest extends ServiceTest {
 
     @Test
     public void getPaymentURLAssignedOrder() {
-        thrown.expect(ImmutableOrderException.class);
         User user = persistUser();
         Order order = new Order(user);
         order.setReference("getPaymentURLPendingOrder");
 
         order = testEntityManager.persist(order);
 
-        orderService.getPaymentUrl(order.getId());
+        Order finalOrder = order;
+        assertThrows(ImmutableOrderException.class, () -> orderService.getPaymentUrl(finalOrder.getId()));
     }
 }

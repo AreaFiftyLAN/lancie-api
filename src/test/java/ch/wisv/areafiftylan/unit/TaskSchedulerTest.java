@@ -3,13 +3,14 @@ package ch.wisv.areafiftylan.unit;
 import ch.wisv.areafiftylan.products.model.order.Order;
 import ch.wisv.areafiftylan.security.authentication.AuthenticationServiceImpl;
 import ch.wisv.areafiftylan.utils.ScheduledTasks;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Import({ScheduledTasks.class, AuthenticationServiceImpl.class})
 public class TaskSchedulerTest extends ServiceTest {
@@ -27,7 +28,7 @@ public class TaskSchedulerTest extends ServiceTest {
         scheduledTasks.ExpireOrders();
 
         Optional<Order> expiredOrder = orderRepository.findById(order.getId());
-        Assert.assertTrue(expiredOrder.isEmpty());
+        assertTrue(expiredOrder.isEmpty());
     }
 
     @Test
@@ -41,6 +42,6 @@ public class TaskSchedulerTest extends ServiceTest {
         scheduledTasks.ExpireOrders();
 
         Optional<Order> expiredOrder = orderRepository.findById(order.getId());
-        Assert.assertTrue(expiredOrder.isEmpty());
+        assertTrue(expiredOrder.isEmpty());
     }
 }

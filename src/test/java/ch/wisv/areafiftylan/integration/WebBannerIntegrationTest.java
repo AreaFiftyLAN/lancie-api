@@ -6,9 +6,9 @@ import ch.wisv.areafiftylan.web.banner.service.BannerRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.http.ContentType;
 import org.apache.http.HttpStatus;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.sql.Date;
@@ -19,8 +19,8 @@ import java.util.Collection;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.hasItem;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class WebBannerIntegrationTest extends XAuthIntegrationTest {
 
@@ -36,7 +36,7 @@ public class WebBannerIntegrationTest extends XAuthIntegrationTest {
 
     private ObjectMapper mapper;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         banner = new Banner();
         banners = new ArrayList<>();
@@ -51,7 +51,7 @@ public class WebBannerIntegrationTest extends XAuthIntegrationTest {
         mapper = new ObjectMapper();
     }
 
-    @After
+    @AfterEach
     public void cleanUpBanners() {
         bannerRepository.deleteAll();
     }
@@ -103,7 +103,7 @@ public class WebBannerIntegrationTest extends XAuthIntegrationTest {
             get(BANNER_ENDPOINT + "current").
         then().
             statusCode(HttpStatus.SC_OK).
-            body("object.text",equalTo(banner.getText().toString()));
+            body("object.text",equalTo(banner.getText()));
         //@formatter:on
     }
 

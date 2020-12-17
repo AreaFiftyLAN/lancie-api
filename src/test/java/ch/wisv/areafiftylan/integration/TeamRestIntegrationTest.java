@@ -26,8 +26,7 @@ import ch.wisv.areafiftylan.users.model.User;
 import io.restassured.http.ContentType;
 import io.restassured.http.Header;
 import org.apache.http.HttpStatus;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collection;
@@ -37,9 +36,7 @@ import java.util.Map;
 import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
 import static org.hamcrest.Matchers.*;
-import static org.hamcrest.core.IsCollectionContaining.hasItem;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 public class TeamRestIntegrationTest extends XAuthIntegrationTest {
@@ -84,7 +81,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
         //@formatter:on
 
         Team team = teamRepository.getOne(Long.valueOf(teamId));
-        Assert.assertNotNull(team);
+        assertNotNull(team);
     }
 
     @Test
@@ -110,7 +107,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
         //@formatter:on
 
         Team team = teamRepository.getOne(Long.valueOf(teamId));
-        Assert.assertNotNull(team);
+        assertNotNull(team);
     }
 
     @Test
@@ -136,7 +133,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
         //@formatter:on
 
         Team team = teamRepository.getOne(Long.valueOf(teamId));
-        Assert.assertNotNull(team);
+        assertNotNull(team);
     }
 
     @Test
@@ -359,7 +356,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
         //@formatter:on
 
         Collection<TeamInviteToken> tokens = teamInviteTokenRepository.findByUserEmailIgnoreCase(member.getEmail());
-        Assert.assertFalse(tokens.isEmpty());
+        assertFalse(tokens.isEmpty());
     }
 
     @Test
@@ -411,7 +408,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
         //@formatter:on
 
         Collection<TeamInviteToken> tokens = teamInviteTokenRepository.findByUserEmailIgnoreCase(member.getEmail());
-        Assert.assertFalse(tokens.isEmpty());
+        assertFalse(tokens.isEmpty());
     }
 
     @Test
@@ -441,7 +438,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
         //@formatter:on
 
         Collection<TeamInviteToken> tokens = teamInviteTokenRepository.findByUserEmailIgnoreCase(user.getEmail());
-        Assert.assertEquals(1, tokens.size());
+        assertEquals(1, tokens.size());
     }
 
     @Test
@@ -722,7 +719,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
         //@formatter:on
 
         Collection<Team> allByMembersEmail = teamRepository.findAllByMembersEmailIgnoreCase(user.getEmail());
-        Assert.assertFalse(allByMembersEmail.isEmpty());
+        assertFalse(allByMembersEmail.isEmpty());
     }
 
     @Test

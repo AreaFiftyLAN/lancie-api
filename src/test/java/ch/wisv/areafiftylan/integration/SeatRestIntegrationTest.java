@@ -29,9 +29,8 @@ import ch.wisv.areafiftylan.teams.model.Team;
 import ch.wisv.areafiftylan.users.model.User;
 import io.restassured.http.ContentType;
 import org.apache.http.HttpStatus;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collection;
@@ -39,9 +38,7 @@ import java.util.List;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SeatRestIntegrationTest extends XAuthIntegrationTest {
 
@@ -64,7 +61,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         seatRepository.save(seat);
     }
 
-    @After
+    @AfterEach
     public void cleanupSeatTest() {
         seatService.clearSeat("A", 1);
         seatService.clearSeat("A", 2);
@@ -660,9 +657,9 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         Seat previousSeat = seatService.getSeatBySeatGroupAndSeatNumber("A", 1);
         Seat currentSeat = seatService.getSeatBySeatGroupAndSeatNumber("A", 2);
 
-        Assert.assertNull(previousSeat.getTicket());
-        Assert.assertFalse(previousSeat.isTaken());
-        Assert.assertEquals(currentSeat.getTicket().getId(), ticket.getId());
+        assertNull(previousSeat.getTicket());
+        assertFalse(previousSeat.isTaken());
+        assertEquals(currentSeat.getTicket().getId(), ticket.getId());
         assertTrue(currentSeat.isTaken());
     }
 
@@ -750,7 +747,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         //@formatter:on
 
         Seat seat = seatService.getSeatBySeatGroupAndSeatNumber("A", 1);
-        Assert.assertNull(seat.getTicket());
+        assertNull(seat.getTicket());
     }
 
     @Test
@@ -800,7 +797,7 @@ public class SeatRestIntegrationTest extends XAuthIntegrationTest {
         //@formatter:on
 
         Seat seat = seatService.getSeatBySeatGroupAndSeatNumber("A", 1);
-        Assert.assertNull(seat.getTicket());
+        assertNull(seat.getTicket());
     }
     //endregion Reserve seat
     //region Lock Seat

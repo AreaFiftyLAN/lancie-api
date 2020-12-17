@@ -7,13 +7,14 @@ import ch.wisv.areafiftylan.products.model.TicketOption;
 import ch.wisv.areafiftylan.products.model.TicketType;
 import ch.wisv.areafiftylan.security.token.TicketTransferToken;
 import ch.wisv.areafiftylan.users.model.User;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 public class TicketServiceTest extends ServiceTest {
@@ -28,16 +29,12 @@ public class TicketServiceTest extends ServiceTest {
     @Test
     public void getTicketByIdNotFound() {
         Long id = 9999L;
-        thrown.expect(TicketNotFoundException.class);
-        thrown.expectMessage("Ticket not found");
-        ticketService.getTicketById(id);
+        Assertions.assertThrows(TicketNotFoundException.class, () -> ticketService.getTicketById(id));
     }
 
     @Test
     public void getTicketByIdNull() {
-        thrown.expect(TicketNotFoundException.class);
-        thrown.expectMessage("Ticket not found");
-        ticketService.getTicketById(null);
+        Assertions.assertThrows(TicketNotFoundException.class, () -> ticketService.getTicketById(null));
     }
 
     @Test
@@ -51,16 +48,12 @@ public class TicketServiceTest extends ServiceTest {
     @Test
     public void removeTicketNotFound() {
         Long id = 9999L;
-        thrown.expect(TicketNotFoundException.class);
-        thrown.expectMessage("Ticket not found");
-        ticketService.removeTicket(id);
+        Assertions.assertThrows(TicketNotFoundException.class, () -> ticketService.removeTicket(id));
     }
 
     @Test
     public void removeTicketNull() {
-        thrown.expect(TicketNotFoundException.class);
-        thrown.expectMessage("Ticket not found");
-        ticketService.removeTicket(null);
+        Assertions.assertThrows(TicketNotFoundException.class, () -> ticketService.removeTicket(null));
     }
 
     @Test
@@ -142,11 +135,11 @@ public class TicketServiceTest extends ServiceTest {
         Ticket ticket = persistTicket();
         ticket.setValid(false);
         ticket = testEntityManager.persist(ticket);
-        assertEquals(false, ticket.isValid());
+        assertFalse(ticket.isValid());
 
         ticketService.validateTicket(ticket.getId());
 
-        assertEquals(true, testEntityManager.find(Ticket.class, ticket.getId()).isValid());
+        assertTrue(testEntityManager.find(Ticket.class, ticket.getId()).isValid());
     }
 
     @Test
@@ -154,24 +147,20 @@ public class TicketServiceTest extends ServiceTest {
         Ticket ticket = persistTicket();
         ticket.setValid(true);
         ticket = testEntityManager.persist(ticket);
-        assertEquals(true, ticket.isValid());
+        assertTrue(ticket.isValid());
         ticketService.validateTicket(ticket.getId());
-        assertEquals(true, testEntityManager.find(Ticket.class, ticket.getId()).isValid());
+        assertTrue(testEntityManager.find(Ticket.class, ticket.getId()).isValid());
     }
 
     @Test
     public void validateTicketNotFound() {
         Long id = 9999L;
-        thrown.expect(TicketNotFoundException.class);
-        thrown.expectMessage("Ticket not found");
-        ticketService.validateTicket(id);
+        Assertions.assertThrows(TicketNotFoundException.class, () -> ticketService.validateTicket(id));
     }
 
     @Test
     public void validateTicketNull() {
-        thrown.expect(TicketNotFoundException.class);
-        thrown.expectMessage("Ticket not found");
-        ticketService.validateTicket(null);
+        Assertions.assertThrows(TicketNotFoundException.class, () -> ticketService.validateTicket(null));
     }
 
     @Test
@@ -199,10 +188,7 @@ public class TicketServiceTest extends ServiceTest {
         String typeString = "unavailable_ticket";
         List<String> optionsString = Arrays.asList(CH_MEMBER_OPTION, PICKUP_SERVICE_OPTION);
 
-        thrown.expect(TicketTypeNotFoundException.class);
-        thrown.expectMessage("TicketType ");
-
-        ticketService.requestTicketOfType(user, typeString, optionsString);
+        Assertions.assertThrows(TicketTypeNotFoundException.class, () -> ticketService.requestTicketOfType(user, typeString, optionsString));
     }
 
     @Test
@@ -210,10 +196,7 @@ public class TicketServiceTest extends ServiceTest {
         User user = persistUser();
         List<String> optionsString = Arrays.asList(CH_MEMBER_OPTION, PICKUP_SERVICE_OPTION);
 
-        thrown.expect(TicketTypeNotFoundException.class);
-        thrown.expectMessage("TicketType ");
-
-        ticketService.requestTicketOfType(user, null, optionsString);
+        Assertions.assertThrows(TicketTypeNotFoundException.class, () -> ticketService.requestTicketOfType(user, null, optionsString));
     }
 
     @Test
@@ -221,10 +204,7 @@ public class TicketServiceTest extends ServiceTest {
         User user = persistUser();
         List<String> optionsString = Arrays.asList("not found", "nope.avi");
 
-        thrown.expect(TicketOptionNotFoundException.class);
-        thrown.expectMessage("Ticket Option not found!");
-
-        ticketService.requestTicketOfType(user, TEST_TICKET, optionsString);
+        Assertions.assertThrows(TicketOptionNotFoundException.class, () -> ticketService.requestTicketOfType(user, TEST_TICKET, optionsString));
     }
 
     @Test
@@ -264,20 +244,14 @@ public class TicketServiceTest extends ServiceTest {
                 new TicketType("unavailable", "Unavailable TicketType", 5F, 10, LocalDateTime.now().minusDays(1), true);
         testEntityManager.persist(type);
 
-        thrown.expect(TicketUnavailableException.class);
-        thrown.expectMessage("Ticket is no longer available.");
-
-        ticketService.requestTicketOfType(user, type, Collections.emptyList());
+        Assertions.assertThrows(TicketUnavailableException.class, () -> ticketService.requestTicketOfType(user, type, Collections.emptyList()));
     }
 
     @Test
     public void requestTicketOfTypeObjectsTypeNull() {
         User user = persistUser();
 
-        thrown.expect(TicketUnavailableException.class);
-        thrown.expectMessage("Ticket is no longer available.");
-
-        ticketService.requestTicketOfType(user, null, new ArrayList<TicketOption>());
+        Assertions.assertThrows(TicketUnavailableException.class, () -> ticketService.requestTicketOfType(user, null, new ArrayList<TicketOption>()));
     }
 
     @Test
@@ -288,10 +262,7 @@ public class TicketServiceTest extends ServiceTest {
         TicketOption unavailableOption = new TicketOption("unavailable", 5F);
         List<TicketOption> options = Collections.singletonList(unavailableOption);
 
-        thrown.expect(TicketOptionNotSupportedException.class);
-        thrown.expectMessage("Ticket option ");
-
-        ticketService.requestTicketOfType(user, type, options);
+        Assertions.assertThrows(TicketOptionNotSupportedException.class, () -> ticketService.requestTicketOfType(user, type, options));
     }
 
     @Test
@@ -320,7 +291,7 @@ public class TicketServiceTest extends ServiceTest {
 
         assertEquals(ticket, ttt.getTicket());
         assertEquals(goalUser, ttt.getUser());
-        assertEquals(true, ttt.isValid());
+        assertTrue(ttt.isValid());
     }
 
     @Test
@@ -330,11 +301,8 @@ public class TicketServiceTest extends ServiceTest {
         Ticket ticket = persistTicket();
         Long ticketId = ticket.getId();
 
-        thrown.expect(TicketTransferTokenException.class);
-        thrown.expectMessage(" is already set up for transfer!");
-
         ticketService.setupForTransfer(ticketId, goalEmail);
-        ticketService.setupForTransfer(ticketId, goalEmail);
+        Assertions.assertThrows(TicketTransferTokenException.class, () -> ticketService.setupForTransfer(ticketId, goalEmail));
     }
 
     @Test
@@ -344,10 +312,7 @@ public class TicketServiceTest extends ServiceTest {
         Ticket ticket = persistTicketForUser(goalUser);
         Long ticketId = ticket.getId();
 
-        thrown.expect(TicketTransferTokenException.class);
-        thrown.expectMessage("yourself");
-
-        ticketService.setupForTransfer(ticketId, goalEmail);
+        Assertions.assertThrows(TicketTransferTokenException.class, () -> ticketService.setupForTransfer(ticketId, goalEmail));
     }
 
     @Test
@@ -358,10 +323,7 @@ public class TicketServiceTest extends ServiceTest {
         Long ticketId = ticket.getId();
         testEntityManager.persist(new RFIDLink("1234567890", ticket));
 
-        thrown.expect(TicketAlreadyLinkedException.class);
-        thrown.expectMessage("Ticket has already been linked to a RFID");
-
-        ticketService.setupForTransfer(ticketId, goalEmail);
+        Assertions.assertThrows(TicketAlreadyLinkedException.class, () -> ticketService.setupForTransfer(ticketId, goalEmail));
     }
 
     @Test
@@ -381,18 +343,12 @@ public class TicketServiceTest extends ServiceTest {
 
     @Test
     public void transferTicketTokenNotFound() {
-        thrown.expect(TokenNotFoundException.class);
-        thrown.expectMessage("Could not find token ");
-
-        ticketService.transferTicket("invalid_token");
+        Assertions.assertThrows(TokenNotFoundException.class, () -> ticketService.transferTicket("invalid_token"));
     }
 
     @Test
     public void transferTicketTokenNull() {
-        thrown.expect(TokenNotFoundException.class);
-        thrown.expectMessage("Could not find token ");
-
-        ticketService.transferTicket(null);
+        Assertions.assertThrows(TokenNotFoundException.class, () -> ticketService.transferTicket(null));
     }
 
     @Test
@@ -406,10 +362,7 @@ public class TicketServiceTest extends ServiceTest {
 
         ttt.use();
 
-        thrown.expect(InvalidTokenException.class);
-        thrown.expectMessage("Token is expired, has been already used or has been revoked.");
-
-        ticketService.transferTicket(token);
+        Assertions.assertThrows(InvalidTokenException.class, () -> ticketService.transferTicket(token));
     }
 
     @Test
@@ -424,10 +377,7 @@ public class TicketServiceTest extends ServiceTest {
         // Creating the RFIDLink needs to happen after setupForTransfer.
         testEntityManager.persist(new RFIDLink("1234567890", ticket));
 
-        thrown.expect(TicketAlreadyLinkedException.class);
-        thrown.expectMessage("Ticket has already been linked to a RFID");
-
-        ticketService.transferTicket(token);
+        Assertions.assertThrows(TicketAlreadyLinkedException.class, () -> ticketService.transferTicket(token));
     }
 
     @Test
@@ -448,18 +398,8 @@ public class TicketServiceTest extends ServiceTest {
 
     @Test
     public void cancelTicketTransferTokenNotFound() {
-        thrown.expect(TokenNotFoundException.class);
-        thrown.expectMessage("Could not find token ");
-
-        ticketService.cancelTicketTransfer("invalid_token");
-    }
-
-    @Test
-    public void cancelTicketTransferTokenNull() {
-        thrown.expect(TokenNotFoundException.class);
-        thrown.expectMessage("Could not find token ");
-
-        ticketService.cancelTicketTransfer(null);
+        Assertions.assertThrows(TokenNotFoundException.class, () -> ticketService.cancelTicketTransfer("invalid_token"));
+        Assertions.assertThrows(TokenNotFoundException.class, () -> ticketService.cancelTicketTransfer(null));
     }
 
     @Test
@@ -473,10 +413,7 @@ public class TicketServiceTest extends ServiceTest {
 
         ttt.use();
 
-        thrown.expect(InvalidTokenException.class);
-        thrown.expectMessage("Token is expired, has been already used or has been revoked.");
-
-        ticketService.cancelTicketTransfer(token);
+        Assertions.assertThrows(InvalidTokenException.class, () -> ticketService.cancelTicketTransfer(token));
     }
 
     @Test
@@ -525,9 +462,7 @@ public class TicketServiceTest extends ServiceTest {
 
     @Test
     public void getOwnedTicketsAndFromTeamMembersNull() {
-        thrown.expect(IllegalArgumentException.class);
-
-        ticketService.getOwnedTicketsAndFromTeamMembers(null);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> ticketService.getOwnedTicketsAndFromTeamMembers(null));
     }
 
     @Test
@@ -680,10 +615,8 @@ public class TicketServiceTest extends ServiceTest {
 
     @Test
     public void updateTicketTypeTestNoneThere() {
-        thrown.expect(TicketTypeNotFoundException.class);
-        thrown.expectMessage("TicketType with ID null not found!");
         TicketType ticketType = new TicketType("type1", "text", 5F, 0, LocalDateTime.now(), false);
-        ticketService.updateTicketType(ticketType.getId(), ticketType);
+        Assertions.assertThrows(TicketTypeNotFoundException.class, () -> ticketService.updateTicketType(ticketType.getId(), ticketType));
     }
 
     @Test

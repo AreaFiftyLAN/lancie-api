@@ -15,18 +15,16 @@ plugins {
     id 'com.google.cloud.tools.jib' version '2.7.0'
 }
 
-jar {
-    archiveName = 'lancie-api'
-}
-
-sourceCompatibility = JavaVersion.VERSION_11
-targetCompatibility = JavaVersion.VERSION_11
-
 repositories {
     mavenCentral()
     maven {
         url "https://github.com/stil4m/maven-repository/raw/master/releases/"
     }
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 }
 
 dependencies {
@@ -57,10 +55,6 @@ dependencies {
     testCompile 'io.rest-assured:rest-assured:4.1.2'
     testCompile 'io.rest-assured:json-path:4.1.2'
     testCompile 'io.rest-assured:xml-path:4.1.2'
-
-    // https://mvnrepository.com/artifact/org.junit.vintage/junit-vintage-engine
-    testCompile group: 'org.junit.vintage', name: 'junit-vintage-engine', version: '5.7.0'
-
 }
 
 jib {
@@ -87,6 +81,10 @@ jacocoTestReport {
         xml.enabled true
         html.enabled false
     }
+}
+
+test {
+    useJUnitPlatform()
 }
 
 check.dependsOn jacocoTestReport

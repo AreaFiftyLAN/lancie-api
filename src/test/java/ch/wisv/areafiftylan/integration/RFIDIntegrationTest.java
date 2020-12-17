@@ -27,8 +27,7 @@ import ch.wisv.areafiftylan.products.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.users.model.User;
 import io.restassured.http.ContentType;
 import org.apache.http.HttpStatus;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Optional;
@@ -36,6 +35,7 @@ import java.util.Optional;
 import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class RFIDIntegrationTest extends XAuthIntegrationTest {
     private final String RFID_ENDPOINT = "/rfid/";
@@ -254,7 +254,7 @@ public class RFIDIntegrationTest extends XAuthIntegrationTest {
         //@formatter:on
 
         Optional<RFIDLink> queryResult = rfidLinkRepository.findByRfid(dto.getRfid());
-        Assert.assertEquals(queryResult.orElseThrow(RFIDNotFoundException::new).
+        assertEquals(queryResult.orElseThrow(RFIDNotFoundException::new).
                 getTicket().getId(), ticket.getId());
     }
 
@@ -276,7 +276,7 @@ public class RFIDIntegrationTest extends XAuthIntegrationTest {
             statusCode(HttpStatus.SC_BAD_REQUEST);
         //@formatter:on
 
-        Assert.assertFalse(rfidLinkRepository.findByRfid(dto.getRfid()).isPresent());
+        assertFalse(rfidLinkRepository.findByRfid(dto.getRfid()).isPresent());
     }
 
     @Test
@@ -301,8 +301,8 @@ public class RFIDIntegrationTest extends XAuthIntegrationTest {
         //@formatter:on
 
         Optional<RFIDLink> queryResult = rfidLinkRepository.findByRfid(rfidLink.getRfid());
-        Assert.assertTrue(queryResult.isPresent());
-        Assert.assertEquals(queryResult.get().getTicket().getId(), ticket1.getId());
+        assertTrue(queryResult.isPresent());
+        assertEquals(queryResult.get().getTicket().getId(), ticket1.getId());
     }
 
     @Test
@@ -323,7 +323,7 @@ public class RFIDIntegrationTest extends XAuthIntegrationTest {
             .statusCode(HttpStatus.SC_CONFLICT);
         //@formatter:on
 
-        Assert.assertFalse(rfidLinkRepository.findByRfid(dto.getRfid()).isPresent());
+        assertFalse(rfidLinkRepository.findByRfid(dto.getRfid()).isPresent());
     }
 
     @Test
@@ -365,7 +365,7 @@ public class RFIDIntegrationTest extends XAuthIntegrationTest {
             .statusCode(HttpStatus.SC_NOT_FOUND);
         //@formatter:on
 
-        Assert.assertFalse(rfidLinkRepository.findByRfid(dto.getRfid()).isPresent());
+        assertFalse(rfidLinkRepository.findByRfid(dto.getRfid()).isPresent());
     }
 
     @Test
@@ -384,7 +384,7 @@ public class RFIDIntegrationTest extends XAuthIntegrationTest {
             .body("ticket.id", equalTo(ticket.getId().intValue()));
         //@formatter:on
 
-        Assert.assertFalse(rfidLinkRepository.findByRfid(link.getRfid()).isPresent());
+        assertFalse(rfidLinkRepository.findByRfid(link.getRfid()).isPresent());
     }
 
     @Test
@@ -403,7 +403,7 @@ public class RFIDIntegrationTest extends XAuthIntegrationTest {
             .body("ticket.id", equalTo(ticket.getId().intValue()));
         //@formatter:on
 
-        Assert.assertFalse(rfidLinkRepository.findByRfid(rfidLink.getRfid()).isPresent());
+        assertFalse(rfidLinkRepository.findByRfid(rfidLink.getRfid()).isPresent());
     }
 
     @Test
@@ -411,7 +411,7 @@ public class RFIDIntegrationTest extends XAuthIntegrationTest {
         User admin = createAdmin();
         Ticket ticket = createTicketForUser(admin);
         RFIDLink link = createRfidLink(ticket);
-        String unused = String.valueOf(Long.valueOf(link.getRfid()) + 1);
+        String unused = String.valueOf(Long.parseLong(link.getRfid()) + 1);
 
         //@formatter:off
         given().
@@ -422,7 +422,7 @@ public class RFIDIntegrationTest extends XAuthIntegrationTest {
             .statusCode(HttpStatus.SC_NOT_FOUND);
         //@formatter:on
 
-        Assert.assertTrue(rfidLinkRepository.findByRfid(link.getRfid()).isPresent());
+        assertTrue(rfidLinkRepository.findByRfid(link.getRfid()).isPresent());
     }
 
     @Test
@@ -445,7 +445,7 @@ public class RFIDIntegrationTest extends XAuthIntegrationTest {
         Ticket ticket = createTicketForUser(user);
         createRfidLink(ticket);
 
-        Assert.assertTrue(rfidLinkRepository.existsRFIDLinkByTicket_Owner_Email(user.getEmail()));
+        assertTrue(rfidLinkRepository.existsRFIDLinkByTicket_Owner_Email(user.getEmail()));
     }
 
     @Test
@@ -453,6 +453,6 @@ public class RFIDIntegrationTest extends XAuthIntegrationTest {
         User user = createUser();
         createTicketForUser(user);
 
-        Assert.assertFalse(rfidLinkRepository.existsRFIDLinkByTicket_Owner_Email(user.getEmail()));
+        assertFalse(rfidLinkRepository.existsRFIDLinkByTicket_Owner_Email(user.getEmail()));
     }
 }

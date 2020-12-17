@@ -21,14 +21,14 @@ import ch.wisv.areafiftylan.extras.mailupdates.model.Subscription;
 import ch.wisv.areafiftylan.extras.mailupdates.model.SubscriptionDTO;
 import ch.wisv.areafiftylan.extras.mailupdates.model.SubscriptionRepository;
 import ch.wisv.areafiftylan.extras.mailupdates.service.SubscriptionService;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collection;
 import java.util.LinkedList;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SubscriptionServiceTest extends ServiceTest {
 
@@ -43,7 +43,7 @@ public class SubscriptionServiceTest extends ServiceTest {
 
     private SubscriptionDTO subscriptionDTO;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.subscriptionDTO = new SubscriptionDTO();
     }

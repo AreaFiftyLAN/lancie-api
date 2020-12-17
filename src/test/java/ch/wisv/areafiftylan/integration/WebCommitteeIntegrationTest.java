@@ -5,8 +5,8 @@ import ch.wisv.areafiftylan.web.committee.model.CommitteeMember;
 import ch.wisv.areafiftylan.web.committee.service.CommitteeRepository;
 import io.restassured.http.ContentType;
 import org.apache.http.HttpStatus;
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static io.restassured.RestAssured.given;
@@ -30,7 +30,7 @@ public class WebCommitteeIntegrationTest extends XAuthIntegrationTest {
         return committeeRepository.save(committeeMember);
     }
 
-    @After
+    @AfterEach
     public void cleanupCommitteeTest() {
         committeeRepository.deleteAll();
     }

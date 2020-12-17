@@ -25,10 +25,9 @@ import io.restassured.http.ContentType;
 import io.restassured.http.Header;
 import io.restassured.response.Response;
 import org.apache.http.HttpStatus;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashMap;
@@ -38,6 +37,8 @@ import java.util.Optional;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AuthenticationIntegrationTest extends XAuthIntegrationTest {
 
@@ -48,7 +49,7 @@ public class AuthenticationIntegrationTest extends XAuthIntegrationTest {
     Map<String, String> userDTO;
     private final String AUTH_HEADER = "X-Auth-Token";
 
-    @Before
+    @BeforeEach
     public void setup() {
         user = createUser();
         userDTO = new HashMap<>();
@@ -56,7 +57,7 @@ public class AuthenticationIntegrationTest extends XAuthIntegrationTest {
         userDTO.put("password", cleartextPassword);
     }
 
-    @After
+    @AfterEach
     public void cleanupAuthTest() {
         authenticationTokenRepository.deleteAll();
     }
@@ -73,7 +74,7 @@ public class AuthenticationIntegrationTest extends XAuthIntegrationTest {
         Optional<AuthenticationToken> authenticationToken =
                 authenticationTokenRepository.findByUserEmail(user.getEmail());
 
-        Assert.assertTrue(authenticationToken.isPresent());
+        assertTrue(authenticationToken.isPresent());
 
         response.then().
                 statusCode(HttpStatus.SC_OK).
@@ -107,7 +108,7 @@ public class AuthenticationIntegrationTest extends XAuthIntegrationTest {
         AuthenticationToken authenticationToken2 =
                 authenticationTokenRepository.findByUserEmail(user.getEmail()).orElse(null);
 
-        Assert.assertFalse(authenticationToken1.equals(authenticationToken2));
+        assertFalse(authenticationToken1.equals(authenticationToken2));
     }
 
     @Test

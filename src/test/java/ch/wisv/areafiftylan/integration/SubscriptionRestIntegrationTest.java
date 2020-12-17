@@ -18,25 +18,24 @@
 package ch.wisv.areafiftylan.integration;
 
 
-import org.apache.http.HttpStatus;
-import org.junit.Before;
-import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.LinkedList;
-import java.util.List;
-
 import ch.wisv.areafiftylan.extras.mailupdates.model.Subscription;
 import ch.wisv.areafiftylan.extras.mailupdates.model.SubscriptionDTO;
 import ch.wisv.areafiftylan.extras.mailupdates.model.SubscriptionRepository;
 import ch.wisv.areafiftylan.users.model.User;
 import io.restassured.http.ContentType;
+import org.apache.http.HttpStatus;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.LinkedList;
+import java.util.List;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SubscriptionRestIntegrationTest extends XAuthIntegrationTest {
 
@@ -57,7 +56,7 @@ public class SubscriptionRestIntegrationTest extends XAuthIntegrationTest {
     private Subscription subscription2;
     private Subscription subscription3;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         subscriptionRepository.deleteAll();
 

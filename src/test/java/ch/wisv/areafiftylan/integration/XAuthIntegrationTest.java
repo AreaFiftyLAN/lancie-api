@@ -38,22 +38,21 @@ import ch.wisv.areafiftylan.users.service.UserRepository;
 import io.restassured.RestAssured;
 import io.restassured.config.RedirectConfig;
 import io.restassured.http.Header;
-import org.junit.Before;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
-
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ContextConfiguration(classes = ApplicationTest.class)
 @ActiveProfiles("test")
@@ -87,7 +86,7 @@ public abstract class XAuthIntegrationTest {
     protected final String PICKUP_SERVICE = "pickupService";
     protected final String TEST_TICKET = "test";
 
-    @Before
+    @BeforeEach
     public void setXAuthIntegrationTest() {
         RestAssured.port = port;
         RestAssured.config().redirect(RedirectConfig.redirectConfig().followRedirects(false));
@@ -130,7 +129,7 @@ public abstract class XAuthIntegrationTest {
         return ticketRepository.save(ticket);
     }
 
-    protected RFIDLink createRFIDLink(String rfidString, Ticket ticket){
+    protected RFIDLink createRFIDLink(String rfidString, Ticket ticket) {
         RFIDLink rfidLink = new RFIDLink(rfidString, ticket);
         return rfidLinkRepository.save(rfidLink);
     }
