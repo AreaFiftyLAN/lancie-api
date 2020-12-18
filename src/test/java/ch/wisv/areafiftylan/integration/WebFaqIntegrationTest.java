@@ -5,8 +5,8 @@ import ch.wisv.areafiftylan.web.faq.model.FaqPair;
 import ch.wisv.areafiftylan.web.faq.service.FaqRepository;
 import io.restassured.http.ContentType;
 import org.apache.http.HttpStatus;
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static io.restassured.RestAssured.given;
@@ -27,7 +27,7 @@ public class WebFaqIntegrationTest  extends XAuthIntegrationTest{
         return faqRepository.save(faqPair);
     }
 
-    @After
+    @AfterEach
     public void cleanupFaqTests() {
         faqRepository.deleteAll();
     }

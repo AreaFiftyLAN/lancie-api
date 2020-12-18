@@ -25,7 +25,7 @@ import ch.wisv.areafiftylan.users.model.User;
 import io.restassured.http.ContentType;
 import io.restassured.http.Header;
 import org.apache.http.HttpStatus;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
@@ -37,9 +37,7 @@ import static io.restassured.RestAssured.when;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.*;
-import static org.hamcrest.core.IsCollectionContaining.hasItem;
-import static org.hamcrest.core.IsCollectionContaining.hasItems;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class UserRestIntegrationTest extends XAuthIntegrationTest {
 
@@ -61,7 +59,7 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         return profileDTO;
     }
 
-   @Test
+    @Test
     public void testGetAllUsersAsAnonymous() {
         //@formatter:off
         when().
@@ -578,7 +576,7 @@ public class UserRestIntegrationTest extends XAuthIntegrationTest {
         //@formatter:on
 
         User disabledUser = userRepository.findOneByEmailIgnoreCase(user.getEmail()).orElse(user);
-        assertFalse("User is disabled", disabledUser.isAccountNonLocked());
+        assertFalse(disabledUser.isAccountNonLocked());
     }
 
     @Test

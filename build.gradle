@@ -15,13 +15,6 @@ plugins {
     id 'com.google.cloud.tools.jib' version '2.7.0'
 }
 
-jar {
-    archiveName = 'lancie-api'
-}
-
-sourceCompatibility = JavaVersion.VERSION_11
-targetCompatibility = JavaVersion.VERSION_11
-
 repositories {
     mavenCentral()
     maven {
@@ -29,38 +22,38 @@ repositories {
     }
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
 dependencies {
     // Some dependency versions are managed by Spring Boot, refer to
     // https://docs.spring.io/spring-boot/docs/current/reference/html/appendix-dependency-versions.html
-    compile("org.springframework.boot:spring-boot-starter-web")
-    compile("org.springframework.boot:spring-boot-starter-data-jpa")
-    compile("org.springframework.boot:spring-boot-starter-security")
-    compile("org.springframework.boot:spring-boot-starter-mail")
-    compile("org.springframework.boot:spring-boot-starter-thymeleaf")
-    compile("org.springframework.boot:spring-boot-devtools")
-    compile("org.springframework.boot:spring-boot-starter-logging")
-    compile("org.springframework.boot:spring-boot-starter-actuator")
-    compile("org.springframework.boot:spring-boot-starter-json")
-    compile("org.springframework.boot:spring-boot-starter-validation")
-    compile "org.flywaydb:flyway-core:7.3.2"
-    compile("org.springframework.boot:spring-boot-starter-aop")
-    compile("com.google.guava:guava:30.0-jre")
-    compile("nl.stil4m:mollie-api:2.7.0")
-    compile("net.logstash.logback:logstash-logback-encoder:4.11")
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'org.springframework.boot:spring-boot-devtools'
+    implementation 'org.springframework.boot:spring-boot-starter-logging'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-json'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+    implementation 'org.flywaydb:flyway-core:7.3.2'
+    implementation 'com.google.guava:guava:30.0-jre'
+    implementation 'nl.stil4m:mollie-api:2.7.0'
+    implementation 'net.logstash.logback:logstash-logback-encoder:4.11'
+    implementation 'in.ashwanthkumar:slack-java-webhook:0.0.9'
 
-    compile("in.ashwanthkumar:slack-java-webhook:0.0.9")
+    runtimeOnly 'org.hsqldb:hsqldb'
+    runtimeOnly 'org.postgresql:postgresql'
 
-    runtime("org.hsqldb:hsqldb")
-    runtime("org.postgresql:postgresql")
-
-    testCompile("org.springframework.boot:spring-boot-starter-test")
-    testCompile 'io.rest-assured:rest-assured:4.1.2'
-    testCompile 'io.rest-assured:json-path:4.1.2'
-    testCompile 'io.rest-assured:xml-path:4.1.2'
-
-    // https://mvnrepository.com/artifact/org.junit.vintage/junit-vintage-engine
-    testCompile group: 'org.junit.vintage', name: 'junit-vintage-engine', version: '5.7.0'
-
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'io.rest-assured:rest-assured:4.2.1'
+    testImplementation 'io.rest-assured:json-path:4.2.1'
+    testImplementation 'io.rest-assured:xml-path:4.2.1'
 }
 
 jib {
@@ -87,6 +80,10 @@ jacocoTestReport {
         xml.enabled true
         html.enabled false
     }
+}
+
+test {
+    useJUnitPlatform()
 }
 
 check.dependsOn jacocoTestReport

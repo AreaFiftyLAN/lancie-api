@@ -6,16 +6,15 @@ import ch.wisv.areafiftylan.extras.rfid.service.RFIDLinkRepository;
 import ch.wisv.areafiftylan.extras.rfid.service.RFIDService;
 import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.users.model.User;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collection;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class RFIDServiceTest extends ServiceTest{
+public class RFIDServiceTest extends ServiceTest {
 
     @Autowired
     RFIDService rfidService;
@@ -71,58 +70,57 @@ public class RFIDServiceTest extends ServiceTest{
         Ticket ticket = persistTicketForUser(user);
         String rfid = "0000000001";
         RFIDLink link = rfidService.addRFIDLink(rfid, ticket.getId());
-        assertTrue(link.getRfid().equals(rfid));
-        assertTrue(link.getTicket().equals(ticket));
+        assertEquals(rfid, link.getRfid());
+        assertEquals(ticket, link.getTicket());
     }
 
-    @Test(expected = InvalidRFIDException.class)
     public void addRFIDLinkTooShortTest() {
         User user = persistUser();
         Ticket ticket = persistTicketForUser(user);
         String rfid = "0000001";
-        rfidService.addRFIDLink(rfid, ticket.getId());
+        Assertions.assertThrows(InvalidRFIDException.class, () -> rfidService.addRFIDLink(rfid, ticket.getId()));
         assertEquals(0, rfidLinkRepository.findAll().size());
     }
 
-    @Test(expected = InvalidRFIDException.class)
+    @Test
     public void addRFIDLinkTooLongTest() {
         User user = persistUser();
         Ticket ticket = persistTicketForUser(user);
         String rfid = "0000000000000000001";
-        rfidService.addRFIDLink(rfid, ticket.getId());
+        Assertions.assertThrows(InvalidRFIDException.class, () -> rfidService.addRFIDLink(rfid, ticket.getId()));
         assertEquals(0, rfidLinkRepository.findAll().size());
     }
 
-    @Test(expected = RFIDTakenException.class)
+    @Test
     public void addRFIDLinkAlreadyTakenTest() {
         User user = persistUser();
         Ticket ticket = persistTicketForUser(user);
         String rfid = "0000000001";
         rfidService.addRFIDLink(rfid, ticket.getId());
-        rfidService.addRFIDLink(rfid, ticket.getId());
-        assertEquals(0, rfidLinkRepository.findAll().size());
+        Assertions.assertThrows(RFIDTakenException.class, () -> rfidService.addRFIDLink(rfid, ticket.getId()));
+        assertEquals(1, rfidLinkRepository.findAll().size());
     }
 
-    @Test(expected = InvalidTicketException.class)
+    @Test
     public void addRFIDLinkInvalidTicketTest() {
         User user = persistUser();
         Ticket ticket = persistTicketForUser(user);
         ticket.setValid(false);
         ticketRepository.save(ticket);
         String rfid = "0000000001";
-        rfidService.addRFIDLink(rfid, ticket.getId());
+        Assertions.assertThrows(InvalidTicketException.class, () -> rfidService.addRFIDLink(rfid, ticket.getId()));
         assertEquals(0, rfidLinkRepository.findAll().size());
     }
 
-    @Test(expected = TicketAlreadyLinkedException.class)
+    @Test
     public void addRFIDLinkTicketAlreadyLinkedTest() {
         User user = persistUser();
         Ticket ticket = persistTicketForUser(user);
         String rfid1 = "0000000001";
         String rfid2 = "0000000002";
         rfidService.addRFIDLink(rfid1, ticket.getId());
-        rfidService.addRFIDLink(rfid2, ticket.getId());
-        assertEquals(0, rfidLinkRepository.findAll().size());
+        Assertions.assertThrows(TicketAlreadyLinkedException.class, () -> rfidService.addRFIDLink(rfid2, ticket.getId()));
+        assertEquals(1, rfidLinkRepository.findAll().size());
     }
 
     @Test
@@ -149,11 +147,11 @@ public class RFIDServiceTest extends ServiceTest{
         assertEquals(0, rfidLinkRepository.findAll().size());
     }
 
-    @Test(expected = RFIDNotFoundException.class)
+    @Test
     public void removeRFIDLinkNotThereTest() {
         String rfid = "0000000001";
         assertEquals(0, rfidLinkRepository.findAll().size());
-        rfidService.removeRFIDLink(rfid);
+        Assertions.assertThrows(RFIDNotFoundException.class, () -> rfidService.removeRFIDLink(rfid));
     }
 
     @Test

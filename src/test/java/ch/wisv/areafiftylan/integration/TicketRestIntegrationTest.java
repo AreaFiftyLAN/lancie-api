@@ -33,8 +33,7 @@ import ch.wisv.areafiftylan.teams.model.Team;
 import ch.wisv.areafiftylan.users.model.User;
 import io.restassured.http.ContentType;
 import org.apache.http.HttpStatus;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -47,6 +46,7 @@ import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 public class TicketRestIntegrationTest extends XAuthIntegrationTest {
@@ -261,9 +261,9 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         //@formatter:on
 
         TicketTransferToken ttt = tttRepository.findByToken(token).get();
-        Assert.assertTrue(ttt.isValid());
-        Assert.assertTrue(ttt.getTicket().getOwner().equals(ticketOwner));
-        Assert.assertTrue(ttt.getUser().equals(ticketReceiver));
+        assertTrue(ttt.isValid());
+        assertEquals(ticketOwner, ttt.getTicket().getOwner());
+        assertEquals(ticketReceiver, ttt.getUser());
     }
 
     @Test
@@ -376,8 +376,8 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         ttt = tttRepository.findByToken(ttt.getToken()).get();
         ticket = ticketRepository.findById(ticket.getId()).orElseThrow(TicketNotFoundException::new);
 
-        Assert.assertTrue(ttt.isValid());
-        Assert.assertEquals(ticket.getOwner(), ticketOwner);
+        assertTrue(ttt.isValid());
+        assertEquals(ticket.getOwner(), ticketOwner);
     }
 
     @Test
@@ -400,8 +400,8 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         ttt = tttRepository.findByToken(ttt.getToken()).get();
         ticket = ticketRepository.findById(ticket.getId()).orElseThrow(TicketNotFoundException::new);
 
-        Assert.assertTrue(ttt.isValid());
-        Assert.assertEquals(ticket.getOwner(), ticketOwner);
+        assertTrue(ttt.isValid());
+        assertEquals(ticket.getOwner(), ticketOwner);
     }
 
     @Test
@@ -424,8 +424,8 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         ttt = tttRepository.findByToken(ttt.getToken()).get();
         ticket = ticketRepository.findById(ticket.getId()).orElseThrow(TicketNotFoundException::new);
 
-        Assert.assertFalse(ttt.isValid());
-        Assert.assertTrue(ticket.getOwner().equals(ticketReceiver));
+        assertFalse(ttt.isValid());
+        assertEquals(ticketReceiver, ticket.getOwner());
     }
 
     @Test
@@ -454,8 +454,8 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         ttt = tttRepository.findByToken(ttt.getToken()).get();
         ticket = ticketRepository.findById(ticket.getId()).orElseThrow(TicketNotFoundException::new);
 
-        Assert.assertTrue(ttt.isValid());
-        Assert.assertTrue(ticket.getOwner().equals(ticketOwner));
+        assertTrue(ttt.isValid());
+        assertEquals(ticketOwner, ticket.getOwner());
     }
 
     @Test
@@ -479,8 +479,8 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         ttt = tttRepository.findByToken(ttt.getToken()).get();
         ticket = ticketRepository.findById(ticket.getId()).orElseThrow(TicketNotFoundException::new);
 
-        Assert.assertTrue(ttt.isValid());
-        Assert.assertTrue(ticket.getOwner().equals(ticketOwner));
+        assertTrue(ttt.isValid());
+        assertEquals(ticketOwner, ticket.getOwner());
     }
 
     @Test
@@ -541,8 +541,8 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         ttt = tttRepository.findByToken(ttt.getToken()).get();
         ticket = ticketRepository.findById(ticket.getId()).orElseThrow(TicketNotFoundException::new);
 
-        Assert.assertTrue(ttt.isValid());
-        Assert.assertTrue(ticket.getOwner().equals(ticketOwner));
+        assertTrue(ttt.isValid());
+        assertEquals(ticketOwner, ticket.getOwner());
     }
 
     @Test
@@ -565,8 +565,8 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         ttt = tttRepository.findByToken(ttt.getToken()).get();
         ticket = ticketRepository.findById(ticket.getId()).orElseThrow(TicketNotFoundException::new);
 
-        Assert.assertFalse(ttt.isValid());
-        Assert.assertTrue(ticket.getOwner().equals(ticketOwner));
+        assertFalse(ttt.isValid());
+        assertEquals(ticketOwner, ticket.getOwner());
     }
 
     @Test
@@ -589,8 +589,8 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         ttt = tttRepository.findByToken(ttt.getToken()).get();
         ticket = ticketRepository.findById(ticket.getId()).orElseThrow(TicketNotFoundException::new);
 
-        Assert.assertTrue(ttt.isValid());
-        Assert.assertEquals(ticket.getOwner(), ticketOwner);
+        assertTrue(ttt.isValid());
+        assertEquals(ticket.getOwner(), ticketOwner);
     }
 
     @Test
@@ -614,8 +614,8 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         ttt = tttRepository.findByToken(ttt.getToken()).get();
         ticket = ticketRepository.findById(ticket.getId()).orElseThrow(TicketNotFoundException::new);
 
-        Assert.assertTrue(ttt.isValid());
-        Assert.assertEquals(ticket.getOwner(), ticketOwner);
+        assertTrue(ttt.isValid());
+        assertEquals(ticket.getOwner(), ticketOwner);
     }
 
     @Test

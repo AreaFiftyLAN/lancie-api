@@ -17,11 +17,9 @@ import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.users.service.UserRepository;
 import ch.wisv.areafiftylan.users.service.UserServiceImpl;
 import ch.wisv.areafiftylan.utils.mail.MailServiceImpl;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -30,7 +28,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.thymeleaf.spring5.SpringTemplateEngine;
 
 import java.time.LocalDate;
@@ -38,7 +36,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
 @DataJpaTest
 @Import({TestRunner.class, OrderServiceImpl.class, RFIDServiceImpl.class, SeatServiceImpl.class, TicketServiceImpl.class, SubscriptionServiceImpl.class, UserServiceImpl.class, TeamServiceImpl.class})
@@ -80,9 +78,6 @@ public abstract class ServiceTest {
     protected final String EXTRA_OPTION = "extraOption";
     protected final String TEST_TICKET = "test";
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
     protected User persistUser() {
         long count = userRepository.count();
         User user = new User(count + "@mail.com", new BCryptPasswordEncoder().encode("password"));
@@ -96,7 +91,7 @@ public abstract class ServiceTest {
     protected Ticket persistTicket() {
         Ticket ticket =
                 ticketService.requestTicketOfType(TEST_TICKET, Arrays.asList(CH_MEMBER_OPTION, PICKUP_SERVICE_OPTION));
-        ticket.setValid(true);
+        ticket.setValid(false);
         return testEntityManager.persist(ticket);
     }
 
@@ -117,12 +112,12 @@ public abstract class ServiceTest {
         return testEntityManager.persist(team);
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         testEntityManager.clear();
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
 
     }

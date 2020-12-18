@@ -8,15 +8,15 @@ import ch.wisv.areafiftylan.web.tournament.model.Tournament;
 import ch.wisv.areafiftylan.web.tournament.service.TournamentRepository;
 import io.restassured.http.ContentType;
 import org.apache.http.HttpStatus;
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashSet;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class WebSponsorIntegrationTest extends XAuthIntegrationTest {
 
@@ -63,7 +63,7 @@ public class WebSponsorIntegrationTest extends XAuthIntegrationTest {
         return tournamentRepository.save(tournament);
     }
 
-    @After
+    @AfterEach
     public void cleanupSponsorTests() {
         tournamentRepository.deleteAll();
         sponsorRepository.deleteAll();

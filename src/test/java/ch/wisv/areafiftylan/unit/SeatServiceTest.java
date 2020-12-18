@@ -3,8 +3,10 @@ package ch.wisv.areafiftylan.unit;
 import ch.wisv.areafiftylan.exception.SeatNotFoundException;
 import ch.wisv.areafiftylan.seats.model.SeatGroupDTO;
 import ch.wisv.areafiftylan.seats.service.SeatService;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class SeatServiceTest extends ServiceTest {
 
@@ -22,10 +24,7 @@ public class SeatServiceTest extends ServiceTest {
 
         seatGroupDTO.setSeatGroupName(TEMP_SEATGROUP + "invalid");
 
-        thrown.expect(SeatNotFoundException.class);
-        thrown.expectMessage("SeatGroup " + seatGroupDTO.getSeatGroupName() + " not found!");
-
-        seatService.removeSeats(seatGroupDTO);
+        assertThrows(SeatNotFoundException.class, () -> seatService.removeSeats(seatGroupDTO));
     }
 
     @Test
@@ -37,9 +36,6 @@ public class SeatServiceTest extends ServiceTest {
 
         seatGroupDTO.setNumberOfSeats(-5);
 
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("Number of seats needs to be higher than 1");
-
-        seatService.removeSeats(seatGroupDTO);
+        assertThrows(IllegalArgumentException.class, () -> seatService.removeSeats(seatGroupDTO));
     }
 }
