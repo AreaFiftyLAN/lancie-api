@@ -323,7 +323,7 @@ public class OrderServiceTest extends ServiceTest {
     public void assignOrderToUserEmailNull() {
         Long id = testEntityManager.persistAndGetId(new Order(), Long.class);
 
-        assertThrows(UsernameNotFoundException.class, () -> orderService.assignOrderToUser(id, null));
+        assertThrows(UsernameNotFoundException.class, () -> orderService.assignOrderToUser(id, ""));
     }
 
     @Test

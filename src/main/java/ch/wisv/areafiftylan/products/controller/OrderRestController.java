@@ -21,6 +21,7 @@ import ch.wisv.areafiftylan.exception.ImmutableOrderException;
 import ch.wisv.areafiftylan.exception.OrderNotFoundException;
 import ch.wisv.areafiftylan.exception.TicketNotFoundException;
 import ch.wisv.areafiftylan.exception.TicketUnavailableException;
+import ch.wisv.areafiftylan.products.model.AssignDTO;
 import ch.wisv.areafiftylan.products.model.TicketDTO;
 import ch.wisv.areafiftylan.products.model.order.Order;
 import ch.wisv.areafiftylan.products.service.OrderService;
@@ -44,6 +45,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Collection;
 
 import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEntity;
@@ -266,6 +268,22 @@ public class OrderRestController {
         log.info(controllerMarker, "Order {} updated", order.getId(), StructuredArguments.v("order_id", order.getId()));
 
         return createResponseEntity(HttpStatus.OK, "Order status updated", order);
+    }
+
+    /**
+     * This call allows for assigning a giveaway ticket. It creates the order directly.
+     *
+     * @param assignDTO the Assign DTO to be used to assign the ticket
+     * @return The created giveaway Order.
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/assigngiveaway")
+    public ResponseEntity<?> assignTicket(@RequestBody @Validated AssignDTO assignDTO) {
+        Order order = orderService.create(assignDTO.getTicketType(), null);
+        orderService.assignOrderToUser(order.getId(), assignDTO.getUserID());
+        orderService.adminApproveOrder(order.getId());
+        return createResponseEntity(HttpStatus.CREATED, "Ticket of type: " + assignDTO.getTicketType() +
+                " assigned!", order);
     }
 
     @ExceptionHandler(TicketUnavailableException.class)

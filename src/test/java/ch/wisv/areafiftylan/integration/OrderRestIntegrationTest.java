@@ -695,4 +695,44 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
             body("message", equalTo("Operation on Order " + order.getId() + " not permitted"));
         //@formatter:on
     }
+
+    @Test
+    public void testUserAssignTicketOrder() {
+        Map<String, Object> assignObject = new HashMap<>();
+        User user = createUser();
+        assignObject.put("userID", user.getId());
+        assignObject.put("ticketType", TEST_TICKET);
+
+        //@formatter:off
+        given().
+                header(getXAuthTokenHeaderForUser(user)).
+                when().
+                body(assignObject).contentType(ContentType.JSON).
+                post("/orders/assigngiveaway").
+                then().
+                statusCode(HttpStatus.SC_FORBIDDEN).
+                body("object", is(nullValue()));
+    }
+
+    @Test
+    public void testAdminAssignTicketOrder() {
+        Map<String, Object> assignObject = new HashMap<>();
+        User user = createUser();
+        assignObject.put("userID", user.getId());
+        assignObject.put("ticketType", TEST_TICKET);
+        User admin = createAdmin();
+
+        //@formatter:off
+        given().
+                header(getXAuthTokenHeaderForUser(admin)).
+                when().
+                body(assignObject).contentType(ContentType.JSON).
+                post("/orders/assigngiveaway").
+                then().
+                statusCode(HttpStatus.SC_CREATED).
+                body("object.tickets", hasSize(1)).
+                body("object.tickets.type.name", hasItem(is(TEST_TICKET))).
+                body("object.tickets.type.text", anything()).
+                body("object.amount",equalTo(30F));
+    }
 }
