@@ -28,7 +28,6 @@ import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -699,18 +698,17 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void testUserAssignTicketOrder() {
-        Map<String, Object> order = new HashMap<>();
-        List<String> options = Arrays.asList(CH_MEMBER, PICKUP_SERVICE);
-        order.put("type", TEST_TICKET);
-        order.put("options", options);
+        Map<String, Object> assignObject = new HashMap<>();
         User user = createUser();
+        assignObject.put("userID", user.getId());
+        assignObject.put("ticketType", TEST_TICKET);
 
         //@formatter:off
         given().
                 header(getXAuthTokenHeaderForUser(user)).
                 when().
-                body(order).contentType(ContentType.JSON).
-                post("/orders/ " + user.getId() + "/test/assigngiveaway").
+                body(assignObject).contentType(ContentType.JSON).
+                post("/orders/assigngiveaway").
                 then().
                 statusCode(HttpStatus.SC_FORBIDDEN).
                 body("object", is(nullValue()));
@@ -718,19 +716,18 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void testAdminAssignTicketOrder() {
-        Map<String, Object> order = new HashMap<>();
-        List<String> options = Arrays.asList(CH_MEMBER, PICKUP_SERVICE);
-        order.put("type", TEST_TICKET);
-        order.put("options", options);
+        Map<String, Object> assignObject = new HashMap<>();
         User user = createUser();
+        assignObject.put("userID", user.getId());
+        assignObject.put("ticketType", TEST_TICKET);
         User admin = createAdmin();
 
         //@formatter:off
         given().
                 header(getXAuthTokenHeaderForUser(admin)).
                 when().
-                body(order).contentType(ContentType.JSON).
-                post("/orders/ " + user.getId() + "/test/assigngiveaway").
+                body(assignObject).contentType(ContentType.JSON).
+                post("/orders/assigngiveaway").
                 then().
                 statusCode(HttpStatus.SC_CREATED).
                 body("object.id", is(16)).
