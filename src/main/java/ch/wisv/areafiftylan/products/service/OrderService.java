@@ -47,6 +47,8 @@ public interface OrderService {
 
     Order assignOrderToUser(Long orderId, String email);
 
+    Order assignOrderToUser(Long orderId, Long userId);
+
     /**
      * Removes a ticket with the given DTO from an order. Throws a NotFoundException when a ticket with such a DTO can't
      * be found

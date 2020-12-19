@@ -167,6 +167,12 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public Order assignOrderToUser(Long orderId, Long userId) {
+        User user = userService.getUserById(userId);
+        return assignOrderToUser(orderId, user.getEmail());
+    }
+
+    @Override
     public Order removeTicketFromOrder(Long orderId, Long ticketId) {
         Order order = getOrderById(orderId);
         if (order.getStatus().equals(OrderStatus.ANONYMOUS) || order.getStatus().equals(OrderStatus.ASSIGNED)) {
