@@ -28,6 +28,7 @@ import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -694,5 +695,48 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
             statusCode(HttpStatus.SC_CONFLICT).
             body("message", equalTo("Operation on Order " + order.getId() + " not permitted"));
         //@formatter:on
+    }
+
+    @Test
+    public void testUserAssignTicketOrder() {
+        Map<String, Object> order = new HashMap<>();
+        List<String> options = Arrays.asList(CH_MEMBER, PICKUP_SERVICE);
+        order.put("type", TEST_TICKET);
+        order.put("options", options);
+        User user = createUser();
+
+        //@formatter:off
+        given().
+                header(getXAuthTokenHeaderForUser(user)).
+                when().
+                body(order).contentType(ContentType.JSON).
+                post("/orders/ " + user.getId() + "/test/assigngiveaway").
+                then().
+                statusCode(HttpStatus.SC_FORBIDDEN).
+                body("object", is(nullValue()));
+    }
+
+    @Test
+    public void testAdminAssignTicketOrder() {
+        Map<String, Object> order = new HashMap<>();
+        List<String> options = Arrays.asList(CH_MEMBER, PICKUP_SERVICE);
+        order.put("type", TEST_TICKET);
+        order.put("options", options);
+        User user = createUser();
+        User admin = createAdmin();
+
+        //@formatter:off
+        given().
+                header(getXAuthTokenHeaderForUser(admin)).
+                when().
+                body(order).contentType(ContentType.JSON).
+                post("/orders/ " + user.getId() + "/test/assigngiveaway").
+                then().
+                statusCode(HttpStatus.SC_CREATED).
+                body("object.id", is(16)).
+                body("object.tickets", hasSize(1)).
+                body("object.tickets.type.name", hasItem(is(TEST_TICKET))).
+                body("object.tickets.type.text", anything()).
+                body("object.amount",equalTo(30F));
     }
 }

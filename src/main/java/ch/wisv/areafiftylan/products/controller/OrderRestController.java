@@ -44,6 +44,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Collection;
 
 import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEntity;
@@ -266,6 +267,21 @@ public class OrderRestController {
         log.info(controllerMarker, "Order {} updated", order.getId(), StructuredArguments.v("order_id", order.getId()));
 
         return createResponseEntity(HttpStatus.OK, "Order status updated", order);
+    }
+
+    /**
+     * This call allows for assigning a giveaway ticket. It creates the order directly.
+     *
+     * @param userId UserID of the Giveaway ticket
+     * @return The created giveaway Order.
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/{userId}/{ticketType}/assigngiveaway")
+    public ResponseEntity<?> assignTicket(@PathVariable long userId, @PathVariable String ticketType) {
+        Order order = orderService.create(ticketType, null);
+        orderService.assignOrderToUser(order.getId(), userId);
+        orderService.adminApproveOrder(order.getId());
+        return createResponseEntity(HttpStatus.CREATED, "Ticket of type: " + ticketType +" assigned!", order);
     }
 
     @ExceptionHandler(TicketUnavailableException.class)
