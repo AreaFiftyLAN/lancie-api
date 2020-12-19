@@ -730,7 +730,6 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
                 post("/orders/assigngiveaway").
                 then().
                 statusCode(HttpStatus.SC_CREATED).
-                body("object.id", is(16)).
                 body("object.tickets", hasSize(1)).
                 body("object.tickets.type.name", hasItem(is(TEST_TICKET))).
                 body("object.tickets.type.text", anything()).
