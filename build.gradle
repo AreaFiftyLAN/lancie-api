@@ -73,6 +73,9 @@ jib {
             implementation = 'com.google.cloud.tools.jib.gradle.extension.springboot.JibSpringBootExtension'
         }
     }
+    container {
+        creationTime = 'USE_CURRENT_TIMESTAMP'
+    }
 }
 
 jacocoTestReport {
