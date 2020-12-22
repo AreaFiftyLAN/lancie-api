@@ -96,7 +96,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 new JsonLoginAuthenticationAttemptHandler(authenticationService);
         http.logout().logoutSuccessHandler(attemptHandler);
 
-        http.authorizeRequests().expressionHandler(webExpressionHandler()).requestMatchers(EndpointRequest.to("health"))
+        http.cors().and().authorizeRequests().expressionHandler(webExpressionHandler()).requestMatchers(EndpointRequest.to("health"))
                 .permitAll().requestMatchers(EndpointRequest.toAnyEndpoint()).hasRole("ADMIN").anyRequest().permitAll();
 
         // We use custom Authentication Tokens, making csrf redundant
