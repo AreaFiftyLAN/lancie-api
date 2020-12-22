@@ -79,7 +79,8 @@ public class AuthenticationIntegrationTest extends XAuthIntegrationTest {
         response.then().
                 statusCode(HttpStatus.SC_OK).
                 header("X-Auth-Token", containsString(authenticationToken.get().getToken())).
-                header("Access-Control-Allow-Origin", "*");
+                header("Access-Control-Allow-Origin", "*").
+                header("Access-Control-Expose-Headers", "X-Auth-Token");
         //@formatter:on
     }
 
