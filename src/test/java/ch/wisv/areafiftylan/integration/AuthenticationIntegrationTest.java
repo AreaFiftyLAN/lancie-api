@@ -30,15 +30,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class AuthenticationIntegrationTest extends XAuthIntegrationTest {
 
@@ -71,14 +72,14 @@ public class AuthenticationIntegrationTest extends XAuthIntegrationTest {
             body(userDTO).contentType(ContentType.JSON).
             post("/login");
 
-        Optional<AuthenticationToken> authenticationToken =
+        Optional<List<AuthenticationToken>> authenticationToken =
                 authenticationTokenRepository.findByUserEmail(user.getEmail());
 
         assertTrue(authenticationToken.isPresent());
 
         response.then().
                 statusCode(HttpStatus.SC_OK).
-                header("X-Auth-Token", containsString(authenticationToken.get().getToken())).
+                header("X-Auth-Token", containsString(authenticationToken.get().get(0).getToken())).
                 header("Access-Control-Allow-Origin", "*").
                 header("Access-Control-Expose-Headers", "X-Auth-Token");
         //@formatter:on
@@ -86,31 +87,33 @@ public class AuthenticationIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void testRequestTokenRenew() {
-        //@formatter:off
-        given().
-        when().
-            body(userDTO).contentType(ContentType.JSON).
-            post("/login").
-        then().
-            statusCode(HttpStatus.SC_OK);
-        //@formatter:on
+        callLoginOK(userDTO);
 
-        AuthenticationToken authenticationToken1 =
-                authenticationTokenRepository.findByUserEmail(user.getEmail()).orElse(null);
+        List<AuthenticationToken> authenticationTokenList1 =
+                authenticationTokenRepository.findByUserEmail(user.getEmail()).orElse(Collections.emptyList());
+        assertEquals(1, authenticationTokenList1.size());
+        AuthenticationToken authenticationToken1 = authenticationTokenList1.get(0);
 
-        //@formatter:off
-        given().
-        when().
-            body(userDTO).contentType(ContentType.JSON).
-            post("/login").
-        then().
-            statusCode(HttpStatus.SC_OK);
-        //@formatter:on
+        callLoginOK(userDTO);
 
-        AuthenticationToken authenticationToken2 =
-                authenticationTokenRepository.findByUserEmail(user.getEmail()).orElse(null);
+        List<AuthenticationToken> authenticationTokenList2 =
+                authenticationTokenRepository.findByUserEmail(user.getEmail()).orElse(Collections.emptyList());
 
+        assertEquals(2, authenticationTokenList2.size());
+        AuthenticationToken authenticationToken2 = authenticationTokenList2.get(1);
         assertFalse(authenticationToken1.equals(authenticationToken2));
+    }
+
+    @Test
+    public void testRequestTokenTooManySessions() {
+        for (int i = 0; i < 5; i++) {
+            callLoginOK(userDTO);
+        }
+
+        List<AuthenticationToken> authenticationTokenList =
+                authenticationTokenRepository.findByUserEmail(user.getEmail()).orElse(Collections.emptyList());
+
+        assertEquals(1, authenticationTokenList.size());
     }
 
     @Test
@@ -278,5 +281,16 @@ public class AuthenticationIntegrationTest extends XAuthIntegrationTest {
                 statusCode(HttpStatus.SC_OK);
             //@formatter:on
         }
+    }
+
+    private void callLoginOK(Map<String, String> userDTO) {
+        //@formatter:off
+        given().
+                when().
+                body(userDTO).contentType(ContentType.JSON).
+                post("/login").
+                then().
+                statusCode(HttpStatus.SC_OK);
+        //@formatter:on
     }
 }

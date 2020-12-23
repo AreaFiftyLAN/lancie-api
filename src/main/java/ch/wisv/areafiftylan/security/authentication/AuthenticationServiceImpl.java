@@ -33,6 +33,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Optional;
+
 @Service
 @Slf4j
 public class AuthenticationServiceImpl implements AuthenticationService {
@@ -59,7 +62,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         User user = userService.getUserByEmail(email);
 
         // Delete the old Token
-        authenticationTokenRepository.findByUserEmail(email).ifPresent(authenticationTokenRepository::delete);
+        Optional<List<AuthenticationToken>> existingToken = authenticationTokenRepository.findByUserEmail(email);
+        int sessions = existingToken.map(List::size).orElse(0);
+        if (sessions >= 4) {
+            authenticationTokenRepository.findByUserEmail(email).ifPresent(authenticationTokenRepository::deleteAll);
+        }
 
         return authenticationTokenRepository.saveAndFlush(new AuthenticationToken(user)).getToken();
     }
