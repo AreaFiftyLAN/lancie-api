@@ -61,11 +61,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public String createNewAuthToken(String email) {
         User user = userService.getUserByEmail(email);
 
-        // Delete the old Token
-        Optional<List<AuthenticationToken>> existingToken = authenticationTokenRepository.findByUserEmail(email);
-        int sessions = existingToken.map(List::size).orElse(0);
-        if (sessions >= 4) {
-            authenticationTokenRepository.findByUserEmail(email).ifPresent(authenticationTokenRepository::deleteAll);
+        // Delete the old Tokens if there are more than 4.
+        List<AuthenticationToken> existingTokens = authenticationTokenRepository.findByUserEmail(email);
+        if (existingTokens.size() >= 4) {
+            authenticationTokenRepository.deleteAll(existingTokens);
         }
 
         return authenticationTokenRepository.saveAndFlush(new AuthenticationToken(user)).getToken();

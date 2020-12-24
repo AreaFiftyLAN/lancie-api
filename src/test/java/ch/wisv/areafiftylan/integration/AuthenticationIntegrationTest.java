@@ -30,11 +30,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.containsString;
@@ -72,14 +70,14 @@ public class AuthenticationIntegrationTest extends XAuthIntegrationTest {
             body(userDTO).contentType(ContentType.JSON).
             post("/login");
 
-        Optional<List<AuthenticationToken>> authenticationToken =
+        List<AuthenticationToken> authenticationToken =
                 authenticationTokenRepository.findByUserEmail(user.getEmail());
 
-        assertTrue(authenticationToken.isPresent());
+        assertNotNull(authenticationToken.get(0));
 
         response.then().
                 statusCode(HttpStatus.SC_OK).
-                header("X-Auth-Token", containsString(authenticationToken.get().get(0).getToken())).
+                header("X-Auth-Token", containsString(authenticationToken.get(0).getToken())).
                 header("Access-Control-Allow-Origin", "*").
                 header("Access-Control-Expose-Headers", "X-Auth-Token");
         //@formatter:on
@@ -90,14 +88,14 @@ public class AuthenticationIntegrationTest extends XAuthIntegrationTest {
         callLoginOK(userDTO);
 
         List<AuthenticationToken> authenticationTokenList1 =
-                authenticationTokenRepository.findByUserEmail(user.getEmail()).orElse(Collections.emptyList());
+                authenticationTokenRepository.findByUserEmail(user.getEmail());
         assertEquals(1, authenticationTokenList1.size());
         AuthenticationToken authenticationToken1 = authenticationTokenList1.get(0);
 
         callLoginOK(userDTO);
 
         List<AuthenticationToken> authenticationTokenList2 =
-                authenticationTokenRepository.findByUserEmail(user.getEmail()).orElse(Collections.emptyList());
+                authenticationTokenRepository.findByUserEmail(user.getEmail());
 
         assertEquals(2, authenticationTokenList2.size());
         AuthenticationToken authenticationToken2 = authenticationTokenList2.get(1);
@@ -105,15 +103,34 @@ public class AuthenticationIntegrationTest extends XAuthIntegrationTest {
     }
 
     @Test
-    public void testRequestTokenTooManySessions() {
+    public void testRequestTokenManySessions() {
         for (int i = 0; i < 5; i++) {
             callLoginOK(userDTO);
         }
 
         List<AuthenticationToken> authenticationTokenList =
-                authenticationTokenRepository.findByUserEmail(user.getEmail()).orElse(Collections.emptyList());
+                authenticationTokenRepository.findByUserEmail(user.getEmail());
 
         assertEquals(1, authenticationTokenList.size());
+    }
+
+    @Test
+    public void testRequestTokenManySessionsTwoUsers() {
+        User user2 = createUser();
+        HashMap<String, String> user2DTO = new HashMap<>();
+        user2DTO.put("email", user2.getEmail());
+        user2DTO.put("password", cleartextPassword);
+
+        callLoginOK(user2DTO);
+
+        for (int i = 0; i < 5; i++) {
+            callLoginOK(user2DTO);
+        }
+
+        List<AuthenticationToken> authenticationTokenList =
+                authenticationTokenRepository.findByUserEmail(user2.getEmail());
+
+        assertNotNull(authenticationTokenList.get(0));
     }
 
     @Test
