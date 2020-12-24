@@ -104,14 +104,20 @@ public class AuthenticationIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void testRequestTokenManySessions() {
-        for (int i = 0; i < 5; i++) {
+        callLoginOK(userDTO);
+        List<AuthenticationToken> authenticationTokens =
+                authenticationTokenRepository.findByUserEmail(user.getEmail());
+
+        AuthenticationToken token = authenticationTokens.get(0);
+        for (int i = 0; i < 4; i++) {
             callLoginOK(userDTO);
         }
 
         List<AuthenticationToken> authenticationTokenList =
                 authenticationTokenRepository.findByUserEmail(user.getEmail());
 
-        assertEquals(1, authenticationTokenList.size());
+        assertFalse(authenticationTokenList.contains(token));
+        assertEquals(4, authenticationTokenList.size());
     }
 
     @Test

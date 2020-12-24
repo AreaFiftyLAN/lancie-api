@@ -64,7 +64,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         // Delete the old Tokens if there are more than 4.
         List<AuthenticationToken> existingTokens = authenticationTokenRepository.findByUserEmail(email);
         if (existingTokens.size() >= 4) {
-            authenticationTokenRepository.deleteAll(existingTokens);
+            authenticationTokenRepository.delete(existingTokens.get(0));
         }
 
         return authenticationTokenRepository.saveAndFlush(new AuthenticationToken(user)).getToken();
