@@ -96,6 +96,42 @@ public class TeamRestController {
                 "Team successfully created at " + httpHeaders.getLocation(), team);
     }
 
+    /**
+     * The method to handle POST requests on the /teams endpoint. This assigns a new captain to an existing team.
+     * Users can only assign a new captain to a team if they are the captain of that team.
+     * Admins can also assign a new captain to a team.
+     *
+     * @param user The logged in user
+     * @param teamID The ID of the team
+     * @param newCaptainEmail The email of the new captain
+     *
+     * @return Return status message of the operation
+     */
+    @PreAuthorize("isAuthenticated()")
+    @JsonView(View.Public.class)
+    @PostMapping("/{teamID}/changecaptain")
+    ResponseEntity<?> changeCaptain(@AuthenticationPrincipal User user, @PathVariable Long teamID,
+                                    @RequestBody String newCaptainEmail) {
+        Team team = teamService.getTeamById(teamID);
+
+        if (team.getCaptain().getEmail().equals(newCaptainEmail)) {
+            return createResponseEntity(HttpStatus.NOT_MODIFIED, "This person is already the captain of the team.");
+        }
+
+        // Check if the requestor is an admin or the captain of the team.
+        if (!user.getRoles().contains(Role.ROLE_ADMIN) && !user.getEmail().equals(team.getCaptain().getEmail())) {
+            return createResponseEntity(HttpStatus.UNAUTHORIZED,
+                    "Only the captain of the team can assign a new captain.");
+        }
+
+        TeamDTO teamDTO = new TeamDTO();
+        teamDTO.setTeamName(team.getTeamName());
+        teamDTO.setCaptainEmail(newCaptainEmail);
+        teamService.update(team.getId(), teamDTO);
+        return createResponseEntity(HttpStatus.OK,
+                "Captain of team " + team.getTeamName() + " successfully changed!");
+    }
+
 
     /**
      * Get all users. Only available as Admin
