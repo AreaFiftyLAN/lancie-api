@@ -107,21 +107,15 @@ public class TeamRestController {
      *
      * @return Return status message of the operation
      */
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("@currentUserServiceImpl.canEditTeam(principal, #teamID)")
     @JsonView(View.Public.class)
-    @PostMapping("/{teamID}/changecaptain")
+    @PostMapping("/{teamID}/captain")
     ResponseEntity<?> changeCaptain(@AuthenticationPrincipal User user, @PathVariable Long teamID,
                                     @RequestBody String newCaptainEmail) {
         Team team = teamService.getTeamById(teamID);
 
         if (team.getCaptain().getEmail().equals(newCaptainEmail)) {
             return createResponseEntity(HttpStatus.NOT_MODIFIED, "This person is already the captain of the team.");
-        }
-
-        // Check if the requestor is an admin or the captain of the team.
-        if (!user.getRoles().contains(Role.ROLE_ADMIN) && !user.getEmail().equals(team.getCaptain().getEmail())) {
-            return createResponseEntity(HttpStatus.UNAUTHORIZED,
-                    "Only the captain of the team can assign a new captain.");
         }
 
         TeamDTO teamDTO = new TeamDTO();

@@ -1027,7 +1027,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
                 header(getXAuthTokenHeaderForUser(captain)).
                 when().
                 body(user.getEmail()).
-                post(TEAM_ENDPOINT + team.getId() + "/changecaptain").
+                post(TEAM_ENDPOINT + team.getId() + "/captain").
                 then().
                 statusCode(HttpStatus.SC_OK);
         //@formatter:on
@@ -1048,9 +1048,9 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
                 header(getXAuthTokenHeaderForUser(user)).
                 when().
                 body(user.getEmail()).
-                post(TEAM_ENDPOINT + team.getId() + "/changecaptain").
+                post(TEAM_ENDPOINT + team.getId() + "/captain").
                 then().
-                statusCode(HttpStatus.SC_UNAUTHORIZED);
+                statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
     }
 
@@ -1064,7 +1064,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
                 header(getXAuthTokenHeaderForUser(captain)).
                 when().
                 body(captain.getEmail()).
-                post(TEAM_ENDPOINT + team.getId() + "/changecaptain").
+                post(TEAM_ENDPOINT + team.getId() + "/captain").
                 then().
                 statusCode(HttpStatus.SC_NOT_MODIFIED);
         //@formatter:on
@@ -1084,7 +1084,7 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
                 header(getXAuthTokenHeaderForUser(admin)).
                 when().
                 body(user.getEmail()).
-                post(TEAM_ENDPOINT + team.getId() + "/changecaptain").
+                post(TEAM_ENDPOINT + team.getId() + "/captain").
                 then().
                 statusCode(HttpStatus.SC_OK);
         //@formatter:on
@@ -1104,9 +1104,9 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
                 header(getXAuthTokenHeaderForUser(user)).
                 when().
                 body(user.getEmail()).
-                post(TEAM_ENDPOINT + team.getId() + "/changecaptain").
+                post(TEAM_ENDPOINT + team.getId() + "/captain").
                 then().
-                statusCode(HttpStatus.SC_UNAUTHORIZED);
+                statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
     }
 
