@@ -117,11 +117,8 @@ public class TeamRestController {
         if (team.getCaptain().getEmail().equals(newCaptainEmail)) {
             return createResponseEntity(HttpStatus.NOT_MODIFIED, "This person is already the captain of the team.");
         }
-
-        TeamDTO teamDTO = new TeamDTO();
-        teamDTO.setTeamName(team.getTeamName());
-        teamDTO.setCaptainEmail(newCaptainEmail);
-        teamService.update(team.getId(), teamDTO);
+        
+        teamService.update(team.getId(), null, newCaptainEmail);
         return createResponseEntity(HttpStatus.OK,
                 "Captain of team " + team.getTeamName() + " successfully changed!");
     }
@@ -276,7 +273,7 @@ public class TeamRestController {
     @JsonView(View.Team.class)
     @PutMapping("/{teamId}")
     public Team update(@PathVariable Long teamId, @Validated @RequestBody TeamDTO input) {
-        return this.teamService.update(teamId, input);
+        return this.teamService.update(teamId, input.getTeamName(), input.getCaptainEmail());
     }
 
     /**

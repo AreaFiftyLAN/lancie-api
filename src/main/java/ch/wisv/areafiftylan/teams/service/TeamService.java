@@ -40,7 +40,7 @@ public interface TeamService {
 
     Collection<Team> getTeamsByMemberEmail(String email);
 
-    Team update(Long teamId, TeamDTO input);
+    Team update(Long teamId, String teamName, String captainEmail);
 
     Team delete(Long teamId);
 
