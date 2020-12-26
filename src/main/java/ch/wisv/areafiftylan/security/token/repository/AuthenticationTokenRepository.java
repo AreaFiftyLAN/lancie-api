@@ -25,7 +25,7 @@ import java.util.List;
 
 @Repository
 public interface AuthenticationTokenRepository extends TokenRepository<AuthenticationToken> {
-    List<AuthenticationToken> findByUserEmail(String email);
+    List<AuthenticationToken> findByUserEmailOrderById(String email);
 
     void deleteByUser(User user);
 }
