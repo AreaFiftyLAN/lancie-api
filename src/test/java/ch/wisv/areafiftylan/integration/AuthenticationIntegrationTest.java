@@ -71,7 +71,7 @@ public class AuthenticationIntegrationTest extends XAuthIntegrationTest {
             post("/login");
 
         List<AuthenticationToken> authenticationToken =
-                authenticationTokenRepository.findByUserEmailOrderById(user.getEmail());
+                authenticationTokenRepository.findByUserEmailOrderByExpiryDate(user.getEmail());
 
         assertNotNull(authenticationToken.get(0));
 
@@ -88,14 +88,14 @@ public class AuthenticationIntegrationTest extends XAuthIntegrationTest {
         callLoginOK(userDTO);
 
         List<AuthenticationToken> authenticationTokenList1 =
-                authenticationTokenRepository.findByUserEmailOrderById(user.getEmail());
+                authenticationTokenRepository.findByUserEmailOrderByExpiryDate(user.getEmail());
         assertEquals(1, authenticationTokenList1.size());
         AuthenticationToken authenticationToken1 = authenticationTokenList1.get(0);
 
         callLoginOK(userDTO);
 
         List<AuthenticationToken> authenticationTokenList2 =
-                authenticationTokenRepository.findByUserEmailOrderById(user.getEmail());
+                authenticationTokenRepository.findByUserEmailOrderByExpiryDate(user.getEmail());
 
         assertEquals(2, authenticationTokenList2.size());
         AuthenticationToken authenticationToken2 = authenticationTokenList2.get(1);
@@ -106,7 +106,7 @@ public class AuthenticationIntegrationTest extends XAuthIntegrationTest {
     public void testRequestTokenManySessions() {
         callLoginOK(userDTO);
         List<AuthenticationToken> authenticationTokens =
-                authenticationTokenRepository.findByUserEmailOrderById(user.getEmail());
+                authenticationTokenRepository.findByUserEmailOrderByExpiryDate(user.getEmail());
 
         AuthenticationToken token = authenticationTokens.get(0);
         for (int i = 0; i < 4; i++) {
@@ -114,7 +114,7 @@ public class AuthenticationIntegrationTest extends XAuthIntegrationTest {
         }
 
         List<AuthenticationToken> authenticationTokenList =
-                authenticationTokenRepository.findByUserEmailOrderById(user.getEmail());
+                authenticationTokenRepository.findByUserEmailOrderByExpiryDate(user.getEmail());
 
         assertFalse(authenticationTokenList.contains(token));
         assertEquals(4, authenticationTokenList.size());
@@ -134,7 +134,7 @@ public class AuthenticationIntegrationTest extends XAuthIntegrationTest {
         }
 
         List<AuthenticationToken> authenticationTokenList =
-                authenticationTokenRepository.findByUserEmailOrderById(user2.getEmail());
+                authenticationTokenRepository.findByUserEmailOrderByExpiryDate(user2.getEmail());
 
         assertNotNull(authenticationTokenList.get(0));
     }
