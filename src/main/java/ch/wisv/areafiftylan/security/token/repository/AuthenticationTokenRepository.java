@@ -21,11 +21,11 @@ import ch.wisv.areafiftylan.security.token.AuthenticationToken;
 import ch.wisv.areafiftylan.users.model.User;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
+import java.util.List;
 
 @Repository
 public interface AuthenticationTokenRepository extends TokenRepository<AuthenticationToken> {
-    Optional<AuthenticationToken> findByUserEmail(String email);
+    List<AuthenticationToken> findByUserEmailOrderByExpiryDate(String email);
 
     void deleteByUser(User user);
 }
