@@ -93,16 +93,15 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public Team update(Long teamId, TeamDTO input) {
+    public Team update(Long teamId, String teamName, String captainEmail) {
         Team current = getTeamById(teamId);
 
         // If the Teamname is set, change the Teamname
-        if (!Strings.isNullOrEmpty(input.getTeamName())) {
-            current.setTeamName(input.getTeamName());
+        if (!Strings.isNullOrEmpty(teamName)) {
+            current.setTeamName(teamName);
         }
 
         // If the Captain email is set and different from the current captain, change the Captain
-        String captainEmail = input.getCaptainEmail();
         if (!Strings.isNullOrEmpty(captainEmail) && !captainEmail.equals(current.getCaptain().getEmail())) {
             User captain = userService.getUserByEmail(captainEmail);
             current.setCaptain(captain);

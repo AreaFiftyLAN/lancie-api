@@ -1014,6 +1014,102 @@ public class TeamRestIntegrationTest extends XAuthIntegrationTest {
             statusCode(HttpStatus.SC_OK);
         //@formatter:on
     }
+
+    @Test
+    public void testChangeCaptainByCaptain() {
+        User captain = createUser();
+        User user = createUser();
+        Team team = createTeamWithCaptain(captain);
+        team.addMember(user);
+
+        //@formatter:off
+        given().
+                header(getXAuthTokenHeaderForUser(captain)).
+                when().
+                body(user.getEmail()).
+                post(TEAM_ENDPOINT + team.getId() + "/captain").
+                then().
+                statusCode(HttpStatus.SC_OK);
+        //@formatter:on
+
+        Team newTeam = teamRepository.findById(team.getId()).get();
+        assertEquals(newTeam.getCaptain().getEmail(), user.getEmail());
+    }
+
+    @Test
+    public void testChangeCaptainByMember() {
+        User captain = createUser();
+        User user = createUser();
+        Team team = createTeamWithCaptain(captain);
+        team.addMember(user);
+
+        //@formatter:off
+        given().
+                header(getXAuthTokenHeaderForUser(user)).
+                when().
+                body(user.getEmail()).
+                post(TEAM_ENDPOINT + team.getId() + "/captain").
+                then().
+                statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
+    }
+
+    @Test
+    public void testChangeCaptainToCaptain() {
+        User captain = createUser();
+        Team team = createTeamWithCaptain(captain);
+
+        //@formatter:off
+        given().
+                header(getXAuthTokenHeaderForUser(captain)).
+                when().
+                body(captain.getEmail()).
+                post(TEAM_ENDPOINT + team.getId() + "/captain").
+                then().
+                statusCode(HttpStatus.SC_NOT_MODIFIED);
+        //@formatter:on
+    }
+
+    @Test
+    public void testChangeCaptainByAdmin() {
+        User captain = createUser();
+        User user = createUser();
+        User admin = createAdmin();
+
+        Team team = createTeamWithCaptain(captain);
+        team.addMember(user);
+
+        //@formatter:off
+        given().
+                header(getXAuthTokenHeaderForUser(admin)).
+                when().
+                body(user.getEmail()).
+                post(TEAM_ENDPOINT + team.getId() + "/captain").
+                then().
+                statusCode(HttpStatus.SC_OK);
+        //@formatter:on
+
+        Team newTeam = teamRepository.findById(team.getId()).get();
+        assertEquals(newTeam.getCaptain().getEmail(), user.getEmail());
+    }
+
+    @Test
+    public void changeCaptainByNonMember() {
+        User captain = createUser();
+        User user = createUser();
+        Team team = createTeamWithCaptain(captain);
+
+        //@formatter:off
+        given().
+                header(getXAuthTokenHeaderForUser(user)).
+                when().
+                body(user.getEmail()).
+                post(TEAM_ENDPOINT + team.getId() + "/captain").
+                then().
+                statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
+    }
+
     //endregion
 
 }
