@@ -58,7 +58,7 @@ public class UserProfileRestController {
     private boolean allowedToEditProfile(User user, ProfileDTO input) {
         boolean isUserCheckedIn = rfidService.isOwnerLinked(user.getEmail());
         LocalDate currentBirthday = user.getProfile().getBirthday();
-        boolean isDateChanged = !currentBirthday.equals(input.getBirthday());
+        boolean isDateChanged = !input.getBirthday().equals(currentBirthday);
 
 
         return !isDateChanged || !isUserCheckedIn;
