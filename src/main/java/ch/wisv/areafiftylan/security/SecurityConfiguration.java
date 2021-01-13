@@ -123,7 +123,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(@Nonnull CorsRegistry registry) {
-                registry.addMapping("/**").exposedHeaders("X-Auth-Token");
+                registry.addMapping("/**").exposedHeaders("X-Auth-Token").allowedMethods("GET", "POST", "PUT", "OPTIONS", "HEAD");
             }
         };
     }
