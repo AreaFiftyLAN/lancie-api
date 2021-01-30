@@ -99,6 +99,8 @@ public class CurrentUserRestController {
 
             } else if (e instanceof AccessDeniedException) {
                 return createResponseEntity(HttpStatus.FORBIDDEN, e.getMessage());
+            } else {
+                return createResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong, please try again!");
             }
         }
 
