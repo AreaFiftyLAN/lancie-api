@@ -50,8 +50,9 @@ import ch.wisv.areafiftylan.web.tournament.model.TournamentType;
 import ch.wisv.areafiftylan.web.tournament.service.TournamentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
-import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -63,7 +64,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Component
-@Profile("dev")
+//@Profile("dev")
 public class TestDataRunner {
     private final UserRepository accountRepository;
     private final TicketRepository ticketRepository;
@@ -81,6 +82,8 @@ public class TestDataRunner {
     private final SponsorRepository sponsorRepository;
     private final TournamentRepository tournamentRepository;
 
+    private final Environment environment;
+
     @Autowired
     public TestDataRunner(UserRepository accountRepository, TicketRepository ticketRepository,
                           TeamRepository teamRepository, SeatService seatService,
@@ -88,7 +91,7 @@ public class TestDataRunner {
                           RFIDLinkRepository rfidLinkRepository, PossibleConsumptionsRepository consumptionsRepository,
                           ConsumptionService consumptionService, BannerRepository bannerRepository, CommitteeRepository committeeRepository,
                           FaqRepository faqRepository, SponsorRepository sponsorRepository,
-                          TournamentRepository tournamentRepository) {
+                          TournamentRepository tournamentRepository, Environment environment) {
         this.accountRepository = accountRepository;
         this.ticketRepository = ticketRepository;
         this.seatService = seatService;
@@ -103,9 +106,16 @@ public class TestDataRunner {
         this.faqRepository = faqRepository;
         this.sponsorRepository = sponsorRepository;
         this.tournamentRepository = tournamentRepository;
+        this.environment = environment;
     }
 
-    @EventListener(ApplicationStartedEvent.class)
+    @EventListener(value = ApplicationStartedEvent.class)
+    public void insertDataOnDev() {
+        if (environment.acceptsProfiles(Profiles.of("dev"))) {
+            insertTestData();
+        }
+    }
+
     public void insertTestData() {
         //region Users
         LocalDate localDate = LocalDate.of(2000, 1, 2);
