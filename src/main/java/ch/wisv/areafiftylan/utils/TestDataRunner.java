@@ -36,6 +36,8 @@ import ch.wisv.areafiftylan.users.model.Gender;
 import ch.wisv.areafiftylan.users.model.Role;
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.users.service.UserRepository;
+import ch.wisv.areafiftylan.utils.setup.SetupLog;
+import ch.wisv.areafiftylan.utils.setup.SetupRepository;
 import ch.wisv.areafiftylan.web.banner.model.Banner;
 import ch.wisv.areafiftylan.web.banner.service.BannerRepository;
 import ch.wisv.areafiftylan.web.committee.model.CommitteeMember;
@@ -53,6 +55,7 @@ import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -82,6 +85,8 @@ public class TestDataRunner {
     private final SponsorRepository sponsorRepository;
     private final TournamentRepository tournamentRepository;
 
+    private final SetupRepository setupRepository;
+
     private final Environment environment;
 
     @Autowired
@@ -91,7 +96,7 @@ public class TestDataRunner {
                           RFIDLinkRepository rfidLinkRepository, PossibleConsumptionsRepository consumptionsRepository,
                           ConsumptionService consumptionService, BannerRepository bannerRepository, CommitteeRepository committeeRepository,
                           FaqRepository faqRepository, SponsorRepository sponsorRepository,
-                          TournamentRepository tournamentRepository, Environment environment) {
+                          TournamentRepository tournamentRepository, SetupRepository setupRepository, Environment environment) {
         this.accountRepository = accountRepository;
         this.ticketRepository = ticketRepository;
         this.seatService = seatService;
@@ -106,6 +111,7 @@ public class TestDataRunner {
         this.faqRepository = faqRepository;
         this.sponsorRepository = sponsorRepository;
         this.tournamentRepository = tournamentRepository;
+        this.setupRepository = setupRepository;
         this.environment = environment;
     }
 
@@ -117,6 +123,12 @@ public class TestDataRunner {
     }
 
     public void insertTestData() {
+        try {
+            setupRepository.save(new SetupLog(LocalDateTime.now().getYear(), "testRunner"));
+        } catch (DataIntegrityViolationException e) {
+            // Setup already done
+        }
+
         //region Users
         LocalDate localDate = LocalDate.of(2000, 1, 2);
 

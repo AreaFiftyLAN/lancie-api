@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class SetupLog {
 
-    public SetupLog(Integer year, User initiator) {
+    public SetupLog(Integer year, String initiator) {
         this.year = year;
         this.initiator = initiator;
         this.setupDate = LocalDateTime.now();
@@ -28,8 +28,7 @@ public class SetupLog {
     @Column(unique = true)
     private Integer year;
 
-    @ManyToOne
-    private User initiator;
+    private String initiator;
 
     @ManyToOne
     private SetupToken token;

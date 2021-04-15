@@ -5,12 +5,18 @@ import ch.wisv.areafiftylan.extras.consumption.model.PossibleConsumptionsReposit
 import ch.wisv.areafiftylan.extras.rfid.service.RFIDLinkRepository;
 import ch.wisv.areafiftylan.products.service.repository.*;
 import ch.wisv.areafiftylan.seats.service.SeatRepository;
+import ch.wisv.areafiftylan.security.token.SetupToken;
 import ch.wisv.areafiftylan.security.token.Token;
 import ch.wisv.areafiftylan.security.token.repository.AuthenticationTokenRepository;
 import ch.wisv.areafiftylan.security.token.repository.TokenRepository;
+import ch.wisv.areafiftylan.users.model.User;
+import ch.wisv.areafiftylan.utils.mail.MailService;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,7 +36,14 @@ public class SetupService {
 
     private final SeatRepository seatRepository;
 
-    public SetupService(List<TokenRepository<?>> tokenRepositories, OrderRepository orderRepository, TicketRepository ticketRepository, RFIDLinkRepository rfidLinkRepository, ExpiredOrderRepository expiredOrderRepository, TicketOptionRepository ticketOptionRepository, TicketTypeRepository ticketTypeRepository, ConsumptionMapsRepository consumptionMapsRepository, PossibleConsumptionsRepository possibleConsumptionsRepository, SeatRepository seatRepository) {
+    private final SetupRepository setupRepository;
+
+    private final MailService mailService;
+
+    @Value("${a5l.mail.setupUrl}")
+    String setupUrl;
+
+    public SetupService(List<TokenRepository<?>> tokenRepositories, OrderRepository orderRepository, TicketRepository ticketRepository, RFIDLinkRepository rfidLinkRepository, ExpiredOrderRepository expiredOrderRepository, TicketOptionRepository ticketOptionRepository, TicketTypeRepository ticketTypeRepository, ConsumptionMapsRepository consumptionMapsRepository, PossibleConsumptionsRepository possibleConsumptionsRepository, SeatRepository seatRepository, SetupRepository setupRepository, MailService mailService) {
         this.tokenRepositories = tokenRepositories;
         this.orderRepository = orderRepository;
         this.ticketRepository = ticketRepository;
@@ -41,6 +54,30 @@ public class SetupService {
         this.consumptionMapsRepository = consumptionMapsRepository;
         this.possibleConsumptionsRepository = possibleConsumptionsRepository;
         this.seatRepository = seatRepository;
+        this.setupRepository = setupRepository;
+        this.mailService = mailService;
+    }
+
+    public int getCurrentEventYear() {
+        SetupLog lastSetup = setupRepository.findAll(Sort.by("year")).get(0);
+        if (lastSetup != null) {
+            return lastSetup.getYear();
+        } else {
+            return LocalDate.now().getYear();
+        }
+    }
+
+    public void initializeSetup(User user, int year) {
+        SetupLog lastSetup = setupRepository.findAll(Sort.by("year")).get(0);
+
+        if (lastSetup.getYear() >= year) {
+            throw new IllegalArgumentException("Can't setup event for this year or before");
+        }
+
+        SetupToken token = new SetupToken(user, year);
+
+        String url = setupUrl + "?token=" + token.getToken();
+        mailService.sendSetupMail(user, token, url);
     }
 
     /**

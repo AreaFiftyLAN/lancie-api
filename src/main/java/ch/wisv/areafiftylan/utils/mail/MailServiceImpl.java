@@ -18,11 +18,13 @@
 package ch.wisv.areafiftylan.utils.mail;
 
 import ch.wisv.areafiftylan.products.model.order.Order;
+import ch.wisv.areafiftylan.security.token.SetupToken;
 import ch.wisv.areafiftylan.teams.model.Team;
 import ch.wisv.areafiftylan.users.model.Profile;
 import ch.wisv.areafiftylan.users.model.User;
-import org.springframework.beans.factory.annotation.Autowired;
+import ch.wisv.areafiftylan.utils.setup.SetupService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailPreparationException;
 import org.springframework.mail.MailSendException;
@@ -45,19 +47,19 @@ public class MailServiceImpl implements MailService {
 
     private final SpringTemplateEngine templateEngine;
 
+    private final SetupService setupService;
+
     @Value("${a5l.mail.sender}")
     String sender;
 
     @Value("${a5l.mail.contact}")
     String contact;
 
-    @Value("${a5l.mail.year}")
-    String year;
-
-    @Autowired
-    public MailServiceImpl(JavaMailSender mailSender, SpringTemplateEngine templateEngine) {
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    public MailServiceImpl(JavaMailSender mailSender, SpringTemplateEngine templateEngine, @Lazy SetupService setupService) {
         this.mailSender = mailSender;
         this.templateEngine = templateEngine;
+        this.setupService = setupService;
     }
 
     private void sendMailWithContent(String recipientEmail, String subject, String content) {
@@ -113,7 +115,7 @@ public class MailServiceImpl implements MailService {
         final Context ctx = new Context(new Locale("en"));
         ctx.setVariable("name", name);
         ctx.setVariable("message", message);
-        ctx.setVariable("year", year);
+        ctx.setVariable("year", setupService.getCurrentEventYear());
         return this.templateEngine.process("mailTemplate", ctx);
     }
 
@@ -160,7 +162,7 @@ public class MailServiceImpl implements MailService {
         ctx.setVariable("name",
                 order.getUser().getProfile().getFirstName() + " " + order.getUser().getProfile().getLastName());
         ctx.setVariable("order", order);
-        ctx.setVariable("year", year);
+        ctx.setVariable("year", setupService.getCurrentEventYear());
         String content = this.templateEngine.process("orderConfirmation", ctx);
 
         sendMailWithContent(order.getUser().getEmail(), "Order Confirmation", content);
@@ -188,9 +190,16 @@ public class MailServiceImpl implements MailService {
     public void sendSeatOverrideMail(User user) {
         String subject = "Your seat was reset";
         String message = "Unfortunately we had to reallocate your reserved seat.\n" +
-                         "Please contact us if you have any questions.\n" +
-                         "You can reserve a new seat through <a href=\"https://areafiftylan.nl/my-area\">My Area</a>.";
+                "Please contact us if you have any questions.\n" +
+                "You can reserve a new seat through <a href=\"https://areafiftylan.nl/my-area\">My Area</a>.";
         sendMail(user.getEmail(), formatRecipient(user), subject, message);
+    }
+
+    @Override
+    public void sendSetupMail(User user, SetupToken token, String url) {
+        String subject = "Set up AreaFiftyLAN for " + token.getYear();
+        String message = "Please click the link below to set up the AreaFiftyLAN website for " + token.getYear() + "\n" +
+                "<a href=\"" + url + "\">" + url + "</a>";
     }
 
     @Override

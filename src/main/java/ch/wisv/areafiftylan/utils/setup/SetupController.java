@@ -5,15 +5,13 @@ import ch.wisv.areafiftylan.security.token.SetupToken;
 import ch.wisv.areafiftylan.security.token.repository.SetupTokenRepository;
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.utils.ResponseEntityBuilder;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import static ch.wisv.areafiftylan.utils.ResponseEntityBuilder.createResponseEntity;
 
 @RestController
 @RequestMapping("/setup")
@@ -31,16 +29,11 @@ public class SetupController {
 
     @PostMapping("/{year}")
     public ResponseEntity<?> setupNewEvent(@AuthenticationPrincipal User user, @PathVariable int year) {
-        SetupLog lastSetup = setupRepository.findAll(Sort.by("year")).get(0);
 
-        if (lastSetup.getYear() >= year) {
-            return ResponseEntityBuilder.createResponseEntity(HttpStatus.BAD_REQUEST, "Can't setup event for this year or before");
-        }
-
-        SetupToken token = new SetupToken(user, year);
+        setupService.initializeSetup(user, year);
 
 
-        return ResponseEntityBuilder.createResponseEntity(HttpStatus.OK, "All good", token);
+        return ResponseEntityBuilder.createResponseEntity(HttpStatus.OK, "All good");
     }
 
     @PostMapping("/{year}/{token}")
@@ -54,10 +47,15 @@ public class SetupController {
             setupService.deleteAllCurrentEventData();
 
         }
-        SetupLog newSetup = new SetupLog(year, user);
+        SetupLog newSetup = new SetupLog(year, user.getUsername());
         setupRepository.save(newSetup);
 
         return ResponseEntityBuilder.createResponseEntity(HttpStatus.OK, "Setup complete");
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<?> handleIllegalArgument(IllegalArgumentException ex) {
+        return createResponseEntity(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
 

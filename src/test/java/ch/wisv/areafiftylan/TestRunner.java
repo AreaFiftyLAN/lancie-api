@@ -6,8 +6,11 @@ import ch.wisv.areafiftylan.products.service.repository.TicketOptionRepository;
 import ch.wisv.areafiftylan.products.service.repository.TicketTypeRepository;
 import ch.wisv.areafiftylan.seats.model.Seat;
 import ch.wisv.areafiftylan.seats.service.SeatRepository;
+import ch.wisv.areafiftylan.utils.setup.SetupLog;
+import ch.wisv.areafiftylan.utils.setup.SetupRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -20,12 +23,14 @@ public class TestRunner implements CommandLineRunner {
     private final TicketOptionRepository ticketOptionRepository;
     private final TicketTypeRepository ticketTypeRepository;
     private final SeatRepository seatRepository;
+    private final SetupRepository setupRepository;
 
     public TestRunner(TicketOptionRepository ticketOptionRepository, TicketTypeRepository ticketTypeRepository,
-                      SeatRepository seatRepository) {
+                      SeatRepository seatRepository, SetupRepository setupRepository) {
         this.ticketOptionRepository = ticketOptionRepository;
         this.ticketTypeRepository = ticketTypeRepository;
         this.seatRepository = seatRepository;
+        this.setupRepository = setupRepository;
     }
 
     @Override
@@ -44,6 +49,12 @@ public class TestRunner implements CommandLineRunner {
             Seat seat = new Seat("A", i);
             seat.setLocked(false);
             seatRepository.save(seat);
+        }
+
+        try {
+            setupRepository.save(new SetupLog(LocalDateTime.now().getYear(), "testRunner"));
+        } catch (DataIntegrityViolationException e) {
+            // Setup already done
         }
     }
 }
