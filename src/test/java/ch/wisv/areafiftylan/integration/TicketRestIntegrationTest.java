@@ -128,8 +128,6 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         Ticket ticket = createTicketForUser(ticketOwner);
 
         //@formatter:off
-            given().
-                header(getXAuthTokenHeaderForUser(user)).
             when().
                 delete(TICKETS_ENDPOINT + ticket.getId()).
             then().
@@ -144,6 +142,8 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         Ticket ticket = createTicketForUser(ticketOwner);
 
         //@formatter:off
+            given().
+                header(getXAuthTokenHeaderForUser(user)).
             when().
                 delete(TICKETS_ENDPOINT + ticket.getId()).
             then().
