@@ -126,6 +126,13 @@ public class TicketRestController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("{ticketId}")
+    public Ticket getAllTickets() {
+        ticketService.deleteTicketOption(ticket_id);
+        return createResponseEntity(HttpStatus.OK, "Ticket successfully deleted.");
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/transport")
     public Collection<Ticket> getAllTicketsWithTransport() {
         return ticketService.getAllTicketsWithTransport();
