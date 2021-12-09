@@ -105,6 +105,53 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
     }
 
     @Test
+    public void testdeleteTicketAsAdmin() {
+        User admin = createAdmin();
+        User ticketOwner = createUser();
+        Ticket ticket = createTicketForUser(ticketOwner);
+
+        //@formatter:off
+            given().
+                header(getXAuthTokenHeaderForUser(admin)).
+            when().
+                delete(TICKETS_ENDPOINT + ticket.getId()).
+            then().
+                statusCode(HttpStatus.SC_OK);
+        //@formatter:on
+
+        assertThat(ticketService.getAllTickets()).doesNotContain(ticket);
+    }
+
+    @Test
+    public void testdeleteTicketAsAnon() {
+        User ticketOwner = createUser();
+        Ticket ticket = createTicketForUser(ticketOwner);
+
+        //@formatter:off
+            given().
+                header(getXAuthTokenHeaderForUser(user)).
+            when().
+                delete(TICKETS_ENDPOINT + ticket.getId()).
+            then().
+                statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
+    }
+
+    @Test
+    public void testdeleteTicketAsUser() {
+        User user = createUser();
+        User ticketOwner = createUser();
+        Ticket ticket = createTicketForUser(ticketOwner);
+
+        //@formatter:off
+            when().
+                delete(TICKETS_ENDPOINT + ticket.getId()).
+            then().
+                statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
+    }
+
+    @Test
     public void testGetAvailableTickets() {
         Collection<TicketType> ticketTypes =
                 ticketService.getAllTicketTypes().stream().filter(TicketType::isBuyable).collect(Collectors.toList());
