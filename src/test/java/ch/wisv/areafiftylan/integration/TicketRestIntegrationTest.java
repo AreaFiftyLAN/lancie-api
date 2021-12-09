@@ -114,7 +114,7 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
             given().
                 header(getXAuthTokenHeaderForUser(admin)).
             when().
-                delete(TICKETS_ENDPOINT + ticket.getId()).
+                delete(ticket.getId()).
             then().
                 statusCode(HttpStatus.SC_OK);
         //@formatter:on
@@ -129,7 +129,7 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
 
         //@formatter:off
             when().
-                delete(TICKETS_ENDPOINT + ticket.getId()).
+                delete(ticket.getId()).
             then().
                 statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
@@ -145,7 +145,7 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
             given().
                 header(getXAuthTokenHeaderForUser(user)).
             when().
-                delete(TICKETS_ENDPOINT + ticket.getId()).
+                delete(ticket.getId()).
             then().
                 statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
