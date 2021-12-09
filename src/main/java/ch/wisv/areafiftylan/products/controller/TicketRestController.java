@@ -127,8 +127,8 @@ public class TicketRestController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("{ticketId}")
-    public Ticket getAllTickets() {
-        ticketService.deleteTicketOption(ticket_id);
+    public Ticket deleteTicket(@PathVariable Long ticketId) {
+        ticketService.deleteTicketOption(ticketId);
         return createResponseEntity(HttpStatus.OK, "Ticket successfully deleted.");
     }
 
