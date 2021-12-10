@@ -24,6 +24,7 @@ import ch.wisv.areafiftylan.extras.rfid.model.RFIDLink;
 import ch.wisv.areafiftylan.extras.rfid.service.RFIDLinkRepository;
 import ch.wisv.areafiftylan.products.model.order.Order;
 import ch.wisv.areafiftylan.products.model.Ticket;
+import ch.wisv.areafiftylan.products.model.TicketDTO;
 import ch.wisv.areafiftylan.products.model.TicketOption;
 import ch.wisv.areafiftylan.products.model.TicketType;
 import ch.wisv.areafiftylan.products.service.OrderService;
@@ -157,16 +158,14 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void testdeleteTicketAsAdminInOrder() {
+        User ticketOwner = createUser();
         TicketType type =
                 new TicketType("testAddType", "Type for adding test", 10, 0, LocalDateTime.now().plusDays(1), false);
         ticketService.addTicketType(type);
-
-        User admin = createAdmin();
-        User ticketOwner = createUser();
         Ticket ticket = new Ticket(ticketOwner, type);
 
-        Order ticketTypeOrederd = orderService.create("testAddType", null);
-        ticketTypeOrederd.addTicket(ticket);
+        Order order = orderService.create("testAddType", null);
+        User admin = createAdmin();
 
         //@formatter:off
             given().
