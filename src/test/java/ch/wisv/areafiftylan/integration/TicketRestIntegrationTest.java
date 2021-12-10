@@ -166,6 +166,7 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         Ticket ticket = new Ticket(ticketOwner, type);
 
         Order ticketTypeOrederd = orderService.create("testAddType", null);
+        ticketTypeOrederd.addTicket(ticket);
 
         //@formatter:off
             given().
