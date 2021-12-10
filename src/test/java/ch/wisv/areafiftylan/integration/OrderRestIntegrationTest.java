@@ -22,6 +22,9 @@ import ch.wisv.areafiftylan.products.model.order.Order;
 import ch.wisv.areafiftylan.products.model.order.OrderStatus;
 import ch.wisv.areafiftylan.products.service.repository.OrderRepository;
 import ch.wisv.areafiftylan.products.service.repository.TicketRepository;
+import ch.wisv.areafiftylan.products.model.TicketType;
+import ch.wisv.areafiftylan.products.service.OrderService;
+import ch.wisv.areafiftylan.products.service.TicketService;
 import ch.wisv.areafiftylan.users.model.User;
 import io.restassured.http.ContentType;
 import org.apache.http.HttpStatus;
@@ -29,6 +32,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -46,6 +50,12 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
 
     @Autowired
     private TicketRepository ticketRepository;
+
+    @Autowired
+    private OrderService orderService;
+
+    @Autowired
+    private TicketService ticketService;
 
     @Value("${a5l.ticketLimit}")
     private int TICKET_LIMIT;
@@ -164,14 +174,15 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
     @Test
     public void testdeleteOrderAsAdmin() {
         User admin = createAdmin();
-        Order order = new Order();
-        orderRepository.save(order);
+        TicketType type = new TicketType("testEditType1", "Type for edit test", 10, 0, LocalDateTime.now().plusDays(1), true);
+        type = ticketService.addTicketType(type);
+        Order order = orderService.create("testEditType1", null);
 
         //@formatter:off
             given().
                 header(getXAuthTokenHeaderForUser(admin)).
             when().
-                delete(ORDER_ENDPOINT + "/" + order.getId()).
+                delete(ORDER_ENDPOINT + order.getId()).
             then().
                 statusCode(HttpStatus.SC_OK);
         //@formatter:on
@@ -179,12 +190,13 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
 
     @Test
     public void testdeleteOrderAsAnon() {
-        Order order = new Order();
-        orderRepository.save(order);
+        TicketType type = new TicketType("testEditType2", "Type for edit test", 10, 0, LocalDateTime.now().plusDays(1), true);
+        type = ticketService.addTicketType(type);
+        Order order = orderService.create("testEditType2", null);
 
         //@formatter:off
             when().
-                delete(ORDER_ENDPOINT + "/" + order.getId()).
+                delete(ORDER_ENDPOINT + order.getId()).
             then().
                 statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
@@ -193,14 +205,15 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
     @Test
     public void testdeleteOrderAsUser() {
         User user = createUser();
-        Order order = new Order();
-        orderRepository.save(order);
+        TicketType type = new TicketType("testEditType3", "Type for edit test", 10, 0, LocalDateTime.now().plusDays(1), true);
+        type = ticketService.addTicketType(type);
+        Order order = orderService.create("testEditType3", null);
 
         //@formatter:off
             given().
                 header(getXAuthTokenHeaderForUser(user)).
             when().
-                delete(ORDER_ENDPOINT + "/" + order.getId()).
+                delete(ORDER_ENDPOINT + order.getId()).
             then().
                 statusCode(HttpStatus.SC_FORBIDDEN);
         //@formatter:on
