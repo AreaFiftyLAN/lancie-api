@@ -162,9 +162,9 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
         TicketType type =
                 new TicketType("testAddType", "Type for adding test", 10, 0, LocalDateTime.now().plusDays(1), false);
         ticketService.addTicketType(type);
-        Ticket ticket = new Ticket(ticketOwner, type);
 
         Order order = orderService.create("testAddType", null);
+        Ticket ticket = order.getTickets().stream().findFirst().orElseThrow();
         User admin = createAdmin();
 
         //@formatter:off
@@ -173,7 +173,7 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
             when().
                 delete(TICKETS_ENDPOINT + "/" + ticket.getId()).
             then().
-                statusCode(HttpStatus.SC_BAD_REQUEST);
+                statusCode(HttpStatus.SC_CONFLICT);
         //@formatter:on
 
     }
