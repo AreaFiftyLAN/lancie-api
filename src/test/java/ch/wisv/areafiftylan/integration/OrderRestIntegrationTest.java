@@ -162,6 +162,51 @@ public class OrderRestIntegrationTest extends XAuthIntegrationTest {
     }
 
     @Test
+    public void testdeleteOrderAsAdmin() {
+        User admin = createAdmin();
+        Order order = new Order();
+        orderRepository.save(order);
+
+        //@formatter:off
+            given().
+                header(getXAuthTokenHeaderForUser(admin)).
+            when().
+                delete(ORDER_ENDPOINT + "/" + order.getId()).
+            then().
+                statusCode(HttpStatus.SC_OK);
+        //@formatter:on
+    }
+
+    @Test
+    public void testdeleteOrderAsAnon() {
+        Order order = new Order();
+        orderRepository.save(order);
+
+        //@formatter:off
+            when().
+                delete(ORDER_ENDPOINT + "/" + order.getId()).
+            then().
+                statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
+    }
+
+    @Test
+    public void testdeleteOrderAsUser() {
+        User user = createUser();
+        Order order = new Order();
+        orderRepository.save(order);
+
+        //@formatter:off
+            given().
+                header(getXAuthTokenHeaderForUser(user)).
+            when().
+                delete(ORDER_ENDPOINT + "/" + order.getId()).
+            then().
+                statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
+    }
+
+    @Test
     public void testAddTicketToAnonOrder() {
         Order order = insertAnonOrder();
         Map<String, Object> orderDTO = new HashMap<>();
