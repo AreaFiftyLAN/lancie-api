@@ -41,6 +41,11 @@ public interface OrderService {
     Order create(String type, List<String> options);
 
     /**
+     * Delete the Order with orderId
+     */
+    public Order removeOrder(Long orderId);
+
+    /**
      * Add a ticket to an order. Checks if a ticket is available first
      */
     Order addTicketToOrder(Long orderId, String type, List<String> options);

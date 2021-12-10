@@ -124,6 +124,18 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public Order removeOrder(Long orderId) {
+        if (orderId == null) {
+            throw new IllegalArgumentException("No ID given for deleting the order.");
+        }
+        
+        Order order = getOrderById(orderId);
+        orderRepository.delete(order);
+
+        return order;
+    }
+
+    @Override
     public Order addTicketToOrder(Long orderId, String type, List<String> options) {
         Order order = getOrderById(orderId);
 
