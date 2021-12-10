@@ -113,6 +113,13 @@ public class OrderRestController {
         return orderService.getOrderById(orderId);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/{orderId}")
+    public ResponseEntity<?> deleteOrder(@PathVariable Long orderId) {
+        orderService.removeOrder(orderId);
+        return createResponseEntity(HttpStatus.OK, "Order successfully deleted.");
+    }
+
     /**
      * Adds a ticket to an existing Order. It's possible to buy serveral ticket at once. After the order has been
      * created, tickets can be added by POSTing more TicketDTOs to this location.
