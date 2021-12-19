@@ -25,6 +25,7 @@ import ch.wisv.areafiftylan.extras.rfid.service.RFIDLinkRepository;
 import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.model.TicketOption;
 import ch.wisv.areafiftylan.products.model.TicketType;
+import ch.wisv.areafiftylan.products.service.repository.OrderRepository;
 import ch.wisv.areafiftylan.products.service.repository.TicketOptionRepository;
 import ch.wisv.areafiftylan.products.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.products.service.repository.TicketTypeRepository;
@@ -83,6 +84,7 @@ public class TestDataRunner {
     private final SponsorRepository sponsorRepository;
     private final TournamentRepository tournamentRepository;
     private final OrderService orderService;
+    private final OrderRepository orderRepository;
 
     @Autowired
     public TestDataRunner(UserRepository accountRepository, TicketRepository ticketRepository,
@@ -91,7 +93,7 @@ public class TestDataRunner {
                           RFIDLinkRepository rfidLinkRepository, PossibleConsumptionsRepository consumptionsRepository,
                           ConsumptionService consumptionService, BannerRepository bannerRepository, CommitteeRepository committeeRepository,
                           FaqRepository faqRepository, SponsorRepository sponsorRepository,
-                          TournamentRepository tournamentRepository, OrderService orderService) {
+                          TournamentRepository tournamentRepository, OrderService orderService, OrderRepository orderRepository) {
         this.accountRepository = accountRepository;
         this.ticketRepository = ticketRepository;
         this.seatService = seatService;
@@ -107,6 +109,7 @@ public class TestDataRunner {
         this.sponsorRepository = sponsorRepository;
         this.tournamentRepository = tournamentRepository;
         this.orderService = orderService;
+        this.orderRepository = orderRepository;
 
     }
 
@@ -277,9 +280,11 @@ public class TestDataRunner {
         //region Orders
         Order order_admin = orderService.create("Normal", null);
         orderService.assignOrderToUser(order_admin.getId(), userAdmin.getId());
+        orderRepository.save(order_admin);
 
         Order order_normal = orderService.create("Normal", null);
         orderService.assignOrderToUser(order_normal.getId(), userNormal.getId());
+        orderRepository.save(order_admin);
         //endregion Orders
     }
 
