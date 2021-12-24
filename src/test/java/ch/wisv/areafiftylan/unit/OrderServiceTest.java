@@ -512,6 +512,8 @@ public class OrderServiceTest extends ServiceTest {
         assertEquals(RETURN_URL + "?order=" + order.getId(), orderService.requestPayment(id));
         verify(paymentService, never()).registerOrder(Mockito.any(Order.class));
         reset(paymentService);
+        assertEquals(OrderStatus.PAID, order.getStatus());
+        assertEquals(OrderStatus.PAID, orderService.getOrderById(id).getStatus());
     }
 
     @Test
