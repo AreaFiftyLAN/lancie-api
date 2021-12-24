@@ -94,7 +94,7 @@ public class Order {
     }
 
     @JsonView(View.OrderOverview.class)
-    public float getAmountTickets() {
+    public int getAmountTickets() {
         return tickets.size();
     }
 
