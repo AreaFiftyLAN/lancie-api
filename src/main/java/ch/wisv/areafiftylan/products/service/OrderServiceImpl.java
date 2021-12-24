@@ -217,7 +217,7 @@ public class OrderServiceImpl implements OrderService {
         }
         if (order.getAmount() == 0) {
             order.setStatus(OrderStatus.PAID);
-            return RETURN_URL + orderId;
+            return RETURN_URL + "?order=" + orderId;
         }
 
         return paymentService.registerOrder(order);

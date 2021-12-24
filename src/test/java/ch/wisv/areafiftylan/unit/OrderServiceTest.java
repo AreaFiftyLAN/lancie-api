@@ -509,7 +509,7 @@ public class OrderServiceTest extends ServiceTest {
         order.addTicket(ticket);
 
         Long id = testEntityManager.persistAndGetId(order, Long.class);
-        assertEquals(RETURN_URL + order.getId(), orderService.requestPayment(id));
+        assertEquals(RETURN_URL + "?order=" + order.getId(), orderService.requestPayment(id));
         verify(paymentService, never()).registerOrder(Mockito.any(Order.class));
         reset(paymentService);
     }
