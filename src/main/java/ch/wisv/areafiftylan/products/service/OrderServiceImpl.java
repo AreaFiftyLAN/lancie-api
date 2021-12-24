@@ -206,11 +206,15 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public String requestPayment(Long orderId) {
         Order order = getOrderById(orderId);
-        if (order.getAmount() == 0) {
+        if (order.getAmountTickets() == 0) {
             throw new IllegalStateException("Order can not be empty");
         }
         if (order.getStatus() != OrderStatus.ASSIGNED) {
             throw new UnassignedOrderException(order.getId());
+        }
+        if (order.getAmount() == 0) {
+            order.setStatus(OrderStatus.PAID);
+            return "https://areafiftylan.nl/order-check?order=" + orderId;
         }
 
         return paymentService.registerOrder(order);

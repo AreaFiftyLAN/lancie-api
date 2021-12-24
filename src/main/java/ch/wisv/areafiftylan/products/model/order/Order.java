@@ -93,6 +93,11 @@ public class Order {
         return price;
     }
 
+    @JsonView(View.OrderOverview.class)
+    public float getAmountTickets() {
+        return tickets.size();
+    }
+
     public void setUser(User user) {
         this.user = user;
         if (user != null) {
