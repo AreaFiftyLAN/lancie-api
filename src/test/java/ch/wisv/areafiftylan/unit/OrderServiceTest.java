@@ -27,6 +27,7 @@ import ch.wisv.areafiftylan.utils.mail.MailService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
@@ -45,6 +46,9 @@ public class OrderServiceTest extends ServiceTest {
 
     @Autowired
     private MailService mailService;
+
+    @Value("${a5l.paymentReturnUrl}")
+    private String RETURN_URL;
 
     @Test
     public void getOrderById() {
@@ -505,7 +509,7 @@ public class OrderServiceTest extends ServiceTest {
         order.addTicket(ticket);
 
         Long id = testEntityManager.persistAndGetId(order, Long.class);
-        assertEquals("https://areafiftylan.nl/order-check?order=" + order.getId(), orderService.requestPayment(id));
+        assertEquals(RETURN_URL + order.getId(), orderService.requestPayment(id));
         verify(paymentService, never()).registerOrder(Mockito.any(Order.class));
         reset(paymentService);
     }

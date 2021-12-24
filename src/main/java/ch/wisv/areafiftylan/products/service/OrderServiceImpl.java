@@ -52,6 +52,9 @@ public class OrderServiceImpl implements OrderService {
     private final PaymentService paymentService;
     private final MailService mailService;
 
+    @Value("${a5l.paymentReturnUrl}")
+    private String RETURN_URL;
+
     @Value("${a5l.orderLimit}")
     private int ORDER_LIMIT;
 
@@ -214,7 +217,7 @@ public class OrderServiceImpl implements OrderService {
         }
         if (order.getAmount() == 0) {
             order.setStatus(OrderStatus.PAID);
-            return "https://areafiftylan.nl/order-check?order=" + orderId;
+            return RETURN_URL + orderId;
         }
 
         return paymentService.registerOrder(order);
