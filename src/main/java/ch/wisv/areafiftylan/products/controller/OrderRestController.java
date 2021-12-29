@@ -21,6 +21,7 @@ import ch.wisv.areafiftylan.exception.ImmutableOrderException;
 import ch.wisv.areafiftylan.exception.OrderNotFoundException;
 import ch.wisv.areafiftylan.exception.TicketNotFoundException;
 import ch.wisv.areafiftylan.exception.TicketUnavailableException;
+import ch.wisv.areafiftylan.products.model.order.OrderStatus;
 import ch.wisv.areafiftylan.products.model.AssignDTO;
 import ch.wisv.areafiftylan.products.model.TicketDTO;
 import ch.wisv.areafiftylan.products.model.order.Order;
@@ -270,7 +271,11 @@ public class OrderRestController {
     @JsonView(View.OrderOverview.class)
     @GetMapping("/{orderId}/status")
     public ResponseEntity<?> updateOrderStatusManual(@PathVariable long orderId) {
-        Order order = orderService.updateOrderStatusByOrderId(orderId);
+        Order order = orderService.getOrderById(orderId);
+        if (order.getStatus() == OrderStatus.PAID) {
+            return createResponseEntity(HttpStatus.OK, "Order status updated", order);
+        }
+        order = orderService.updateOrderStatusByOrderId(orderId);
 
         log.info(controllerMarker, "Order {} updated", order.getId(), StructuredArguments.v("order_id", order.getId()));
 
