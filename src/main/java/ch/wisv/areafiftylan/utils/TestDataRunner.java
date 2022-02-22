@@ -25,9 +25,13 @@ import ch.wisv.areafiftylan.extras.rfid.service.RFIDLinkRepository;
 import ch.wisv.areafiftylan.products.model.Ticket;
 import ch.wisv.areafiftylan.products.model.TicketOption;
 import ch.wisv.areafiftylan.products.model.TicketType;
+import ch.wisv.areafiftylan.products.model.order.OrderStatus;
+import ch.wisv.areafiftylan.products.service.repository.OrderRepository;
 import ch.wisv.areafiftylan.products.service.repository.TicketOptionRepository;
 import ch.wisv.areafiftylan.products.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.products.service.repository.TicketTypeRepository;
+import ch.wisv.areafiftylan.products.service.OrderService;
+import ch.wisv.areafiftylan.products.model.order.Order;
 import ch.wisv.areafiftylan.seats.model.SeatGroupDTO;
 import ch.wisv.areafiftylan.seats.service.SeatService;
 import ch.wisv.areafiftylan.teams.model.Team;
@@ -80,6 +84,8 @@ public class TestDataRunner {
     private final FaqRepository faqRepository;
     private final SponsorRepository sponsorRepository;
     private final TournamentRepository tournamentRepository;
+    private final OrderService orderService;
+    private final OrderRepository orderRepository;
 
     @Autowired
     public TestDataRunner(UserRepository accountRepository, TicketRepository ticketRepository,
@@ -88,7 +94,7 @@ public class TestDataRunner {
                           RFIDLinkRepository rfidLinkRepository, PossibleConsumptionsRepository consumptionsRepository,
                           ConsumptionService consumptionService, BannerRepository bannerRepository, CommitteeRepository committeeRepository,
                           FaqRepository faqRepository, SponsorRepository sponsorRepository,
-                          TournamentRepository tournamentRepository) {
+                          TournamentRepository tournamentRepository, OrderService orderService, OrderRepository orderRepository) {
         this.accountRepository = accountRepository;
         this.ticketRepository = ticketRepository;
         this.seatService = seatService;
@@ -103,6 +109,9 @@ public class TestDataRunner {
         this.faqRepository = faqRepository;
         this.sponsorRepository = sponsorRepository;
         this.tournamentRepository = tournamentRepository;
+        this.orderService = orderService;
+        this.orderRepository = orderRepository;
+
     }
 
     @EventListener(ApplicationStartedEvent.class)
@@ -269,6 +278,17 @@ public class TestDataRunner {
         tournament(TournamentType.UNOFFICIAL, "JD", "images-optimized/unofficial/justdance.jpg", "2 V 2", "Just Dance",
                 "Just Dance is about dancing.", Collections.singletonList("Nothing."), sogeti);
         //endregion Web Data
+        //region Orders
+        Order order_admin = orderService.create("Normal", null);
+        orderService.assignOrderToUser(order_admin.getId(), userAdmin.getId());
+        order_admin.setStatus(OrderStatus.PAID);
+        orderRepository.save(order_admin);
+
+        Order order_normal = orderService.create("Normal", null);
+        orderService.assignOrderToUser(order_normal.getId(), userNormal.getId());
+        order_normal.setStatus(OrderStatus.PAID);
+        orderRepository.save(order_admin);
+        //endregion Orders
     }
 
     private CommitteeMember committeeMember(Long position, String function, String name, String icon) {

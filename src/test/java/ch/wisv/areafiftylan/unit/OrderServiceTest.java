@@ -19,13 +19,16 @@ package ch.wisv.areafiftylan.unit;
 
 import ch.wisv.areafiftylan.exception.*;
 import ch.wisv.areafiftylan.products.model.Ticket;
+import ch.wisv.areafiftylan.products.model.TicketType;
 import ch.wisv.areafiftylan.products.model.order.Order;
 import ch.wisv.areafiftylan.products.model.order.OrderStatus;
+import ch.wisv.areafiftylan.products.service.TicketService;
 import ch.wisv.areafiftylan.users.model.User;
 import ch.wisv.areafiftylan.utils.mail.MailService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
@@ -33,6 +36,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -42,7 +46,13 @@ import static org.mockito.Mockito.*;
 public class OrderServiceTest extends ServiceTest {
 
     @Autowired
+    private TicketService ticketService;
+
+    @Autowired
     private MailService mailService;
+
+    @Value("${a5l.paymentReturnUrl}")
+    private String RETURN_URL;
 
     @Test
     public void getOrderById() {
@@ -491,6 +501,23 @@ public class OrderServiceTest extends ServiceTest {
         orderService.requestPayment(id);
         verify(paymentService, times(1)).registerOrder(Mockito.any(Order.class));
         reset(paymentService);
+    }
+
+    @Test
+    public void requestPaymentFree() {
+        ticketService.addTicketType(new TicketType("testPaymentFree", "testPaymentFree", 0.0f, 15, LocalDateTime.of(3021, 6, 3, 0, 0), true));
+        Order order = orderService.create("testPaymentFree", null);
+        User user = persistUser();
+        orderService.assignOrderToUser(order.getId(), user.getId());
+        assertEquals(0.0, order.getAmount(), 0.0001);
+        assertNotNull(order.getUser());
+
+        Long id = testEntityManager.persistAndGetId(order, Long.class);
+        assertEquals(RETURN_URL + "?order=" + order.getId(), orderService.requestPayment(id));
+        verify(paymentService, never()).registerOrder(Mockito.any(Order.class));
+        reset(paymentService);
+        assertEquals(OrderStatus.PAID, order.getStatus());
+        assertEquals(OrderStatus.PAID, orderService.getOrderById(id).getStatus());
     }
 
     @Test

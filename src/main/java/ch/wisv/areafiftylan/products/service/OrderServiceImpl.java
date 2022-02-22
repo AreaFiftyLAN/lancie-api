@@ -52,6 +52,9 @@ public class OrderServiceImpl implements OrderService {
     private final PaymentService paymentService;
     private final MailService mailService;
 
+    @Value("${a5l.paymentReturnUrl}")
+    private String RETURN_URL;
+
     @Value("${a5l.orderLimit}")
     private int ORDER_LIMIT;
 
@@ -121,6 +124,18 @@ public class OrderServiceImpl implements OrderService {
         order.addTicket(ticket);
 
         return orderRepository.save(order);
+    }
+
+    @Override
+    public Order removeOrder(Long orderId) {
+        if (orderId == null) {
+            throw new IllegalArgumentException("No ID given for deleting the order.");
+        }
+        
+        Order order = getOrderById(orderId);
+        orderRepository.delete(order);
+
+        return order;
     }
 
     @Override
@@ -194,11 +209,17 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public String requestPayment(Long orderId) {
         Order order = getOrderById(orderId);
-        if (order.getAmount() == 0) {
+        if (order.getAmountTickets() == 0) {
             throw new IllegalStateException("Order can not be empty");
         }
         if (order.getStatus() != OrderStatus.ASSIGNED) {
             throw new UnassignedOrderException(order.getId());
+        }
+        if (order.getAmount() == 0) {
+            order.setStatus(OrderStatus.PAID);
+            validateTicketsIfPaid(order);
+            orderRepository.save(order);
+            return RETURN_URL + "?order=" + orderId;
         }
 
         return paymentService.registerOrder(order);
