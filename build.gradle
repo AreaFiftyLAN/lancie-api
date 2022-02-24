@@ -59,34 +59,6 @@ dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 }
 
-jib {
-    from {
-        image = 'wisvch/spring-boot-base:2.1'
-    }
-    to {
-        image = 'quay.io/areafiftylan/lancie-api'
-        auth {
-            username = System.getenv("QUAY_USERNAME") ?: "" // Set in Github Org Secrets
-            password = System.getenv("QUAY_PASSWORD") ?: ""
-        }
-        tags = [System.getenv("GITHUB_RUN_NUMBER") ?: "latest"]
-    }
-    pluginExtensions {
-        pluginExtension {
-            implementation = 'com.google.cloud.tools.jib.gradle.extension.springboot.JibSpringBootExtension'
-        }
-    }
-    container {
-        creationTime = 'USE_CURRENT_TIMESTAMP'
-    }
-}
-
-jacocoTestReport {
-    reports {
-        xml.enabled true
-        html.enabled false
-    }
-}
 
 test {
     useJUnitPlatform()
