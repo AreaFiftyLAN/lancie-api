@@ -15,8 +15,6 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '11'
-      - name: Test Coverage
-        run: ./gradlew clean build jacocoTestReport jacocoFix --scan
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
       - name: Login to GitHub Container Registry
