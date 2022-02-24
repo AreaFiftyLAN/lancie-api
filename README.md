@@ -39,6 +39,16 @@ If you want to run the API on your server, you probably don't want to run it fro
 ### Build
 To generate a runnable JAR file, make sure that you have followed all the instructions under the **run** section. When you have done so, run `./gradlew build`. This command will run all tests, and create a runnable JAR file in the `./build` folder. You could also run `Build` from the gradle view in IntelliJ IDEA.
 
+### WISV CI/CD
+This repository is monitored by [flux](https://github.com/WISVCH/flux-beheer/) for changes to the `live` branch.
+To deploy a new version to the live branch, create a new release with accompanying tag at [releases](https://github.com/AreaFiftyLAN/lancie-api/releases/).
+Be sure to follow the tag versioning scheme.
+After the release and tag have been created, you can deploy the tag to the `live` branch using:
+```
+git push -f origin tag:live
+```
+Don't have the required rights? Ask an owner to do it for you!
+
 ## Contributing
 If you want to contribute, awesome! First, pick an issue and self-assign it. Make your changes in a new branch, with the following naming convention:
 
