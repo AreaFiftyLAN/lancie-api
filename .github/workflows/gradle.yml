@@ -14,7 +14,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '11'
       - name: Test Coverage
         run: ./gradlew clean build jacocoTestReport jacocoFix --scan
       - name: Set up Docker Buildx
