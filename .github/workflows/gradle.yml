@@ -29,7 +29,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: ghcr.io/areafiftylan/lancie-api
+          images: ghcr.io/AreaFiftyLAN/lancie-api
           tags: type=sha, prefix={{date 'YYYYMMDD'}}-
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
