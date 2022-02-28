@@ -45,7 +45,7 @@ To deploy a new version to the live branch, create a new release with accompanyi
 Be sure to follow the tag versioning scheme.
 After the release and tag have been created, you can deploy the tag to the `live` branch using:
 ```
-git push -f origin tag:live
+git push origin tag:live
 ```
 Don't have the required rights? Ask an owner to do it for you!
 
