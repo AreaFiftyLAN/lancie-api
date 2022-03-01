@@ -37,6 +37,8 @@ public interface TicketService {
 
     Collection<Ticket> findValidTicketsByOwnerEmail(String email);
 
+    Collection<TicketTransferToken> getAllTransferTickets();
+
     Collection<Ticket> getAllTickets();
 
     /**
