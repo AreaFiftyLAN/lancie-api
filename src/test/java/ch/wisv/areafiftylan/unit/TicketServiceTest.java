@@ -131,6 +131,27 @@ public class TicketServiceTest extends ServiceTest {
     }
 
     @Test
+    public void getAllTransferTicketsZero() {
+        Collection<TicketTransferToken> ticketTransferToken = ticketService.getAllTransferTickets();
+        assertEquals(0, ticketTransferToken.size());
+    }
+
+    @Test
+    public void getAllTransferTicketsOne() {
+        persistTicketTransferToken(persistUser());
+        Collection<TicketTransferToken> ticketTransferToken = ticketService.getAllTransferTickets();
+        assertEquals(1, ticketTransferToken.size());
+    }
+
+    @Test
+    public void getAllTransferTicketsTwo() {
+        persistTicketTransferToken(persistUser());
+        persistTicketTransferToken(persistUser());
+        Collection<TicketTransferToken> ticketTransferToken = ticketService.getAllTransferTickets();
+        assertEquals(2, ticketTransferToken.size());
+    }
+
+    @Test
     public void validateTicketFromInvalid() {
         Ticket ticket = persistTicket();
         ticket.setValid(false);

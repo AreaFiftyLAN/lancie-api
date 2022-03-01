@@ -10,6 +10,7 @@ import ch.wisv.areafiftylan.products.service.repository.TicketOptionRepository;
 import ch.wisv.areafiftylan.products.service.repository.TicketRepository;
 import ch.wisv.areafiftylan.products.service.repository.TicketTypeRepository;
 import ch.wisv.areafiftylan.seats.service.SeatServiceImpl;
+import ch.wisv.areafiftylan.security.token.TicketTransferToken;
 import ch.wisv.areafiftylan.teams.model.Team;
 import ch.wisv.areafiftylan.teams.service.TeamServiceImpl;
 import ch.wisv.areafiftylan.users.model.Gender;
@@ -110,6 +111,10 @@ public abstract class ServiceTest {
         Team team = new Team(teamName, captain);
         members.forEach(team::addMember);
         return testEntityManager.persist(team);
+    }
+
+    protected TicketTransferToken persistTicketTransferToken(User to) {
+        return ticketService.setupForTransfer(persistTicket().getId(), to.getEmail());
     }
 
     @BeforeEach
