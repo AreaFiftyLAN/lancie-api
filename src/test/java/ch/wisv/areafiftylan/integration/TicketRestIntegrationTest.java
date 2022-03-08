@@ -110,6 +110,44 @@ public class TicketRestIntegrationTest extends XAuthIntegrationTest {
     }
 
     @Test
+    public void testGetAllTransferTicketsAsAnon() {
+        //@formatter:off
+        when().
+            get(TRANSFER_ENDPOINT).
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
+    }
+
+    @Test
+    public void testGetAllTransferTicketsAsUser() {
+        User user = createUser();
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(user)).
+        when().
+            get(TRANSFER_ENDPOINT).
+        then().
+            statusCode(HttpStatus.SC_FORBIDDEN);
+        //@formatter:on
+    }
+
+    @Test
+    public void testGetAllTransferTicketsAsAdmin() {
+        User admin = createAdmin();
+
+        //@formatter:off
+        given().
+            header(getXAuthTokenHeaderForUser(admin)).
+        when().
+            get(TRANSFER_ENDPOINT).
+        then().
+            statusCode(HttpStatus.SC_OK);
+        //@formatter:on
+    }
+
+    @Test
     public void testdeleteTicketAsAdmin() {
         User admin = createAdmin();
         User ticketOwner = createUser();

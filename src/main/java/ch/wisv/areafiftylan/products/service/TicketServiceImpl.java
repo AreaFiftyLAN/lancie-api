@@ -236,6 +236,11 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
+    public Collection<TicketTransferToken> getAllTransferTickets() {
+        return tttRepository.findAll();
+    }
+
+    @Override
     public Collection<Ticket> getAllTickets() {
         return ticketRepository.findAll();
     }
