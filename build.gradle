@@ -32,7 +32,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-json'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-aop'
-    implementation 'org.flywaydb:flyway-core'
+
+    // DONT UPGRADE TO 8+, NO SUPPORT FOR POSTGRES 9.6
+    implementation 'org.flywaydb:flyway-core:7.15.0'
     implementation 'com.google.guava:guava:31.1-jre'
     implementation 'nl.stil4m:mollie-api:2.7.0'
     implementation 'net.logstash.logback:logstash-logback-encoder:7.0.1'
