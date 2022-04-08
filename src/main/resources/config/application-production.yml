@@ -2,7 +2,7 @@ logging:
     file:
         name: /tmp/logs/lancie-api.log
 
-## AREA FIFTYLAN SETTINGS
+## AREA FIFTYLAN SETTINGS 2022
 a5l:
     paymentReturnUrl: https://areafiftylan.nl/order-check
     user:
@@ -13,11 +13,10 @@ a5l:
         sender: LANcie <lancie@ch.tudelft.nl>
         contact: LANcie <lancie@ch.tudelft.nl>
         confirmUrl: https://areafiftylan.nl/register-confirm
-        year: 2020
+        year: 2022
     ratelimit:
         enabled: false
         minute: 10
-
     orderLimit: 15
     ticketLimit: 220
     orderKeepAlive: 15
