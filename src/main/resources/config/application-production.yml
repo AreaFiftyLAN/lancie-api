@@ -2,7 +2,7 @@ logging:
     file:
         name: /tmp/logs/lancie-api.log
 
-## AREA FIFTYLAN SETTINGS
+## AREA FIFTYLAN SETTINGS 2022
 a5l:
     paymentReturnUrl: https://areafiftylan.nl/order-check
     user:
