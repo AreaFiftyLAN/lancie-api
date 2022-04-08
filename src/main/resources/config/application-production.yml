@@ -17,7 +17,6 @@ a5l:
     ratelimit:
         enabled: false
         minute: 10
-
     orderLimit: 15
     ticketLimit: 220
     orderKeepAlive: 15
