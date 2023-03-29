@@ -2,7 +2,7 @@ logging:
     file:
         name: /tmp/logs/lancie-api.log
 
-## AREA FIFTYLAN SETTINGS 2022
+## AREA FIFTYLAN SETTINGS 2023
 a5l:
     paymentReturnUrl: https://areafiftylan.nl/order-check
     user:
@@ -13,7 +13,7 @@ a5l:
         sender: LANcie <lancie@ch.tudelft.nl>
         contact: LANcie <lancie@ch.tudelft.nl>
         confirmUrl: https://areafiftylan.nl/register-confirm
-        year: 2022
+        year: 2023
     ratelimit:
         enabled: false
         minute: 10
